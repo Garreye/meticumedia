@@ -1,0 +1,189 @@
+﻿// --------------------------------------------------------------------------------
+// Source code available at http://code.google.com/p/meticumedia/
+// This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
+// --------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using System.Xml;
+
+namespace Meticumedia
+{
+    /// <summary>
+    /// Class defining a movie.
+    /// </summary>
+    public class Movie : Content
+    {
+        #region Constants
+
+        /// <summary>
+        /// String used for display of movie with unknown (empty) name.
+        /// </summary>
+        public static readonly string Unknown = "UNKNOWN";
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public Movie() : base()
+        {
+        }
+
+        /// <summary>
+        /// Constructor with known name.
+        /// </summary>
+        /// <param name="name"></param>
+        public Movie(string name) : this()
+        {
+            this.Name = name;
+        }
+
+        /// <summary>
+        /// Constructor for cloning a Movie.
+        /// </summary>
+        /// <param name="movie"></param>
+        public Movie(Movie movie) : this()
+        {
+            UpdateInfo(movie);
+            this.RootFolder = movie.RootFolder;
+            this.Path = movie.Path;
+        }
+
+        /// <summary>
+        /// Constructor for creating instance from inherited class
+        /// </summary>
+        /// <param name="content"></param>
+        public Movie(Content content) : this()
+        {
+            this.Name = content.Name;
+            this.DatabaseName = content.DatabaseName;
+            this.Date = content.Date;
+            this.Overview = content.Overview;
+            this.Genres = content.Genres;
+            this.Path = content.Path;
+            this.Found = content.Found;
+            this.RootFolder = content.RootFolder;
+            this.Id = content.Id;
+            this.Watched = content.Watched;
+            this.IncludeInScan = content.IncludeInScan;
+            this.DoRenaming = content.DoRenaming;
+            this.LastUpdated = content.LastUpdated;            
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Updates this movie with properties from another instance.
+        /// </summary>
+        /// <param name="movie"></param>
+        public void UpdateInfo(Movie movie)
+        {
+            this.Name = movie.Name;
+            this.DatabaseName = movie.DatabaseName;
+            this.Overview = movie.Overview;
+            this.Date = movie.Date;
+            this.Found = movie.Found;
+            this.Id = movie.Id;
+            this.Genres = new List<string>();
+            if (movie.Genres != null)
+                foreach (string genre in movie.Genres)
+                    this.Genres.Add(genre);
+        }
+
+        /// <summary>
+        /// Get string for movie.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return this.Name == string.Empty ? Unknown : this.Name;
+        }
+
+        /// <summary>
+        /// Build nice file path for movie path folder
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        public string BuildFilePath(string fullPath)
+        {
+            return System.IO.Path.Combine(BuildFolderPath(), Settings.MovieFileFormat.BuildMovieFileName(this, fullPath));
+        }
+
+        /// <summary>
+        /// Build file path with no folder changes
+        /// </summary>
+        /// <param name="fullPath"></param>
+        /// <returns></returns>
+        public string BuildFilePathNoFolderChanges(string fullPath)
+        {
+            return System.IO.Path.Combine(this.Path, Settings.MovieFileFormat.BuildMovieFileName(this, fullPath));
+        }
+
+        /// <summary>
+        /// Build path for movie folder
+        /// </summary>
+        /// <returns></returns>
+        public override string BuildFolderPath()
+        {
+            if (string.IsNullOrEmpty(this.RootFolder))
+            {
+                ContentRootFolder defaultContent;
+                if (Settings.GetDefaultMovieFolder(out defaultContent))
+                    this.RootFolder = defaultContent.FullPath;
+            }
+
+            return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.Name + " (" + this.Date.Year.ToString() + ")"));
+        }
+
+        #endregion
+
+        #region XML
+
+        /// <summary>
+        /// Root XML element for saving instance to file.
+        /// </summary>
+        private static readonly string ROOT_XML = "Movie";
+
+        /// <summary>
+        /// Saves instance to XML file.
+        /// </summary>
+        /// <param name="xw">Writer for accessing XML file</param>
+        public void Save(XmlWriter xw)
+        {
+            // Start movie
+            xw.WriteStartElement(ROOT_XML);
+
+            // Write element from base
+            this.WriteContentElements(xw);
+
+            // End movie
+            xw.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Loads instance from XML.
+        /// </summary>
+        /// <param name="itemNode">Node to load XML from</param>
+        /// <returns>true if sucessfully loaded from XML</returns>
+        public bool Load(XmlNode movieNode)
+        {
+            // Check that node is current type
+            if (movieNode.Name != ROOT_XML)
+                return false;
+
+            // Read base properties out
+            base.ReadContentElements(movieNode);
+
+            return true;
+        }
+
+        #endregion
+    }
+}
