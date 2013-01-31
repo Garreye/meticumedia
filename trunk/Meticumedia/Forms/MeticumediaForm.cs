@@ -189,7 +189,7 @@ namespace Meticumedia
         /// <param name="e"></param>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Windows.Forms.MessageBox.Show("meticumedia v0.8.1 (alpha)", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            System.Windows.Forms.MessageBox.Show("meticumedia v0.8.1 (alpha)\nCopyright © 2013", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>

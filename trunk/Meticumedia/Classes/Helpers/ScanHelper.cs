@@ -261,7 +261,8 @@ namespace Meticumedia
         private static void AddDirScanResult(int scanNum, OrgItem item)
         {
             lock (directoryScanLock)
-                scanResults[scanNum].Add(item);
+                if (scanResults.ContainsKey(scanNum))
+                    scanResults[scanNum].Add(item);
         }
 
         private static void DirectoryScanProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete complete, ref int numItemsProcessed)
@@ -933,7 +934,7 @@ namespace Meticumedia
             }
 
             // Check if any movie folders need to be renamed!
-            foreach (Movie movie in Organization.GetMoviesFromFolders(folders)) 
+            foreach (Movie movie in Organization.GetMoviesFromRootFolders(folders)) 
             {
                 if (!string.IsNullOrEmpty(movie.Name) && movie.Path != movie.BuildFolderPath())
                 {

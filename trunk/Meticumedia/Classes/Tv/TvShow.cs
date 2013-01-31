@@ -75,7 +75,7 @@ namespace Meticumedia
         public TvShow(TvShow show)
             : this()
         {
-            UpdateInfo(show);
+            Clone(show);
         }
 
         /// <summary>
@@ -85,23 +85,7 @@ namespace Meticumedia
         public TvShow(Content content)
             : this()
         {
-            this.Name = content.Name;
-            this.DatabaseName = content.DatabaseName;
-            this.Date = content.Date;
-            this.Overview = content.Overview;
-            this.Genres = content.Genres;
-            this.Found = content.Found;
-            if (!string.IsNullOrEmpty(content.RootFolder))
-                this.RootFolder = content.RootFolder;
-            if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
-                this.Path = content.Path;
-            else
-                this.Path = this.BuildFolderPath();
-            this.Id = content.Id;
-            this.Watched = content.Watched;
-            this.IncludeInScan = content.IncludeInScan;
-            this.DoRenaming = content.DoRenaming;
-            this.LastUpdated = content.LastUpdated;
+            base.Clone(content);
         }
 
         #endregion
@@ -109,15 +93,19 @@ namespace Meticumedia
         #region Methods
 
         /// <summary>
-        /// Get string for movie.
+        /// String for instance is name if valid, else "UNKNOWN"
         /// </summary>
-        /// <returns></returns>
+        /// <returns>string for instance</returns>
         public override string ToString()
         {
             return this.Name == string.Empty ? "UNKNOWN" : this.Name;
         }
 
-        public void UpdateInfo(TvShow show)
+        /// <summary>
+        /// CLones another instance of class 
+        /// </summary>
+        /// <param name="show">Show to clon</param>
+        public void Clone(TvShow show)
         {
             this.Name = show.Name;
             this.RootFolder = show.RootFolder;
@@ -130,12 +118,9 @@ namespace Meticumedia
             this.Id = show.Id;
             this.Date = show.Date;
             this.DoMissingCheck = show.DoMissingCheck;
-
             foreach (TvSeason season in this.Seasons)
-            {
                 foreach (TvEpisode episode in season.Episodes)
                     episode.Show = show.Name;
-            }
         }
 
         /// <summary>
@@ -175,7 +160,7 @@ namespace Meticumedia
         /// <summary>
         /// Recursive search a directory and mark missing episodes.
         /// </summary>
-        /// <param name="directory"></param>
+        /// <param name="directory">Path of directory to check for episode files</param>
         private void UpdateMissingRecursive(string directory)
         {
             string[] files = Directory.GetFiles(directory);
@@ -210,48 +195,13 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Simplifies the show name for better matching again file names
-        /// </summary>
-        /// <param name="remBrackCntnt">Sets whether content inside brackets is ignored (e.g. "(2008)" or "(US)")</param>
-        /// <param name="remAnds">Set whether "and"/"&" are removed</param>
-        /// <returns>The simplified show name string</returns>
-        private string GetSimplifiedName(bool remBrackCntnt, bool remAnds)
-        {
-            // All lowercase
-            string simplifiedName = this.Name.ToLower();
-
-            // Remove "the"
-            simplifiedName = simplifiedName.Replace("the", "");
-
-            // Remove "and"/"&"
-            if (remAnds)
-            {
-                simplifiedName = simplifiedName.Replace("&", "");
-                simplifiedName = simplifiedName.Replace("and", "");
-            }
-
-            // Remove things between bracket e.g. "(US)" or "(2004)"
-            if (remBrackCntnt)
-                simplifiedName = Regex.Replace(simplifiedName, "(\\u0028.*\\u0029)", "");
-
-            // Replace seperators with spaces
-            simplifiedName = Regex.Replace(simplifiedName, @"[_\-\.]+", " "); // (can't use \W because & is included in this)
-
-            // Remove unneeded characters: ',!,?,(,),:
-            simplifiedName = Regex.Replace(simplifiedName, @"['!\?\u0028\u0029\:]+", "");
-
-            // Return simplified name
-            return simplifiedName.Trim();
-        }
-
-        /// <summary>
         /// Builds a regular expression string for matching against
         /// file names. String built such that it will cause matches for:
         ///     -The full show name with spaces (e.g. "How I Met Your Mother)
         ///     -The full show name without spaces (e.g. "HowIMetYourMother)
         ///     -The acronym for the show name (e.g. "himym") - if name has 3 or more words
         ///     -The name without cosonents (e.g. "BttlstrGlctc")
-        /// "and"/"&" are removed in all matching except the acronyms
+        /// "and"/"&" are set to optional matches
         /// </summary>
         /// <returns></returns>
         private string BuildNameRegularExpresionString(bool removeWhitespace)
@@ -274,7 +224,7 @@ namespace Meticumedia
                 // Add 'a' for accronym
                 if (showWords[i] == "and" || showWords[i] == "&")
                 {
-                    showReStr += @"(a(nd\W+)?)?";
+                    showReStr += @"(a|&(nd\W+)?)?";
                     continue;
                 }
 
@@ -385,8 +335,9 @@ namespace Meticumedia
         /// <summary>
         /// Build the file name string for a given episode
         /// </summary>
-        /// <param name="episode"></param>
-        /// <returns></returns>
+        /// <param name="episode1">Episode to build file name for</param>
+        /// <param name="episode2">Second episode for double-episode files</param>
+        /// <returns>Episode file name string</returns>
         public string BuildFileName(TvEpisode episode1, TvEpisode episode2, string path)
         {
             return Settings.TvFileFormat.BuildTvFileName(episode1, episode2, path);
@@ -395,13 +346,12 @@ namespace Meticumedia
         /// <summary>
         /// Build full path of file for moving/copying TV episode file.
         /// </summary>
-        /// <param name="episode1"></param>
-        /// <param name="episode2"></param>
-        /// <param name="extension"></param>
-        /// <returns></returns>
+        /// <param name="episode1">Episode to build file path for</param>
+        /// <param name="episode2">Second episode for double-episode files</param>
+        /// <param name="extension">File extension for path</param>
+        /// <returns>Episode file path</returns>
         public string BuildFilePath(TvEpisode episode1, TvEpisode episode2, string path)
         {
-
             // New season created to prevent exception if episode doesn't fall into a valid season
             return this.Path + "\\" + (new TvSeason(episode1.Season)).ToString() + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
         }

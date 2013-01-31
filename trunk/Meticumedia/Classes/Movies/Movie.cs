@@ -60,19 +60,7 @@ namespace Meticumedia
         /// <param name="content"></param>
         public Movie(Content content) : this()
         {
-            this.Name = content.Name;
-            this.DatabaseName = content.DatabaseName;
-            this.Date = content.Date;
-            this.Overview = content.Overview;
-            this.Genres = content.Genres;
-            this.Path = content.Path;
-            this.Found = content.Found;
-            this.RootFolder = content.RootFolder;
-            this.Id = content.Id;
-            this.Watched = content.Watched;
-            this.IncludeInScan = content.IncludeInScan;
-            this.DoRenaming = content.DoRenaming;
-            this.LastUpdated = content.LastUpdated;            
+            base.Clone(content);
         }
 
         #endregion

@@ -10,51 +10,106 @@ using System.Threading;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Class that handles threading methods for process of a set of Organization paths.
+    /// </summary>
     public class OrgProcessing
     {
         #region Delegates
 
+        /// <summary>
+        /// Delegate to be called by process thread when it is completed - used to keep track of number of completed threads
+        /// </summary>
         public delegate void ProcessComplete();
 
+        /// <summary>
+        /// Delegate to handle processing of a single OrgPath instance specific during processing run.
+        /// </summary>
+        /// <param name="orgPath">Organization path instance to be processed</param>
+        /// <param name="pathNum">The path's number out of total being processed</param>
+        /// <param name="totalPaths">Total number of path being processed</param>
+        /// <param name="updateNumber">The identifier for the OrgProcessing instance</param>
+        /// <param name="background">Whether processing is running as a background operation</param>
+        /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
+        /// <param name="processComplete">Delegate to be called by processing when completed</param>
+        /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
         public delegate void Processing(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, ProcessComplete processComplete, ref int numItemsProcessed);
 
         #endregion
 
-        public static object TotalLock = new object();
+        #region Properties
 
-        public static int TotalProcesses = 0;
-
+        /// <summary>
+        /// The identifier for this instance of OrgProcessing.
+        /// </summary>
         public int ProcessNumber { get; private set; }
+
+        #endregion
 
         #region Constructor
 
+        /// <summary>
+        /// Constructor with processing method to apply to OrgPath items during run.
+        /// </summary>
+        /// <param name="process">Delegate for processing OrgPath item during run</param>
         public OrgProcessing(Processing process)
         {
+            // Store process
             this.process = process;
-            lock (TotalLock)
-                this.ProcessNumber = OrgProcessing.TotalProcesses++;
+
+            // Set process number
+            lock (totalLock)
+                this.ProcessNumber = OrgProcessing.totalProcesses++;
         }
 
         #endregion
 
         #region Variables
 
+        /// <summary>
+        /// Lock for totalProcesses variable
+        /// </summary>
+        private static object totalLock = new object();
+
+        /// <summary>
+        /// Total number of instances of this class created.
+        /// Used to set ProcessNumber property which identifies each instance.
+        /// </summary>
+        private static int totalProcesses = 0;
+
+        /// <summary>
+        /// Delegate to be used to process OrgPath item during run
+        /// </summary>
         private Processing process = null;
 
+        /// <summary>
+        /// Total number of items processed during run
+        /// </summary>
         private int numItemProcessed = 0;
 
+        /// <summary>
+        /// Lock for modifying numItemProcessed variable
+        /// </summary>
         private object processingLock = new object();
 
         #endregion
 
         #region Methods
 
+        /// <summary>
+        /// Run processing on set of OrgPath
+        /// </summary>
+        /// <param name="paths">List of paths to be processed</param>
+        /// <param name="cancel">Cancellation variable</param>
+        /// <param name="background">Whether processing is run in background</param>
+        /// <param name="subSearch">Whether processing is sub-search type</param>
         public void Run(List<OrgPath> paths, ref bool cancel, bool background, bool subSearch)
         {
             // Loop through all paths
             lock (processingLock)
                 numItemProcessed = 0;
-            for (int i = 0; i < paths.Count; i++)
+            int i = 0;
+            for (i = 0; i < paths.Count; i++)
             {
                 // Limit number of threads
                 while (i > numItemProcessed + 25 && (!cancel || background))
@@ -70,10 +125,14 @@ namespace Meticumedia
             }
 
             // Wait for all threads to complete
-            while (numItemProcessed < paths.Count && (!cancel || background))
+            while (numItemProcessed < i && (!cancel || background))
                 Thread.Sleep(100);
         }
 
+        /// <summary>
+        /// Thread wrapper for processing delegate.
+        /// </summary>
+        /// <param name="stateInfo">Arguments for processing</param>
         private void ProcessThread(object stateInfo)
         {
             object[] args = (object[])stateInfo;
@@ -86,6 +145,9 @@ namespace Meticumedia
             process(orgPath, updateNumer, totalPaths, this.ProcessNumber, background, subSearch, Complete, ref numItemProcessed);
         }
 
+        /// <summary>
+        /// Method to be called by processing methods upon completion
+        /// </summary>
         private void Complete()
         {
             lock (processingLock)

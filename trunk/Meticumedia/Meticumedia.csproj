@@ -385,6 +385,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="meticumedia-icon-small.ico" />
+    <Content Include="Setup\meticumedia.iss">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="wordsEn.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

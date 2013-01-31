@@ -625,7 +625,7 @@ namespace Meticumedia
             cmbFolders.SelectedIndex = indexToSelect;
 
             // Display shows
-            lvShows.Contents = Organization.GetShowsFromFolders(cmbFolders.SelectedItem.ToString(), txtNameFilter.Text);
+            lvShows.Contents = Organization.GetShowsFromRootFolders(cmbFolders.SelectedItem.ToString(), txtNameFilter.Text);
             lvShows.DisplayContent(false);
 
             // Start updating the movies that are found in select folder
@@ -716,7 +716,7 @@ namespace Meticumedia
             string folder = (string)e.Argument;
 
             // Update each selected movie folder
-            Organization.UpdateTvFolders(folder, fullUpdateCompleted);
+            Organization.UpdateTvRootFolders(folder, fullUpdateCompleted);
         }
 
         /// <summary>
@@ -862,7 +862,7 @@ namespace Meticumedia
                 folderName = cmbFolders.SelectedItem.ToString();
 
             // Get shows for selected folder and sort them
-            lvShows.Contents = Organization.GetShowsFromFolders(folderName, txtNameFilter.Text);
+            lvShows.Contents = Organization.GetShowsFromRootFolders(folderName, txtNameFilter.Text);
             if (newOnly)
                 lvShows.DisplayContent(newOnly);
             else
@@ -900,7 +900,7 @@ namespace Meticumedia
             // Update show if results are valid
             if (sef.Results != null)
             {
-                SelectedShow.UpdateInfo(sef.Results);
+                SelectedShow.Clone(sef.Results);
                 Organization.SaveShows();
                 UpdateShows(false);
                 OnShowsChange();

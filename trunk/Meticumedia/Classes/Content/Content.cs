@@ -12,7 +12,7 @@ using System.Runtime.Serialization;
 namespace Meticumedia
 {
     /// <summary>
-    /// Represents a folder that content for a single type (e.g. a movie or a TV show)
+    /// Represents a folder that contains content for a single item (movie or TV show)
     /// </summary>
     public class Content : IComparable, ISerializable
     {        
@@ -109,9 +109,39 @@ namespace Meticumedia
             this.LastUpdated = new DateTime(1, 1, 1);
         }
 
+        /// <summary>
+        /// Constructor for cloning instance
+        /// </summary>
+        /// <param name="content">Instance to clone</param>
+        public Content(Content content)
+        {
+            Clone(content);
+        }
+
         #endregion
 
         #region Methods
+
+        protected void Clone(Content content)
+        {
+            this.Name = content.Name;
+            this.DatabaseName = content.DatabaseName;
+            this.Date = content.Date;
+            this.Overview = content.Overview;
+            this.Genres = content.Genres;
+            this.Found = content.Found;
+            if (!string.IsNullOrEmpty(content.RootFolder))
+                this.RootFolder = content.RootFolder;
+            if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
+                this.Path = content.Path;
+            else
+                this.Path = this.BuildFolderPath();
+            this.Id = content.Id;
+            this.Watched = content.Watched;
+            this.IncludeInScan = content.IncludeInScan;
+            this.DoRenaming = content.DoRenaming;
+            this.LastUpdated = content.LastUpdated;
+        }
 
         public virtual string BuildFolderPath()
         {

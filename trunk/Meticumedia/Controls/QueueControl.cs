@@ -60,6 +60,43 @@ namespace Meticumedia
       
         #endregion
 
+        #region Constructor
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public QueueControl()
+        {
+            InitializeComponent();
+
+            // Build queue listview columns
+            queueColumns = OrgItemListHelper.SetOrgItemListColumns(OrgItemListHelper.OrgColumnSetup.Queue, lvQueue);
+
+            // Initialize queue worker
+            queueWorker = new BackgroundWorker();
+            queueWorker.WorkerReportsProgress = true;
+            queueWorker.WorkerSupportsCancellation = true;
+            queueWorker.DoWork += new DoWorkEventHandler(queueWorker_DoWork);
+
+            // Set queue to running at startup
+            OrgItem.QueuePaused = false;
+
+            // Register to queuing event
+            ScanControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
+            ContentListView.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
+            ShowsControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
+
+            // Register context menu
+            lvQueue.ContextMenu = contextMenu;
+            contextMenu.Popup += new EventHandler(contextMenu_Popup);
+
+            // Setup pause button flash timer
+            buttonTimer.Elapsed += new ElapsedEventHandler(buttonTimer_Elapsed);
+            buttonTimer.Enabled = false;
+        }
+
+        #endregion
+
         #region Context Menu
 
         /// <summary>
@@ -151,42 +188,6 @@ namespace Meticumedia
         private void HandleMoveBottom(object sender, EventArgs e)
         {
             MoveToBottomSelected();
-        }
-
-        #endregion
-
-        #region Constructor
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public QueueControl()
-        {
-            InitializeComponent();
-
-            // Build queue listview columns
-            queueColumns = OrgItemListHelper.SetOrgItemListColumns(OrgItemListHelper.OrgColumnSetup.Queue, lvQueue);
-
-            // Initialize queue worker
-            queueWorker = new BackgroundWorker();
-            queueWorker.WorkerReportsProgress = true;
-            queueWorker.WorkerSupportsCancellation = true;
-            queueWorker.DoWork += new DoWorkEventHandler(queueWorker_DoWork);
-            //queueWorker.ProgressChanged += new ProgressChangedEventHandler(queueWorker_ReportProgress);
-
-            // Set queue to running at startup
-            OrgItem.QueuePaused = false;
-
-            // Register to queuing event
-            ScanControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
-            ContentListView.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
-            ShowsControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
-
-            lvQueue.ContextMenu = contextMenu;
-            contextMenu.Popup += new EventHandler(contextMenu_Popup);
-
-            buttonTimer.Elapsed += new ElapsedEventHandler(buttonTimer_Elapsed);
-            buttonTimer.Enabled = false;
         }
 
         #endregion
@@ -370,13 +371,9 @@ namespace Meticumedia
         void buttonTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (btnQueuePause.BackColor == basePauseButtonColor)
-            {
-                btnQueuePause.BackColor = Color.LightYellow;
-            }
+                btnQueuePause.BackColor = Color.Yellow;
             else
-            {
                 btnQueuePause.BackColor = basePauseButtonColor;
-            }
         }
 
         #endregion
@@ -551,7 +548,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Mmoves selected items in queue down by one.
+        /// Moves selected items in queue down by one.
         /// </summary>
         private void MoveDownSelected()
         {
@@ -705,7 +702,7 @@ namespace Meticumedia
                     item.ActionProgressChanged += new EventHandler<ProgressChangedEventArgs>(item_ActionProgressChanged);
                     item.PerformAction();
                     item.ActionProgressChanged -= new EventHandler<ProgressChangedEventArgs>(item_ActionProgressChanged);
-                  
+
                     // Remove item
                     if (item.ActionComplete)
                     {
@@ -727,24 +724,56 @@ namespace Meticumedia
                 else
                     Thread.Sleep(500);
             }
+
+            // Clear progress bar once all item completed
+            this.Invoke((MethodInvoker)delegate
+            {
+                this.pbTotal.Value = 0;
+                this.pbTotal.Message = string.Empty;
+            });
         }
 
         /// <summary>
         /// Update progress bar when queue item action progress changes
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">OrgItem</param>
+        /// <param name="e">Progress args</param>
         private void item_ActionProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             this.Invoke((MethodInvoker)delegate
             {
-                // Update progress if percentage has changed
+                // Limit progress value to 100
                 int progress = Math.Min(e.ProgressPercentage, 100);
-                if (this.pbTotal.Value != progress)
+
+                // Set progress bar value
+                this.pbTotal.Value = progress;
+
+                // Set progress bar message
+                OrgItem item = (OrgItem)sender;
+                string actionStr = string.Empty;
+                switch (item.Action)
                 {
-                    this.pbTotal.Value = progress;
-                    UpdateQueue();
+                    case OrgAction.Copy:
+                        actionStr = "Copying";
+                        break;
+                    case OrgAction.Delete:
+                        actionStr = "Deleting";
+                        break;
+                    case OrgAction.Move:
+                        actionStr = "Moving";
+                        break;
+                    case OrgAction.Rename:
+                        actionStr = "Renaming";
+                        break;
+                    default:
+                        actionStr = "Processing";
+                        break;
                 }
+                this.pbTotal.Message = actionStr + " file '" + Path.GetFileName(item.SourcePath) + "'";
+
+                // Update percent in listview
+                UpdateQueue();
+
             });
         }
 

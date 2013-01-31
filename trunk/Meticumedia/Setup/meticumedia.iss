@@ -1,7 +1,4 @@
-; -- Example1.iss --
-; Demonstrates copying 3 files and creating an icon.
-
-; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
+; meticumedia setup script for Inno Setup Compiler
 
 [Setup]
 AppName=meticumedia
@@ -20,4 +17,4 @@ Source: "license.txt"; DestDir: "{app}";
 
 [Icons]
 Name: "{group}\meticumedia"; Filename: "{app}\Meticumedia.exe"
-Name: "{commondesktop}\My Program"; Filename: "{app}\Meticumedia.exe"
+Name: "{commondesktop}\meticumedia"; Filename: "{app}\Meticumedia.exe"

@@ -140,7 +140,7 @@ namespace Meticumedia
             if(cmbGenre.SelectedItem != null)
                 genre = cmbGenre.SelectedItem.ToString();
 
-            lvMovieDirectory.Contents = Organization.GetMoviesFromFolders(folderName, genre, chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);
+            lvMovieDirectory.Contents = Organization.GetMoviesFromRootFolders(folderName, genre, chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);
             if (!newOnly)
                 lvMovieDirectory.SortContents(lvMovieDirectory.lastSortColumn, true);
             else
