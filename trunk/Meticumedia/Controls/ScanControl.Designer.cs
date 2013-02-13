@@ -37,6 +37,7 @@ namespace Meticumedia
             this.cmbDirectory = new System.Windows.Forms.ComboBox();
             this.btnEditScanDirs = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.pbScanProgress = new TextProgressBar();
             this.btnEditMovieFolders = new System.Windows.Forms.Button();
             this.rbMovieFolderCheck = new System.Windows.Forms.RadioButton();
             this.cmbMovieFolders = new System.Windows.Forms.ComboBox();
@@ -44,6 +45,8 @@ namespace Meticumedia
             this.rbDirCheck = new System.Windows.Forms.RadioButton();
             this.btnRun = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.chkQueueFilter = new System.Windows.Forms.CheckBox();
+            this.chkFolderCatFilter = new System.Windows.Forms.CheckBox();
             this.chkTrashCatFilter = new System.Windows.Forms.CheckBox();
             this.chkUnknownCatFilter = new System.Windows.Forms.CheckBox();
             this.chkCustomCatFilter = new System.Windows.Forms.CheckBox();
@@ -60,21 +63,18 @@ namespace Meticumedia
             this.btnModAction = new System.Windows.Forms.Button();
             this.chkRenameDelete = new System.Windows.Forms.CheckBox();
             this.chkMoveCopy = new System.Windows.Forms.CheckBox();
-            this.chkFolderCatFilter = new System.Windows.Forms.CheckBox();
             this.lvResults = new Meticumedia.DoubleBufferedListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.pbScanProgress = new TextProgressBar();
-            this.chkQueueFilter = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmbShows
             // 
-            this.cmbShows.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbShows.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbShows.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbShows.Enabled = false;
             this.cmbShows.FormattingEnabled = true;
@@ -97,8 +97,8 @@ namespace Meticumedia
             // 
             // cmbDirectory
             // 
-            this.cmbDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbDirectory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDirectory.FormattingEnabled = true;
             this.cmbDirectory.Location = new System.Drawing.Point(134, 19);
@@ -120,8 +120,8 @@ namespace Meticumedia
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.pbScanProgress);
             this.groupBox1.Controls.Add(this.btnEditMovieFolders);
             this.groupBox1.Controls.Add(this.rbMovieFolderCheck);
@@ -138,6 +138,16 @@ namespace Meticumedia
             this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Setup";
+            // 
+            // pbScanProgress
+            // 
+            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbScanProgress.Location = new System.Drawing.Point(134, 102);
+            this.pbScanProgress.Message = null;
+            this.pbScanProgress.Name = "pbScanProgress";
+            this.pbScanProgress.Size = new System.Drawing.Size(546, 23);
+            this.pbScanProgress.TabIndex = 28;
             // 
             // btnEditMovieFolders
             // 
@@ -163,8 +173,8 @@ namespace Meticumedia
             // 
             // cmbMovieFolders
             // 
-            this.cmbMovieFolders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbMovieFolders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbMovieFolders.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMovieFolders.Enabled = false;
             this.cmbMovieFolders.FormattingEnabled = true;
@@ -209,9 +219,9 @@ namespace Meticumedia
             // 
             // groupBox2
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.chkQueueFilter);
             this.groupBox2.Controls.Add(this.chkFolderCatFilter);
             this.groupBox2.Controls.Add(this.chkTrashCatFilter);
@@ -239,6 +249,30 @@ namespace Meticumedia
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Scan";
             // 
+            // chkQueueFilter
+            // 
+            this.chkQueueFilter.AutoSize = true;
+            this.chkQueueFilter.Location = new System.Drawing.Point(363, 22);
+            this.chkQueueFilter.Name = "chkQueueFilter";
+            this.chkQueueFilter.Size = new System.Drawing.Size(64, 17);
+            this.chkQueueFilter.TabIndex = 35;
+            this.chkQueueFilter.Text = "Queued";
+            this.chkQueueFilter.UseVisualStyleBackColor = true;
+            this.chkQueueFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            // 
+            // chkFolderCatFilter
+            // 
+            this.chkFolderCatFilter.AutoSize = true;
+            this.chkFolderCatFilter.Checked = true;
+            this.chkFolderCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkFolderCatFilter.Location = new System.Drawing.Point(468, 45);
+            this.chkFolderCatFilter.Name = "chkFolderCatFilter";
+            this.chkFolderCatFilter.Size = new System.Drawing.Size(55, 17);
+            this.chkFolderCatFilter.TabIndex = 34;
+            this.chkFolderCatFilter.Text = "Folder";
+            this.chkFolderCatFilter.UseVisualStyleBackColor = true;
+            this.chkFolderCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            // 
             // chkTrashCatFilter
             // 
             this.chkTrashCatFilter.AutoSize = true;
@@ -259,9 +293,9 @@ namespace Meticumedia
             this.chkUnknownCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkUnknownCatFilter.Location = new System.Drawing.Point(390, 45);
             this.chkUnknownCatFilter.Name = "chkUnknownCatFilter";
-            this.chkUnknownCatFilter.Size = new System.Drawing.Size(61, 17);
+            this.chkUnknownCatFilter.Size = new System.Drawing.Size(72, 17);
             this.chkUnknownCatFilter.TabIndex = 32;
-            this.chkUnknownCatFilter.Text = "Custom";
+            this.chkUnknownCatFilter.Text = "Unknown";
             this.chkUnknownCatFilter.UseVisualStyleBackColor = true;
             this.chkUnknownCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
@@ -387,7 +421,7 @@ namespace Meticumedia
             // chkIgnoreCatFilter
             // 
             this.chkIgnoreCatFilter.AutoSize = true;
-            this.chkIgnoreCatFilter.Location = new System.Drawing.Point(518, 45);
+            this.chkIgnoreCatFilter.Location = new System.Drawing.Point(529, 45);
             this.chkIgnoreCatFilter.Name = "chkIgnoreCatFilter";
             this.chkIgnoreCatFilter.Size = new System.Drawing.Size(62, 17);
             this.chkIgnoreCatFilter.TabIndex = 17;
@@ -431,24 +465,11 @@ namespace Meticumedia
             this.chkMoveCopy.UseVisualStyleBackColor = true;
             this.chkMoveCopy.CheckedChanged += new System.EventHandler(this.chkMoveCopy_CheckedChanged);
             // 
-            // chkFolderCatFilter
-            // 
-            this.chkFolderCatFilter.AutoSize = true;
-            this.chkFolderCatFilter.Checked = true;
-            this.chkFolderCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkFolderCatFilter.Location = new System.Drawing.Point(457, 45);
-            this.chkFolderCatFilter.Name = "chkFolderCatFilter";
-            this.chkFolderCatFilter.Size = new System.Drawing.Size(55, 17);
-            this.chkFolderCatFilter.TabIndex = 34;
-            this.chkFolderCatFilter.Text = "Folder";
-            this.chkFolderCatFilter.UseVisualStyleBackColor = true;
-            this.chkFolderCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
-            // 
             // lvResults
             // 
-            this.lvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lvResults.CheckBoxes = true;
             this.lvResults.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
@@ -480,27 +501,6 @@ namespace Meticumedia
             // 
             this.columnHeader3.Text = "Destination";
             this.columnHeader3.Width = 284;
-            // 
-            // pbScanProgress
-            // 
-            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbScanProgress.Location = new System.Drawing.Point(134, 102);
-            this.pbScanProgress.Message = null;
-            this.pbScanProgress.Name = "pbScanProgress";
-            this.pbScanProgress.Size = new System.Drawing.Size(546, 23);
-            this.pbScanProgress.TabIndex = 28;
-            // 
-            // chkQueueFilter
-            // 
-            this.chkQueueFilter.AutoSize = true;
-            this.chkQueueFilter.Location = new System.Drawing.Point(363, 22);
-            this.chkQueueFilter.Name = "chkQueueFilter";
-            this.chkQueueFilter.Size = new System.Drawing.Size(64, 17);
-            this.chkQueueFilter.TabIndex = 35;
-            this.chkQueueFilter.Text = "Queued";
-            this.chkQueueFilter.UseVisualStyleBackColor = true;
-            this.chkQueueFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // ScanControl
             // 

@@ -32,7 +32,7 @@ namespace Meticumedia
         /// </summary>
         private void InitializeComponent()
         {
-            this.lvQueue = new DoubleBufferedListView();
+            this.lvQueue = new Meticumedia.DoubleBufferedListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -49,9 +49,9 @@ namespace Meticumedia
             // 
             // lvQueue
             // 
-            this.lvQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lvQueue.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
@@ -142,7 +142,7 @@ namespace Meticumedia
             this.btnMoveTop.Name = "btnMoveTop";
             this.btnMoveTop.Size = new System.Drawing.Size(35, 23);
             this.btnMoveTop.TabIndex = 18;
-            this.btnMoveTop.Text = "////\\\\";
+            this.btnMoveTop.Text = "//\\\\";
             this.btnMoveTop.UseVisualStyleBackColor = true;
             this.btnMoveTop.Click += new System.EventHandler(this.btnMoveTop_Click);
             // 
@@ -169,8 +169,8 @@ namespace Meticumedia
             // 
             // pbTotal
             // 
-            this.pbTotal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbTotal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pbTotal.Location = new System.Drawing.Point(65, 3);
             this.pbTotal.Message = null;
             this.pbTotal.Name = "pbTotal";

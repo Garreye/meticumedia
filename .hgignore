@@ -1,3 +1,6 @@
 syntax: glob
 Meticumedia/obj/*
 Meticumedia/bin/*
+Features.txt
+Getting Started.docx
+Push.txt

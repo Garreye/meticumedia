@@ -45,14 +45,14 @@ namespace Meticumedia
             // Default format
             if (movie)
             {
-                Format.Add(new FileNamePortion(FileWordType.MovieName, FileNamePortion.ContainerTypes.Whitespace));
+                Format.Add(new FileNamePortion(FileWordType.MovieName, FileNamePortion.ContainerTypes.None));
                 Format.Add(new FileNamePortion(FileWordType.Year, FileNamePortion.ContainerTypes.SquareBrackets));
                 Format.Add(new FileNamePortion(FileWordType.VideoResolution, FileNamePortion.ContainerTypes.SquareBrackets));
                 Format.Add(new FileNamePortion(FileWordType.FilePart, FileNamePortion.ContainerTypes.SquareBrackets));
             }
             else
             {
-                Format.Add(new FileNamePortion(FileWordType.ShowName, FileNamePortion.ContainerTypes.Whitespace));
+                Format.Add(new FileNamePortion(FileWordType.ShowName, FileNamePortion.ContainerTypes.None));
                 Format.Add(new FileNamePortion(FileWordType.EpisodeNumber, FileNamePortion.ContainerTypes.Dashes));
                 Format.Add(new FileNamePortion(FileWordType.EpisodeName, FileNamePortion.ContainerTypes.Dashes));
                 
@@ -238,6 +238,12 @@ namespace Meticumedia
                             break;
                         case FileNamePortion.ContainerTypes.SquigglyBrackets:
                             fileName += "{";
+                            break;
+                        case FileNamePortion.ContainerTypes.Period:
+                            fileName += ".";
+                            break;
+                        case FileNamePortion.ContainerTypes.Custom:
+                            fileName += portion.Value;
                             break;
                     }
 

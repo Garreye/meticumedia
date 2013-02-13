@@ -33,11 +33,10 @@ namespace Meticumedia
         private void InitializeComponent()
         {
             this.dgvNameFormat = new System.Windows.Forms.DataGridView();
-            this.colType = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.colContainer = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.colValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbFormat = new System.Windows.Forms.GroupBox();
             this.gbEpFormat = new System.Windows.Forms.GroupBox();
+            this.chkSeasonDoubleDigits = new System.Windows.Forms.CheckBox();
+            this.chkEpisodeDoubleDigits = new System.Windows.Forms.CheckBox();
             this.chkHeaderPerEpisode = new System.Windows.Forms.CheckBox();
             this.chkSeasonFirst = new System.Windows.Forms.CheckBox();
             this.txtEpisodeHeader = new System.Windows.Forms.TextBox();
@@ -51,8 +50,9 @@ namespace Meticumedia
             this.txtFilePreview1 = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.lblExample1 = new System.Windows.Forms.Label();
-            this.chkEpisodeDoubleDigits = new System.Windows.Forms.CheckBox();
-            this.chkSeasonDoubleDigits = new System.Windows.Forms.CheckBox();
+            this.colType = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.colContainer = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.colValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvNameFormat)).BeginInit();
             this.gbFormat.SuspendLayout();
             this.gbEpFormat.SuspendLayout();
@@ -62,9 +62,9 @@ namespace Meticumedia
             // dgvNameFormat
             // 
             this.dgvNameFormat.AllowUserToOrderColumns = true;
-            this.dgvNameFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvNameFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvNameFormat.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgvNameFormat.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvNameFormat.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -78,28 +78,11 @@ namespace Meticumedia
             this.dgvNameFormat.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvNameFormat_CellValueChanged);
             this.dgvNameFormat.RowEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvNameFormat_CellValueChanged);
             // 
-            // colType
-            // 
-            this.colType.HeaderText = "Type";
-            this.colType.Name = "colType";
-            this.colType.Width = 150;
-            // 
-            // colContainer
-            // 
-            this.colContainer.HeaderText = "Seperator";
-            this.colContainer.Name = "colContainer";
-            // 
-            // colValue
-            // 
-            this.colValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colValue.HeaderText = "Value";
-            this.colValue.Name = "colValue";
-            // 
             // gbFormat
             // 
-            this.gbFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gbFormat.Controls.Add(this.dgvNameFormat);
             this.gbFormat.Location = new System.Drawing.Point(3, 3);
             this.gbFormat.Name = "gbFormat";
@@ -110,8 +93,8 @@ namespace Meticumedia
             // 
             // gbEpFormat
             // 
-            this.gbEpFormat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbEpFormat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gbEpFormat.Controls.Add(this.chkSeasonDoubleDigits);
             this.gbEpFormat.Controls.Add(this.chkEpisodeDoubleDigits);
             this.gbEpFormat.Controls.Add(this.chkHeaderPerEpisode);
@@ -126,6 +109,28 @@ namespace Meticumedia
             this.gbEpFormat.TabIndex = 2;
             this.gbEpFormat.TabStop = false;
             this.gbEpFormat.Text = "Episode Number Format";
+            // 
+            // chkSeasonDoubleDigits
+            // 
+            this.chkSeasonDoubleDigits.AutoSize = true;
+            this.chkSeasonDoubleDigits.Location = new System.Drawing.Point(279, 21);
+            this.chkSeasonDoubleDigits.Name = "chkSeasonDoubleDigits";
+            this.chkSeasonDoubleDigits.Size = new System.Drawing.Size(158, 17);
+            this.chkSeasonDoubleDigits.TabIndex = 7;
+            this.chkSeasonDoubleDigits.Text = "Force Season Double Digits";
+            this.chkSeasonDoubleDigits.UseVisualStyleBackColor = true;
+            this.chkSeasonDoubleDigits.CheckedChanged += new System.EventHandler(this.episodeFormatChanges);
+            // 
+            // chkEpisodeDoubleDigits
+            // 
+            this.chkEpisodeDoubleDigits.AutoSize = true;
+            this.chkEpisodeDoubleDigits.Location = new System.Drawing.Point(279, 44);
+            this.chkEpisodeDoubleDigits.Name = "chkEpisodeDoubleDigits";
+            this.chkEpisodeDoubleDigits.Size = new System.Drawing.Size(160, 17);
+            this.chkEpisodeDoubleDigits.TabIndex = 6;
+            this.chkEpisodeDoubleDigits.Text = "Force Episode Double Digits";
+            this.chkEpisodeDoubleDigits.UseVisualStyleBackColor = true;
+            this.chkEpisodeDoubleDigits.CheckedChanged += new System.EventHandler(this.episodeFormatChanges);
             // 
             // chkHeaderPerEpisode
             // 
@@ -185,8 +190,8 @@ namespace Meticumedia
             // 
             // gbPreview
             // 
-            this.gbPreview.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbPreview.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.gbPreview.Controls.Add(this.txtFilePreview2);
             this.gbPreview.Controls.Add(this.label9);
             this.gbPreview.Controls.Add(this.lblExample2);
@@ -202,8 +207,8 @@ namespace Meticumedia
             // 
             // txtFilePreview2
             // 
-            this.txtFilePreview2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilePreview2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFilePreview2.Location = new System.Drawing.Point(104, 82);
             this.txtFilePreview2.Name = "txtFilePreview2";
             this.txtFilePreview2.ReadOnly = true;
@@ -230,8 +235,8 @@ namespace Meticumedia
             // 
             // txtFilePreview1
             // 
-            this.txtFilePreview1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilePreview1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFilePreview1.Location = new System.Drawing.Point(104, 38);
             this.txtFilePreview1.Name = "txtFilePreview1";
             this.txtFilePreview1.ReadOnly = true;
@@ -255,29 +260,24 @@ namespace Meticumedia
             this.lblExample1.Size = new System.Drawing.Size(419, 13);
             this.lblExample1.TabIndex = 9;
             this.lblExample1.Text = "Example 1 - Single Episode: Episode 5 of season 1 of the show \'Arrested Developme" +
-                "nt\'.";
+    "nt\'.";
             // 
-            // chkEpisodeDoubleDigits
+            // colType
             // 
-            this.chkEpisodeDoubleDigits.AutoSize = true;
-            this.chkEpisodeDoubleDigits.Location = new System.Drawing.Point(279, 44);
-            this.chkEpisodeDoubleDigits.Name = "chkEpisodeDoubleDigits";
-            this.chkEpisodeDoubleDigits.Size = new System.Drawing.Size(160, 17);
-            this.chkEpisodeDoubleDigits.TabIndex = 6;
-            this.chkEpisodeDoubleDigits.Text = "Force Episode Double Digits";
-            this.chkEpisodeDoubleDigits.UseVisualStyleBackColor = true;
-            this.chkEpisodeDoubleDigits.CheckedChanged += new System.EventHandler(this.episodeFormatChanges);
+            this.colType.HeaderText = "Type";
+            this.colType.Name = "colType";
+            this.colType.Width = 150;
             // 
-            // chkSeasonDoubleDigits
+            // colContainer
             // 
-            this.chkSeasonDoubleDigits.AutoSize = true;
-            this.chkSeasonDoubleDigits.Location = new System.Drawing.Point(279, 21);
-            this.chkSeasonDoubleDigits.Name = "chkSeasonDoubleDigits";
-            this.chkSeasonDoubleDigits.Size = new System.Drawing.Size(158, 17);
-            this.chkSeasonDoubleDigits.TabIndex = 7;
-            this.chkSeasonDoubleDigits.Text = "Force Season Double Digits";
-            this.chkSeasonDoubleDigits.UseVisualStyleBackColor = true;
-            this.chkSeasonDoubleDigits.CheckedChanged += new System.EventHandler(this.episodeFormatChanges);
+            this.colContainer.HeaderText = "Seperator";
+            this.colContainer.Name = "colContainer";
+            // 
+            // colValue
+            // 
+            this.colValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colValue.HeaderText = "Custom Value";
+            this.colValue.Name = "colValue";
             // 
             // FileNameFormatControl
             // 
@@ -301,9 +301,6 @@ namespace Meticumedia
         #endregion
 
         private System.Windows.Forms.DataGridView dgvNameFormat;
-        private System.Windows.Forms.DataGridViewComboBoxColumn colType;
-        private System.Windows.Forms.DataGridViewComboBoxColumn colContainer;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colValue;
         private System.Windows.Forms.GroupBox gbFormat;
         private System.Windows.Forms.GroupBox gbEpFormat;
         private System.Windows.Forms.CheckBox chkHeaderPerEpisode;
@@ -321,5 +318,8 @@ namespace Meticumedia
         private System.Windows.Forms.Label lblExample1;
         private System.Windows.Forms.CheckBox chkSeasonDoubleDigits;
         private System.Windows.Forms.CheckBox chkEpisodeDoubleDigits;
+        private System.Windows.Forms.DataGridViewComboBoxColumn colType;
+        private System.Windows.Forms.DataGridViewComboBoxColumn colContainer;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colValue;
     }
 }

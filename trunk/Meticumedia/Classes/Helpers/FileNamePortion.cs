@@ -20,7 +20,7 @@ namespace Meticumedia
         /// <summary>
         /// Container for the portion of the file name - how it is separated from the rest of the name
         /// </summary>
-        public enum ContainerTypes { Whitespace, Underscores, Dashes, Brackets, SquareBrackets, SquigglyBrackets }
+        public enum ContainerTypes { None, Whitespace, Underscores, Dashes, Brackets, SquareBrackets, SquigglyBrackets, Period, Custom }
 
         #endregion
 

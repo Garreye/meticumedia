@@ -61,7 +61,6 @@ namespace Meticumedia
                 int row = dgvNameFormat.Rows.Add();
                 dgvNameFormat.Rows[row].Cells[0].Value = portion.Type.ToString();
                 dgvNameFormat.Rows[row].Cells[1].Value = portion.Container.ToString();
-                dgvNameFormat.Rows[row].Cells[2].ReadOnly = portion.Type != FileWordType.CustomString;
             }
 
             // No episode format editor for movies
@@ -169,12 +168,6 @@ namespace Meticumedia
 
         private void dgvNameFormat_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            for (int i = 0; i < dgvNameFormat.Rows.Count; i++)
-            {
-                if (dgvNameFormat.Rows[i].Cells[0].Value != null && dgvNameFormat.Rows[i].Cells[2].Value != null)
-                    dgvNameFormat.Rows[i].Cells[2].ReadOnly = dgvNameFormat.Rows[i].Cells[0].Value.ToString() != FileWordType.CustomString.ToString();
-            }
-
             UpdatePreview();
         }
 
