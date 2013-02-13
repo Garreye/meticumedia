@@ -11,9 +11,9 @@ SolidCompression=yes
 OutputDir=Install
 
 [Files]
-Source: "Meticumedia.exe"; DestDir: "{app}"
-Source: "wordsEn.txt"; DestDir: "{app}"
-Source: "license.txt"; DestDir: "{app}";
+Source: "Meticumedia.exe"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "wordsEn.txt"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "license.txt"; DestDir: "{app}"; Flags: ignoreversion;
 
 [Icons]
 Name: "{group}\meticumedia"; Filename: "{app}\Meticumedia.exe"
