@@ -12,7 +12,7 @@ using System.Windows.Forms;
 namespace Meticumedia
 {
     /// <summary>
-    /// Helper class for attempting to split string into words.
+    /// Helper class for attempting to split string with no whitespace into words.
     /// </summary>
     public static class WordHelper
     {
@@ -42,10 +42,11 @@ namespace Meticumedia
         /// <summary>
         /// Check is a word is in the dictionary
         /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
+        /// <param name="word">Word to look for</param>
+        /// <returns>Whether word is in dictionary</returns>
         public static bool IsWord(string word)
         {
+            // Don't look for empty words
             if (string.IsNullOrWhiteSpace(word))
                 return false;
 

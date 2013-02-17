@@ -10,7 +10,7 @@ using System.Text;
 namespace Meticumedia
 {
     /// <summary>
-    /// Organization path item. Contains file info and property related to organization (pushed from parent content folder)
+    /// Organization path item. Contains file info and property related to organization (pushed from parent content folder).
     /// </summary>
     public class OrgPath
     {
@@ -31,7 +31,7 @@ namespace Meticumedia
         public bool AllowDelete { get; set; }
 
         /// <summary>
-        /// Content folder file belongs to (if any)
+        /// Root folder file belongs to (if any)
         /// </summary>
         public ContentRootFolder RootFolder { get; set; }
 
@@ -41,7 +41,7 @@ namespace Meticumedia
         public OrgFolder OrgFolder { get; set; }
 
         /// <summary>
-        /// Content associated with file
+        /// Content associated with file (if any)
         /// </summary>
         public Content Content { get; set; }
 

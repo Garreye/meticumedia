@@ -12,12 +12,15 @@ using System.Xml;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Base class for TV database accessors (e.g. TheTvDb or TVRage)
+    /// </summary>
     public class TvDatabaseAccess
     {
         #region Constants/Enums
 
         /// <summary>
-        /// API Key for accessing TheTvDb
+        /// API Key for accessing database
         /// </summary>
         protected virtual string API_KEY { get { return string.Empty; } }
 
@@ -26,24 +29,24 @@ namespace Meticumedia
         /// </summary>
         public enum MirrorType { Xml = 1, Banner = 2, Zip = 4 }
 
-                /// <summary>
-        /// TheTvDb XML mirror
-        /// </summary>
-        protected List<string> xmlMirrors;
-
-        /// <summary>
-        /// TheTvDb zip mirror
-        /// </summary>
-        protected List<string> zipMirrors;
-
         #endregion
 
         #region Variables
 
         /// <summary>
-        /// Indicates wheter mirors are valid.
+        /// Indicates whether mirors are valid.
         /// </summary>
         protected static bool mirrorsValid = false;
+
+        /// <summary>
+        /// XML mirrors
+        /// </summary>
+        protected List<string> xmlMirrors;
+
+        /// <summary>
+        /// Zip mirrors
+        /// </summary>
+        protected List<string> zipMirrors;
 
         #endregion
 
@@ -60,7 +63,7 @@ namespace Meticumedia
         /// <summary>
         /// Gets a database mirror.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Whether mirror was found</returns>
         public bool GetMirror(MirrorType type, out string mirror)
         {
             if (!mirrorsValid)
@@ -102,17 +105,17 @@ namespace Meticumedia
         /// <summary>
         /// Return lists of series Ids that need updating. 
         /// </summary>
-        /// <param name="info"></param>
+        /// <param name="ids">List of series id that need to be updated locally</param>
         /// <returns></returns>
-        public virtual bool GetDataToBeUpdated(out List<int> info, out string time)
+        public virtual bool GetDataToBeUpdated(out List<int> ids, out string time)
         {
-            info = new List<int>();
+            ids = new List<int>();
             time = string.Empty;
             return true;
         }
 
         /// <summary>
-        /// Performs search for a show in TheTvDb.
+        /// Performs search for a show in database - with retrying
         /// </summary>
         /// <param name="searchString">The string to search for</param>
         /// <returns>Array of results from the search</returns>
@@ -122,6 +125,7 @@ namespace Meticumedia
             if (!GetMirror(MirrorType.Xml, out mirror))
                 return null;
 
+            // Try multiple times - databases requests tend to fail randomly
             for (int i = 0; i < 5; i++)
                 try
                 {
@@ -131,14 +135,20 @@ namespace Meticumedia
             return new List<Content>();
         }
 
+        /// <summary>
+        /// Performs search for show in database. Should be overriden
+        /// </summary>
+        /// <param name="mirror">Mirror to use</param>
+        /// <param name="searchString">Search string for show</param>
+        /// <param name="includeSummaries">Whether to include summaries in search results (takes longer - set to false unless user is seeing them)</param>
+        /// <returns>Results as list of shows</returns>
         protected virtual List<Content> DoSearch(string mirror, string searchString, bool includeSummaries)
         {
             return new List<Content>();
         }
 
         /// <summary>
-        /// Gets season/episode information from TheTvDb. Use for newly added shows only,
-        /// will replace all episode information in show.
+        /// Gets season/episode information from database.
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
         public TvShow FullShowSeasonsUpdate(TvShow show)
@@ -147,6 +157,7 @@ namespace Meticumedia
             if (show.Id == 0)
                 return show;
 
+            // Try multiple times - databases requests tend to fail randomly
             for (int  i = 0; i < 5; i++)
                 try
                 {
@@ -168,6 +179,11 @@ namespace Meticumedia
             return show;
         }
 
+        /// <summary>
+        /// Performs update of TV show information from database. Should be overriden!
+        /// </summary>
+        /// <param name="show">Show instance to update</param>
+        /// <returns>Updated show instance</returns>
         public virtual TvShow DoUpdate(TvShow show)
         {
             return show;

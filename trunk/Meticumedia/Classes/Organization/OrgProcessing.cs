@@ -11,7 +11,7 @@ using System.Threading;
 namespace Meticumedia
 {
     /// <summary>
-    /// Class that handles threading methods for process of a set of Organization paths.
+    /// Class that handles threading methods for processing of a set of organization paths.
     /// </summary>
     public class OrgProcessing
     {
@@ -51,7 +51,7 @@ namespace Meticumedia
         /// <summary>
         /// Constructor with processing method to apply to OrgPath items during run.
         /// </summary>
-        /// <param name="process">Delegate for processing OrgPath item during run</param>
+        /// <param name="process">Delegate for processing OrgPath items during run</param>
         public OrgProcessing(Processing process)
         {
             // Store process

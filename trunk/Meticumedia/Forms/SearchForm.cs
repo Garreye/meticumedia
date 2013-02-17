@@ -37,6 +37,12 @@ namespace Meticumedia
             : this(searchString, show, false)
         { }
 
+        /// <summary>
+        /// Constructor with known properties
+        /// </summary>
+        /// <param name="searchString">Search string</param>
+        /// <param name="show">Whether search is for tv show (or movie if false)</param>
+        /// <param name="showMatchButton">Whether to show match button - for debugging only</param>
         public SearchForm(string searchString, bool show, bool showMatchButton)
         {
             InitializeComponent();
@@ -47,18 +53,11 @@ namespace Meticumedia
             // Set search string text
             searchControl1.IsShow = show;
             searchControl1.MatchVisible = showMatchButton;
-            searchControl1.SearchResultsSelected += searchControl1_SearchResultsSelected;
-        }
-
-        void searchControl1_SearchResultsSelected(object sender, SearchControl.SearchResultsSelectedArgs e)
-        {
-            
         }
 
         #endregion
 
         #region Form Event Handlers
-
         
         /// <summary>
         /// OK button click sets results to selected item and closes form.

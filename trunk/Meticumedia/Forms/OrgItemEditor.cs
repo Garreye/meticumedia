@@ -146,7 +146,7 @@ namespace Meticumedia
         private TvShow selectedShow = null;
 
         /// <summary>
-        /// Content folder item being edited belongs to.
+        /// Root folder of item being edited belongs to.
         /// </summary>
         private string rootFolder = string.Empty;
 
@@ -193,6 +193,9 @@ namespace Meticumedia
             txtDestination.Text = BuildDestination();
         }
 
+        /// <summary>
+        /// Set episode name of selected episodes
+        /// </summary>
         private void SetEpisodeName()
         {
             if (selectedShow != null)
@@ -231,8 +234,6 @@ namespace Meticumedia
         /// <summary>
         /// OK button sets results and closes form
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnOk_Click(object sender, EventArgs e)
         {
             // Get results from GUI
@@ -257,11 +258,27 @@ namespace Meticumedia
         /// <summary>
         /// Cancel closes form (without saving results)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnCancel_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        /// <summary>
+        /// New show opens search form and adds selected show to list of shows
+        /// </summary>
+        private void btnNewShow_Click(object sender, EventArgs e)
+        {
+            SearchForm form = new SearchForm(FileHelper.RemoveEpisodeInfo(Path.GetFileNameWithoutExtension(txtSourceFile.Text)), true);
+            form.ShowDialog();
+
+            if (form.DialogResult == System.Windows.Forms.DialogResult.OK)
+            {
+                TvShow newShow = new TvShow(form.Results);
+                newShow = TvDatabaseHelper.FullShowSeasonsUpdate(newShow);
+                cmbShows.Items.Add(newShow);
+                cmbShows.SelectedItem = newShow;
+                selectedShow = newShow;
+            }
         }
 
         #endregion
@@ -405,20 +422,5 @@ namespace Meticumedia
         }
 
         #endregion
-
-        private void btnNewShow_Click(object sender, EventArgs e)
-        {
-            SearchForm form = new SearchForm(FileHelper.RemoveEpisodeInfo(Path.GetFileNameWithoutExtension(txtSourceFile.Text)), true);
-            form.ShowDialog();
-
-            if (form.DialogResult == System.Windows.Forms.DialogResult.OK)
-            {
-                TvShow newShow = new TvShow(form.Results);
-                newShow = TvDatabaseHelper.FullShowSeasonsUpdate(newShow);
-                cmbShows.Items.Add(newShow);
-                cmbShows.SelectedItem = newShow;
-                selectedShow = newShow;
-            }
-        }
     }
 }

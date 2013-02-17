@@ -34,7 +34,7 @@ namespace Meticumedia
         /// <summary>
         /// Constructor with episode to be edited passed in
         /// </summary>
-        /// <param name="ep"></param>
+        /// <param name="ep">Episode to edit</param>
         public EpisodeEditorForm(TvEpisode ep) : this()
         {
             cntrlEp.Episode = ep;
@@ -43,8 +43,6 @@ namespace Meticumedia
         /// <summary>
         /// OK button saves changes from control episode to Episode property and closes form.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnOk_Click(object sender, EventArgs e)
         {
             Episode = cntrlEp.Episode;
@@ -55,8 +53,6 @@ namespace Meticumedia
         /// <summary>
         /// Cancel closes form without saving episode.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnCancel_Click(object sender, EventArgs e)
         {
             this.Close();

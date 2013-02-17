@@ -69,10 +69,6 @@ namespace Meticumedia
             // Display progress bar to show loading progress
             ShowProgressBar();
 
-            // Start genre build
-            TheMovieDbHelper.BuildGenres();
-            TheMovieDbHelper.GenresChanged += new EventHandler(TheMovieDbHelper_GenreChange);
-
             // Register progress from movie updating
             Organization.MovieLoadProgressChange += new EventHandler<ProgressChangedEventArgs>(Organization_MovieLoadProgressChange);
             Organization.MovieLoadComplete += new EventHandler(Organization_MovieLoadComplete);
@@ -84,7 +80,6 @@ namespace Meticumedia
             movieUpdater.RunWorkerCompleted += new RunWorkerCompletedEventHandler(movieUpdater_RunWorkerCompleted);
 
             // Setup listview
-            lvMovieDirectory.DisplayGenres = true;
             lvMovieDirectory.ItemToEdit += new EventHandler(lvMovieDirectory_ItemToEdit);
             lvMovieDirectory.SaveContentsRequired += new EventHandler(lvMovieDirectory_SaveRequired);
             lvMovieDirectory.UpdateContentsRequired += new EventHandler(lvMovieDirectory_UpdateContentsRequired);
@@ -110,7 +105,7 @@ namespace Meticumedia
             // Add all available genres
             cmbGenre.Items.Clear();
             cmbGenre.Items.Add("All Genres");
-            foreach (string genre in TheMovieDbHelper.GetAvailableGenres(lvMovieDirectory.Contents))
+            foreach (string genre in Organization.AllMovieGenres)
             {
                 int item = cmbGenre.Items.Add(genre);
 
@@ -397,18 +392,18 @@ namespace Meticumedia
         /// </summary>
         private void Organization_MovieLoadComplete(object sender, EventArgs e)
         {
-            if (this.InvokeRequired)
-                this.Invoke((MethodInvoker)delegate
-                {
-                    UpdateMovies(false);
-                    
-                    UpdateMoviesInFolders();
-                });
-            else
+            this.Invoke((MethodInvoker)delegate
             {
+                UpdateGenres();
+                Organization.AllMovieGenres.GenresUpdated += AllMovieGenres_GenresUpdated;
                 UpdateMovies(false);
                 UpdateMoviesInFolders();
-            }
+            });
+        }
+
+        private void AllMovieGenres_GenresUpdated(object sender, EventArgs e)
+        {
+            UpdateGenres();
         }
 
         #endregion
@@ -442,14 +437,6 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Rebuilds genres in combobox when build from database is complete.
-        /// </summary>
-        private void TheMovieDbHelper_GenreChange(object sender, EventArgs e)
-        {
-            UpdateGenres();
-        }
-
-        /// <summary>
         /// Updates displayed movies when selected movie folder is changed.
         /// </summary>
         private void cmbFolders_SelectedIndexChanged(object sender, EventArgs e)
@@ -458,6 +445,9 @@ namespace Meticumedia
             UpdateGenres();
         }
 
+        /// <summary>
+        /// Last selected genre
+        /// </summary>
         private string lastSelectedGenre = string.Empty;
 
         /// <summary>
@@ -575,21 +565,33 @@ namespace Meticumedia
             lvMovieDirectory.HideWatched = chkHideWatched.Checked;
         }
 
+        /// <summary>
+        /// Year check box updates displayed items
+        /// </summary>
         private void chkYearFilter_CheckedChanged(object sender, EventArgs e)
         {
             UpdateMovies(false);
         }
 
+        /// <summary>
+        /// Min. year change updates displayed items
+        /// </summary>
         private void numMinYear_ValueChanged(object sender, EventArgs e)
         {
             UpdateMovies(false);
         }
 
+        /// <summary>
+        /// Max. year change updates displayed items
+        /// </summary>
         private void numMaxYear_ValueChanged(object sender, EventArgs e)
         {
             UpdateMovies(false);
         }
 
+        /// <summary>
+        /// Name filter updates displayed items
+        /// </summary>
         private void txtNameFilter_TextChanged(object sender, EventArgs e)
         {
             UpdateMovies(false);

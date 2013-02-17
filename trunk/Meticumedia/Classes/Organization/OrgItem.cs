@@ -15,7 +15,7 @@ using System.Xml;
 namespace Meticumedia
 {
     /// <summary>
-    /// An organization item. Stores information about a single organization of a file and handles the action related to organization.
+    /// An organization item. Stores information about a single organization of a path and handles the action related to organization.
     /// </summary>
     public class OrgItem
     {
@@ -116,6 +116,9 @@ namespace Meticumedia
         /// </summary>
         public DateTime ActionTime { get; set; }
 
+        /// <summary>
+        /// Item number in scan. To be processed in same order as scanned to prevent conflicts.
+        /// </summary>
         public int Number { get; set; }
 
         #endregion
@@ -850,7 +853,7 @@ namespace Meticumedia
             {
                 this.ActionComplete = true;
                 this.ActionSucess = false;
-                // TODO: notify user?
+                // TODO: notify user! - item stays in queue with failed status maybe..
             }
 
             // Check if action is complete
@@ -865,6 +868,7 @@ namespace Meticumedia
                 if (time < 500)
                     Thread.Sleep(500 - time);
 
+                // Cleanup folder (delete empty sub-folders)
                 if (this.Category != FileHelper.FileCategory.Folder)
                     CleanupFolder();
 

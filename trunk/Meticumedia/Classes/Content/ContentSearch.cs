@@ -11,8 +11,8 @@ using System.Threading;
 namespace Meticumedia
 {
     /// <summary>
-    /// Abstract class that handle searching for and matching content from online database.
-    /// Create multiple search queries and runs them in separate threads to minimize time
+    /// Abstract class that defines searching for and matching content from online database.
+    /// Creates multiple search queries and runs them in separate threads to minimize time
     /// to get maximum number of results.
     /// </summary>
     public abstract class ContentSearch
@@ -63,9 +63,9 @@ namespace Meticumedia
         /// <summary>
         /// Match a folder path to content in database
         /// </summary>
-        /// <param name="rootFolder"></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="rootFolder">Root folder content will belong to</param>
+        /// <param name="path">Current path of content</param>
+        /// <returns>Content from database that was matched, null if no match</returns>
         protected Content PathMatch(string rootFolder, string path)
         {
             // Get folder name from full path
@@ -81,6 +81,9 @@ namespace Meticumedia
         /// </summary>
         private int searchCount = 0;
 
+        /// <summary>
+        /// Lock for accessing search variables
+        /// </summary>
         private object searchLock = new object();
 
         /// <summary>
@@ -88,18 +91,26 @@ namespace Meticumedia
         /// </summary>
         private Dictionary<int, MatchStatus> searchStatus = new Dictionary<int, MatchStatus>();
 
-        protected Content ContentMatch(string search, string rootFolder, string folderPath)
+        /// <summary>
+        /// Attempts to match string to content from the online database.
+        /// </summary>
+        /// <param name="search">Search string to match against</param>
+        /// <param name="rootFolder">The root folder the content will belong to</param>
+        /// <param name="folderPath">Folder path where the content should be moved to</param>
+        /// <returns>Match content item, null if no match</returns>
+        public Content ContentMatch(string search, string rootFolder, string folderPath)
         {
             return ContentMatch(search, rootFolder, folderPath, true);
         }
 
         /// <summary>
-        /// Attempt to match a folder name to a movie from the online database.
+        /// Attempts to match string to content from the online database.
         /// </summary>
-        /// <param name="search">Search string to match againg</param>
-        /// <param name="rootFolder">The movie folder where the movie is in</param>
-        /// <param name="folderPath">Folder path where the movie should be moved to</param>
-        /// <returns>Match movie item.</returns>
+        /// <param name="search">Search string to match against</param>
+        /// <param name="rootFolder">The root folder the content will belong to</param>
+        /// <param name="folderPath">Folder path where the content should be moved to</param>
+        /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
+        /// <returns>Match content item, null if no match</returns>
         protected Content ContentMatch(string search, string rootFolder, string folderPath, bool threaded)
         {
             // Create empty content
@@ -204,17 +215,21 @@ namespace Meticumedia
 
         /// <summary>
         /// Method for create multiple searches bases specific to inheriting class.
-        /// (e.g. for TV show match we want to search with full path name and then
-        /// with a substring up to episode information - "seinfeld" from "seinfeld s01e01 xvid 480p rip bullshit")
+        /// If not overriden simply returns list with the input as the only item.
         /// </summary>
-        /// <param name="baseSearch"></param>
-        /// <returns></returns>
-        protected abstract List<string> GetModifiedSearches(string baseSearch);
+        /// <param name="baseSearch">Starting search string</param>
+        /// <returns>List of strings to use as search starting points</returns>
+        protected virtual List<string> GetModifiedSearches(string baseSearch)
+        {
+            List<string> baseSearches = new List<string>();
+            baseSearches.Add(baseSearch);
+            return baseSearches;
+        }
 
         /// <summary>
         /// Search thread operation. Performs a single search for content from string passed in through arguments.
         /// </summary>
-        /// <param name="stateInfo"></param>
+        /// <param name="stateInfo">Arguments for thread</param>
         private void SearchThread(object stateInfo)
         {
             // Get arguments
@@ -238,24 +253,22 @@ namespace Meticumedia
                     searchStatus[statusIndex].Matches[searchIndex] = match;
                     searchStatus[statusIndex].Completes[searchIndex] = true;
                 }
-
-            //Console.WriteLine("Search thread #" + statusIndex + " - " + searchIndex + ": " + search + " END - " + (match != null));
         }
 
         /// <summary>
         /// Search database for content and find a match from results.
         /// </summary>
-        /// <param name="search">Search string to match movie to</param>
-        /// <param name="folderPath">Path of folder containing movie</param>
-        /// <param name="rootFolder">Content folder containing movie's folder</param>
-        /// <param name="year">Year to match to movie</param>
-        /// <param name="movie">resulting match found from search</param>
+        /// <param name="search">Search string to match content to</param>
+        /// <param name="folderPath">Path of folder containing content</param>
+        /// <param name="rootFolder">Root folder containing content folder</param>
+        /// <param name="year">Year to match to content</param>
+        /// <param name="result">resulting match found from search</param>
         /// <returns>whether match was successful</returns>
         private bool DoMatch(string search, string folderPath, string rootFolder, int year, out Content result)
         {
             result = null;
 
-            // Search for movie
+            // Search for content
             List<Content> searchResults = PerformSearch(search, false);
 
             // Go through results
@@ -267,39 +280,39 @@ namespace Meticumedia
 
                 // Check if search string match results string
                 string simplifiedSearch = FileHelper.SimplifyFileName(search);
-                string dbMovieName = FileHelper.SimplifyFileName(searchResult.Name);
+                string dbContentName = FileHelper.SimplifyFileName(searchResult.Name);
 
                 // Try basic match
-                bool match = FileHelper.CompareStrings(simplifiedSearch, dbMovieName);
+                bool match = FileHelper.CompareStrings(simplifiedSearch, dbContentName);
 
                 // Try match with year removed
                 if (!match)
                 {
                     simplifiedSearch = FileHelper.SimplifyFileName(search, true, true);
-                    dbMovieName = FileHelper.SimplifyFileName(searchResult.Name, true, true);
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbMovieName);
+                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true);
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName);
                 }
 
                 // Try match with spaces removed
                 if (!match)
                 {
                     string dirNoSpc = simplifiedSearch.Replace(" ", "");
-                    string nameNoSpc = dbMovieName.Replace(" ", "");
+                    string nameNoSpc = dbContentName.Replace(" ", "");
                     match = FileHelper.CompareStrings(dirNoSpc, nameNoSpc);
                 }
 
-                // Try match with year added to movie name
+                // Try match with year added to content name
                 if(!match)
                 {
-                    dbMovieName = FileHelper.SimplifyFileName(searchResult.Name + " " + searchResult.Date.Year.ToString());
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbMovieName);
+                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name + " " + searchResult.Date.Year.ToString());
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName);
                 }
 
                 // No match, next result!
                 if(!match)
                     continue;
 
-                // Get full information for matching result
+                // Set results folder/path
                 result = searchResult;
                 result.RootFolder = rootFolder;
                 if (string.IsNullOrEmpty(folderPath))
@@ -315,14 +328,13 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Performs search for content on database - specific to content type
+        /// Performs search for content in database - specific to content type
         /// </summary>
-        /// <param name="search"></param>
-        /// <returns></returns>
+        /// <param name="search">string to search for</param>
+        /// <param name="includeSummaries">whether to get summary of each return search result</param>
+        /// <returns>List of content matching search string from online database</returns>
         protected abstract List<Content> PerformSearch(string search, bool includeSummaries);
 
-
         #endregion
-
     }
 }

@@ -50,8 +50,11 @@ namespace Meticumedia
             this.txtFilePreview1 = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.lblExample1 = new System.Windows.Forms.Label();
+            this.colHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colType = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.colContainer = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.colFooter = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colWhitespace = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCase = new System.Windows.Forms.DataGridViewComboBoxColumn();
             this.colValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvNameFormat)).BeginInit();
             this.gbFormat.SuspendLayout();
@@ -68,8 +71,11 @@ namespace Meticumedia
             this.dgvNameFormat.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgvNameFormat.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvNameFormat.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colHeader,
             this.colType,
-            this.colContainer,
+            this.colFooter,
+            this.colWhitespace,
+            this.colCase,
             this.colValue});
             this.dgvNameFormat.Location = new System.Drawing.Point(6, 19);
             this.dgvNameFormat.Name = "dgvNameFormat";
@@ -262,21 +268,43 @@ namespace Meticumedia
             this.lblExample1.Text = "Example 1 - Single Episode: Episode 5 of season 1 of the show \'Arrested Developme" +
     "nt\'.";
             // 
+            // colHeader
+            // 
+            this.colHeader.FillWeight = 10F;
+            this.colHeader.HeaderText = "Header";
+            this.colHeader.Name = "colHeader";
+            this.colHeader.Width = 50;
+            // 
             // colType
             // 
             this.colType.HeaderText = "Type";
             this.colType.Name = "colType";
             this.colType.Width = 150;
             // 
-            // colContainer
+            // colFooter
             // 
-            this.colContainer.HeaderText = "Seperator";
-            this.colContainer.Name = "colContainer";
+            this.colFooter.FillWeight = 10F;
+            this.colFooter.HeaderText = "Footer";
+            this.colFooter.Name = "colFooter";
+            this.colFooter.Width = 50;
+            // 
+            // colWhitespace
+            // 
+            this.colWhitespace.HeaderText = "Whitespace";
+            this.colWhitespace.Name = "colWhitespace";
+            this.colWhitespace.Width = 70;
+            // 
+            // colCase
+            // 
+            this.colCase.HeaderText = "Case  Option";
+            this.colCase.Name = "colCase";
+            this.colCase.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colCase.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // colValue
             // 
             this.colValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colValue.HeaderText = "Custom Value";
+            this.colValue.HeaderText = "Custom String Entry";
             this.colValue.Name = "colValue";
             // 
             // FileNameFormatControl
@@ -318,8 +346,11 @@ namespace Meticumedia
         private System.Windows.Forms.Label lblExample1;
         private System.Windows.Forms.CheckBox chkSeasonDoubleDigits;
         private System.Windows.Forms.CheckBox chkEpisodeDoubleDigits;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHeader;
         private System.Windows.Forms.DataGridViewComboBoxColumn colType;
-        private System.Windows.Forms.DataGridViewComboBoxColumn colContainer;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFooter;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colWhitespace;
+        private System.Windows.Forms.DataGridViewComboBoxColumn colCase;
         private System.Windows.Forms.DataGridViewTextBoxColumn colValue;
     }
 }

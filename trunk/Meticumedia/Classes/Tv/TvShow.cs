@@ -106,7 +106,7 @@ namespace Meticumedia
         /// </summary>
         /// <param name="show">Show to clon</param>
         public void Clone(TvShow show)
-        {
+        {            
             this.Name = show.Name;
             this.RootFolder = show.RootFolder;
             this.Overview = show.Overview;
@@ -114,6 +114,7 @@ namespace Meticumedia
             this.Path = show.Path;
             this.Found = show.Found;
             this.IncludeInScan = show.IncludeInScan;
+            this.Genres = show.Genres;
             this.Seasons = show.Seasons;
             this.Id = show.Id;
             this.Date = show.Date;

@@ -17,6 +17,9 @@ using System.Threading;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Control for displaying TV shows and episodes.
+    /// </summary>
     public partial class ShowsControl : UserControl
     {
         #region Episode Filter Class
@@ -184,7 +187,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Indicates that a TV shows have changed.
+        /// Indicates that TV shows have changed.
         /// </summary>
         public event EventHandler ShowsChanged;
 
@@ -249,7 +252,6 @@ namespace Meticumedia
             showUpdater.RunWorkerCompleted += new RunWorkerCompletedEventHandler(showUpdater_RunWorkerCompleted);
 
             // Setup shows list
-            lvShows.DisplayGenres = false;
             lvShows.ItemToEdit += new EventHandler(lvShows_ItemToEdit);
             lvShows.SaveContentsRequired += new EventHandler(lvShows_SaveContentsRequired);
             lvShows.UpdateContentsRequired += new EventHandler(lvShows_UpdateContentsRequired);
@@ -258,20 +260,11 @@ namespace Meticumedia
             lvEpisodes.ContextMenu = episodeContextMenu;
             episodeContextMenu.Popup += new EventHandler(episodeContextMenu_Popup);
 
+            // Register load complete
             this.Load += new EventHandler(ShowsControl_Load);
 
+            // Register update to TV items in scan directories
             ScanHelper.TvScanItemsUpdate += ScanHelper_TvScanItemsUpdate;
-        }
-
-        void ScanHelper_TvScanItemsUpdate(object sender, EventArgs e)
-        {
-            if (!this.IsHandleCreated)
-                return;
-            
-            this.Invoke((MethodInvoker)delegate
-            {
-                DisplayShow(true);
-            });
         }
         
         #endregion
@@ -300,6 +293,7 @@ namespace Meticumedia
             if (!GetSelectedEpisodes(out selEpisodes))
                 return;
 
+            // Add options
             episodeContextMenu.MenuItems.Add("Play", new EventHandler(HandlePlay));
             episodeContextMenu.MenuItems.Add("Edit", new EventHandler(HandleEdit));
 
@@ -426,6 +420,20 @@ namespace Meticumedia
         #region Event Handlers
 
         /// <summary>
+        /// Handle updates to TV items in scan folders event
+        /// </summary>
+        void ScanHelper_TvScanItemsUpdate(object sender, EventArgs e)
+        {
+            if (!this.IsHandleCreated)
+                return;
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                DisplayShow(true);
+            });
+        }
+
+        /// <summary>
         /// Handler for control load event
         /// </summary>
         void ShowsControl_Load(object sender, EventArgs e)
@@ -464,8 +472,6 @@ namespace Meticumedia
         /// <summary>
         /// Updates displayed legend colours when they are changed.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void TvEpisode_BackColourChanged(object sender, EventArgs e)
         {
             SetLegend();
@@ -549,8 +555,6 @@ namespace Meticumedia
         /// <summary>
         /// Handles change of selection on shows list; sets selected and displays episodes from show.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void lvShows_SelectedIndexChanged(object sender, EventArgs e)
         {
             Content selShow;
@@ -564,8 +568,6 @@ namespace Meticumedia
         /// <summary>
         /// The show editor is opened when the edit button is opened.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnEditShow_Click(object sender, EventArgs e)
         {
             EditShow();
@@ -579,20 +581,63 @@ namespace Meticumedia
             UpdateShowsInFolders(false);
         }
 
+        /// <summary>
+        /// Shows list refresh when folder selection changed
+        /// </summary>
         private void cmbFolders_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateShows(false);
         }
 
+        /// <summary>
+        /// Shows list refresh when name filter text changed
+        /// </summary>
         private void txtNameFilter_TextChanged(object sender, EventArgs e)
         {
             UpdateShows(false);
             txtNameFilter.Select();
         }
 
+        /// <summary>
+        /// Genres change refresh displayed list
+        /// </summary>
+        private void cmbGenre_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateShows(false);
+        }
+
         #endregion
 
         #region Shows List
+
+        /// <summary>
+        /// Update Genres in list based on what genres are actually in 
+        /// the movies displayed
+        /// </summary>
+        private void UpdateGenres()
+        {
+            //if (cmbFolders.SelectedItem == null)
+            //    return;
+
+            string selectedGenre = string.Empty;
+            if (cmbGenre.SelectedItem != null)
+                selectedGenre = cmbGenre.SelectedItem.ToString();
+
+            // Add all available genres
+            cmbGenre.Items.Clear();
+            cmbGenre.Items.Add("All Genres");
+            foreach (string genre in Organization.AllTvGenres)
+            {
+                int item = cmbGenre.Items.Add(genre);
+
+                // Reselect genre
+                if (selectedGenre == genre)
+                    cmbGenre.SelectedIndex = item;
+            }
+
+            if (cmbGenre.SelectedIndex < 0)
+                cmbGenre.SelectedIndex = 0;
+        }
 
         /// <summary>
         /// Updates TV folders available for selection in combo box.
@@ -611,7 +656,7 @@ namespace Meticumedia
             cmbFolders.Items.Clear();
             cmbFolders.Items.Add("All Show Folders");
 
-            // Add each movie folder from settings
+            // Add each tv folder from settings
             foreach (ContentRootFolder folder in Settings.TvFolders)
             {
                 int index = cmbFolders.Items.Add(folder);
@@ -625,7 +670,7 @@ namespace Meticumedia
             cmbFolders.SelectedIndex = indexToSelect;
 
             // Display shows
-            lvShows.Contents = Organization.GetShowsFromRootFolders(cmbFolders.SelectedItem.ToString(), txtNameFilter.Text);
+            lvShows.Contents = Organization.GetShowsFromRootFolders(cmbFolders.SelectedItem.ToString(), txtNameFilter.Text, cmbGenre.SelectedItem.ToString());
             lvShows.DisplayContent(false);
 
             // Start updating the movies that are found in select folder
@@ -768,9 +813,16 @@ namespace Meticumedia
 
             this.Invoke((MethodInvoker)delegate
             {
+                UpdateGenres();
+                Organization.AllTvGenres.GenresUpdated += AllTvGenres_GenresUpdated;
                 OnShowsChange();
                 UpdateFolders();
             });
+        }
+
+        private void AllTvGenres_GenresUpdated(object sender, EventArgs e)
+        {
+            UpdateGenres();
         }
 
         /// <summary>
@@ -862,7 +914,7 @@ namespace Meticumedia
                 folderName = cmbFolders.SelectedItem.ToString();
 
             // Get shows for selected folder and sort them
-            lvShows.Contents = Organization.GetShowsFromRootFolders(folderName, txtNameFilter.Text);
+            lvShows.Contents = Organization.GetShowsFromRootFolders(folderName, txtNameFilter.Text, cmbGenre.SelectedItem.ToString());
             if (newOnly)
                 lvShows.DisplayContent(newOnly);
             else

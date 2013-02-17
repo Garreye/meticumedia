@@ -183,6 +183,9 @@ namespace Meticumedia
 
         #region Variables
 
+        /// <summary>
+        /// Missing status of episode in show folder or scan dir.
+        /// </summary>
         public enum MissingStatus { Located, Missing, InScanDirectory }
 
         /// <summary>
@@ -264,6 +267,10 @@ namespace Meticumedia
             this.Watched = false;
         }
 
+        /// <summary>
+        /// Constructor for cloning instance.
+        /// </summary>
+        /// <param name="episode">Instance to clone</param>
         public TvEpisode(TvEpisode episode)
         {
             this.NameIsUserSet = episode.NameIsUserSet;
@@ -377,6 +384,9 @@ namespace Meticumedia
             return true;
         }
 
+        /// <summary>
+        /// Opens episode file for playback.
+        /// </summary>
         public void PlayEpisodeFile()
         {
             // File is in TV show folder
@@ -448,6 +458,10 @@ namespace Meticumedia
                 return Color.Transparent;
         }
 
+        /// <summary>
+        /// Get show episode belongs to
+        /// </summary>
+        /// <returns></returns>
         public TvShow GetShow()
         {
             for (int i = 0; i < Organization.Shows.Count; i++)

@@ -68,7 +68,8 @@ namespace Meticumedia
         /// </summary>
         /// <param name="SeperatorBefore">Separator type required before word</param>
         /// <param name="SeperatorAfter">Separator type required after word</param>
-        /// <param name="Word">The word remove from string</param>
+        /// <param name="Word">The word to remove from string</param>
+        /// <param name="type">type of the word to remove</param>
         public RemoveFileWord(Separator seperatorBefore, Separator seperatorAfter, string word, FileWordType type)
         {
             this.SeparatorBefore = seperatorBefore;
@@ -84,8 +85,10 @@ namespace Meticumedia
         /// </summary>
         /// <param name="seperatorBefore"></param>
         /// <param name="seperatorAfter"></param>
-        /// <param name="word"></param>
-        /// <param name="removeAfterWords"></param>
+        /// <param name="word">The word to remove from string</param>
+        /// <param name="type">type of the word to remove</param>
+        /// <param name="removeAfterWords">Whether to also remove the word following if it is the last in the string</param>
+        /// <param name="removeEverythingAfter">Whether to remove all characters after match</param>
         public RemoveFileWord(Separator seperatorBefore, Separator seperatorAfter, string word, FileWordType type, bool removeAfterWords, bool removeEverythingAfter) 
             : this(seperatorBefore, seperatorAfter, word, type)
         {
@@ -98,9 +101,10 @@ namespace Meticumedia
         #region Methods
 
         /// <summary>
-        /// Removes the word from a string.
+        /// Removes the word from a string and adds removed word to dictionary of removed words indexed by type
         /// </summary>
         /// <param name="text">The text to remove word from</param>
+        /// <param name="removeFileWords">Dictionary of all removed words from text to add to if word is removed</param>
         /// <returns>Text with word removed if found</returns>
         public bool RemoveWord(ref string text, Dictionary<FileWordType, List<string>> removeFileWords)
         {

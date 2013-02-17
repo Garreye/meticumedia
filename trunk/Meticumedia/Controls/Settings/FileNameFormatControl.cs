@@ -14,24 +14,64 @@ using System.IO;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Control for editing file name format (for both TV and movies)
+    /// </summary>
     public partial class FileNameFormatControl : UserControl
     {
+        #region Properties
+
+        /// <summary>
+        /// File name format instance being edited.
+        /// </summary>
         public FileNameFormat FileNameFormat
         {
             get;
             private set;
         }
-                
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public FileNameFormatControl()
         {
             InitializeComponent();
         }
 
+        #endregion
+
+        #region Variables
+
+        /// <summary>
+        /// Whether file name format is for movie (vs. tv episode)
+        /// </summary>
         private bool isMovieFormat = false;
 
+        /// <summary>
+        /// Disables preview building - to use during loading
+        /// </summary>
+        private bool disablePreviewBuild = true;
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Loads file name format from settings into control.
+        /// </summary>
+        /// <param name="movie">Whether to load movie format (or tv format if false)</param>
         public void LoadFormat(bool movie)
         {
-
+            // Save movie flag
+            isMovieFormat = movie;
+            
+            // Disable building
+            disablePreviewBuild = true;
+            
             // Load datagridview combo box options
             foreach (FileWordType word in Enum.GetValues(typeof(FileWordType)))
             {
@@ -41,12 +81,8 @@ namespace Meticumedia
                 if ((movie &&  (word & FileWordType.Movie) > 0) || (!movie && (word & FileWordType.Tv) > 0))
                     colType.Items.Add(word.ToString());
             }
-
-            foreach (FileNamePortion.ContainerTypes type in Enum.GetValues(typeof(FileNamePortion.ContainerTypes)))
-                colContainer.Items.Add(type.ToString());
-            
-            
-            isMovieFormat = movie;
+            foreach (FileNamePortion.CaseOptionType type in Enum.GetValues(typeof(FileNamePortion.CaseOptionType)))
+                colCase.Items.Add(type.ToString());            
             
             // Get format from settings
             if (isMovieFormat)
@@ -59,8 +95,12 @@ namespace Meticumedia
             foreach (FileNamePortion portion in this.FileNameFormat.Format)
             {
                 int row = dgvNameFormat.Rows.Add();
-                dgvNameFormat.Rows[row].Cells[0].Value = portion.Type.ToString();
-                dgvNameFormat.Rows[row].Cells[1].Value = portion.Container.ToString();
+                dgvNameFormat.Rows[row].Cells[0].Value = portion.Header;
+                dgvNameFormat.Rows[row].Cells[1].Value = portion.Type.ToString();
+                dgvNameFormat.Rows[row].Cells[2].Value = portion.Footer;
+                dgvNameFormat.Rows[row].Cells[3].Value = portion.Whitespace;
+                dgvNameFormat.Rows[row].Cells[4].Value = portion.CaseOption.ToString();
+                dgvNameFormat.Rows[row].Cells[5].Value = portion.Value;
             }
 
             // No episode format editor for movies
@@ -78,6 +118,7 @@ namespace Meticumedia
             chkEpisodeDoubleDigits.Checked = this.FileNameFormat.EpisodeFormat.ForceEpisodeDoubleDigits;
             chkSeasonDoubleDigits.Checked = this.FileNameFormat.EpisodeFormat.ForceSeasonDoubleDigits;
 
+            // Set preview labels
             if (isMovieFormat)
             {
                 lblExample1.Text = "Example 1 - 'Donnie Darko': 720p, bluray rip - x264, 5.1 audio - english, extended cut, file part 1";
@@ -89,10 +130,16 @@ namespace Meticumedia
                 lblExample2.Text = "Example 2 - Double Episode: Episode 23 and 24 of season 9 of the show 'Seinfeld'";
             }
 
+            // Enable building
             disablePreviewBuild = false;
+
+            // Update preview
             UpdatePreview();
         }
 
+        /// <summary>
+        /// Save file name format from control into settings.
+        /// </summary>
         public void SetFormat()
         {
             BuildFormat();
@@ -102,13 +149,19 @@ namespace Meticumedia
                 Settings.TvFileFormat = this.FileNameFormat;
         }
 
+        /// <summary>
+        /// Update file name format previews in control.
+        /// </summary>
         private void UpdatePreview()
         {
+            // Check if building disabled
             if (disablePreviewBuild)
                 return;
             
+            // Update format from control entrues
             BuildFormat();
             
+            // Build preview
             if (isMovieFormat)
             {
                 Movie movie = new Movie("Donnie Darko");
@@ -126,27 +179,44 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Update localc file name format variable from control entries
+        /// </summary>
         private void BuildFormat()
         {
+            // Reset format
             this.FileNameFormat = new FileNameFormat(isMovieFormat);
 
-            // Get file name format
+            // Build base format from datagrid view
             this.FileNameFormat.Format = new List<FileNamePortion>();
             for (int i = 0; i < dgvNameFormat.Rows.Count; i++)
             {
-                if (dgvNameFormat.Rows[i].Cells[0].Value != null && dgvNameFormat.Rows[i].Cells[1].Value != null)
+                // If no value selected then row is invalid
+                if (dgvNameFormat.Rows[i].Cells[1].Value != null)
                 {
+                    string header = string.Empty;
+                    if (dgvNameFormat.Rows[i].Cells[0].Value != null)
+                        header = dgvNameFormat.Rows[i].Cells[0].Value.ToString();
+                    
                     FileWordType type;
-                    Enum.TryParse<FileWordType>(dgvNameFormat.Rows[i].Cells[0].Value.ToString(), out type);
+                    Enum.TryParse<FileWordType>(dgvNameFormat.Rows[i].Cells[1].Value.ToString(), out type);
 
-                    FileNamePortion.ContainerTypes container;
-                    Enum.TryParse<FileNamePortion.ContainerTypes>(dgvNameFormat.Rows[i].Cells[1].Value.ToString(), out container);
+                    string footer = string.Empty;
+                    if (dgvNameFormat.Rows[i].Cells[2].Value != null)
+                        footer = dgvNameFormat.Rows[i].Cells[2].Value.ToString();
+
+                    string whitespace = string.Empty;
+                    if (dgvNameFormat.Rows[i].Cells[3].Value != null)
+                        whitespace = dgvNameFormat.Rows[i].Cells[3].Value.ToString();
+
+                    FileNamePortion.CaseOptionType caseOption;
+                    Enum.TryParse<FileNamePortion.CaseOptionType>(dgvNameFormat.Rows[i].Cells[4].Value.ToString(), out caseOption);
 
                     string value = string.Empty;
-                    if (dgvNameFormat.Rows[i].Cells[2].Value != null)
-                        value = dgvNameFormat.Rows[i].Cells[2].Value.ToString();
+                    if (dgvNameFormat.Rows[i].Cells[5].Value != null)
+                        value = dgvNameFormat.Rows[i].Cells[5].Value.ToString();
 
-                    this.FileNameFormat.Format.Add(new FileNamePortion(type, value, container));
+                    this.FileNameFormat.Format.Add(new FileNamePortion(type, value, header, footer, caseOption, whitespace));
                 }
             }
 
@@ -159,17 +229,26 @@ namespace Meticumedia
             this.FileNameFormat.EpisodeFormat.ForceSeasonDoubleDigits = chkSeasonDoubleDigits.Checked;
         }
 
-        private bool disablePreviewBuild = true;
+        #endregion
 
+        #region Event Handlers
+
+        /// <summary>
+        /// Changes to episode format trigger preview update.
+        /// </summary>
         private void episodeFormatChanges(object sender, EventArgs e)
         {
             UpdatePreview();
         }
 
+        /// <summary>
+        /// Changes to datagridview trigger preview update.
+        /// </summary>
         private void dgvNameFormat_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             UpdatePreview();
         }
 
+        #endregion
     }
 }

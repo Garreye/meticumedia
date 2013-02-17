@@ -11,15 +11,24 @@ using System.Xml;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Class for accesing TVRage online TV database and related functions.
+    /// </summary>
     public class TvRageAccess : TvDatabaseAccess
     {
+        #region Constants
+
         protected override string API_KEY { get { return "zqWjteEikX3q0IJLx0fc"; } }
+
+        #endregion
 
         #region Constuctor
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public TvRageAccess()
         {
-            
         }
 
         #endregion
@@ -27,7 +36,7 @@ namespace Meticumedia
         #region Mirrors
 
         /// <summary>
-        /// Updates local list of TheTvDb mirrors.
+        /// Updates mirrors.
         /// </summary>
         public override void UpdatesMirrors()
         {
@@ -41,10 +50,19 @@ namespace Meticumedia
 
         #region Searching/Updating
 
+        /// <summary>
+        /// Performs search for show in database. Should be overriden
+        /// </summary>
+        /// <param name="mirror">Mirror to use</param>
+        /// <param name="searchString">Search string for show</param>
+        /// <param name="includeSummaries">Whether to include summaries in search results (takes longer - set to false unless user is seeing them)</param>
+        /// <returns>Results as list of shows</returns>
         protected override List<Content> DoSearch(string mirror, string searchString, bool includeSummaries)
         {
+            // Init results
             List<Content> searchResults = new List<Content>();
             
+            // Get search results from databasse
             string seriesLookupUrl = mirror + "/search.php?key=" + this.API_KEY + "&show=" + searchString;
             WebClient webClient = new WebClient();
             string seriesList = webClient.DownloadString(seriesLookupUrl);
@@ -57,35 +75,46 @@ namespace Meticumedia
             XmlElement root = seriesDoc.DocumentElement;
             XmlNodeList nodes = root.ChildNodes;
 
-            // Go through each node and get the url for all mirrors
+            // Go through each node and get parse into shows
             for (int i = 0; i < nodes.Count; i++)
             {
                 // Create show
                 TvShow searchResult = ParseShowInfo(nodes[i]);
 
+                // Get summaries for each resulting show - this may be slow!
                 if (includeSummaries)
                 {
+                    // Get show info from database
                     string showInfoUrl = mirror + "/showinfo.php?key=" + this.API_KEY + "&sid=" + searchResult.Id;
                     string showInfo = webClient.DownloadString(showInfoUrl);
 
+                    // Create XML object
                     XmlDocument showInfoDoc = new XmlDocument();
                     showInfoDoc.InnerXml = showInfo;
 
-                    // Get show overview from infor
+                    // Parse show info from XML
                     searchResult = ParseShowInfo(showInfoDoc.DocumentElement);
                 }
 
+                // Add parsed show to results
                 searchResults.Add(searchResult);
             }
 
-
+            // Return results
             return searchResults;
         }
 
+        /// <summary>
+        /// Parse show properties from show XML node from database
+        /// </summary>
+        /// <param name="node">XML node to parse info from</param>
+        /// <returns>Parse TvShow object</returns>
         private static TvShow ParseShowInfo(XmlNode node)
         {
+            // Init show
             TvShow show = new TvShow();
 
+            // Parse properties out from child nodes
             XmlNodeList seriesNodes = node.ChildNodes;
             foreach (XmlNode subNode in seriesNodes)
                 switch (subNode.Name.ToLower())
@@ -107,7 +136,7 @@ namespace Meticumedia
                         show.Date = airDate;
                         break;
                     case "genres":
-                        show.Genres = new List<string>();
+                        show.Genres = new GenreCollection(GenreCollection.CollectionType.Tv);
                         foreach (XmlNode genreNode in subNode.ChildNodes)
                             show.Genres.Add(genreNode.InnerText);
                         break;
@@ -119,7 +148,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Gets season/episode information from TheTvDb
+        /// Gets season/episode information from database
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
         public override TvShow DoUpdate(TvShow show)
@@ -129,18 +158,19 @@ namespace Meticumedia
             if (!GetMirror(MirrorType.Xml, out mirror))
                 return show;
 
-
+            // Get show info from database
             string showInfoUrl = mirror + "/showinfo.php?key=" + this.API_KEY + "&sid=" + show.Id;
             WebClient webClient = new WebClient();
             string showInfo = webClient.DownloadString(showInfoUrl);
 
+            // Create XML object from results
             XmlDocument seriesDoc = new XmlDocument();
             seriesDoc.InnerXml = showInfo;
 
-            // Get show overview from infor
+            // Parse show info
             show.Overview = ParseShowInfo(seriesDoc.DocumentElement).Overview;
 
-            // Init episode list
+            // Get episode info from database
             string episodeListUrl = mirror + "/episode_list.php?key=" + this.API_KEY + "&sid=" + show.Id;
             webClient = new WebClient();
             string seriesList = webClient.DownloadString(episodeListUrl);
@@ -153,14 +183,12 @@ namespace Meticumedia
             XmlElement root = seriesDoc.DocumentElement;
             XmlNodeList nodes = root.ChildNodes;
 
-            // Go through each node and get the url for all mirrors
-
+            // Go through each node and parse out episodes
             foreach (XmlNode subNode in nodes)
             {
                 switch (subNode.Name.ToLower())
                 {
                     case "episodelist":
-                        //show.Seasons = new TvSeasonCollection();
                         foreach (XmlNode seasonNode in subNode.ChildNodes)
                         {
                             if (seasonNode.Name.ToLower() == "season")
@@ -219,7 +247,6 @@ namespace Meticumedia
             }
             return show;
         }
-
 
         #endregion
     }

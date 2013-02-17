@@ -26,22 +26,22 @@ namespace Meticumedia
         public string FolderPath { get; set; }
 
         /// <summary>
-        /// Determines whether file will be copied instead of moved from the folder
+        /// Whether file will be copied instead of moved from the folder
         /// </summary>
         public bool CopyFrom { get; set; }
 
         /// <summary>
-        /// Determines whether the software should do recursive file searches in the folder
+        /// Whether the software should do recursive file searches in the folder
         /// </summary>
         public bool Recursive { get; set; }
 
         /// <summary>
-        /// Determines whether the file are allowed to be set to be deleted when organizing the folder
+        /// Whether the file are allowed to be set to be deleted when organizing the folder
         /// </summary>
         public bool AllowDeleting { get; set; }
 
         /// <summary>
-        /// Sets whether to automatically delete empty sub-fodlers
+        /// Whether to automatically delete empty sub-fodlers during processing
         /// </summary>
         public bool AutomaticallyDeleteEmptyFolders { get; set; }
 

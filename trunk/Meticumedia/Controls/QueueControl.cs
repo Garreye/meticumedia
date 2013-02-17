@@ -386,6 +386,7 @@ namespace Meticumedia
         /// <param name="items">Items to add to queue</param>
         public void QueueItems(List<OrgItem> items)
         {
+            // Get sender
             if (this.Parent is TabPage && this.Parent.Parent is TabControl)
                 ((TabControl)this.Parent.Parent).SelectedTab = ((TabPage)this.Parent);
 
@@ -506,6 +507,8 @@ namespace Meticumedia
                     // Refresh display
                     DisplayQueue();
                 }
+
+                // Disable buttons
                 SetItemButtonEnables(false);
 
                 // Trigger queue items changed event

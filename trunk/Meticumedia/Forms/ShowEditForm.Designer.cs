@@ -76,7 +76,6 @@ namespace Meticumedia
             tvShow1.DoRenaming = true;
             tvShow1.Path = "";
             tvShow1.Found = false;
-            tvShow1.Genres = ((System.Collections.Generic.List<string>)(resources.GetObject("tvShow1.Genres")));
             tvShow1.Id = 0;
             tvShow1.IncludeInScan = true;
             tvShow1.LastUpdated = new System.DateTime(((long)(0)));

@@ -10,7 +10,7 @@ using System.Text;
 namespace Meticumedia
 {
     /// <summary>
-    /// Enum of possible status for TV missing/rename check
+    /// Possible status for TV missing/rename check items
     /// </summary>
     public enum OrgStatus { Found, Missing, Organization };
 }

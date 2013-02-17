@@ -18,7 +18,6 @@ namespace Meticumedia
     /// </summary>
     public partial class FileTypesControl : UserControl
     {
-
         #region Constructor
 
         /// <summary>
@@ -40,6 +39,7 @@ namespace Meticumedia
         {
             ftcVideo.FileTypes = Settings.VideoFileTypes;
             ftcDelete.FileTypes = Settings.DeleteFileTypes;
+            ftcIgnore.FileTypes = Settings.IgnoreFileTypes;
         }
 
         /// <summary>
@@ -49,6 +49,7 @@ namespace Meticumedia
         {
             Settings.VideoFileTypes = ftcVideo.FileTypes;
             Settings.DeleteFileTypes = ftcDelete.FileTypes;
+            Settings.IgnoreFileTypes = ftcIgnore.FileTypes;
         }
 
         #endregion

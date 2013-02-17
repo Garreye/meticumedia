@@ -17,7 +17,8 @@ using Ionic.Zip;
 namespace Meticumedia
 {
     /// <summary>
-    /// Helper class for accesing TheTvDb online TV database and related functions.
+    /// Class for accesing TheTvDb online TV database and related functions.
+    /// TODO: currently not in use, TVRage always used...
     /// </summary>
     public class TheTvDbAccess : TvDatabaseAccess
     {
@@ -27,7 +28,6 @@ namespace Meticumedia
         /// API Key for accessing TheTvDb
         /// </summary>
         protected override string API_KEY { get { return "F29971EFAF45B40A"; } }
-
 
         #endregion
 

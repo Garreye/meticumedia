@@ -53,6 +53,11 @@ namespace Meticumedia
             foreach (string ext in Settings.DeleteFileTypes)
                 if (extenstion == ext.ToLower())
                     return FileCategory.Trash;
+
+            foreach (string ext in Settings.IgnoreFileTypes)
+                if (extenstion == ext.ToLower())
+                    return FileCategory.Ignored;
+
             return FileCategory.Unknown;
         }
 
@@ -108,11 +113,10 @@ namespace Meticumedia
             if (s1.Equals(s2))
                 return true;
 
-
             int s1Count;
             int s2Count;
             List<string> diff;
-            GetStrinDiff(s1, s2, out s1Count, out s2Count, out diff);
+            GetStringDiff(s1, s2, out s1Count, out s2Count, out diff);
 
             if (diff.Count == 1 && diff[0] == "the")
                 return true;
@@ -129,20 +133,28 @@ namespace Meticumedia
         /// <summary>
         /// Get list different between two strings - based on seperation by whitespace
         /// </summary>
-        /// <param name="s1"></param>
-        /// <param name="s2"></param>
-        /// <returns></returns>
+        /// <param name="s1">The first string</param>
+        /// <param name="s2">The second string</param>
+        /// <returns>list of differences</returns>
         public static List<string> GetStringDiff(string s1, string s2)
         {
             int s1Count;
             int s2Count;
             List<string> diff;
-            GetStrinDiff(s1, s2, out s1Count, out s2Count, out diff);
+            GetStringDiff(s1, s2, out s1Count, out s2Count, out diff);
 
             return diff;
         }
 
-        private static void GetStrinDiff(string s1, string s2, out int s1Count, out int s2Count, out List<string> diff)
+        /// <summary>
+        /// Get list different between two strings - based on seperation by whitespace
+        /// </summary>
+        /// <param name="s1">The first string</param>
+        /// <param name="s2">The second string</param>
+        /// <param name="s1Count">Count of words in first string</param>
+        /// <param name="s2Count">Count of words in second string</param>
+        /// <param name="diff">list of differences</param>
+        private static void GetStringDiff(string s1, string s2, out int s1Count, out int s2Count, out List<string> diff)
         {
             // Get words out of strings
             IEnumerable<string> set1 = s1.Split(' ').Distinct();
@@ -320,7 +332,7 @@ namespace Meticumedia
         #region File Name Simplifying
 
         /// <summary>
-        /// Array of words to be removed from movie file names to make processing easier.
+        /// Array of words to be removed from file names to make processing easier.
         /// </summary>
         private static RemoveFileWord[] AlwaysRemoveWords = new RemoveFileWord[]
         {
@@ -362,6 +374,9 @@ namespace Meticumedia
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "lol", FileWordType.None),
         };
 
+        /// <summary>
+        /// Array of words that to be removed from file names to make SOMETIMES processing easier.
+        /// </summary>
         private static RemoveFileWord[] OptionalRemoveWords = new RemoveFileWord[]
         {
             new RemoveFileWord(Separator.Nonnumeric, Separator.Nonnumeric, @"(?:19|20)\d{2}", FileWordType.Year, true, false),
@@ -369,26 +384,52 @@ namespace Meticumedia
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "(?:and|&)", FileWordType.None, false, false)
         };
 
+        /// <summary>
+        /// Optional remove file word types - matches OptionalRemoveWords items
+        /// </summary>
         public enum OptionalSimplifyRemoves { None = 0, Year = 1, YearAndFollowing = 2, And = 4 }
 
+        /// <summary>
+        /// Result from simplification process of a string.
+        /// </summary>
         public class SimplifyStringResults
         {
+            /// <summary>
+            /// Simplified string value.
+            /// </summary>
             public string SimplifiedString { get; set; }
 
+            /// <summary>
+            /// Dictionary of words that were removed from original string, indexed by word type
+            /// </summary>
             public Dictionary<FileWordType, List<string>> RemovedWords { get; set; }
 
+            /// <summary>
+            /// Constructor with known properties
+            /// </summary>
+            /// <param name="text">Simplified string</param>
+            /// <param name="removedWords">Dictionary of words that were removed</param>
             public SimplifyStringResults(string text, Dictionary<FileWordType, List<string>> removedWords)
             {
                 this.SimplifiedString = text;
                 this.RemovedWords = removedWords;
             }
 
+            /// <summary>
+            /// Overrides to output simplified string value.
+            /// </summary>
+            /// <returns></returns>
             public override string ToString()
             {
                 return this.SimplifiedString;
             }
         }
 
+        /// <summary>
+        /// Creates of list of simplified strings from an input string (multiple options for which words to remove creates multiple results).
+        /// </summary>
+        /// <param name="input">String to be simplified</param>
+        /// <returns>List of simplified string results</returns>
         public static List<SimplifyStringResults> SimplifyString(string input)
         {
             // Create list of simplified strings
@@ -431,6 +472,7 @@ namespace Meticumedia
                             break;
                         }
 
+                    // Check that simplification doesn't already exist!
                     if (!exists && !string.IsNullOrEmpty(simpleRes.SimplifiedString))
                         simpliedStrings.Add(simpleRes);
                 }
@@ -439,6 +481,17 @@ namespace Meticumedia
             return simpliedStrings;
         }
 
+        /// <summary>
+        /// Simplifies an input string with various options.
+        /// </summary>
+        /// <param name="input">String to be simplified</param>
+        /// <param name="removeFirst">Whether to always remove first word during simplification</param>
+        /// <param name="removeLast">Whether to always remove last word during simplification</param>
+        /// <param name="options">Selection of optional remove words</param>
+        /// <param name="disableRemAfter">Disable removing of words that follow defined words to remove</param>
+        /// <param name="wordSplitEn">Enables splitting words in the string using dictionary (e.g. "howimetyourmother" split to "how i met your mother"</param>
+        /// <param name="removeWhitespace">Whether to remove extra whitespace</param>
+        /// <returns>Simplified string results</returns>
         public static SimplifyStringResults BuildSimplifyResults(string input, bool removeFirst, bool removeLast, OptionalSimplifyRemoves options, bool disableRemAfter, bool wordSplitEn, bool removeWhitespace)
         {
             // All lowercase
@@ -504,30 +557,43 @@ namespace Meticumedia
             return new SimplifyStringResults(simplifiedName, removeFileWords);
         }
 
-        private static string RemoveWord(bool disableRemAfter, string simplifiedName, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord)
+        /// <summary>
+        /// Removes word from string with extra options.
+        /// </summary>
+        /// <param name="disableRemAfter">Disable removing of words that follow defined words to remove</param>
+        /// <param name="input">Input string to remove words from</param>
+        /// <param name="removeFileWords">List of removed words from string to add to when removing more</param>
+        /// <param name="remWord">Word to be removed</param>
+        /// <returns>string with word removed</returns>
+        private static string RemoveWord(bool disableRemAfter, string input, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord)
         {
+            // Store remove after state
             bool remEverything = remWord.RemoveEverythingAfter;
             bool remAfterWord = remWord.RemoveFollowingEndWord;
 
+            // Disable remove after if needed
             if (disableRemAfter)
             {
                 remWord.RemoveEverythingAfter = false;
                 remWord.RemoveFollowingEndWord = false;
             }
 
-            remWord.RemoveWord(ref simplifiedName, removeFileWords);
+            // Perform word remove
+            remWord.RemoveWord(ref input, removeFileWords);
 
-
+            // Restore remove after state
             if (disableRemAfter)
             {
                 remWord.RemoveEverythingAfter = remEverything;
                 remWord.RemoveFollowingEndWord = remAfterWord;
             }
-            return simplifiedName;
+
+            // Return results with removed word
+            return input;
         }
 
         /// <summary>
-        /// Simplifies a file name string for easier matching against TV show names.
+        /// Simplifies a file name string for easier matching against database results.
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns>The simplified file name string</returns>
@@ -552,12 +618,24 @@ namespace Meticumedia
             return simplifiedName;
         }
 
+        /// <summary>
+        /// Simplifies a file name for easier processing.
+        /// </summary>
+        /// <param name="fileName">File name to simplify</param>
+        /// <param name="removeYear">Whether to remove year during simplification</param>
+        /// <param name="removeWhitespace">Whether to remove extra whitespace</param>
+        /// <returns>Simplified file name</returns>
         public static string SimplifyFileName(string fileName, bool removeYear, bool removeWhitespace)
         {
             OptionalSimplifyRemoves options = removeYear ? OptionalSimplifyRemoves.Year : OptionalSimplifyRemoves.None;
             return BuildSimplifyResults(fileName, false, false, options, true, false, removeWhitespace).SimplifiedString;
         }
 
+        /// <summary>
+        /// Simplifies a file name for easier processing (with default options)
+        /// </summary>
+        /// <param name="fileName">File name to simplify</param>
+        /// <returns>Simplified file name</returns>
         public static string SimplifyFileName(string fileName)
         {
             return SimplifyFileName(fileName, false, true);

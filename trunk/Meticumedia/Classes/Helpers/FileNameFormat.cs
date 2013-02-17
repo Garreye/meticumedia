@@ -25,7 +25,7 @@ namespace Meticumedia
         public List<FileNamePortion> Format { get; set; }
 
         /// <summary>
-        /// Format for episode string portion of file name
+        /// Format for episode string portion of file name (if any)
         /// </summary>
         public TvEpisodeFormat EpisodeFormat { get; set; }
 
@@ -42,20 +42,19 @@ namespace Meticumedia
             // Init format
             this.Format = new List<FileNamePortion>();
 
-            // Default format
+            // Default formats
             if (movie)
             {
-                Format.Add(new FileNamePortion(FileWordType.MovieName, FileNamePortion.ContainerTypes.None));
-                Format.Add(new FileNamePortion(FileWordType.Year, FileNamePortion.ContainerTypes.SquareBrackets));
-                Format.Add(new FileNamePortion(FileWordType.VideoResolution, FileNamePortion.ContainerTypes.SquareBrackets));
-                Format.Add(new FileNamePortion(FileWordType.FilePart, FileNamePortion.ContainerTypes.SquareBrackets));
+                Format.Add(new FileNamePortion(FileWordType.MovieName, string.Empty, " ", FileNamePortion.CaseOptionType.None));
+                Format.Add(new FileNamePortion(FileWordType.Year, "[", "]", FileNamePortion.CaseOptionType.None));
+                Format.Add(new FileNamePortion(FileWordType.VideoResolution, "[", "]", FileNamePortion.CaseOptionType.None));
+                Format.Add(new FileNamePortion(FileWordType.FilePart, "[", "]", FileNamePortion.CaseOptionType.None));
             }
             else
             {
-                Format.Add(new FileNamePortion(FileWordType.ShowName, FileNamePortion.ContainerTypes.None));
-                Format.Add(new FileNamePortion(FileWordType.EpisodeNumber, FileNamePortion.ContainerTypes.Dashes));
-                Format.Add(new FileNamePortion(FileWordType.EpisodeName, FileNamePortion.ContainerTypes.Dashes));
-                
+                Format.Add(new FileNamePortion(FileWordType.ShowName, string.Empty, " - ", FileNamePortion.CaseOptionType.None));
+                Format.Add(new FileNamePortion(FileWordType.EpisodeNumber, string.Empty, " - ", FileNamePortion.CaseOptionType.None));
+                Format.Add(new FileNamePortion(FileWordType.EpisodeName, string.Empty, string.Empty, FileNamePortion.CaseOptionType.None));
             }
             this.EpisodeFormat = new TvEpisodeFormat();
         }
@@ -77,7 +76,7 @@ namespace Meticumedia
         #region Methods
 
         /// <summary>
-        ///  Build formatted file name for movie from an existing file path.
+        /// Builds formatted file name for movie from an existing file path.
         /// </summary>
         /// <param name="movie">The movie associated with file</param>
         /// <param name="fullPath">The path of current file to be renamed</param>
@@ -139,6 +138,13 @@ namespace Meticumedia
             return FileHelper.GetSafeFileName(buildName) + fileExt;
         }
 
+        /// <summary>
+        /// Builds formatted file name for TV episode file from an existing file path.
+        /// </summary>
+        /// <param name="episode1">First episode in file</param>
+        /// <param name="episode2">Second episode in file</param>
+        /// <param name="fullPath">Path of file to be formatted</param>
+        /// <returns>Path with file name formatted</returns>
         public string BuildTvFileName(TvEpisode episode1, TvEpisode episode2, string fullPath)
         {
             // Get file name
@@ -156,24 +162,41 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Build file name for movie
+        /// Build file name for movie.
         /// </summary>
         /// <param name="movieName">Name of movie</param>
         /// <param name="date">Date movie was released</param>
-        /// <param name="simpleResultify">File name simplifying results</param>
+        /// <param name="simplifyResults">File name simplifying results</param>
         /// <param name="differentiator">String that differentiates file from other similar files in same directory</param>
         /// <returns>Resulting formatted file name string</returns>
-        private string BuildFileName(string movieName, DateTime date, FileHelper.SimplifyStringResults simpleResultify, string differentiator)
+        private string BuildFileName(string movieName, DateTime date, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
         {
-            return BuildFileName(movieName, null, null, date, simpleResultify, differentiator);
+            return BuildFileName(movieName, null, null, date, simplifyResults, differentiator);
         }
 
-        private string BuildFileName(TvEpisode episode1, TvEpisode episode2, FileHelper.SimplifyStringResults simpleResultify)
+        /// <summary>
+        /// Build file name for TV epiosode file.
+        /// </summary>
+        /// <param name="episode1">First episode in file</param>
+        /// <param name="episode2">Second episode in file (if any)</param>
+        /// <param name="simplifyResults">File name simplifying results</param>
+        /// <returns>Resulting formatted file name string</returns>
+        private string BuildFileName(TvEpisode episode1, TvEpisode episode2, FileHelper.SimplifyStringResults simplifyResults)
         {
-            return BuildFileName(string.Empty, episode1, episode2, new DateTime(), simpleResultify, string.Empty);
+            return BuildFileName(string.Empty, episode1, episode2, new DateTime(), simplifyResults, string.Empty);
         }
 
-        private string BuildFileName(string movieName, TvEpisode episode1, TvEpisode episode2, DateTime date, FileHelper.SimplifyStringResults simpleResultify, string differentiator)
+        /// <summary>
+        /// Build file name for TV or movie file.
+        /// </summary>
+        /// <param name="movieName">Name of movie</param>
+        /// <param name="episode1">First episode in file</param>
+        /// <param name="episode2">Second episode in file</param>
+        /// <param name="date">Date item was released</param>
+        /// <param name="simplifyResults">File name simplifying results</param>
+        /// <param name="differentiator"></param>
+        /// <returns></returns>
+        private string BuildFileName(string movieName, TvEpisode episode1, TvEpisode episode2, DateTime date, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
         {
             // Init file name
             string fileName = string.Empty;
@@ -182,7 +205,7 @@ namespace Meticumedia
             foreach (FileNamePortion portion in this.Format)
             {
                 // Get string value for current portion
-                string value;
+                string value = portion.Header;
                 switch (portion.Type)
                 {
                     case FileWordType.MovieName:
@@ -201,75 +224,41 @@ namespace Meticumedia
                         value = portion.Value;
                         break;
                     case FileWordType.Year:
-                        if (!GetFileWord(simpleResultify, portion.Type, out value))
-                            value = date.Year.ToString();
+                        value = date.Year.ToString();
                         break;
                     case FileWordType.FilePart:
-                        if (!GetFileWord(simpleResultify, portion.Type, out value))
+                        if (!GetFileWord(simplifyResults, portion.Type, out value))
                             value = differentiator;
                         break;
                     default:
-                        GetFileWord(simpleResultify, portion.Type, out value);
+                        GetFileWord(simplifyResults, portion.Type, out value);
                         break;
                 }
 
-                // Add opening containers
-                if (!string.IsNullOrEmpty(value))
+                // Add portion with header/footer and apply option
+                if (!string.IsNullOrWhiteSpace(value))
                 {
-                    switch (portion.Container)
+                    // Add header
+                    fileName += portion.Header;
+
+                    // Apply case options
+                    switch (portion.CaseOption)
                     {
-                        case FileNamePortion.ContainerTypes.Whitespace:
-                            if (!string.IsNullOrEmpty(fileName))
-                                fileName += " ";
+                        case FileNamePortion.CaseOptionType.None:
                             break;
-                        case FileNamePortion.ContainerTypes.Underscores:
-                            if (!string.IsNullOrEmpty(fileName))
-                                fileName += "_";
+                        case FileNamePortion.CaseOptionType.LowerCase:
+                            value = value.ToLower();
                             break;
-                        case FileNamePortion.ContainerTypes.Dashes:
-                            if (!string.IsNullOrEmpty(fileName))
-                                fileName += " - ";
-                            break;
-                        case FileNamePortion.ContainerTypes.Brackets:
-                            fileName += " (";
-                            break;
-                        case FileNamePortion.ContainerTypes.SquareBrackets:
-                            fileName += " [";
-                            break;
-                        case FileNamePortion.ContainerTypes.SquigglyBrackets:
-                            fileName += "{";
-                            break;
-                        case FileNamePortion.ContainerTypes.Period:
-                            fileName += ".";
-                            break;
-                        case FileNamePortion.ContainerTypes.Custom:
-                            fileName += portion.Value;
+                        case FileNamePortion.CaseOptionType.UpperCase:
+                            value = value.ToUpper();
                             break;
                     }
 
-                    // Add portionvalue
-                    fileName += value;
+                    // Apply whitespace options
+                    fileName += Regex.Replace(value, @"\s+", portion.Whitespace);
 
-                    // Add closing container
-                    switch (portion.Container)
-                    {
-                        case FileNamePortion.ContainerTypes.Whitespace:
-                        case FileNamePortion.ContainerTypes.Underscores:
-                        case FileNamePortion.ContainerTypes.Dashes:
-                            break;
-                        case FileNamePortion.ContainerTypes.Brackets:
-                            if (!string.IsNullOrEmpty(fileName))
-                                fileName += ")";
-                            break;
-                        case FileNamePortion.ContainerTypes.SquareBrackets:
-                            if (!string.IsNullOrEmpty(fileName))
-                                fileName += "]";
-                            break;
-                        case FileNamePortion.ContainerTypes.SquigglyBrackets:
-                            if (!string.IsNullOrEmpty(fileName))
-                                fileName += "}";
-                            break;
-                    }
+                    // Add footer
+                    fileName += portion.Footer;
                 }
             }
 

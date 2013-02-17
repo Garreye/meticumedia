@@ -10,7 +10,7 @@ using System.Text;
 namespace Meticumedia
 {
     /// <summary>
-    /// Enum of possible organization actions that can be performed on files.
+    /// All possible organization actions that can be performed.
     /// </summary>
     public enum OrgAction { None,  AlreadyExists, Move, Copy, Rename, Delete, Queued, Processing, NoRootFolder };
 

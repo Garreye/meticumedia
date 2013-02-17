@@ -34,17 +34,17 @@ namespace Meticumedia
         public DateTime Date { get; set; }
 
         /// <summary>
-        /// Overview of content
+        /// Overview/description of content
         /// </summary>
         public string Overview { get; set; }
         
         /// <summary>
         /// Genre of content
         /// </summary>
-        public List<string> Genres { get; set; }   
+        public GenreCollection Genres { get; set; }   
 
         /// <summary>
-        /// Path to folder contain content files. Empty string if none.
+        /// Path to folder. Empty string if none.
         /// </summary>
         public string Path { get; set; }
 
@@ -69,9 +69,8 @@ namespace Meticumedia
         public bool Watched { get; set; }
 
         /// <summary>
-        /// Determines whether or not the show is to be included
-        /// in scanning for episode that need to be renamed or are
-        /// missing.
+        /// Determines whether or not the content is to be included
+        /// in scanning
         /// </summary>
         public bool IncludeInScan { get; set; }
 
@@ -105,7 +104,7 @@ namespace Meticumedia
             this.Name = string.Empty;
             this.Overview = string.Empty;
             this.Watched = false;
-            this.Genres = new List<string>();
+            this.Genres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
             this.LastUpdated = new DateTime(1, 1, 1);
         }
 
@@ -122,6 +121,10 @@ namespace Meticumedia
 
         #region Methods
 
+        /// <summary>
+        /// Copies properties from another instance into this instance.
+        /// </summary>
+        /// <param name="content">Instance to copy properties from</param>
         protected void Clone(Content content)
         {
             this.Name = content.Name;
@@ -130,12 +133,15 @@ namespace Meticumedia
             this.Overview = content.Overview;
             this.Genres = content.Genres;
             this.Found = content.Found;
+
             if (!string.IsNullOrEmpty(content.RootFolder))
                 this.RootFolder = content.RootFolder;
+
             if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
                 this.Path = content.Path;
             else
                 this.Path = this.BuildFolderPath();
+
             this.Id = content.Id;
             this.Watched = content.Watched;
             this.IncludeInScan = content.IncludeInScan;
@@ -143,6 +149,10 @@ namespace Meticumedia
             this.LastUpdated = content.LastUpdated;
         }
 
+        /// <summary>
+        /// Builds properly formatted path to content folder
+        /// </summary>
+        /// <returns>Resulting built path</returns>
         public virtual string BuildFolderPath()
         {
             return System.IO.Path.Combine(this.RootFolder, this.Name);
@@ -271,7 +281,7 @@ namespace Meticumedia
                         this.Overview = value;
                         break;
                     case XmlElements.Genres:
-                        this.Genres = new List<string>();
+                        this.Genres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
                         foreach (XmlNode genreNode in propNode.ChildNodes)
                             this.Genres.Add(genreNode.InnerText);
                         break;
@@ -315,7 +325,7 @@ namespace Meticumedia
         #region Serialization
 
         /// <summary>
-        /// Serialized object - currently incomplete, only implemented to eliminate error in forms that
+        /// Serialized object - TODO: currently incomplete, only implemented to eliminate error in forms that
         /// have instances of this class as objects
         /// </summary>
         /// <param name="info"></param>
@@ -347,7 +357,7 @@ namespace Meticumedia
         /// Compare this content instance to another instance. Compares by name.
         /// </summary>
         /// <param name="obj">Object to compare this instance to</param>
-        /// <returns></returns>
+        /// <returns>Comparison results</returns>
         public int CompareTo(object obj)
         {
             if (obj is Content)

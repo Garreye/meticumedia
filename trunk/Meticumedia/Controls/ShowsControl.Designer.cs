@@ -35,10 +35,6 @@ namespace Meticumedia
             this.label3 = new System.Windows.Forms.Label();
             this.cmbEpFilter = new System.Windows.Forms.ComboBox();
             this.gbEpisodes = new System.Windows.Forms.GroupBox();
-            this.lbScanDir = new Meticumedia.LegendBoxControl();
-            this.lbIgnored = new Meticumedia.LegendBoxControl();
-            this.lbUnaired = new Meticumedia.LegendBoxControl();
-            this.lbMissing = new Meticumedia.LegendBoxControl();
             this.btnUnignore = new System.Windows.Forms.Button();
             this.btnIgnore = new System.Windows.Forms.Button();
             this.chkDisplayIgnored = new System.Windows.Forms.CheckBox();
@@ -52,17 +48,24 @@ namespace Meticumedia
             this.btnEditFolders = new System.Windows.Forms.Button();
             this.cmbFolders = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnEditMovie = new System.Windows.Forms.Button();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.cmbGenre = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtNameFilter = new System.Windows.Forms.TextBox();
             this.lvShows = new Meticumedia.ContentListView();
             this.colPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colYear = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colGenres = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colOverview = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.btnEditMovie = new System.Windows.Forms.Button();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.label4 = new System.Windows.Forms.Label();
-            this.txtNameFilter = new System.Windows.Forms.TextBox();
             this.lbInvalid = new Meticumedia.LegendBoxControl();
             this.pbUpdating = new TextProgressBar();
+            this.lbScanDir = new Meticumedia.LegendBoxControl();
+            this.lbIgnored = new Meticumedia.LegendBoxControl();
+            this.lbUnaired = new Meticumedia.LegendBoxControl();
+            this.lbMissing = new Meticumedia.LegendBoxControl();
             this.gbEpisodes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -107,64 +110,15 @@ namespace Meticumedia
             this.gbEpisodes.Controls.Add(this.cmbEpFilter);
             this.gbEpisodes.Location = new System.Drawing.Point(3, 3);
             this.gbEpisodes.Name = "gbEpisodes";
-            this.gbEpisodes.Size = new System.Drawing.Size(621, 290);
+            this.gbEpisodes.Size = new System.Drawing.Size(621, 278);
             this.gbEpisodes.TabIndex = 14;
             this.gbEpisodes.TabStop = false;
             this.gbEpisodes.Text = "Episodes";
             // 
-            // lbScanDir
-            // 
-            this.lbScanDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbScanDir.AutoSize = true;
-            this.lbScanDir.Color = System.Drawing.SystemColors.Control;
-            this.lbScanDir.Label = "In Scan Dir.";
-            this.lbScanDir.Location = new System.Drawing.Point(91, 256);
-            this.lbScanDir.Margin = new System.Windows.Forms.Padding(0);
-            this.lbScanDir.Name = "lbScanDir";
-            this.lbScanDir.Size = new System.Drawing.Size(103, 30);
-            this.lbScanDir.TabIndex = 23;
-            // 
-            // lbIgnored
-            // 
-            this.lbIgnored.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbIgnored.AutoSize = true;
-            this.lbIgnored.Color = System.Drawing.SystemColors.Control;
-            this.lbIgnored.Label = "Ignored";
-            this.lbIgnored.Location = new System.Drawing.Point(278, 256);
-            this.lbIgnored.Margin = new System.Windows.Forms.Padding(0);
-            this.lbIgnored.Name = "lbIgnored";
-            this.lbIgnored.Size = new System.Drawing.Size(83, 30);
-            this.lbIgnored.TabIndex = 22;
-            this.lbIgnored.Visible = false;
-            // 
-            // lbUnaired
-            // 
-            this.lbUnaired.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbUnaired.AutoSize = true;
-            this.lbUnaired.Color = System.Drawing.SystemColors.Control;
-            this.lbUnaired.Label = "Unaired";
-            this.lbUnaired.Location = new System.Drawing.Point(194, 256);
-            this.lbUnaired.Margin = new System.Windows.Forms.Padding(0);
-            this.lbUnaired.Name = "lbUnaired";
-            this.lbUnaired.Size = new System.Drawing.Size(84, 30);
-            this.lbUnaired.TabIndex = 21;
-            // 
-            // lbMissing
-            // 
-            this.lbMissing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbMissing.AutoSize = true;
-            this.lbMissing.Color = System.Drawing.SystemColors.Control;
-            this.lbMissing.Label = "Missing";
-            this.lbMissing.Location = new System.Drawing.Point(9, 256);
-            this.lbMissing.Margin = new System.Windows.Forms.Padding(0);
-            this.lbMissing.Name = "lbMissing";
-            this.lbMissing.Size = new System.Drawing.Size(82, 30);
-            this.lbMissing.TabIndex = 20;
-            // 
             // btnUnignore
             // 
             this.btnUnignore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnUnignore.Location = new System.Drawing.Point(459, 259);
+            this.btnUnignore.Location = new System.Drawing.Point(459, 247);
             this.btnUnignore.Name = "btnUnignore";
             this.btnUnignore.Size = new System.Drawing.Size(75, 23);
             this.btnUnignore.TabIndex = 18;
@@ -176,7 +130,7 @@ namespace Meticumedia
             // btnIgnore
             // 
             this.btnIgnore.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnIgnore.Location = new System.Drawing.Point(540, 259);
+            this.btnIgnore.Location = new System.Drawing.Point(540, 247);
             this.btnIgnore.Name = "btnIgnore";
             this.btnIgnore.Size = new System.Drawing.Size(75, 23);
             this.btnIgnore.TabIndex = 13;
@@ -211,7 +165,7 @@ namespace Meticumedia
             this.lvEpisodes.HideSelection = false;
             this.lvEpisodes.Location = new System.Drawing.Point(9, 46);
             this.lvEpisodes.Name = "lvEpisodes";
-            this.lvEpisodes.Size = new System.Drawing.Size(606, 207);
+            this.lvEpisodes.Size = new System.Drawing.Size(606, 195);
             this.lvEpisodes.TabIndex = 11;
             this.lvEpisodes.UseCompatibleStateImageBehavior = false;
             this.lvEpisodes.View = System.Windows.Forms.View.Details;
@@ -285,54 +239,10 @@ namespace Meticumedia
             this.label1.TabIndex = 20;
             this.label1.Text = "TV Folder";
             // 
-            // lvShows
-            // 
-            this.lvShows.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lvShows.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colPath,
-            this.colName,
-            this.colYear,
-            this.colOverview});
-            this.lvShows.Contents = null;
-            this.lvShows.DisplayGenres = true;
-            this.lvShows.FullRowSelect = true;
-            this.lvShows.HideSelection = false;
-            this.lvShows.HideWatched = false;
-            this.lvShows.Location = new System.Drawing.Point(3, 56);
-            this.lvShows.MultiSelect = false;
-            this.lvShows.Name = "lvShows";
-            this.lvShows.Size = new System.Drawing.Size(615, 145);
-            this.lvShows.TabIndex = 24;
-            this.lvShows.UseCompatibleStateImageBehavior = false;
-            this.lvShows.View = System.Windows.Forms.View.Details;
-            this.lvShows.SelectedIndexChanged += new System.EventHandler(this.lvShows_SelectedIndexChanged);
-            // 
-            // colPath
-            // 
-            this.colPath.Text = "Folder Path";
-            this.colPath.Width = 267;
-            // 
-            // colName
-            // 
-            this.colName.Text = "Show Name";
-            this.colName.Width = 164;
-            // 
-            // colYear
-            // 
-            this.colYear.Text = "Year";
-            this.colYear.Width = 200;
-            // 
-            // colOverview
-            // 
-            this.colOverview.Text = "Overview";
-            this.colOverview.Width = 2000;
-            // 
             // btnEditMovie
             // 
             this.btnEditMovie.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnEditMovie.Location = new System.Drawing.Point(543, 207);
+            this.btnEditMovie.Location = new System.Drawing.Point(543, 219);
             this.btnEditMovie.Name = "btnEditMovie";
             this.btnEditMovie.Size = new System.Drawing.Size(75, 24);
             this.btnEditMovie.TabIndex = 25;
@@ -352,6 +262,8 @@ namespace Meticumedia
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.cmbGenre);
+            this.splitContainer1.Panel1.Controls.Add(this.label2);
             this.splitContainer1.Panel1.Controls.Add(this.label4);
             this.splitContainer1.Panel1.Controls.Add(this.txtNameFilter);
             this.splitContainer1.Panel1.Controls.Add(this.lvShows);
@@ -367,13 +279,34 @@ namespace Meticumedia
             // 
             this.splitContainer1.Panel2.Controls.Add(this.gbEpisodes);
             this.splitContainer1.Size = new System.Drawing.Size(627, 542);
-            this.splitContainer1.SplitterDistance = 240;
+            this.splitContainer1.SplitterDistance = 252;
             this.splitContainer1.TabIndex = 31;
+            // 
+            // cmbGenre
+            // 
+            this.cmbGenre.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbGenre.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbGenre.FormattingEnabled = true;
+            this.cmbGenre.Location = new System.Drawing.Point(75, 30);
+            this.cmbGenre.Name = "cmbGenre";
+            this.cmbGenre.Size = new System.Drawing.Size(375, 21);
+            this.cmbGenre.TabIndex = 38;
+            this.cmbGenre.SelectedIndexChanged += new System.EventHandler(this.cmbGenre_SelectedIndexChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(9, 33);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(36, 13);
+            this.label2.TabIndex = 37;
+            this.label2.Text = "Genre";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 33);
+            this.label4.Location = new System.Drawing.Point(9, 60);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 36;
@@ -383,11 +316,60 @@ namespace Meticumedia
             // 
             this.txtNameFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtNameFilter.Location = new System.Drawing.Point(75, 30);
+            this.txtNameFilter.Location = new System.Drawing.Point(75, 57);
             this.txtNameFilter.Name = "txtNameFilter";
             this.txtNameFilter.Size = new System.Drawing.Size(543, 20);
             this.txtNameFilter.TabIndex = 35;
             this.txtNameFilter.TextChanged += new System.EventHandler(this.txtNameFilter_TextChanged);
+            // 
+            // lvShows
+            // 
+            this.lvShows.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvShows.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colPath,
+            this.colName,
+            this.colYear,
+            this.colGenres,
+            this.colOverview});
+            this.lvShows.Contents = null;
+            this.lvShows.FullRowSelect = true;
+            this.lvShows.HideSelection = false;
+            this.lvShows.HideWatched = false;
+            this.lvShows.Location = new System.Drawing.Point(3, 83);
+            this.lvShows.MultiSelect = false;
+            this.lvShows.Name = "lvShows";
+            this.lvShows.Size = new System.Drawing.Size(615, 130);
+            this.lvShows.TabIndex = 24;
+            this.lvShows.UseCompatibleStateImageBehavior = false;
+            this.lvShows.View = System.Windows.Forms.View.Details;
+            this.lvShows.SelectedIndexChanged += new System.EventHandler(this.lvShows_SelectedIndexChanged);
+            // 
+            // colPath
+            // 
+            this.colPath.Text = "Folder Path";
+            this.colPath.Width = 267;
+            // 
+            // colName
+            // 
+            this.colName.Text = "Show Name";
+            this.colName.Width = 164;
+            // 
+            // colYear
+            // 
+            this.colYear.Text = "Year";
+            this.colYear.Width = 50;
+            // 
+            // colGenres
+            // 
+            this.colGenres.Text = "Genres";
+            this.colGenres.Width = 93;
+            // 
+            // colOverview
+            // 
+            this.colOverview.Text = "Overview";
+            this.colOverview.Width = 2000;
             // 
             // lbInvalid
             // 
@@ -395,7 +377,7 @@ namespace Meticumedia
             this.lbInvalid.AutoSize = true;
             this.lbInvalid.Color = System.Drawing.Color.LightGray;
             this.lbInvalid.Label = "Invalid ID";
-            this.lbInvalid.Location = new System.Drawing.Point(3, 204);
+            this.lbInvalid.Location = new System.Drawing.Point(3, 216);
             this.lbInvalid.Margin = new System.Windows.Forms.Padding(0);
             this.lbInvalid.Name = "lbInvalid";
             this.lbInvalid.Size = new System.Drawing.Size(102, 30);
@@ -405,11 +387,60 @@ namespace Meticumedia
             // 
             this.pbUpdating.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbUpdating.Location = new System.Drawing.Point(3, 56);
+            this.pbUpdating.Location = new System.Drawing.Point(3, 83);
             this.pbUpdating.Message = "Updating Folders";
             this.pbUpdating.Name = "pbUpdating";
             this.pbUpdating.Size = new System.Drawing.Size(615, 23);
             this.pbUpdating.TabIndex = 30;
+            // 
+            // lbScanDir
+            // 
+            this.lbScanDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lbScanDir.AutoSize = true;
+            this.lbScanDir.Color = System.Drawing.SystemColors.Control;
+            this.lbScanDir.Label = "In Scan Dir.";
+            this.lbScanDir.Location = new System.Drawing.Point(91, 244);
+            this.lbScanDir.Margin = new System.Windows.Forms.Padding(0);
+            this.lbScanDir.Name = "lbScanDir";
+            this.lbScanDir.Size = new System.Drawing.Size(103, 30);
+            this.lbScanDir.TabIndex = 23;
+            // 
+            // lbIgnored
+            // 
+            this.lbIgnored.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lbIgnored.AutoSize = true;
+            this.lbIgnored.Color = System.Drawing.SystemColors.Control;
+            this.lbIgnored.Label = "Ignored";
+            this.lbIgnored.Location = new System.Drawing.Point(278, 244);
+            this.lbIgnored.Margin = new System.Windows.Forms.Padding(0);
+            this.lbIgnored.Name = "lbIgnored";
+            this.lbIgnored.Size = new System.Drawing.Size(83, 30);
+            this.lbIgnored.TabIndex = 22;
+            this.lbIgnored.Visible = false;
+            // 
+            // lbUnaired
+            // 
+            this.lbUnaired.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lbUnaired.AutoSize = true;
+            this.lbUnaired.Color = System.Drawing.SystemColors.Control;
+            this.lbUnaired.Label = "Unaired";
+            this.lbUnaired.Location = new System.Drawing.Point(194, 244);
+            this.lbUnaired.Margin = new System.Windows.Forms.Padding(0);
+            this.lbUnaired.Name = "lbUnaired";
+            this.lbUnaired.Size = new System.Drawing.Size(84, 30);
+            this.lbUnaired.TabIndex = 21;
+            // 
+            // lbMissing
+            // 
+            this.lbMissing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lbMissing.AutoSize = true;
+            this.lbMissing.Color = System.Drawing.SystemColors.Control;
+            this.lbMissing.Label = "Missing";
+            this.lbMissing.Location = new System.Drawing.Point(9, 244);
+            this.lbMissing.Margin = new System.Windows.Forms.Padding(0);
+            this.lbMissing.Name = "lbMissing";
+            this.lbMissing.Size = new System.Drawing.Size(82, 30);
+            this.lbMissing.TabIndex = 20;
             // 
             // ShowsControl
             // 
@@ -462,5 +493,8 @@ namespace Meticumedia
         private LegendBoxControl lbScanDir;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox txtNameFilter;
+        private System.Windows.Forms.ComboBox cmbGenre;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ColumnHeader colGenres;
     }
 }

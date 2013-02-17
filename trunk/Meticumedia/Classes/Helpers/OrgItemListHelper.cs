@@ -13,12 +13,12 @@ using System.Windows.Forms;
 namespace Meticumedia
 {
     /// <summary>
-    /// Helper class for displaying OrgItem instances in a listview.
+    /// Helper class for displaying list of OrgItem instances in a listview.
     /// </summary>
     public static class OrgItemListHelper
     {
         /// <summary>
-        /// Enum of setups for columns for displaying OrgItems
+        /// Type of setups for columns for displaying items
         /// </summary>
         public enum OrgColumnSetup { MissingCheck, DirectoryScan, MovieFolderCheck, Queue, Log }
         

@@ -35,12 +35,12 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Event indicating there are items to be sent to the queue
+        /// Event indicating there are items to be edited
         /// </summary>
         public event EventHandler ItemToEdit;
 
         /// <summary>
-        /// Triggers ItemsToQueue event
+        /// Triggers ItemToEdit event
         /// </summary>
         /// <param name="items"></param>
         private void OnItemToEdit(Content item)
@@ -50,12 +50,12 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Event indicating there are items to be sent to the queue
+        /// Event indicating that content in list needs to be saved
         /// </summary>
         public event EventHandler SaveContentsRequired;
 
         /// <summary>
-        /// Triggers ItemsToQueue event
+        /// Triggers SaveContentsRequired event
         /// </summary>
         /// <param name="items"></param>
         private void OnSaveContentsRequired()
@@ -90,7 +90,7 @@ namespace Meticumedia
         public List<Content> Contents { get; set; }
 
         /// <summary>
-        /// Sets whether watches contents should be hidden
+        /// Sets whether watched contents should be hidden
         /// </summary>
         public bool HideWatched 
         {
@@ -102,17 +102,12 @@ namespace Meticumedia
             }
         }
 
-        /// <summary>
-        /// Sets whether genres column should be displayed
-        /// </summary>
-        public bool DisplayGenres { get; set; }
-
         #endregion
 
         #region Variables
 
         /// <summary>
-        /// Contents currents displayed in listview (may differ from all content due to hidding of items)
+        /// Contents currents displayed in listview (may differ from all content due to filtering)
         /// </summary>
         private List<Content> displayedContents = new List<Content>();
 
@@ -132,7 +127,7 @@ namespace Meticumedia
         private bool ascendingSort = true;
 
         /// <summary>
-        /// Content Menu for list view
+        /// Context menu for list view
         /// </summary>
         private ContextMenu contextMenu = new ContextMenu();
 
@@ -392,7 +387,7 @@ namespace Meticumedia
         #region Display
 
         /// <summary>
-        /// Displays movies in listview for selected movie folder.
+        /// Displays content in listview for selected root folder.
         /// </summary>
         public void DisplayContent(bool newOnly)
         {
@@ -433,7 +428,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Adds a single movie to listview.
+        /// Adds a single content item to listview.
         /// </summary>
         /// <param name="content">The movie to add to listview</param>
         private void AddContentToList(Content content)
@@ -444,8 +439,7 @@ namespace Meticumedia
             ListViewItem item = this.Items.Add(content.Path);
             item.SubItems.Add(content.ToString());
             item.SubItems.Add(content.Date.Year.ToString());
-            if (this.DisplayGenres)
-                item.SubItems.Add(content.GetGenresString());
+            item.SubItems.Add(content.GetGenresString());
             item.SubItems.Add(content.Overview.Replace(Environment.NewLine, ""));
             if (content.Name.Equals(string.Empty) || content.Id == 0)
                 item.BackColor = Color.LightCoral;
@@ -456,7 +450,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Sorts movies based on columns index from listview.
+        /// Sorts content based on columns index from listview.
         /// </summary>
         /// <param name="lvColumnIndex">Column index to sort on</param>
         public void SortContents(int lvColumnIndex, bool forceSameOrder)

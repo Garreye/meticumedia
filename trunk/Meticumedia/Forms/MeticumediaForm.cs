@@ -31,18 +31,17 @@ namespace Meticumedia
             // Load shows and settings from XML
             Settings.Load();
             Organization.Load();
-            TheMovieDbHelper.LoadGenres();
 
             // Init word helper
             WordHelper.Initialize();
             
-            // Set shows control
+            // Setup shows control
             cntrlShows.ShowsChanged += new EventHandler(cntrlShows_ShowsChange);
 
             // Setup movies control
             cntrlMovies.UpdateFolders();
 
-            // Set scan contorl
+            // Setup scan contorl
             cntrlScan.UpdateDirectories();
             cntrlScan.UpdateShows(true);
             cntrlScan.UpdateMovieFolders();
@@ -50,7 +49,6 @@ namespace Meticumedia
             // Setup queue control
             cntrlQueue.QueueItemsChanged += new EventHandler<QueueControl.QueueItemsChangedArgs>(cntrlQueue_QueueItemsChanged);
             cntrlQueue.QueueItemsComplete += new EventHandler<QueueControl.QueueItemsCompleteArgs>(cntrlQueue_QueueItemsComplete);
-
   
             // Setup Schedule
             cntrlSched.UpdateShows();
@@ -85,8 +83,6 @@ namespace Meticumedia
         /// <summary>
         /// Add completed queue items to log and update TV show missing status if needed.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void cntrlQueue_QueueItemsComplete(object sender, QueueControl.QueueItemsCompleteArgs e)
         {
             this.Invoke((MethodInvoker)delegate
@@ -142,8 +138,6 @@ namespace Meticumedia
         /// <summary>
         /// Update scan control with list of items in queue (so scan knows what files are in the queue).
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void cntrlQueue_QueueItemsChanged(object sender, QueueControl.QueueItemsChangedArgs e)
         {
             cntrlScan.UpdateQueueItems(e.QueueItems);
@@ -153,8 +147,6 @@ namespace Meticumedia
         /// Updates controls with show information when a change to a show 
         /// occurs from the shows control.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void cntrlShows_ShowsChange(object sender, EventArgs e)
         {
             cntrlScan.UpdateShows(false);
@@ -164,8 +156,6 @@ namespace Meticumedia
         /// <summary>
         /// Opens settings window when user clicks settings from file menu
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingsForm settingForm = new SettingsForm(0);
@@ -175,8 +165,6 @@ namespace Meticumedia
         /// <summary>
         /// Closes the form when user click exit from file menu
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -185,8 +173,6 @@ namespace Meticumedia
         /// <summary>
         /// Open the about window when user clicks about from file menu
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.MessageBox.Show("meticumedia v0.8.2 (alpha)\nCopyright © 2013", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -200,6 +186,9 @@ namespace Meticumedia
             System.Diagnostics.Process.Start(e.Link.LinkData as string);
         }
 
+        /// <summary>
+        /// Go to donate page when donate menu item clicked
+        /// </summary>
         private void donateToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=NE42NQGGL8Q9C&lc=CA&item_name=meticumedia&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted");

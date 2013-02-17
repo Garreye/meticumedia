@@ -29,8 +29,8 @@ namespace Meticumedia.Controls
             set 
             { 
                 movie = value;
-                if(value != null)
-                DisplayMovie(false);
+                if (value != null)
+                    DisplayMovie(false);
             }
         }
 
@@ -87,7 +87,6 @@ namespace Meticumedia.Controls
         /// </summary>
         public void UpdateMovieInfo()
         {
-            // 
             this.movie = TheMovieDbHelper.UpdateMovieInfo(this.movie);
             DisplayMovie(false);
         }
@@ -175,24 +174,15 @@ namespace Meticumedia.Controls
         private void btnAddGenre_Click(object sender, EventArgs e)
         {
             // Create array of genre string for selection
-            string[] genres = new string[TheMovieDbHelper.AllGenres.Count];
-            for (int i = 0; i < TheMovieDbHelper.AllGenres.Count; i++)
+            string[] genres = new string[Organization.AllMovieGenres.Count];
+            for (int i = 0; i < Organization.AllMovieGenres.Count; i++)
             {
-                // Don't add genre's already in the movies list
-                bool alreadyAdded = false;
-                if (this.movie.Genres != null)
-                    foreach (string movieGenre in this.movie.Genres)
-                        if (TheMovieDbHelper.AllGenres[i] == this.movie.Name)
-                        {
-                            alreadyAdded = true;
-                            break;
-                        }
-
-                if (alreadyAdded)
+                // Don't list genres already added
+                if (movie.Genres.Contains(Organization.AllMovieGenres[i]))
                     continue;
 
                 // Add genre name
-                genres[i] = TheMovieDbHelper.AllGenres[i];
+                genres[i] = Organization.AllMovieGenres[i];
             }
 
             // Show selection form
@@ -201,7 +191,7 @@ namespace Meticumedia.Controls
 
             // Check results and match to a genre
             if (!string.IsNullOrEmpty(selForm.Results))
-                foreach (string genre in TheMovieDbHelper.AllGenres)
+                foreach (string genre in Organization.AllMovieGenres)
                     if (genre == selForm.Results)
                     {
                         this.movie.Genres.Add(genre);
@@ -268,9 +258,5 @@ namespace Meticumedia.Controls
         }
 
         #endregion
-
-
-
-
     }
 }

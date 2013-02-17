@@ -99,12 +99,12 @@ namespace Meticumedia
         private Dictionary<OrgColumnType, OrgItemColumn> logColumns;
 
         /// <summary>
-        /// Context menu for queue list
+        /// Context menu for listview
         /// </summary>
         private ContextMenu contextMenu = new ContextMenu();
 
         /// <summary>
-        /// Flag indicating that display on log item is required on load event
+        /// Flag indicating that display of log item is required on load event
         /// Set if display was attempted befor handle for control was created
         /// </summary>
         private bool displayOnLoadRequired = false;
@@ -114,10 +114,13 @@ namespace Meticumedia
         /// </summary>
         private OrgColumnType sortType = OrgColumnType.DateTime;
 
+        /// <summary>
+        /// Flag indicating whether sorting based on column clicked is currently set to ascending (used for toggling between ascending/descending)
+        /// </summary>
         private bool sortAscending = false;
 
         /// <summary>
-        /// Last column clicked in scan listview
+        /// Last column clicked in listview
         /// </summary>
         private OrgColumnType lastClickedColumn = 0;
 
@@ -154,8 +157,6 @@ namespace Meticumedia
         /// <summary>
         /// Displays items in log when control is loaded if needed
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void LogControl_Load(object sender, EventArgs e)
         {
             if(displayOnLoadRequired)
@@ -187,8 +188,6 @@ namespace Meticumedia
         /// <summary>
         /// Delete button removes selected items from log (and thus listview)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void btnDelete_Click(object sender, EventArgs e)
         {
             RemoveSelected();
@@ -253,14 +252,19 @@ namespace Meticumedia
 
         #region Methods
 
-        // Adds an action to log (and thus listview)
+        /// <summary>
+        /// Adds an action to log (and thus listview)
+        /// </summary>
+        /// <param name="item"></param>
         public void AddLogItems(OrgItem item)
         {
             Organization.AddLogItem(item);
             DisplayLog();
         }
 
-        // Displays log of actons in listview
+        /// <summary>
+        /// Displays log of actons in listview 
+        /// </summary>
         public void DisplayLog()
         {
             List<OrgItem> filteredLog = ApplyFilter(Organization.ActionLog);
@@ -269,6 +273,11 @@ namespace Meticumedia
             OrgItemListHelper.DisplayOrgItemInList(filteredLog, lvLog, logColumns);
         }
 
+        /// <summary>
+        /// Applies filters to items in listview
+        /// </summary>
+        /// <param name="unfilteredLog">All log items to be filtered</param>
+        /// <returns>List of filtered items</returns>
         private List<OrgItem> ApplyFilter(List<OrgItem> unfilteredLog)
         {
             List<OrgItem> filteredLog = new List<OrgItem>();
@@ -301,6 +310,5 @@ namespace Meticumedia
         }
 
         #endregion        
-
     }
 }

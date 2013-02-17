@@ -11,14 +11,23 @@ using System.IO;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// List of TvShow with added properties for collection.
+    /// </summary>
     public class TvShowCollection : List<TvShow>
     {
         #region Properties
 
+        /// <summary>
+        /// Database time when collection was updated.
+        /// </summary>
         public string LastUpdate { get; set; }
 
         #endregion
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public TvShowCollection()
             : base()
         {

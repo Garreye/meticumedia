@@ -128,6 +128,10 @@ namespace Meticumedia
             this.Results = null;
         }
 
+        /// <summary>
+        /// Constructor for debuggin matching.
+        /// </summary>
+        /// <param name="hideCustom"></param>
         public SearchControl(bool hideCustom) : this()
         {
             btnSetSelected.Visible = hideCustom;
@@ -227,8 +231,9 @@ namespace Meticumedia
             OnSearchResultsSelected(btnSetSelected.Text == "Custom");
         }
 
-        #endregion
-
+        /// <summary>
+        /// Match button attempts to match search entry to a single item in database - used only for debugging matching.
+        /// </summary
         private void bntMatch_Click(object sender, EventArgs e)
         {
             Content match;
@@ -240,5 +245,7 @@ namespace Meticumedia
             searchResults.Add(match);
             DisplayResults();
         }
+
+        #endregion
     }
 }

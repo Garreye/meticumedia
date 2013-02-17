@@ -9,31 +9,47 @@ using System.Text;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Helper class for accessing TV database.
+    /// </summary>
     public class TvDatabaseHelper
     {
+
         #region Database Selection
 
         /// <summary>
-        /// Database access - change type to TheTvDbAccess to use TheTvDb online database 
+        /// Database access instance
         /// </summary>
         private static TvDatabaseAccess databaseAccess = new TvRageAccess();
 
+        /// <summary>
+        /// Database selection types
+        /// </summary>
         public enum TvDataBaseSelection { TvRage, TheTvDb }
 
+        /// <summary>
+        /// Current database selection - TODO: allow user to control in settings!
+        /// </summary>
         private static TvDataBaseSelection dataBaseSelection = TvDataBaseSelection.TvRage;
 
-        public static void SetDataBase(TvDataBaseSelection selection)
+        /// <summary>
+        /// Sets database type
+        /// </summary>
+        /// <param name="selection">Database type to set</param>
+        public static void SetDatabase(TvDataBaseSelection selection)
         {
+            // No changes if already set
             if (selection == dataBaseSelection)
                 return;
             
+            // Set database access based on selection type
             switch (selection)
             {
                 case TvDataBaseSelection.TvRage:
                     databaseAccess = new TvRageAccess();
                     break;
                 case TvDataBaseSelection.TheTvDb:
-                    // Removed to avoid using DotNetZip library..
+                    // Removed to avoid using DotNetZip library, until settings setup to allow switching..
                     //databaseAccess = new TheTvDbAccess();
                     break;
                 default:
@@ -66,30 +82,24 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Performs search for a show in TheTvDb.
+        /// Performs search for a show in database.
         /// </summary>
         /// <param name="searchString">The string to search for</param>
         /// <returns>Array of results from the search</returns>
         public static List<Content> PerformTvShowSearch(string searchString, bool includeSummaries)
         {
-            for(int i=0;i<5;i++)
-                try
-                {
-                    return databaseAccess.PerformTvShowSearch(searchString, includeSummaries);
-                }
-                catch { }
-            return new List<Content>();
+            return databaseAccess.PerformTvShowSearch(searchString, includeSummaries);
         }
 
         /// <summary>
-        /// Gets season/episode information from TheTvDb. Use for newly added shows only,
-        /// will replace all episode information in show.
+        /// Gets season/episode information from database.
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
         public static TvShow FullShowSeasonsUpdate(TvShow show)
         {
             return databaseAccess.FullShowSeasonsUpdate(show);
         }
+
         #endregion
     }
 }

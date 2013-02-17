@@ -43,7 +43,7 @@ namespace Meticumedia
         private ScanType lastRunScan = ScanType.Directory;
 
         /// <summary>
-        /// Last run scan type.
+        /// Currently run scan type.
         /// </summary>
         private ScanType currentScan = ScanType.Directory;
 
@@ -121,7 +121,7 @@ namespace Meticumedia
             scanWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(scanWorker_RunWorkerCompleted);
             scanWorker.DoWork += new DoWorkEventHandler(scanWorker_DoWork);
 
-            // Register to scan helper progress change (for tracking proress of running scan)
+            // Register to scan helper progress change (for tracking prgress of running scan)
             ScanHelper.ScanProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
 
             // Setup context menu
@@ -149,6 +149,7 @@ namespace Meticumedia
             // Clear item
             contextMenu.MenuItems.Clear();
 
+            // Check that item is selected
             if (lvResults.SelectedItems.Count == 0)
                 return;
 
@@ -185,10 +186,9 @@ namespace Meticumedia
                 foreach (string option in folderOptions)
                     item.MenuItems.Add(option, HandleFolderChange);
             }
-                
 
-            // Create option to modifiy action to replace existing for items
-            if(allAlreadyExists)
+            // Create options
+            if (allAlreadyExists)
                 contextMenu.MenuItems.Add("Set action to replace existing", new EventHandler(HandleReplace));
 
             contextMenu.MenuItems.Add("Add Checked to Queue", new EventHandler(HandleQueue));
@@ -261,7 +261,9 @@ namespace Meticumedia
 
         }
 
-
+        /// <summary>
+        /// Handles folder change action from context menu
+        /// </summary>
         private void HandleFolderChange(object sender, EventArgs e)
         {
             string destinationFolder = ((MenuItem)sender).Text;
@@ -1020,11 +1022,13 @@ namespace Meticumedia
         /// </summary>
         private void ScanHelper_ScanProgressChange(object sender, ProgressChangedEventArgs e)
         {
+            // Get process
             ScanHelper.ScanProcess process = (ScanHelper.ScanProcess)sender;
             string info = (string)e.UserState;
             
             this.Invoke((MethodInvoker)delegate
             {
+                // Set progress bar message based on scan type
                 switch (currentScan)
                 {
                     case ScanType.Directory:
@@ -1059,11 +1063,9 @@ namespace Meticumedia
                         break;
                 }  
                 
-                
+                // Set value
                 pbScanProgress.Value = e.ProgressPercentage;
-                pbScanProgress.Refresh();
             });
-            Application.DoEvents();
         }
 
         /// <summary>
@@ -1071,7 +1073,7 @@ namespace Meticumedia
         /// </summary>
         private void scanWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            // IF last scan was cancelled run new scan
+            // If last scan was cancelled run new scan
             if (rescanRequired)
             {
                 rescanRequired = false;
@@ -1090,6 +1092,9 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Whether to sort ascending (or descending if false)
+        /// </summary>
         private bool sortAcending = true;
 
         /// <summary>
@@ -1184,6 +1189,7 @@ namespace Meticumedia
         /// </summary>
         private void DisplayResults()
         {
+            // Update selection
             OrgItem selItem = null;
             int selIndex = -1;
             if (lvResults.SelectedIndices.Count > 0)
@@ -1192,7 +1198,7 @@ namespace Meticumedia
                 selIndex = lvResults.SelectedIndices[0];
             }
             
-
+            // Filter and sort items for display
             lock (displayItems)
             {
                 displayItems = FilterResults(scanResults);
@@ -1200,7 +1206,7 @@ namespace Meticumedia
                 OrgItem.Sort(displayItems, sortType);
             }
 
-            // Display items
+            // De-register listview events
             lvResults.SelectedIndexChanged -= new System.EventHandler(this.lvResults_SelectedIndexChanged);
             lvResults.ItemChecked -= new System.Windows.Forms.ItemCheckedEventHandler(this.lvResults_ItemChecked);
 
@@ -1228,6 +1234,7 @@ namespace Meticumedia
                 }
             }
 
+            // Re-register listview events
             lvResults.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvResults_ItemChecked);
             lvResults.SelectedIndexChanged += new System.EventHandler(this.lvResults_SelectedIndexChanged);
 
@@ -1236,7 +1243,6 @@ namespace Meticumedia
                 lvResults_ItemChecked(null, new ItemCheckedEventArgs(lvResults.Items[0]));
                 lvResults_SelectedIndexChanged(null, new ItemCheckedEventArgs(lvResults.Items[0]));
             }
-
             
             // Reset check selection
             chkMoveCopy.Text = lastRunScan == ScanType.TvMissing ? "Found" : "Move/Copy";

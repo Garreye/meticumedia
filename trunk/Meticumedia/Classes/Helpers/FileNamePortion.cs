@@ -15,12 +15,12 @@ namespace Meticumedia
     /// </summary>
     public class FileNamePortion
     {
-        #region Constants/Enums
+        #region Enum
 
         /// <summary>
-        /// Container for the portion of the file name - how it is separated from the rest of the name
+        /// Types of options that can be applied to case of portion
         /// </summary>
-        public enum ContainerTypes { None, Whitespace, Underscores, Dashes, Brackets, SquareBrackets, SquigglyBrackets, Period, Custom }
+        public enum CaseOptionType { None, LowerCase, UpperCase }
 
         #endregion
 
@@ -37,63 +37,103 @@ namespace Meticumedia
         public string Value { get; set; }
 
         /// <summary>
-        /// How portion is to be contained/separated from rest of file name
+        /// String to put in front of portion
         /// </summary>
-        public ContainerTypes Container { get; set; }
+        public string Header { get; set; }
+
+        /// <summary>
+        /// String to put at end of portion
+        /// </summary>
+        public string Footer { get; set; }
+
+        /// <summary>
+        /// Option for portion.
+        /// </summary>
+        public CaseOptionType CaseOption { get; set; }
+
+        /// <summary>
+        /// Replacement for whitespace in portion.
+        /// </summary>
+        public string Whitespace { get; set; }
 
         #endregion
 
         #region Constructors
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public FileNamePortion()
         {
             this.Type = FileWordType.None;
             this.Value = string.Empty;
-            this.Container = ContainerTypes.Whitespace;
+            this.Header = string.Empty;
+            this.Footer = " ";
+            this.CaseOption = CaseOptionType.None;
+            this.Whitespace = " ";
         }
 
+        /// <summary>
+        /// Constructor for cloning instance.
+        /// </summary>
+        /// <param name="portion">Instance to clone properties from</param>
         public FileNamePortion(FileNamePortion portion)
         {
             this.Type = portion.Type;
             this.Value = portion.Value;
-            this.Container = portion.Container;
+            this.Header = portion.Header;
+            this.Footer = portion.Footer;
+            this.CaseOption = portion.CaseOption;
+            this.Whitespace = portion.Whitespace;
         }
 
         /// <summary>
         /// Constructor specifying all properties
         /// </summary>
         /// <param name="type">The word type contained in the portion</param>
-        /// <param name="value">The string value of the portion</param>
-        /// <param name="container">How portion is to be contained/separated from rest of file name</param>
-        public FileNamePortion(FileWordType type, string value, ContainerTypes container)
+        /// <param name="value">The value for the custom string</param>
+        /// <param name="header">string to be placed before portion</header>
+        /// <param name="footer">string to be placed after portion</header>
+        /// <param name="option">Option to be applied to case of portion</param>
+        public FileNamePortion(FileWordType type, string value, string header, string footer, CaseOptionType caseOption, string whitespace)
         {
             this.Type = type;
             this.Value = value;
-            this.Container = container;
+            this.Header = header;
+            this.Footer = footer;
+            this.CaseOption = caseOption;
+            this.Whitespace = whitespace;
         }
 
         /// <summary>
         /// Constructor specifying type and value - default container used (whitespace)
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">The word type contained in the portion</param>
         /// <param name="value"></param>
         public FileNamePortion(FileWordType type, string value)
         {
             this.Type = type;
             this.Value = value;
-            this.Container = ContainerTypes.Whitespace;
+            this.Header = string.Empty;
+            this.Footer = " ";
+            this.CaseOption = CaseOptionType.None;
+            this.Whitespace = " ";
         }
 
         /// <summary>
-        /// Constructor specifying type and contained - no value assigned (can be used for all types except UserString)
+        /// Constructor specifying type and containers (header/footer) - no value assigned (can be used for all types except UserString)
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="container"></param>
-        public FileNamePortion(FileWordType type, ContainerTypes container)
+        /// <param name="type">The word type contained in the portion</param>
+        /// <param name="header">string to be placed before portion</param>
+        /// <param name="footer">string to be placed after portion</param>
+        /// <param name="caseOption">Option to be applied to case of portion</param>
+        public FileNamePortion(FileWordType type, string header, string footer, CaseOptionType caseOption)
         {
             this.Type = type;
             this.Value = string.Empty;
-            this.Container = container;
+            this.Header = header;
+            this.Footer = footer;
+            this.CaseOption = CaseOptionType.None;
         }
 
         #endregion
@@ -108,7 +148,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Type, Value, Container };
+        private enum XmlElements { Type, Value, Container, Header, Footer, CaseOption, Whitespace };
 
         /// <summary>
         /// Saves instance properties to XML file.
@@ -131,8 +171,19 @@ namespace Meticumedia
                     case XmlElements.Value:
                         value = this.Value;
                         break;
-                    case XmlElements.Container:
-                        value = this.Container.ToString();
+                    case XmlElements.Container: // deprecated, left in for loading existing formats
+                        break;
+                    case XmlElements.Header:
+                        value = this.Header.Replace(" ", "%space%");
+                        break;
+                    case XmlElements.Footer:
+                        value = this.Footer.Replace(" ", "%space%");
+                        break;
+                    case XmlElements.CaseOption:
+                        value = this.CaseOption.ToString();
+                        break;
+                    case XmlElements.Whitespace:
+                        value = this.Whitespace.Replace(" ", "%space%");
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -180,10 +231,57 @@ namespace Meticumedia
                         if (!string.IsNullOrEmpty(value))
                             this.Value = value;
                         break;
-                    case XmlElements.Container:
-                        ContainerTypes types;
-                        if (Enum.TryParse<ContainerTypes>(value, out types))
-                            this.Container = types;
+                    case XmlElements.Container: // deprecated, converts from container type to header/footer values
+                        //None, Whitespace, Underscores, Dashes, Brackets, SquareBrackets, SquigglyBrackets, Period, Custom
+                        this.Header = string.Empty;
+                        this.Footer = string.Empty;
+                        switch (value)
+                        {
+                            case "None":
+                                break;
+                            case "Whitespace":
+                                this.Footer = " ";
+                                break;
+                            case "Underscores":
+                                this.Header = "_";
+                                break;
+                            case "Dashes":
+                                this.Header = " - ";
+                                break;
+                            case "Brackets":
+                                this.Header = "(";
+                                this.Footer = ")";
+                                break;
+                            case "SquareBrackets":
+                                this.Header = "[";
+                                this.Footer = "]";
+                                break;
+                            case "SquigglyBrackets":
+                                this.Header = "{";
+                                this.Footer = "}";
+                                break;
+                            case "Period":
+                                this.Header = ".";
+                                break;
+                            case "Custom":
+                                this.Header = this.Value;
+                                this.Value = string.Empty;
+                                break;
+                        }
+                        break;
+                    case XmlElements.Header:
+                        this.Header = value.Replace("%space%", " ");
+                        break;
+                    case XmlElements.Footer:
+                        this.Footer = value.Replace("%space%", " ");
+                        break;
+                    case XmlElements.CaseOption:
+                        CaseOptionType caseOption;
+                        if (Enum.TryParse<CaseOptionType>(value, out caseOption))
+                            this.CaseOption = caseOption;
+                        break;
+                    case XmlElements.Whitespace:
+                        this.Whitespace = value.Replace("%space%", " ");
                         break;
                 }
             }

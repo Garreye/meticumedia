@@ -21,17 +21,17 @@ namespace Meticumedia
         #region Properties
 
         /// <summary>
-        /// TV Shows contained within TV folders. 
+        /// All TV Shows contained within all TV folders. 
         /// </summary>
         public static TvShowCollection Shows = new TvShowCollection();
 
         /// <summary>
-        /// Lock for accessing Movies
+        /// Lock for accessing Shows
         /// </summary>
         public static object ShowsLock = new object();        
 
         /// <summary>
-        /// List of movies contained within movie folders.
+        /// All movies contained within all movie folders.
         /// </summary>
         public static List<Movie> Movies = new List<Movie>();
 
@@ -41,14 +41,24 @@ namespace Meticumedia
         public static object MoviesLock = new object();
 
         /// <summary>
-        /// Contains log data for organization actions.
+        /// Contains log of organization actions.
         /// </summary>
         public static List<OrgItem> ActionLog = new List<OrgItem>();
 
         /// <summary>
-        /// Lock for accessing Action Log
+        /// Lock for accessing ActionLog
         /// </summary>
         public static object ActionLogLock = new object();
+
+        /// <summary>
+        /// All available TV genres
+        /// </summary>
+        public static GenreCollection AllTvGenres = new GenreCollection(GenreCollection.CollectionType.Global);
+
+        /// <summary>
+        /// All available movie genres
+        /// </summary>
+        public static GenreCollection AllMovieGenres = new GenreCollection(GenreCollection.CollectionType.Global);
 
         #endregion
 
@@ -161,7 +171,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Static event that fires when show loading completes
+        /// Static event that fires when action log loading completes
         /// </summary>
         public static event EventHandler ActionLogLoadComplete;
 
@@ -181,8 +191,8 @@ namespace Meticumedia
         /// <summary>
         /// Gets base path for storing data on user's PC. Uses application data path.
         /// </summary>
-        /// <param name="createIfNeeded"></param>
-        /// <returns></returns>
+        /// <param name="createIfNeeded">Indicates whether path should be created if it doesn't exist (data is going to be save there)</param>
+        /// <returns>Whether path exists (true even if just created)</returns>
         public static string GetBasePath(bool createIfNeeded)
         {
             string basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -217,7 +227,6 @@ namespace Meticumedia
                     using (XmlWriter xw = XmlWriter.Create(path))
                     {
                         xw.WriteStartElement(SHOWS_XML);
-
                         xw.WriteElementString("LastUpdate", Shows.LastUpdate);
 
                         foreach (TvShow show in Shows)
@@ -365,7 +374,6 @@ namespace Meticumedia
                 if (File.Exists(path))
                     lock (MoviesFileLock)
                     {
-
                         // Load XML
                         XmlTextReader reader = new XmlTextReader(path);
                         XmlDocument xmlDoc = new XmlDocument();
@@ -478,7 +486,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Remove show from lis of shows.
+        /// Remove show from list of shows.
         /// </summary>
         /// <param name="index">Index of show in list to remove</param>
         public static void RemoveShowAt(int index)
@@ -504,8 +512,9 @@ namespace Meticumedia
         /// Get TV shows that are contained in root folders matching a filter string.
         /// </summary>
         /// <param name="rootFolderFilter">The content folder filter string</param>
+        /// <param name="genreFilter">The genre filter to apply - set to "All" to disable filter</param>
         /// <returns>List of shows containted in folder</returns>
-        public static List<Content> GetShowsFromRootFolders(string rootFolderFilter, string nameFilter)
+        public static List<Content> GetShowsFromRootFolders(string rootFolderFilter, string nameFilter, string genreFilter)
         {
             // Initialize shows
             List<Content> folderShows = new List<Content>();
@@ -513,7 +522,7 @@ namespace Meticumedia
             // Add shows from all folders matching folder filter
             foreach (ContentRootFolder folder in Settings.TvFolders)
                 if (rootFolderFilter.StartsWith("All") || folder.FullPath == rootFolderFilter)
-                    GetShowsFromRootFolder(folder, folderShows, nameFilter);
+                    GetShowsFromRootFolder(folder, folderShows, nameFilter, genreFilter);
 
             // Return list
             return folderShows;
@@ -524,15 +533,17 @@ namespace Meticumedia
         /// </summary>
         /// <param name="folder">The content folder to get shows from</param>
         /// <param name="folderShows">The list to add shows to</param>
-        private static void GetShowsFromRootFolder(ContentRootFolder folder, List<Content> folderShows, string nameFilter)
+        /// <param name="genreFilter">The genre filter to apply - set to "All" to disable filter</param>
+        private static void GetShowsFromRootFolder(ContentRootFolder folder, List<Content> folderShows, string nameFilter, string genreFilter)
         {
             // Go through shows and add any shows that within the content folder and scan directory
             for (int i = 0; i < Shows.Count; i++)
             {
                 // Apply name filter
                 bool nameMatch = string.IsNullOrEmpty(nameFilter) || Shows[i].Name.ToLower().Contains(nameFilter.ToLower());
+                bool genreMatch = genreFilter.StartsWith("All") || Shows[i].Genres.Contains(genreFilter);
 
-                if (RootFolderContainsShow(Shows[i], folder) && nameMatch)
+                if (RootFolderContainsShow(Shows[i], folder) && nameMatch && genreMatch)
                 {
                     //Shows[i].UpdateMissing();
                     folderShows.Add(Shows[i]);
@@ -604,7 +615,7 @@ namespace Meticumedia
         private static bool tvUpdateCancelled = false;
 
         /// <summary>
-        /// Updates TV Root folders.
+        /// Updates shows found in TV Root folders.
         /// </summary>
         /// <param name="folder">Name of root folder to update - set to "All" to update all TV root folders</param>
         /// <param name="fastUpdate">Whether to do fast update (skips updating episode info for existing shows)</param> 
@@ -639,7 +650,7 @@ namespace Meticumedia
         private static List<int> seriesIdsToUpdate;
 
         /// <summary>
-        /// Current TV update number identifier.
+        /// Current TV update number identifier. Incremented each time update is performed, used to identify each update thread.
         /// </summary>
         private static int tvUpdateNumber = 0;
 
@@ -653,18 +664,18 @@ namespace Meticumedia
         /// <returns>Whether update was completed without cancelation</returns>
         private static bool UpdateTvRootFolder(ContentRootFolder tvFolder, bool fastUpdate, List<int> idsToUpdate)
         {
-            // Set show IDs that need updating - TODO: deprecated, this was from TheTvDb, TvRage doesn't provide this information
+            // Set show IDs that need updating - this was from TheTvDb, TvRage doesn't provide this information, but leaving this here for future update where user can select which database to use
             seriesIdsToUpdate = idsToUpdate;
 
             // Update progress
-            string progressMsg = "Updating '" + tvFolder.FullPath + "'";
+            string progressMsg = "Update of '" + tvFolder.FullPath + "' started!";
             OnTvFolderUpdateProgressChange(false, 0, progressMsg);
 
             // Initialize processing
             OrgProcessing processing = new OrgProcessing(TvUpdateProcess);
             tvUpdateNumber = processing.ProcessNumber;
 
-            // Run processing - Build of sub-dirs is recursive, so all child root folder sub-dirs will be included
+            // Run processing (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
             processing.Run(tvFolder.BuildSubDirectories(false, true), ref tvUpdateCancelled, false, false);
 
             // Remove shows that no longer exists
@@ -677,7 +688,7 @@ namespace Meticumedia
             Organization.SaveShows();
 
             // Set progress to completed
-            progressMsg = "Updating '" + tvFolder.FullPath + "' complete!";
+            progressMsg = "Update of '" + tvFolder.FullPath + "' complete!";
             OnTvFolderUpdateProgressChange(false, 0, progressMsg);
 
             // Return whether update was completed without cancelation
@@ -685,11 +696,11 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// TV update processing method for single movie path
+        /// TV update processing method (thread) for single movie path.
         /// </summary>
         /// <param name="orgPath">Organization path instance to be processed</param>
         /// <param name="pathNum">The path's number out of total being processed</param>
-        /// <param name="totalPaths">Total number of path being processed</param>
+        /// <param name="totalPaths">Total number of paths being processed</param>
         /// <param name="updateNumber">The identifier for the OrgProcessing instance</param>
         /// <param name="background">Whether processing is running as a background operation</param>
         /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
@@ -698,7 +709,7 @@ namespace Meticumedia
         private static void TvUpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete complete, ref int numItemsProcessed)
         {
             // Check for cancellation - this method is called from thread pool, so cancellation could have occured by the time this is run
-            if (tvUpdateCancelled)
+            if (tvUpdateCancelled || updateNumber != tvUpdateNumber)
                 return;
 
             // Check if folder already has a match to existing show
@@ -722,6 +733,7 @@ namespace Meticumedia
             // Check if show found
             if (showExists && showComplete)
             {
+                // Check if show need updating
                 if ((DateTime.Now - newShow.LastUpdated).TotalDays > 7 || seriesIdsToUpdate.Contains(newShow.Id))
                 {
                     TvDatabaseHelper.FullShowSeasonsUpdate(newShow);
@@ -737,38 +749,38 @@ namespace Meticumedia
                 return;
             }
 
-            // Get match
+            // Show wasn't found, match path to database
             TvShow match = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path);
 
             // Check that current process hasn't been replaced - search can be slow, so update may have been cancelled by the time it gets here
-            if (updateNumber == tvUpdateNumber)
+            if (tvUpdateCancelled || updateNumber != tvUpdateNumber)
+                return;
+
+            // Update show info
+            if (showExists && match != null)
             {
-                // Update show info
-                if (showExists && match != null)
-                {
-                    newShow.Clone(match);
-                    newShow.LastUpdated = DateTime.Now;
-                }
-                else if (match != null)
-                    newShow = match;
-                else
-                    newShow = new TvShow(string.Empty, 0, 0, orgPath.Path, orgPath.RootFolder.FullPath);
-                newShow.Found = true;
-
-                // Add show to list if new
-                if (!showExists)
-                    AddShow(newShow);
-
-                // Update progress
-                OnTvFolderUpdateProgressChange(true, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
-
-                // Call completed delegate
-                complete();
+                newShow.Clone(match);
+                newShow.LastUpdated = DateTime.Now;
             }
+            else if (match != null)
+                newShow = match;
+            else
+                newShow = new TvShow(string.Empty, 0, 0, orgPath.Path, orgPath.RootFolder.FullPath);
+            newShow.Found = true;
+
+            // Add show to list if new
+            if (!showExists)
+                AddShow(newShow);
+
+            // Update progress
+            OnTvFolderUpdateProgressChange(true, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
+
+            // Call completed delegate
+            complete();
         }
 
         /// <summary>
-        /// Cancels TV folder updating thread.
+        /// Cancels TV folder updating.
         /// </summary>
         public static void CancelTvUpdating()
         {
@@ -833,7 +845,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Remove movie from lis of movies.
+        /// Remove movie from list of movies.
         /// </summary>
         /// <param name="index">Index of show in list to remove</param>
         public static void RemoveMovieAt(int index)
@@ -852,9 +864,9 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Remove all movies that no longer exist
+        /// Remove all movies that no longer exist in a root folder
         /// </summary>
-        /// <param name="movieFolder"></param>
+        /// <param name="movieFolder">Root folder to remove missing movies from</param>
         public static void RemoveMissingMovies(ContentRootFolder movieFolder)
         {
             lock (MoviesLock)
@@ -974,7 +986,7 @@ namespace Meticumedia
         public static event EventHandler<OrgProgressChangesEventArgs> MovieFolderUpdateProgressChange;
 
         /// <summary>
-        /// Orginzation updating progress changed event arguments
+        /// Organization updating progress changed event arguments
         /// </summary>
         public class OrgProgressChangesEventArgs : ProgressChangedEventArgs
         {
@@ -1005,12 +1017,12 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Flag indicating movie folder updating should be cancelled.
+        /// Flag indicating movie folder updating has been cancelled.
         /// </summary>
         private static bool movieUpdateCancelled = false;
 
         /// <summary>
-        /// Current Movie update number identifier
+        /// Current Movie update number identifier. Incremented each time update is performed, used to identify each update thread.
         /// </summary>
         private static int movieUpdateNumber = 0;
 
@@ -1023,19 +1035,22 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Searches through a movie folder and attempts to match sub-folders names to 
-        /// a movie in online database. Recursively runs this method on sub-movie folders
+        /// Searches through a movie root folder and attempts to match sub-folders names to 
+        /// movies in online database. Recursively runs this method on child root folders
         /// of movie folder.
         /// </summary>
         /// <param name="movieFolder">Folder where movie is located</param>
         public static bool UpdateMovieFolder(ContentRootFolder movieFolder)
         {
+            // Update progress
             string progressMsg = "Updating '" + movieFolder.FullPath + "' - Gathering Files";
             OnMovieFolderUpdateProgressChange(false, 0, progressMsg);
-            
+
+            // Initialize processing
             OrgProcessing processing = new OrgProcessing(MovieUpdateProcess);
             movieUpdateNumber = processing.ProcessNumber;
-            
+
+            // Run processing (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
             processing.Run(movieFolder.BuildSubDirectories(true, false), ref movieUpdateCancelled, false, false);
 
             // Remove movies that are missing (Found property is false)
@@ -1044,18 +1059,20 @@ namespace Meticumedia
             // Save movie changes
             Organization.SaveMovies();
 
+            // Update progress
             progressMsg = "Updating '" + movieFolder.FullPath + "' complete!";
             OnMovieFolderUpdateProgressChange(false, 0, progressMsg);
 
+            // Return whether update was completed without cancelation
             return !movieUpdateCancelled;
         }
 
         /// <summary>
-        /// Movie update processing method for single movie path
+        /// Movie update processing method (thread) for single movie path
         /// </summary>
         /// <param name="orgPath">Organization path instance to be processed</param>
         /// <param name="pathNum">The path's number out of total being processed</param>
-        /// <param name="totalPaths">Total number of path being processed</param>
+        /// <param name="totalPaths">Total number of paths being processed</param>
         /// <param name="updateNumber">The identifier for the OrgProcessing instance</param>
         /// <param name="background">Whether processing is running as a background operation</param>
         /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
@@ -1064,8 +1081,8 @@ namespace Meticumedia
         private static void MovieUpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete processComplete, ref int numItemsProcessed)
         {
             // Check for cancellation - this method is called from thread pool, so cancellation could have occured by the time this is run
-            if (movieUpdateCancelled)
-               return;
+            if (movieUpdateCancelled || updateNumber != movieUpdateNumber)
+                return;
 
             // Check if movie already has a match to existing movie
             bool movieExists = false;
@@ -1102,25 +1119,26 @@ namespace Meticumedia
             Movie match = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path);
 
             // Check that current process hasn't been replaced - search can be slow, so update may have been cancelled by the time it gets here
-            if (updateNumber == movieUpdateNumber)
-            {
-                // Update movie info if needed
-                if (movieExists)
-                    newMovie.UpdateInfo(match);
-                else
-                    newMovie = match;
-                newMovie.Found = true;
+            if (movieUpdateCancelled || updateNumber != movieUpdateNumber)
+                return;
 
-                // Add movie to list if new
-                if (!movieExists)
-                    Organization.AddMovie(newMovie);
+            // Update movie info if needed
+            if (movieExists)
+                newMovie.UpdateInfo(match);
+            else
+                newMovie = match;
+            newMovie.Found = true;
 
-                // Update progress
-                OnMovieFolderUpdateProgressChange(true, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
+            // Add movie to list if new
+            if (!movieExists)
+                Organization.AddMovie(newMovie);
 
-                // Call complete delegate
-                processComplete();
-            }
+            // Update progress
+            OnMovieFolderUpdateProgressChange(true, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
+
+            // Call complete delegate
+            processComplete();
+
         }
 
         #endregion

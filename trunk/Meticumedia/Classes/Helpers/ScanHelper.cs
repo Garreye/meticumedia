@@ -13,9 +13,12 @@ using System.ComponentModel;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Helper for performing all organizational scans.
+    /// </summary>
     public static class ScanHelper
     {
-        #region Variables
+        #region Global Variables/Enums
 
         /// <summary>
         /// Indicates whether cancel was requested on scan work.
@@ -27,12 +30,17 @@ namespace Meticumedia
         /// </summary>
         private static bool scanRunning = false;
 
+        /// <summary>
+        /// Portions of scan processing that can be running
+        /// </summary>
+        public enum ScanProcess { FileCollect, Directory, Tv, Movie };
+
         #endregion
 
         #region Events
 
         /// <summary>
-        /// Static event that fires when scan progress changes
+        /// Static event for indicatong scan progress has changed
         /// </summary>
         public static event EventHandler<ProgressChangedEventArgs> ScanProgressChange;
 
@@ -46,17 +54,12 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Portion of scan processing that can be running
-        /// </summary>
-        public enum ScanProcess { FileCollect, Directory, Tv, Movie };
-
-        /// <summary>
-        /// Static event that fires when scan progress changes
+        /// Static event for indicating list of TV items in scan folders has been updated
         /// </summary>
         public static event EventHandler<EventArgs> TvScanItemsUpdate;
 
         /// <summary>
-        /// Triggers ScanProgressChange event
+        /// Triggers TvScanItemsUpdate event
         /// </summary>
         public static void OnTvScanItemsUpdate()
         {
@@ -94,12 +97,18 @@ namespace Meticumedia
         /// </summary>
         public static void UpdateScanDirTvItems()
         {
+            // Perform an update
             UpdateTvItems();
 
+            // Start timer to do update periodically
             scanDirUpdateTimer.Elapsed += new System.Timers.ElapsedEventHandler(scanDirUpdateTimer_Elapsed);
             scanDirUpdateTimer.Enabled = true;
         }
 
+        /// <summary>
+        /// Updates list of TV episodes found in scan directories. Performs a directory scan in background that
+        /// only matches to files that are categorized as TV video.
+        /// </summary>
         private static void UpdateTvItems()
         {
             // Run scan to look for TV files
@@ -110,6 +119,7 @@ namespace Meticumedia
                 foreach (TvShow show in Organization.Shows)
                     show.UpdateMissing();
 
+            // Trigger event indicating update has occured
             OnTvScanItemsUpdate();
         }
 
@@ -147,9 +157,10 @@ namespace Meticumedia
         /// <param name="files">List of file being built</param>
         private static void GetFolderFiles(OrgFolder baseFolder, string folderPath, List<OrgPath> files)
         {
-            // Get each file from the folder
+            // Get each file from the folder (try/catch here so that if user specifies as directory that needs special permission it doesn't crash)
             try
             {
+                // Get all files from current path, convert to OrgPath and add to list
                 string[] fileList = Directory.GetFiles(folderPath);
                 foreach (string file in fileList)
                     files.Add(new OrgPath(file, baseFolder.CopyFrom, baseFolder.AllowDeleting, baseFolder));
@@ -166,36 +177,73 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Search through a list of folders and compiles a builds of files and actions to perform.
+        /// Searches through a list of folders and compiles a builds of files and actions to perform.
         /// </summary>
-        /// <param name="folders"></param>
+        /// <param name="folders">List of folders to scan</param>
+        /// <param name="queuedItems">Items that are currently in the queue (user may run a scan on dir. that has files being processed, so those are skipped)</param>
+        /// <param name="tvCheck">Whether ignore all files that aren't TV video files</param>
+        /// <param name="background">Whether scan is running in background (ignores user cancellations)</param>
         /// <returns>List of actions</returns>
         public static List<OrgItem> DirectoryScan(List<OrgFolder> folders, List<OrgItem> queuedItems, bool tvCheck, bool background)
         {
-            scanRunning = true;
+            // Set scan to running
+            if (!background)
+                scanRunning = true;
 
             // Go thorough each folder and create actions for all files
             List<OrgItem> results = DirectoryScan(folders, queuedItems, 100, tvCheck, background);
 
-            scanRunning = false;
-            cancelRequested = false;
+            if (!background)
+            {
+                scanRunning = false;
+                cancelRequested = false;
+            }
 
             return results;
         }
 
+        /// <summary>
+        /// String to use as dir. if TV folders not setup yet
+        /// </summary>
         private static readonly string NO_TV_FOLDER = "NO TV FOLDERS SPECIFIED IN SETTINGS";
+
+        /// <summary>
+        /// String to use as dir. if movie folders not setup yet
+        /// </summary>
         private static readonly string NO_MOVIE_FOLDER = "NO MOVIE FOLDERS SPECIFIED IN SETTINGS";
 
-        public static bool BackgroundDirectoryScanRunning { get; private set; }
+        /// <summary>
+        /// Whether background directory scan is running
+        /// </summary>
+        private static bool backgroundDirectoryScanRunning = false;
 
+        /// <summary>
+        /// Dictionary of temporary shows that were matched to TV episode that couldn't be matched to existing shows.
+        /// Indexed by scan number (multiple scan threads could be running so need index to separate where items belong)
+        /// </summary>
         private static Dictionary<int, List<TvShow>> temporaryShows = new Dictionary<int, List<TvShow>>();
 
+        /// <summary>
+        /// Dictionary of scan results indexed by scan number (multiple scan threads could be running so need index to separate where items belong).
+        /// </summary>
         private static Dictionary<int, List<OrgItem>> scanResults = new Dictionary<int, List<OrgItem>>();
 
+        /// <summary>
+        /// Local list of items are currently queued to be processed. (Could perform scan on directory that has items in queue, so we don't want to
+        /// proposed actions for those.)
+        /// </summary>
         private static List<OrgItem> itemsInQueue;
 
+        /// <summary>
+        /// Lock for accessing scan variables that are used by multiple threads.
+        /// </summary>
         private static object directoryScanLock = new object();
 
+        /// <summary>
+        /// Percentage that directory scan represents of total scan. TV scan runs a directory scan as 
+        /// part of it to check for missing episode in scan directories, so directory is only a portion
+        /// of the scan progress.
+        /// </summary>
         private static double dirScanProgressAmount = 100;
 
         /// <summary>
@@ -204,18 +252,18 @@ namespace Meticumedia
         /// property set.
         /// </summary>
         /// <param name="folder">Folder to search through</param>
-        /// <param name="scanResults">Running list of file action itmems</param>
-        /// <param name="queuedItems">List of items that are currently in the queue</param>
+        /// <param name="queuedItems">Items currenlty in the queue (to be skipped)</param>
+        /// <param name="progressAmount">Percentage that directory scan represents of total scan</param>
+        /// <param name="tvCheck">Whether ignore all files that aren't TV video files</param>
+        /// <param name="background">Whether scan is running in background (ignores user cancellations)</param>
         private static List<OrgItem> DirectoryScan(List<OrgFolder> folders, List<OrgItem> queuedItems, double progressAmount, bool tvCheck, bool background)
         {
-            //return new List<OrgItem>();
-            
             // Only allow 1 background directory scan at a time
             if (background)
             {
-                if (BackgroundDirectoryScanRunning)
+                if (backgroundDirectoryScanRunning)
                     return new List<OrgItem>();
-                BackgroundDirectoryScanRunning = true;
+                backgroundDirectoryScanRunning = true;
             }
 
             // Update progress
@@ -253,11 +301,17 @@ namespace Meticumedia
             if (!background)
                 OnScanProgressChange(ScanProcess.Directory, string.Empty, (int)progressAmount);
             else
-                BackgroundDirectoryScanRunning = false;
+                backgroundDirectoryScanRunning = false;
 
+            // Return results
             return results;
         }
-
+        
+        /// <summary>
+        /// Add item to directory scan results list in dictionary. Variables accessed by multiple threads, so controlled.
+        /// </summary>
+        /// <param name="scanNum">The scan number to add item to</param>
+        /// <param name="item">Item to add to results list</param>
         private static void AddDirScanResult(int scanNum, OrgItem item)
         {
             lock (directoryScanLock)
@@ -265,11 +319,23 @@ namespace Meticumedia
                     scanResults[scanNum].Add(item);
         }
 
+        /// <summary>
+        /// Directory scan processing method (thread) for a single file path.
+        /// </summary>
+        /// <param name="orgPath">Organization path instance to be processed</param>
+        /// <param name="pathNum">The path's number out of total being processed</param>
+        /// <param name="totalPaths">Total number of paths being processed</param>
+        /// <param name="updateNumber">The identifier for the OrgProcessing instance</param>
+        /// <param name="background">Whether processing is running as a background operation</param>
+        /// <param name="subSearch">Whether processing is sub-search(TV only)</param>
+        /// <param name="processComplete">Delegate to be called by processing when completed</param>
+        /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
         private static void DirectoryScanProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete complete, ref int numItemsProcessed)
         {
+            // Sub-search flag is tv only check flag
             bool tvOnlyCheck = subSearch;
-            //Console.WriteLine("Directory Scan Item#" + pathNum + ": " + orgPath.Path);
 
+            // Check for cancellation
             if (cancelRequested && !background)
             {
                 complete();
@@ -306,6 +372,7 @@ namespace Meticumedia
                     break;
                 }
 
+            // If item is already in the queue, skip it
             if (alreadyQueued)
             {
                 complete();
@@ -315,7 +382,7 @@ namespace Meticumedia
             // Set whether item is for new show
             TvShow newShow = null;
 
-            // Try to match file to show
+            // Try to match file to existing show
             Dictionary<TvShow, MatchCollection> matches = new Dictionary<TvShow, MatchCollection>();
             for (int j = 0; j < Organization.Shows.Count; j++)
             {
@@ -325,6 +392,8 @@ namespace Meticumedia
                     matches.Add(Organization.Shows[j], match);
                 }
             }
+
+            // Try to match to temporary show
             lock(directoryScanLock)
                 foreach (TvShow show in temporaryShows[updateNumber])
                 {
@@ -338,6 +407,7 @@ namespace Meticumedia
             // Add appropriate action based on file category
             switch (fileCat)
             {
+                // TV item
                 case FileHelper.FileCategory.TvVideo:
                     // Check if sample!
                     if (orgPath.Path.ToLower().Contains("sample"))
@@ -375,32 +445,35 @@ namespace Meticumedia
                             }
                     }
 
+                    // Episode not matched to a TV show, search database!
                     if (bestMatch == null && !tvOnlyCheck)
                     {
-                        // Search for show from file info!
+                        // Setup search string
                         string showFile = Path.GetFileNameWithoutExtension(orgPath.Path);
 
+                        // Setup path for resulting content
                         ContentRootFolder defaultTvFolder;
                         string path = NO_TV_FOLDER;
                         if (Settings.GetDefaultTvFolder(out defaultTvFolder))
                             path = defaultTvFolder.FullPath;
 
+                        // Perform search for matching TV show
                         bestMatch = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty);
                         bestMatch.RootFolder = Path.Combine(path, bestMatch.Name);
                         TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
+
+                        // Save show in temporary shows list (in case there are more files that may match to it during scan)
                         lock (directoryScanLock)
                             if (!temporaryShows[updateNumber].Contains(bestMatch))
                                 temporaryShows[updateNumber].Add(bestMatch);
                         newShow = bestMatch;
                     }
 
+                    // Episode has been matched to a TV show
                     if (bestMatch != null)
                     {
                         // Try to get episode information from file
                         int seasonNum, episodeNum1, episodeNum2;
-
-                        // TODO: remove show name from file name string first (to prevent ep info to matching to numbers in show name (e.g. 666 park avenue))
-
                         if (FileHelper.GetEpisodeInfo(orgPath.Path, bestMatch.Name, out seasonNum, out episodeNum1, out episodeNum2))
                         {
                             // Try to get the episode from the show
@@ -423,11 +496,12 @@ namespace Meticumedia
 
                                     action = OrgAction.AlreadyExists;
                                 }
+
+                                // Build action and add it to results
                                 string destination = bestMatch.BuildFilePath(episode1, episode2, Path.GetExtension(orgPath.Path));
                                 OrgItem newItem = new OrgItem(action, orgPath.Path, destination, episode1, episode2, fileCat, orgPath.OrgFolder, newShow);
                                 if (destination.StartsWith(NO_TV_FOLDER))
                                     newItem.Action = OrgAction.NoRootFolder;
-
                                 if (newItem.Action == OrgAction.AlreadyExists || newItem.Action == OrgAction.NoRootFolder)
                                     newItem.Check = System.Windows.Forms.CheckState.Unchecked;
                                 else
@@ -453,23 +527,29 @@ namespace Meticumedia
                     }
 
                     break;
+
+                // Movie item
                 case FileHelper.FileCategory.NonTvVideo:
+                    // Create action
                     OrgItem item;
                     CreateMovieAction(orgPath, out item);
 
+                    // If delete action created (for sample file)
                     if (item.Action == OrgAction.Delete)
                         AddDeleteAction(updateNumber, orgPath, fileCat);
                     else
                         AddDirScanResult(updateNumber, item);
-
                     break;
 
+                // Trash
                 case FileHelper.FileCategory.Trash:
                     AddDeleteAction(updateNumber, orgPath, fileCat);
                     break;
+                // Ignore
                 case FileHelper.FileCategory.Ignored:
                     AddDirScanResult(updateNumber, new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder));
                     break;
+                // Unknown
                 default:
                     AddDirScanResult(updateNumber, new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder));
                     break;
@@ -499,6 +579,7 @@ namespace Meticumedia
             // Try to match file to movie
             string search = Path.GetFileNameWithoutExtension(file.Path);
 
+            // Get root folder
             ContentRootFolder defaultMovieFolder;
             string path;
             if (Settings.GetDefaultMovieFolder(out defaultMovieFolder))
@@ -509,6 +590,7 @@ namespace Meticumedia
                 item.Action = OrgAction.NoRootFolder;
             }
 
+            // Search for match to movie
             Movie searchResult = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty);
 
             // Add closest match item
@@ -559,19 +641,21 @@ namespace Meticumedia
         /// Run through all TV shows all looks for episodes that may need to be renamed and for missing episodes.
         /// For missing episodes it attempts to match them to files from the search directories.
         /// </summary>
-        /// <param name="shows"></param>
-        /// <param name="queuedItems"></param>
+        /// <param name="shows">Shows to scan</param>
+        /// <param name="queuedItems">Items currently in queue (to be skipped)</param>
         /// <returns></returns>
         public static List<OrgItem> RunTvCheckScan(List<TvShow> shows, List<OrgItem> queuedItems)
         {
+            // Set running flag
             scanRunning = true;
             
-            // Do directory check on all directories
+            // Do directory check on all directories (to look for missing episodes)
             List<OrgItem> directoryItems =  DirectoryScan(Settings.ScanDirectories, queuedItems, 70, true, false);
 
             // Initialiaze scan items
             List<OrgItem> missingCheckItem = new List<OrgItem>();
 
+            // Initialize item numbers
             int number = 0;
 
             // Go through each show
@@ -591,12 +675,15 @@ namespace Meticumedia
                     
                     foreach (TvEpisode ep in season.Episodes)
                     {
+                        // Check for cancellation
                         if (cancelRequested)
                             break;
 
+                        // Skipped ignored episodes
                         if (ep.Ignored)
                             continue;
 
+                        // Init found flag
                         bool found = false;
 
                         // Missing check
@@ -674,6 +761,8 @@ namespace Meticumedia
                                 continue;
                         }
 
+                        // TODO: loose file check - do directory scan on TV root folder with recursion off..
+
                         // Add empty item for missing
                         if (!found && ep.Aired && shows[i].DoMissingCheck)
                         {
@@ -697,11 +786,14 @@ namespace Meticumedia
                 }
             }
 
+            // Update progress
             OnScanProgressChange(ScanProcess.Tv, string.Empty, 100);
 
+            // Clear flags
             scanRunning = false;
             cancelRequested = false;
 
+            // Return results
             return missingCheckItem;
         }
 
@@ -710,6 +802,11 @@ namespace Meticumedia
 
         #region Movie Rename Check
 
+        /// <summary>
+        /// Get unknown files (files that are not in a content folder) from list of movie root folders .
+        /// </summary>
+        /// <param name="folders">Root folders to look for files in</param>
+        /// <returns>List of unknown files</returns>
         private static List<OrgPath> GetUnknownFiles(List<ContentRootFolder> folders)
         {
             // Initialize file list
@@ -723,6 +820,11 @@ namespace Meticumedia
             return files;
         }
 
+        /// <summary>
+        /// Recursively gets unknown files (files that are not in a content folder) from a movie root folder and its children.
+        /// </summary>
+        /// <param name="folder">Root folders to look for files in</param>
+        /// <param name="files">List of files found to add to</param>
         private static void GetUnknownFiles(ContentRootFolder folder, List<OrgPath> files)
         {  
             // Only get files from folders that allow organization
@@ -733,12 +835,16 @@ namespace Meticumedia
                     files.Add(new OrgPath(file, true, folder.AllowOrganizing, folder, null));
             }
 
-
             // Recursion on sub-content folders
             foreach (ContentRootFolder subfolder in folder.ChildFolders)
                 GetUnknownFiles(subfolder, files);
         }
 
+        /// <summary>
+        /// Get files from  that are known to belong to a movie (in content folder) from list of root folders
+        /// </summary>
+        /// <param name="folders">Root folders to look for files in</param>
+        /// <returns>List of known files</returns>
         private static List<OrgPath> GetKnownFiles(List<ContentRootFolder> folders)
         {
             // Initialize file list
@@ -752,6 +858,14 @@ namespace Meticumedia
             return files;
         }
 
+        /// <summary>
+        /// Recursively gets known files (files that are in a content folder) from a movie root folder and its children.
+        /// </summary>
+        /// <param name="folder">Root folders to look for files in</param>
+        /// <param name="folderPath">Current folder path</param>
+        /// <param name="files">List of files to add to</param>
+        /// <param name="depth">Current depth from root folder</param>
+        /// <param name="movie">Movie current path belongs to</param>
         private static void GetKnownFiles(ContentRootFolder folder, string folderPath, List<OrgPath> files, int depth, Movie movie)
         {
             // Match to movie
@@ -828,15 +942,17 @@ namespace Meticumedia
         /// <param name="queuedItems">Items already in the queue</param>
         private static void MovieFolderScan(List<ContentRootFolder> folders, List<OrgItem> scanResults, List<OrgItem> queuedItems)
         {
-            // Get files from folder
+            // Get unknown files (files not in content folder) from root folders
             OnScanProgressChange(ScanProcess.FileCollect, string.Empty, 0);
             List<OrgPath> files = GetUnknownFiles(folders);
 
+            // Initialize item numbering
             int number = 0;
 
-            // Go through files and try to match video files to a movie
+            // Go through unknwon files and try to match each file to a movie
             for (int i = 0; i < files.Count; i++)
             {
+                // Check for cancellation
                 if (cancelRequested)
                     break;
                 
@@ -883,10 +999,13 @@ namespace Meticumedia
                 scanResults.Add(item);
             }
 
+            // Get knwon movie files (files from within content folders)
             files = GetKnownFiles(folders);
 
+            // Go through each known file and check if renaming is needed
             for (int i = 0; i < files.Count; i++)
             {
+                // Check for cancellation
                 if (cancelRequested)
                     break;
 
@@ -945,6 +1064,7 @@ namespace Meticumedia
                 }
             }
 
+            // Update progress
             OnScanProgressChange(ScanProcess.Movie, string.Empty, 100);
         }
 

@@ -29,17 +29,17 @@ namespace Meticumedia
         public static FileNameFormat TvFileFormat = new FileNameFormat(false);
 
         /// <summary>
-        /// Format for renaming Movie files
+        /// Format for renaming movie files
         /// </summary>
         public static FileNameFormat MovieFileFormat = new FileNameFormat(true);
 
         /// <summary>
-        /// List of folders containing movies
+        /// List of root folders containing movies
         /// </summary>
         public static List<ContentRootFolder> MovieFolders = new List<ContentRootFolder>();
 
         /// <summary>
-        /// List of folders containing TV episodes
+        /// List of root folders containing TV shows
         /// </summary>
         public static List<ContentRootFolder> TvFolders = new List<ContentRootFolder>();
 
@@ -53,8 +53,13 @@ namespace Meticumedia
         /// </summary>
         public static List<string> DeleteFileTypes = new List<string>();
 
+        // <summary>
+        /// File types to ignored during scan
+        /// </summary>
+        public static List<string> IgnoreFileTypes = new List<string>();
+
         /// <summary>
-        /// TV database selection
+        /// TV database selection - TODO: currently fixed, to be selectable by user!
         /// </summary>
         public static TvDatabaseHelper.TvDataBaseSelection TvDatabaseSelection = TvDatabaseHelper.TvDataBaseSelection.TvRage;
 
@@ -105,6 +110,16 @@ namespace Meticumedia
             ".png",
             ".txt",
             ".srs"
+        };
+
+
+        /// <summary>
+        /// Default set of file to be ignored from scan directory
+        /// </summary>
+        private static string[] DefaultIgnoreFileTypes = new string[]
+        {
+            ".mp3",
+            ".flac"
         };
 
         #endregion
@@ -226,12 +241,16 @@ namespace Meticumedia
         /// <summary>
         /// Properties that are elements.
         /// </summary>
-        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes };
+        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes };
 
         /// <summary>
         /// Root element for setting XML.
         /// </summary>
         private static readonly string ROOT_XML = "Settings";
+
+        /// <summary>
+        /// Name for file type XML element.
+        /// </summary>
         private static readonly string FILE_TYPE_XML = "FileType";
 
         /// <summary>
@@ -277,6 +296,10 @@ namespace Meticumedia
                             foreach (string fileType in DeleteFileTypes)
                                 xw.WriteElementString(FILE_TYPE_XML, fileType);
                             break;
+                        case XmlElements.IgnoreFileTypes:
+                            foreach (string fileType in IgnoreFileTypes)
+                                xw.WriteElementString(FILE_TYPE_XML, fileType);
+                            break;
                         default:
                             throw new Exception("Unkonw element!");
                     }
@@ -299,6 +322,7 @@ namespace Meticumedia
             // Initialize file types to defautls
             VideoFileTypes = DefaultVideoFileTypes.ToList<string>();
             DeleteFileTypes = DefaultDeleteFileTypes.ToList<string>();
+            IgnoreFileTypes = DefaultIgnoreFileTypes.ToList<string>();
 
             // Load settings XML
             string path = Path.Combine(basePath, ROOT_XML + ".xml");
@@ -360,6 +384,11 @@ namespace Meticumedia
                             DeleteFileTypes = new List<string>();
                             foreach (XmlNode fielTypeNode in propNode.ChildNodes)
                                 DeleteFileTypes.Add(fielTypeNode.InnerText);
+                            break;
+                        case XmlElements.IgnoreFileTypes:
+                            IgnoreFileTypes = new List<string>();
+                            foreach (XmlNode fielTypeNode in propNode.ChildNodes)
+                                IgnoreFileTypes.Add(fielTypeNode.InnerText);
                             break;
                     }
                 }

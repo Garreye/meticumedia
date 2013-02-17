@@ -67,6 +67,11 @@ namespace Meticumedia.Controls
         /// </summary>
         private bool disableShowChangedEvent = false;
 
+        /// <summary>
+        /// Disables updating show from control - to allow control to be loaded from show
+        /// </summary>
+        private bool disableUpdating = false;
+
         #endregion
 
         #region Constructor
@@ -132,6 +137,24 @@ namespace Meticumedia.Controls
             OnShowChanged();
         }
 
+        /// <summary>
+        /// Updates show from control
+        /// </summary>
+        private void UpdateShow()
+        {
+            if (disableUpdating)
+                return;
+
+            this.show.Name = txtName.Text;
+            this.show.Overview = txtDescr.Text;
+            this.show.Date = new DateTime((int)numYear.Value, this.show.Date.Month, this.show.Date.Day);
+            this.show.IncludeInScan = chkInlcudeScan.Checked;
+            chkDoRenaming.Enabled = chkInlcudeScan.Checked;
+            chkDoMissing.Enabled = chkInlcudeScan.Checked;
+            this.show.DoRenaming = chkDoRenaming.Checked && chkDoRenaming.Enabled;
+            this.show.DoMissingCheck = chkDoMissing.Checked && chkDoMissing.Enabled;
+        }
+
         #endregion
 
         #region Form Event Handlers
@@ -149,6 +172,7 @@ namespace Meticumedia.Controls
                 this.show.Id = cntrlSearch.Results.Id;
                 this.show.Overview = cntrlSearch.Results.Overview;
                 this.show.Date = cntrlSearch.Results.Date;
+                this.show.Genres = cntrlSearch.Results.Genres;
                 TvDatabaseHelper.FullShowSeasonsUpdate(this.show);
                 disableUpdating = false;
             }
@@ -226,6 +250,11 @@ namespace Meticumedia.Controls
             OnShowChanged();
         }
 
+        /// <summary>
+        /// Change to do missing checkbox are mirrored to show instance.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void chkDoMissing_CheckedChanged(object sender, EventArgs e)
         {
             UpdateShow();
@@ -246,22 +275,7 @@ namespace Meticumedia.Controls
         
         #endregion
 
-        private bool disableUpdating = false;
 
-        private void UpdateShow()
-        {
-            if (disableUpdating)
-                return;
-
-            this.show.Name = txtName.Text;
-            this.show.Overview = txtDescr.Text;
-            this.show.Date = new DateTime((int)numYear.Value, this.show.Date.Month, this.show.Date.Day);
-            this.show.IncludeInScan = chkInlcudeScan.Checked;
-            chkDoRenaming.Enabled = chkInlcudeScan.Checked;
-            chkDoMissing.Enabled = chkInlcudeScan.Checked;
-            this.show.DoRenaming = chkDoRenaming.Checked && chkDoRenaming.Enabled;
-            this.show.DoMissingCheck = chkDoMissing.Checked && chkDoMissing.Enabled;
-        }
 
     }
 }

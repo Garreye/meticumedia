@@ -47,6 +47,11 @@ namespace Meticumedia
             this.MultiPart = false;
         }
 
+
+        /// <summary>
+        /// Constructor for cloning instance.
+        /// </summary>
+        /// <param name="file">Instance to clone</param>
         public TvFile(TvFile file)
         {
             this.FilePath = file.FilePath;

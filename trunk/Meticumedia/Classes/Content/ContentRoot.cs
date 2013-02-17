@@ -36,12 +36,12 @@ namespace Meticumedia
 
         /// <summary>
         /// Specifies whether this is the default folder to move/copy 
-        /// movies to during a scan
+        /// content to during a scan
         /// </summary>
         public bool Default { get; set; }
 
         /// <summary>
-        /// List of folders within this folder that contains movies.
+        /// List of child root folders.
         /// </summary>
         public List<ContentRootFolder> ChildFolders { get; set; }
 
@@ -96,7 +96,7 @@ namespace Meticumedia
         /// <summary>
         /// Return path as string.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Path to folder</returns>
         public override string ToString()
         {
             return this.FullPath;
@@ -105,7 +105,7 @@ namespace Meticumedia
         /// <summary>
         /// Build list of sub-directories, with options to clear found flags for content contained in folder if desired.
         /// </summary>
-        /// <param name="clearMoviesFound">Enables clearing of found flag on movie in this folder</param>
+        /// <param name="clearMoviesFound">Enables clearing of found flag on movies in this folder</param>
         /// <param name="clearShowsFound">Enables clearing of found flag on shows in this folder</param>
         /// <returns>List of sub-directories in this content folder</returns>
         public List<OrgPath> BuildSubDirectories(bool clearMoviesFound, bool clearShowsFound)
@@ -173,7 +173,7 @@ namespace Meticumedia
         #region XML
 
         /// <summary>
-        /// Properties of this clasee that saved/loaded in XML elements
+        /// Properties of this class that are saved/loaded in XML elements
         /// </summary>
         private enum XmlElements { SubPath, FullPath, AllowOrganizing, Default, ChildFolders };
 
@@ -188,7 +188,7 @@ namespace Meticumedia
         /// <param name="xw">The XML writer</param>
         public void Save(XmlWriter xw)
         {
-            // Start season element
+            // Start instace element
             xw.WriteStartElement(ROOT_XML);
 
             // Save each property

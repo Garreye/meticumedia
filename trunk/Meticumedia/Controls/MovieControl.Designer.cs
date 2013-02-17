@@ -63,8 +63,8 @@ namespace Meticumedia
             // 
             // cmbFolders
             // 
-            this.cmbFolders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbFolders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbFolders.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbFolders.FormattingEnabled = true;
             this.cmbFolders.Location = new System.Drawing.Point(77, 3);
@@ -109,8 +109,8 @@ namespace Meticumedia
             // 
             // cmbGenre
             // 
-            this.cmbGenre.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbGenre.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbGenre.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbGenre.FormattingEnabled = true;
             this.cmbGenre.Location = new System.Drawing.Point(77, 30);
@@ -238,8 +238,8 @@ namespace Meticumedia
             // 
             // txtNameFilter
             // 
-            this.txtNameFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtNameFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNameFilter.Location = new System.Drawing.Point(76, 85);
             this.txtNameFilter.Name = "txtNameFilter";
             this.txtNameFilter.Size = new System.Drawing.Size(551, 20);
@@ -257,9 +257,9 @@ namespace Meticumedia
             // 
             // lvMovieDirectory
             // 
-            this.lvMovieDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvMovieDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lvMovieDirectory.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colPath,
             this.colName,
@@ -267,7 +267,6 @@ namespace Meticumedia
             this.colGenre,
             this.colOverview});
             this.lvMovieDirectory.Contents = null;
-            this.lvMovieDirectory.DisplayGenres = false;
             this.lvMovieDirectory.FullRowSelect = true;
             this.lvMovieDirectory.HideWatched = false;
             this.lvMovieDirectory.Location = new System.Drawing.Point(6, 134);
@@ -290,7 +289,7 @@ namespace Meticumedia
             // colYear
             // 
             this.colYear.Text = "Year";
-            this.colYear.Width = 91;
+            this.colYear.Width = 50;
             // 
             // colGenre
             // 
@@ -328,8 +327,8 @@ namespace Meticumedia
             // 
             // pbUpdating
             // 
-            this.pbUpdating.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbUpdating.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pbUpdating.Location = new System.Drawing.Point(5, 134);
             this.pbUpdating.Message = "Updating Folders";
             this.pbUpdating.Name = "pbUpdating";

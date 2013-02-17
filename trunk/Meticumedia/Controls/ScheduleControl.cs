@@ -42,22 +42,12 @@ namespace Meticumedia
             SetLegend();
             TvEpisode.BackColourChanged += new EventHandler(TvEpisode_BackColourChanged);
 
+            // Register updates to TV items in scan folders
             ScanHelper.TvScanItemsUpdate += ScanHelper_TvScanItemsUpdate;
 
             // Setup context menu for listview
             lvResults.ContextMenu = contextMenu;
             contextMenu.Popup += new EventHandler(contextMenu_Popup);
-        }
-
-        void ScanHelper_TvScanItemsUpdate(object sender, EventArgs e)
-        {
-            if (!this.IsHandleCreated)
-                return;
-
-            this.Invoke((MethodInvoker)delegate
-            {
-                UpdateResults();
-            });
         }
 
         #endregion
@@ -69,6 +59,9 @@ namespace Meticumedia
         /// </summary>
         private ContextMenu contextMenu = new ContextMenu();
 
+        /// <summary>
+        /// Build context menu on right-click
+        /// </summary>
         void contextMenu_Popup(object sender, EventArgs e)
         {
             BuildContextMenu();
@@ -92,11 +85,19 @@ namespace Meticumedia
             contextMenu.MenuItems.Add("Turn off include in scan for show", new EventHandler(HandleTurnOffIncludeInScan));
         }
 
+        /// <summary>
+        /// Handle play selection in context menu
+        /// </summary>
         private void HandlePlay(object sender, EventArgs e)
         {
             PlaySelectedEpisode();
         }
 
+        /// <summary>
+        /// Handle copy to clipboard selection in context menu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void HandleCopyToClipboard(object sender, EventArgs e)
         {
             CopyEpInfoToClipboard();
@@ -127,6 +128,20 @@ namespace Meticumedia
         #endregion
 
         #region Event Handling
+
+        /// <summary>
+        /// Handle updates to TV items in scan folders event
+        /// </summary>
+        void ScanHelper_TvScanItemsUpdate(object sender, EventArgs e)
+        {
+            if (!this.IsHandleCreated)
+                return;
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                UpdateResults();
+            });
+        }
 
         /// <summary>
         /// Changes to episode colours mirrored to legend
@@ -210,6 +225,9 @@ namespace Meticumedia
                 PlaySelectedEpisode();
         }
 
+        /// <summary>
+        /// Copy selected episode show name and episode number to clipboard
+        /// </summary>
         private void CopyEpInfoToClipboard()
         {
             TvEpisode ep;
@@ -220,6 +238,11 @@ namespace Meticumedia
             Clipboard.SetText(FileHelper.SimplifyFileName(epInfo));
         }
 
+        /// <summary>
+        /// Get selected episode from list
+        /// </summary>
+        /// <param name="ep">Selected episode</param>
+        /// <returns>Whether an episode is selected</returns>
         private bool GetSelectedEpisode(out TvEpisode ep)
         {
             ep = null;
@@ -232,10 +255,6 @@ namespace Meticumedia
             ep = results[lvResults.SelectedIndices[0]];
             return true;
         }
-
-        #endregion
-
-        #region Method
 
         /// <summary>
         /// Play episode that is selected
@@ -286,10 +305,6 @@ namespace Meticumedia
                 cmbShows.SelectedIndex = 0;
         }
 
-        #endregion
-
-        #region Results
-
         /// <summary>
         /// Updates and display resulting TV episodes
         /// </summary>
@@ -324,6 +339,9 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Result currently displayed in listview
+        /// </summary>
         List<TvEpisode> results;
 
         /// <summary>

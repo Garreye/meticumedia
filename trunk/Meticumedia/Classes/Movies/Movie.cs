@@ -55,7 +55,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Constructor for creating instance from inherited class
+        /// Constructor for creating instance from base class
         /// </summary>
         /// <param name="content"></param>
         public Movie(Content content) : this()
@@ -79,7 +79,7 @@ namespace Meticumedia
             this.Date = movie.Date;
             this.Found = movie.Found;
             this.Id = movie.Id;
-            this.Genres = new List<string>();
+            this.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
             if (movie.Genres != null)
                 foreach (string genre in movie.Genres)
                     this.Genres.Add(genre);
@@ -105,9 +105,9 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Build file path with no folder changes
+        /// Build file path with no folder changes (only filename changes)
         /// </summary>
-        /// <param name="fullPath"></param>
+        /// <param name="fullPath">Path to start with</param>
         /// <returns></returns>
         public string BuildFilePathNoFolderChanges(string fullPath)
         {
@@ -117,7 +117,7 @@ namespace Meticumedia
         /// <summary>
         /// Build path for movie folder
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Built path</returns>
         public override string BuildFolderPath()
         {
             if (string.IsNullOrEmpty(this.RootFolder))
