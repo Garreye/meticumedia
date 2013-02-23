@@ -23,22 +23,12 @@ namespace Meticumedia
         /// <summary>
         /// All TV Shows contained within all TV folders. 
         /// </summary>
-        public static TvShowCollection Shows = new TvShowCollection();
-
-        /// <summary>
-        /// Lock for accessing Shows
-        /// </summary>
-        public static object ShowsLock = new object();        
+        public static ContentCollection Shows = new ContentCollection(ContentType.TvShow);     
 
         /// <summary>
         /// All movies contained within all movie folders.
         /// </summary>
-        public static List<Movie> Movies = new List<Movie>();
-
-        /// <summary>
-        /// Lock for accessing Movies
-        /// </summary>
-        public static object MoviesLock = new object();
+        public static ContentCollection Movies = new ContentCollection(ContentType.Movie);
 
         /// <summary>
         /// Contains log of organization actions.
@@ -53,12 +43,12 @@ namespace Meticumedia
         /// <summary>
         /// All available TV genres
         /// </summary>
-        public static GenreCollection AllTvGenres = new GenreCollection(GenreCollection.CollectionType.Global);
+        public static GenreCollection AllTvGenres = new GenreCollection(GenreCollection.CollectionType.Global | GenreCollection.CollectionType.Tv);
 
         /// <summary>
         /// All available movie genres
         /// </summary>
-        public static GenreCollection AllMovieGenres = new GenreCollection(GenreCollection.CollectionType.Global);
+        public static GenreCollection AllMovieGenres = new GenreCollection(GenreCollection.CollectionType.Global | GenreCollection.CollectionType.Movie);
 
         #endregion
 
@@ -67,29 +57,9 @@ namespace Meticumedia
         #region Variables
 
         /// <summary>
-        /// Lock for accessing show save file
-        /// </summary>
-        public static object ShowsFileLock = new object();
-
-        /// <summary>
-        /// Lock for accessing movie save file
-        /// </summary>
-        public static object MoviesFileLock = new object();
-
-        /// <summary>
         /// Lock for accessing log save file
         /// </summary>
         public static object ActionLogFileLock = new object();
-
-        /// <summary>
-        /// TV shows XML root element string
-        /// </summary>
-        private static readonly string SHOWS_XML = "TvShows";
-
-        /// <summary>
-        /// Movies XML root element string
-        /// </summary>
-        private static readonly string MOVIES_XML = "Movies";
 
         /// <summary>
         /// Action Log XML root element string
@@ -99,62 +69,6 @@ namespace Meticumedia
         #endregion
 
         #region Events
-
-        /// <summary>
-        /// Static event that fires when show loading progress changes
-        /// </summary>
-        public static event EventHandler<ProgressChangedEventArgs> TvShowLoadProgressChange;
-
-        /// <summary>
-        /// Triggers TvShowLoadProgressChange event
-        /// </summary>
-        public static void OnTvShowLoadProgressChange(int percent)
-        {
-            if (TvShowLoadProgressChange != null)
-                TvShowLoadProgressChange(null, new ProgressChangedEventArgs(percent, null));
-        }
-
-        /// <summary>
-        /// Static event that fires when show loading completes
-        /// </summary>
-        public static event EventHandler TvShowLoadComplete;
-
-        /// <summary>
-        /// Triggers TvShowLoadComplete event
-        /// </summary>
-        public static void OnTvShowLoadComplete()
-        {
-            if (TvShowLoadComplete != null)
-                TvShowLoadComplete(null, new EventArgs());
-        }
-
-        /// <summary>
-        /// Static event that fires when movie loading progress changes
-        /// </summary>
-        public static event EventHandler<ProgressChangedEventArgs> MovieLoadProgressChange;
-
-        /// <summary>
-        /// Triggers MovieLoadProgressChange event
-        /// </summary>
-        public static void OnMovieLoadProgressChange(int percent)
-        {
-            if (MovieLoadProgressChange != null)
-                MovieLoadProgressChange(null, new ProgressChangedEventArgs(percent, null));
-        }
-
-        /// <summary>
-        /// Static event that fires when show loading completes
-        /// </summary>
-        public static event EventHandler MovieLoadComplete;
-
-        /// <summary>
-        /// Triggers MovieLoadComplete event
-        /// </summary>
-        public static void OnMovieLoadComplete()
-        {
-            if (MovieLoadComplete != null)
-                MovieLoadComplete(null, new EventArgs());
-        }
 
         /// <summary>
         /// Static event that fires when action log loading progress changes
@@ -209,51 +123,9 @@ namespace Meticumedia
         /// </summary>
         public static void Save()
         {
-            SaveShows();
-            SaveMovies();
+            Shows.Save();
+            Movies.Save();
             SaveLog();
-        }
-
-        /// <summary>
-        /// Saves shows to XML
-        /// </summary>
-        public static void SaveShows()
-        {
-            // TV Shows
-            string path = Path.Combine(GetBasePath(true), SHOWS_XML + ".xml");
-            lock (ShowsLock)
-            {
-                lock (ShowsFileLock)
-                    using (XmlWriter xw = XmlWriter.Create(path))
-                    {
-                        xw.WriteStartElement(SHOWS_XML);
-                        xw.WriteElementString("LastUpdate", Shows.LastUpdate);
-
-                        foreach (TvShow show in Shows)
-                            show.Save(xw);
-                        xw.WriteEndElement();
-                    }
-            }
-        }
-
-        /// <summary>
-        /// Saves movies to XML
-        /// </summary>
-        public static void SaveMovies()
-        {
-            // Movies
-            string path = Path.Combine(GetBasePath(true), MOVIES_XML + ".xml");
-            lock (MoviesLock)
-            {
-                lock (MoviesFileLock)
-                    using (XmlWriter xw = XmlWriter.Create(path))
-                    {
-                        xw.WriteStartElement(MOVIES_XML);
-                        foreach (Movie movie in Movies)
-                            movie.Save(xw);
-                        xw.WriteEndElement();
-                    }
-            }
         }
 
         /// <summary>
@@ -311,46 +183,7 @@ namespace Meticumedia
         /// </summary>
         private static void LoadShows(object sender, DoWorkEventArgs e)
         {
-            try
-            {
-                string path = Path.Combine(GetBasePath(false), SHOWS_XML + ".xml");
-                if (File.Exists(path))
-                    lock (ShowsFileLock)
-                    {
-
-                        // Load XML
-                        XmlTextReader reader = new XmlTextReader(path);
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(reader);
-
-                        // Load show data
-                        TvShowCollection loadShows = new TvShowCollection();
-                        XmlNodeList showNodes = xmlDoc.DocumentElement.ChildNodes;
-                        for (int i = 0; i < showNodes.Count; i++)
-                        {
-                            OnTvShowLoadProgressChange((int)(((double)i / showNodes.Count) * 100));
-
-
-                            if (showNodes[i].Name == "LastUpdate")
-                                loadShows.LastUpdate = showNodes[i].InnerText;
-                            else
-                            {
-                                TvShow show = new TvShow();
-                                if (show.Load(showNodes[i]))
-                                    loadShows.Add(show);
-                            }
-                        }
-
-                        reader.Close();
-                        OnTvShowLoadProgressChange(100);
-                        lock (ShowsLock)
-                            Shows = loadShows;
-                    }
-            }
-            catch { }
-
-            ScanHelper.UpdateScanDirTvItems();
-            OnTvShowLoadComplete();
+            Shows.Load();
         }
 
         /// <summary>
@@ -368,39 +201,7 @@ namespace Meticumedia
         /// </summary>
         private static void LoadMovies(object sender, DoWorkEventArgs e)
         {
-            try
-            {
-                string path = Path.Combine(GetBasePath(false), MOVIES_XML + ".xml");
-                if (File.Exists(path))
-                    lock (MoviesFileLock)
-                    {
-                        // Load XML
-                        XmlTextReader reader = new XmlTextReader(path);
-                        XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(reader);
-
-                        // Load movies data
-                        List<Movie> loadMovies = new List<Movie>();
-                        XmlNodeList movieNodes = xmlDoc.DocumentElement.ChildNodes;
-                        for (int i = 0; i < movieNodes.Count; i++)
-                        {
-                            OnMovieLoadProgressChange((int)(((double)i / movieNodes.Count) * 100));
-
-                            Movie movie = new Movie();
-                            if (movie.Load(movieNodes[i]))
-                                loadMovies.Add(movie);
-                        }
-
-                        reader.Close();
-                        OnMovieLoadProgressChange(100);
-
-                        lock (MoviesLock)
-                            Movies = loadMovies;
-                    }
-            }
-            catch { }
-
-            OnMovieLoadComplete();
+            Movies.Load();
         }
 
         /// <summary>
@@ -457,337 +258,194 @@ namespace Meticumedia
 
         #endregion
 
-        #region TV Methods
+        #region Root Folder Updating
 
-        #region Add, Remove, Sort
-
-        /// <summary>
-        /// Add show to show list
-        /// </summary>
-        /// <param name="newShow">Show instance to add to list</param>
-        public static void AddShow(TvShow newShow)
-        {
-            // Add show to list and sort it
-            lock (ShowsLock)
-            {
-                Shows.Add(newShow);
-                SaveShows();
-            }
-        }
+        #region Events
 
         /// <summary>
-        /// Removes a show from list of shows.
+        /// Event indicating there are items to be sent to the queue
         /// </summary>
-        /// <param name="show">Show instance to remove</param>
-        public static void RemoveShow(TvShow show)
-        {
-            lock (ShowsLock)
-                Shows.Remove(show);
-        }
+        public static event EventHandler UpdateCancelled;
 
         /// <summary>
-        /// Remove show from list of shows.
+        /// Triggers ItemsToQueue event
         /// </summary>
-        /// <param name="index">Index of show in list to remove</param>
-        public static void RemoveShowAt(int index)
+        /// <param name="items"></param>
+        public static void OnUpdateCancelled(ContentType type)
         {
-            lock (ShowsLock)
-                Shows.RemoveAt(index);
-        }
-
-        /// <summary>
-        /// Sort shows list.
-        /// </summary>
-        public static void SortShows()
-        {
-            lock (ShowsLock)
-                Shows.Sort();
+            if (UpdateCancelled != null)
+                UpdateCancelled(type, new EventArgs());
         }
 
         #endregion
 
-        #region Folder Methods
-
         /// <summary>
-        /// Get TV shows that are contained in root folders matching a filter string.
-        /// </summary>
-        /// <param name="rootFolderFilter">The content folder filter string</param>
-        /// <param name="genreFilter">The genre filter to apply - set to "All" to disable filter</param>
-        /// <returns>List of shows containted in folder</returns>
-        public static List<Content> GetShowsFromRootFolders(string rootFolderFilter, string nameFilter, string genreFilter)
-        {
-            // Initialize shows
-            List<Content> folderShows = new List<Content>();
-
-            // Add shows from all folders matching folder filter
-            foreach (ContentRootFolder folder in Settings.TvFolders)
-                if (rootFolderFilter.StartsWith("All") || folder.FullPath == rootFolderFilter)
-                    GetShowsFromRootFolder(folder, folderShows, nameFilter, genreFilter);
-
-            // Return list
-            return folderShows;
-        }
-
-        /// <summary>
-        /// Gets TV shows that are contained within a content folder
-        /// </summary>
-        /// <param name="folder">The content folder to get shows from</param>
-        /// <param name="folderShows">The list to add shows to</param>
-        /// <param name="genreFilter">The genre filter to apply - set to "All" to disable filter</param>
-        private static void GetShowsFromRootFolder(ContentRootFolder folder, List<Content> folderShows, string nameFilter, string genreFilter)
-        {
-            // Go through shows and add any shows that within the content folder and scan directory
-            for (int i = 0; i < Shows.Count; i++)
-            {
-                // Apply name filter
-                bool nameMatch = string.IsNullOrEmpty(nameFilter) || Shows[i].Name.ToLower().Contains(nameFilter.ToLower());
-                bool genreMatch = genreFilter.StartsWith("All") || Shows[i].Genres.Contains(genreFilter);
-
-                if (RootFolderContainsShow(Shows[i], folder) && nameMatch && genreMatch)
-                {
-                    //Shows[i].UpdateMissing();
-                    folderShows.Add(Shows[i]);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Check if a root folder contains a specific TV show. Called
-        /// recursively on sub-content folders. 
-        /// </summary>
-        /// <param name="show">Name of TV show</param>
-        /// <param name="folder">Root folder to search in</param>
-        /// <returns>Whether folder contains show</returns>
-        private static bool RootFolderContainsShow(TvShow show, ContentRootFolder folder)
-        {
-            // Check if show content folder matches
-            if (show.RootFolder == folder.FullPath)
-                return true;
-            else
-                // Recursion of sub-folders
-                foreach (ContentRootFolder subFolder in folder.ChildFolders)
-                    if (RootFolderContainsShow(show, subFolder))
-                        return true;
-
-            // No match
-            return false;
-        }
-
-        /// <summary>
-        /// Get a lists of shows that have the include in scan property enabled.
-        /// </summary>
-        /// <returns>List of show that are included in scanning</returns>
-        public static List<TvShow> GetScannableShows(bool updateMissing)
-        {
-            List<TvShow> includeShow = new List<TvShow>();
-            for (int i = 0; i < Shows.Count; i++)
-                if (Shows[i].IncludeInScan && !string.IsNullOrEmpty(Shows[i].Name))
-                {
-                    if (updateMissing)
-                        Shows[i].UpdateMissing();
-                    includeShow.Add(Shows[i]);
-                }
-
-            return includeShow;
-        }
-
-        #endregion
-
-        #region Folder Updating
-
-        /// <summary>
-        /// Static event that fires when movie folder updating progress changes
-        /// </summary>
-        public static event EventHandler<OrgProgressChangesEventArgs> TvFolderUpdateProgressChange;
-
-        /// <summary>
-        /// Triggers TvFolderUpdateProgressChange event
-        /// </summary>
-        public static void OnTvFolderUpdateProgressChange(bool newShow, int percent, string msg)
-        {
-            if (TvFolderUpdateProgressChange != null)
-                TvFolderUpdateProgressChange(null, new OrgProgressChangesEventArgs(newShow, percent, msg));
-        }
-
-        /// <summary>
-        /// Flag indicating TV folder updating has been cancelled.
+        /// Flag indicating TV root folder updating has been cancelled.
         /// </summary>
         private static bool tvUpdateCancelled = false;
 
         /// <summary>
-        /// Updates shows found in TV Root folders.
+        /// Flag indicating movie root folder updating has been cancelled.
         /// </summary>
-        /// <param name="folder">Name of root folder to update - set to "All" to update all TV root folders</param>
-        /// <param name="fastUpdate">Whether to do fast update (skips updating episode info for existing shows)</param> 
-        public static void UpdateTvRootFolders(string folder, bool fastUpdate)
-        {
-            // Get episodes that need updating
-            List<int> seriesIds; string time = string.Empty;
-            TvDatabaseHelper.GetDataToBeUpdated(out seriesIds, out time);
+        private static bool movieUpdateCancelled = false;
 
-            // Update folders that match folder string
-            foreach (ContentRootFolder tvFolder in Settings.TvFolders)
-                if (folder.StartsWith("All") || tvFolder.FullPath == folder)
+        /// <summary>
+        /// Cancels root folder updating.
+        /// </summary>
+        public static void CancelFolderUpdating(ContentType contentType)
+        {
+            SetUpdateCancel(contentType, true);
+        }
+
+        /// <summary>
+        /// Set update cancel flag value.
+        /// </summary>
+        /// <param name="contentType">Flag type to set</param>
+        /// <param name="cancel">Value to set cancel flag to</param>
+        private static void SetUpdateCancel(ContentType contentType, bool cancel)
+        {
+            switch (contentType)
+            {
+                case ContentType.Movie:
+                    movieUpdateCancelled = cancel;
+                    break;
+                case ContentType.TvShow:
+                    tvUpdateCancelled = cancel;
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
+            }
+
+            if (cancel)
+                OnUpdateCancelled(contentType);
+        }
+
+        /// <summary>
+        /// Gets the list of content matching a set of filters that are contained within root folder(s)
+        /// </summary>
+        /// <param name="folders">Root folders to look for content</param>
+        /// <param name="genreFilter">Filter for genre type of movie - use "All" to disable filter</param>
+        /// <param name="yearFilter">Enables year filtering</param>
+        /// <param name="minYear">Minimum for year filter</param>
+        /// <param name="maxYear">Maximum for year filter</param>
+        /// <param name="nameFilter">String that must be contained in movie name - empty string disables filter</param>
+        /// <returns>List of movies from root folder that match filters</returns>
+        public static List<Content> GetContentFromRootFolders(List<ContentRootFolder> folders, GenreCollection genreFilter, bool yearFilter, int minYear, int maxYear, string nameFilter)
+        {
+            // Initialize movies list
+            List<Content> folderMovies = new List<Content>();
+
+            // Go through each content folder and get movie from folders that match name
+            foreach (ContentRootFolder folder in folders)
+                folder.GetContent(genreFilter, folderMovies, yearFilter, minYear, maxYear, nameFilter);
+
+            // Returns list of movies
+            return folderMovies;
+        }
+
+        /// <summary>
+        /// Get the list of content that is contained within a set of root folders
+        /// </summary>
+        /// <param name="folders">List of content folders to get movies from</param>
+        /// <returns>The list of movies found in root folders</returns>
+        public static List<Content> GetContentFromRootFolders(List<ContentRootFolder> folders)
+        {
+            List<Content> folderContent = new List<Content>();
+            foreach (ContentRootFolder folder in folders)
+                folder.GetContent(GetAllGenres(folder.ContentType), folderContent, false, 0, 0, string.Empty);
+            return folderContent;
+        }
+
+        /// <summary>
+        /// Updates content found in root folders.
+        /// </summary>
+        /// <param name="folders">Root folders to update from</param>
+        /// <param name="fastUpdate">Whether to do fast update (skips episodes updating for TV shows)</param> 
+        public static void UpdateContentsFromRootFolders(List<ContentRootFolder> folders, bool fastUpdate)
+        {
+            // Get content type
+            ContentType contentType = folders[0].ContentType;
+            
+            // Get IDs for content that need updating from database (TV only)
+            List<int> seriesIds = new List<int>();
+            string time = string.Empty;
+            if (contentType == ContentType.TvShow)
+                TvDatabaseHelper.GetDataToBeUpdated(out seriesIds, out time);
+
+            // Update each folder in list
+            foreach (ContentRootFolder folder in folders)
+            {
+                bool results;
+                switch (contentType)
                 {
-                    OnTvFolderUpdateProgressChange(false, 0, "Updating '" + tvFolder.FullPath + "' - Gathering Files");
-                    if (!Organization.UpdateTvRootFolder(tvFolder, fastUpdate, seriesIds))
+                    case ContentType.TvShow:
+                        results = folder.UpdateContent(fastUpdate, seriesIds, ref tvUpdateCancelled);
                         break;
+                    case ContentType.Movie:
+                        results = folder.UpdateContent(fastUpdate, seriesIds, ref movieUpdateCancelled);
+                        break;
+                    default:
+                        throw new Exception("Unknown content type");
                 }
+
+                if (!results)
+                    break;
+            }
 
             // Clear cancel flag
-            tvUpdateCancelled = false;
+            SetUpdateCancel(contentType, false);
 
-            // Save show changes
+            // Save changes
+            ContentCollection collection = GetContentCollection(contentType);
+            collection.Sort();
+            collection.Save();
             if (!string.IsNullOrEmpty(time))
-                Shows.LastUpdate = time;
-            SortShows();
-            SaveShows();
-        }
-
-        /// <summary>
-        /// List of TV Show database IDs that require updating.
-        /// </summary>
-        private static List<int> seriesIdsToUpdate;
-
-        /// <summary>
-        /// Current TV update number identifier. Incremented each time update is performed, used to identify each update thread.
-        /// </summary>
-        private static int tvUpdateNumber = 0;
-
-        /// <summary>
-        /// Search through all sub-folders of a root folder and attempts
-        /// to assign each one to a TV show.
-        /// </summary>
-        /// <param name="tvFolder">Root folder to update</param>
-        /// <param name="fastUpdate">Whether update is fast (skips updating episode info for existing shows)</param>
-        /// <param name="idsToUpdate">List of show IDs that need updating</param>
-        /// <returns>Whether update was completed without cancelation</returns>
-        private static bool UpdateTvRootFolder(ContentRootFolder tvFolder, bool fastUpdate, List<int> idsToUpdate)
-        {
-            // Set show IDs that need updating - this was from TheTvDb, TvRage doesn't provide this information, but leaving this here for future update where user can select which database to use
-            seriesIdsToUpdate = idsToUpdate;
-
-            // Update progress
-            string progressMsg = "Update of '" + tvFolder.FullPath + "' started!";
-            OnTvFolderUpdateProgressChange(false, 0, progressMsg);
-
-            // Initialize processing
-            OrgProcessing processing = new OrgProcessing(TvUpdateProcess);
-            tvUpdateNumber = processing.ProcessNumber;
-
-            // Run processing (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
-            processing.Run(tvFolder.BuildSubDirectories(false, true), ref tvUpdateCancelled, false, false);
-
-            // Remove shows that no longer exists
-            lock (ShowsLock)
-                for (int i = Shows.Count - 1; i >= 0; i--)
-                    if (!Shows[i].Found && Shows[i].RootFolder.StartsWith(tvFolder.FullPath))
-                        RemoveShowAt(i);
-
-            // Save movie changes
-            Organization.SaveShows();
-
-            // Set progress to completed
-            progressMsg = "Update of '" + tvFolder.FullPath + "' complete!";
-            OnTvFolderUpdateProgressChange(false, 0, progressMsg);
-
-            // Return whether update was completed without cancelation
-            return !tvUpdateCancelled;
-        }
-
-        /// <summary>
-        /// TV update processing method (thread) for single movie path.
-        /// </summary>
-        /// <param name="orgPath">Organization path instance to be processed</param>
-        /// <param name="pathNum">The path's number out of total being processed</param>
-        /// <param name="totalPaths">Total number of paths being processed</param>
-        /// <param name="updateNumber">The identifier for the OrgProcessing instance</param>
-        /// <param name="background">Whether processing is running as a background operation</param>
-        /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
-        /// <param name="processComplete">Delegate to be called by processing when completed</param>
-        /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
-        private static void TvUpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete complete, ref int numItemsProcessed)
-        {
-            // Check for cancellation - this method is called from thread pool, so cancellation could have occured by the time this is run
-            if (tvUpdateCancelled || updateNumber != tvUpdateNumber)
-                return;
-
-            // Check if folder already has a match to existing show
-            bool showExists = false;
-            bool showComplete = false;
-            TvShow newShow = null;
-            for (int j = 0; j < Shows.Count; j++)
-                if (orgPath.Path == Shows[j].Path)
-                {
-                    showExists = true;
-                    Shows[j].Found = true;
-                    if (!string.IsNullOrEmpty(Shows[j].Name))
-                        showComplete = true;
-                    newShow = Shows[j];
-                    break;
-                }
-
-            // Build progess message
-            string progressMsg = "Updating '" + orgPath.RootFolder.FullPath + "' - Processed '" + Path.GetFileName(orgPath.Path) + "'";
-
-            // Check if show found
-            if (showExists && showComplete)
-            {
-                // Check if show need updating
-                if ((DateTime.Now - newShow.LastUpdated).TotalDays > 7 || seriesIdsToUpdate.Contains(newShow.Id))
-                {
-                    TvDatabaseHelper.FullShowSeasonsUpdate(newShow);
-                    newShow.LastUpdated = DateTime.Now;
-                }
-
-                // Update progress
-                if (updateNumber == tvUpdateNumber)
-                    OnTvFolderUpdateProgressChange(false, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
-
-                // Call completed delegate
-                complete();
-                return;
-            }
-
-            // Show wasn't found, match path to database
-            TvShow match = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path);
-
-            // Check that current process hasn't been replaced - search can be slow, so update may have been cancelled by the time it gets here
-            if (tvUpdateCancelled || updateNumber != tvUpdateNumber)
-                return;
-
-            // Update show info
-            if (showExists && match != null)
-            {
-                newShow.Clone(match);
-                newShow.LastUpdated = DateTime.Now;
-            }
-            else if (match != null)
-                newShow = match;
-            else
-                newShow = new TvShow(string.Empty, 0, 0, orgPath.Path, orgPath.RootFolder.FullPath);
-            newShow.Found = true;
-
-            // Add show to list if new
-            if (!showExists)
-                AddShow(newShow);
-
-            // Update progress
-            OnTvFolderUpdateProgressChange(true, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
-
-            // Call completed delegate
-            complete();
-        }
-
-        /// <summary>
-        /// Cancels TV folder updating.
-        /// </summary>
-        public static void CancelTvUpdating()
-        {
-            tvUpdateCancelled = true;
+                collection.LastUpdate = time;
         }
 
         #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Get content collection for specified content type
+        /// </summary>
+        /// <param name="type">Content type to get</param>
+        /// <returns>Resulting content collection</returns>
+        public static ContentCollection GetContentCollection(ContentType type)
+        {
+            switch (type)
+            {
+                case ContentType.Movie:
+                    return Movies;
+                case ContentType.TvShow:
+                    return Shows;
+                default:
+                    throw new Exception("Unknown content type");
+            }
+        }
+
+        /// <summary>
+        /// Get genres for specified content type
+        /// </summary>
+        /// <param name="type">Content type to get genres for</param>
+        /// <returns>Resulting content collection</returns>
+        public static GenreCollection GetAllGenres(ContentType type)
+        {
+            GenreCollection allGenres;
+            switch (type)
+            {
+                case ContentType.Movie:
+                    allGenres = AllMovieGenres;
+                    break;
+                case ContentType.TvShow:
+                    allGenres = AllTvGenres;
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
+            }
+            return allGenres;
+        }
 
         #endregion
 
@@ -814,334 +472,6 @@ namespace Meticumedia
                 ActionLog.RemoveAt(index);
             SaveLog();
         }
-
-        #endregion
-
-        #region Movie Methods
-
-        #region Add, Remove, Sort
-
-        /// <summary>
-        /// Add movie to movie list
-        /// </summary>
-        /// <param name="newMovie">Show instance to add to list</param>
-        public static void AddMovie(Movie newMovie)
-        {
-            // Add movie to list and save
-            lock (MoviesLock)
-                Movies.Add(newMovie);
-            SaveMovies();
-        }
-
-
-        /// <summary>
-        /// Removes a movie from list of movies.
-        /// </summary>
-        /// <param name="movie">Show instance to remove</param>
-        public static void RemoveMovie(Movie movie)
-        {
-            lock (MoviesLock)
-                Movies.Remove(movie);
-        }
-
-        /// <summary>
-        /// Remove movie from list of movies.
-        /// </summary>
-        /// <param name="index">Index of show in list to remove</param>
-        public static void RemoveMovieAt(int index)
-        {
-            lock (MoviesLock)
-                Movies.RemoveAt(index);
-        }
-
-        /// <summary>
-        /// Sort movies list.
-        /// </summary>
-        public static void SortMovies()
-        {
-            lock (MoviesLock)
-                Movies.Sort();
-        }
-
-        /// <summary>
-        /// Remove all movies that no longer exist in a root folder
-        /// </summary>
-        /// <param name="movieFolder">Root folder to remove missing movies from</param>
-        public static void RemoveMissingMovies(ContentRootFolder movieFolder)
-        {
-            lock (MoviesLock)
-                for (int i = Movies.Count - 1; i >= 0; i--)
-                    if (!Movies[i].Found && Movies[i].RootFolder.StartsWith(movieFolder.FullPath))
-                        Movies.RemoveAt(i);
-        }
-
-        #endregion
-
-        #region Folder Methods
-
-        /// <summary>
-        /// Gets the list of movies matching a set of filters that are contained within movie root folder(s)
-        /// </summary>
-        /// <param name="contentFolderName">Name of root folder to get movies from - use "All" for all movie root folders</param>
-        /// <param name="genreFilter">Filter for genre type of movie - use "All" to disable filter</param>
-        /// <param name="yearFilter">Enables year filtering</param>
-        /// <param name="minYear">Minimum for year filter</param>
-        /// <param name="maxYear">Maximum for year filter</param>
-        /// <param name="nameFilter">String that must be contained in movie name - empty string disables filter</param>
-        /// <returns>List of movies from root folder that match filters</returns>
-        public static List<Content> GetMoviesFromRootFolders(string contentFolderName, string genreFilter, bool yearFilter, int minYear, int maxYear, string nameFilter)
-        {
-            // Initialize movies list
-            List<Content> folderMovies = new List<Content>();
-
-            // Go through each content folder and get movie from folders that match name
-            foreach (ContentRootFolder folder in Settings.MovieFolders)
-                if (contentFolderName.StartsWith("All") || folder.FullPath == contentFolderName)
-                    GetMoviesFromRootFolders(folder, genreFilter, folderMovies, yearFilter, minYear, maxYear, nameFilter);
-
-            // Returns list of movies
-            return folderMovies;
-        }
-
-        /// <summary>
-        /// Get the list of movies that are contained within a set of root folders
-        /// </summary>
-        /// <param name="folders">List of content folders to get movies from</param>
-        /// <returns>The list of movies found in root folders</returns>
-        public static List<Content> GetMoviesFromRootFolders(List<ContentRootFolder> folders)
-        {
-            List<Content> folderMovies = new List<Content>();
-            foreach (ContentRootFolder folder in folders)
-                GetMoviesFromRootFolders(folder, "All", folderMovies, false, 0, 0, string.Empty);
-            return folderMovies;
-        }
-        
-        /// <summary>
-        /// Builds a list of movies matching filter that are contained within a root folder
-        /// </summary>
-        /// <param name="folder">Root folder to get movies from</param>
-        /// <param name="genre">Filter for genre type of movie - use "All" to disable filter</param>
-        /// <param name="folderMovies">List to add movies to</param>
-        /// <param name="yearFilter">Enables year filtering</param>
-        /// <param name="minYear">Minimum for year filter</param>
-        /// <param name="maxYear">Maximum for year filter</param>
-        /// <param name="nameFilter">String that must be contained in movie name - empty string disables filter</param>
-        private static void GetMoviesFromRootFolders(ContentRootFolder folder, string genre, List<Content> folderMovies, bool yearFilter, int minYear, int maxYear, string nameFilter)
-        {
-            // Go through all movies
-            lock (MoviesLock)
-                foreach (Movie movie in Movies)
-                {
-                    // Apply genre filter
-                    bool genreMatch = genre.StartsWith("All");
-                    if (movie.Genres != null && !genreMatch)
-                        foreach (string movieGenre in movie.Genres)
-                            if (movieGenre == genre)
-                            {
-                                genreMatch = true;
-                                break;
-                            }
-
-                    // Apply year filter
-                    bool yearMatch = !yearFilter || (movie.Date.Year >= minYear && movie.Date.Year <= maxYear);
-
-                    // Apply text filter
-                    bool nameMatch = string.IsNullOrEmpty(nameFilter) || movie.Name.ToLower().Contains(nameFilter.ToLower());
-
-                    // Check if movie is in the folder
-                    if (RootFolderContainsMovie(movie, folder) && genreMatch && yearMatch && nameMatch)
-                        folderMovies.Add(movie);
-                }
-        }
-
-        /// <summary>
-        /// Check if a root folder contains a specific movie. Called
-        /// recursively on child root folders.
-        /// </summary>
-        /// <param name="movie">The movie to check for</param>
-        /// <param name="folder">The folder to check if the movie is in</param>
-        /// <returns>Whether the movie is contained in the folder</returns>
-        private static bool RootFolderContainsMovie(Movie movie, ContentRootFolder folder)
-        {            
-            // Check if movie content folder matches
-            if (movie.RootFolder == folder.FullPath)
-                return true;
-            else
-                // Recursion on sub-folders
-                foreach (ContentRootFolder subFolder in folder.ChildFolders)
-                    if (RootFolderContainsMovie(movie, subFolder))
-                        return true;
-
-            // No match
-            return false;
-        }
-
-        #endregion
-
-        #region Folders Updating
-
-        /// <summary>
-        /// Static event that fires when movie folder updating progress changes
-        /// </summary>
-        public static event EventHandler<OrgProgressChangesEventArgs> MovieFolderUpdateProgressChange;
-
-        /// <summary>
-        /// Organization updating progress changed event arguments
-        /// </summary>
-        public class OrgProgressChangesEventArgs : ProgressChangedEventArgs
-        {
-            /// <summary>
-            /// Whether last updated item was new
-            /// </summary>
-            public bool NewItem { get; set; }
-
-            /// <summary>
-            /// Constructor with know properties
-            /// </summary>
-            /// <param name="newItem">Whether new item was found</param>
-            /// <param name="percent">Progress percent</param>
-            /// <param name="msg">Progress message</param>
-            public OrgProgressChangesEventArgs(bool newItem, int percent, string msg) : base(percent, msg)
-            {
-                this.NewItem = newItem;
-            }
-        }
-
-        /// <summary>
-        /// Triggers MovieFolderUpdateProgressChange event
-        /// </summary>
-        public static void OnMovieFolderUpdateProgressChange(bool newMovie, int percent, string msg)
-        {
-            if (MovieFolderUpdateProgressChange != null)
-                MovieFolderUpdateProgressChange(null, new OrgProgressChangesEventArgs(newMovie, percent, msg));
-        }
-
-        /// <summary>
-        /// Flag indicating movie folder updating has been cancelled.
-        /// </summary>
-        private static bool movieUpdateCancelled = false;
-
-        /// <summary>
-        /// Current Movie update number identifier. Incremented each time update is performed, used to identify each update thread.
-        /// </summary>
-        private static int movieUpdateNumber = 0;
-
-        /// <summary>
-        /// Cancels movie folder updating (if any).
-        /// </summary>
-        public static void CancelMovieUpdating()
-        {
-            movieUpdateCancelled = true;
-        }
-
-        /// <summary>
-        /// Searches through a movie root folder and attempts to match sub-folders names to 
-        /// movies in online database. Recursively runs this method on child root folders
-        /// of movie folder.
-        /// </summary>
-        /// <param name="movieFolder">Folder where movie is located</param>
-        public static bool UpdateMovieFolder(ContentRootFolder movieFolder)
-        {
-            // Update progress
-            string progressMsg = "Updating '" + movieFolder.FullPath + "' - Gathering Files";
-            OnMovieFolderUpdateProgressChange(false, 0, progressMsg);
-
-            // Initialize processing
-            OrgProcessing processing = new OrgProcessing(MovieUpdateProcess);
-            movieUpdateNumber = processing.ProcessNumber;
-
-            // Run processing (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
-            processing.Run(movieFolder.BuildSubDirectories(true, false), ref movieUpdateCancelled, false, false);
-
-            // Remove movies that are missing (Found property is false)
-            Organization.RemoveMissingMovies(movieFolder);
-
-            // Save movie changes
-            Organization.SaveMovies();
-
-            // Update progress
-            progressMsg = "Updating '" + movieFolder.FullPath + "' complete!";
-            OnMovieFolderUpdateProgressChange(false, 0, progressMsg);
-
-            // Return whether update was completed without cancelation
-            return !movieUpdateCancelled;
-        }
-
-        /// <summary>
-        /// Movie update processing method (thread) for single movie path
-        /// </summary>
-        /// <param name="orgPath">Organization path instance to be processed</param>
-        /// <param name="pathNum">The path's number out of total being processed</param>
-        /// <param name="totalPaths">Total number of paths being processed</param>
-        /// <param name="updateNumber">The identifier for the OrgProcessing instance</param>
-        /// <param name="background">Whether processing is running as a background operation</param>
-        /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
-        /// <param name="processComplete">Delegate to be called by processing when completed</param>
-        /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
-        private static void MovieUpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete processComplete, ref int numItemsProcessed)
-        {
-            // Check for cancellation - this method is called from thread pool, so cancellation could have occured by the time this is run
-            if (movieUpdateCancelled || updateNumber != movieUpdateNumber)
-                return;
-
-            // Check if movie already has a match to existing movie
-            bool movieExists = false;
-            bool movieComplete = false;
-            Movie newMovie = null;
-            for (int j = 0; j < Organization.Movies.Count; j++)
-                if (orgPath.Path == Organization.Movies[j].Path)
-                {
-                    movieExists = true;
-                    Organization.Movies[j].Found = true;
-                    if (!string.IsNullOrEmpty(Organization.Movies[j].Name) && Organization.Movies[j].Id != 0)
-                        movieComplete = true;
-                    else
-                        newMovie = Organization.Movies[j];
-                    break;
-                }
-
-            // Build progress message
-            string progressMsg = "Updating '" + orgPath.RootFolder.FullPath + "' - Processed '" + Path.GetFileName(orgPath.Path) + "'";
-
-            // Movie found, next!
-            if (movieExists && movieComplete)
-            {
-                // Update progress
-                if (updateNumber == movieUpdateNumber)
-                    OnMovieFolderUpdateProgressChange(false, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
-
-                // Call complete delegate
-                processComplete();
-                return;
-            }
-
-            // Get movie info
-            Movie match = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path);
-
-            // Check that current process hasn't been replaced - search can be slow, so update may have been cancelled by the time it gets here
-            if (movieUpdateCancelled || updateNumber != movieUpdateNumber)
-                return;
-
-            // Update movie info if needed
-            if (movieExists)
-                newMovie.UpdateInfo(match);
-            else
-                newMovie = match;
-            newMovie.Found = true;
-
-            // Add movie to list if new
-            if (!movieExists)
-                Organization.AddMovie(newMovie);
-
-            // Update progress
-            OnMovieFolderUpdateProgressChange(true, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
-
-            // Call complete delegate
-            processComplete();
-
-        }
-
-        #endregion
 
         #endregion
     }

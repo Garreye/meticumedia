@@ -4,7 +4,7 @@
 // --------------------------------------------------------------------------------
 namespace Meticumedia
 {
-    partial class MovieEditorForm
+    partial class ContentEditorForm
     {
         /// <summary>
         /// Required designer variable.
@@ -35,7 +35,7 @@ namespace Meticumedia
             this.btnOk = new System.Windows.Forms.Button();
             this.btnUpdateInfo = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.cntrlMovie = new Meticumedia.Controls.MovieEditControl();
+            this.cntrlContent = new Meticumedia.ContentEditControl();
             this.SuspendLayout();
             // 
             // btnOk
@@ -55,7 +55,7 @@ namespace Meticumedia
             this.btnUpdateInfo.Name = "btnUpdateInfo";
             this.btnUpdateInfo.Size = new System.Drawing.Size(179, 23);
             this.btnUpdateInfo.TabIndex = 16;
-            this.btnUpdateInfo.Text = "Update Info From TheMovieDb";
+            this.btnUpdateInfo.Text = "Update Info From Database";
             this.btnUpdateInfo.UseVisualStyleBackColor = true;
             this.btnUpdateInfo.Click += new System.EventHandler(this.btnUpdateInfo_Click);
             // 
@@ -70,28 +70,29 @@ namespace Meticumedia
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // cntrlMovie
+            // cntrlContent
             // 
-            this.cntrlMovie.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.cntrlContent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlMovie.Location = new System.Drawing.Point(12, 41);
-            this.cntrlMovie.Movie = null;
-            this.cntrlMovie.Name = "cntrlMovie";
-            this.cntrlMovie.Size = new System.Drawing.Size(395, 217);
-            this.cntrlMovie.TabIndex = 19;
+            this.cntrlContent.Content = null;
+            this.cntrlContent.ContentType = Meticumedia.ContentType.Movie;
+            this.cntrlContent.Location = new System.Drawing.Point(12, 41);
+            this.cntrlContent.Name = "cntrlContent";
+            this.cntrlContent.Size = new System.Drawing.Size(395, 217);
+            this.cntrlContent.TabIndex = 19;
             // 
-            // MovieEditorForm
+            // ContentEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(419, 295);
-            this.Controls.Add(this.cntrlMovie);
+            this.Controls.Add(this.cntrlContent);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.btnUpdateInfo);
-            this.Name = "MovieEditorForm";
-            this.Text = "Movie Editor";
+            this.Name = "ContentEditorForm";
+            this.Text = "Content Editor";
             this.ResumeLayout(false);
 
         }
@@ -101,6 +102,6 @@ namespace Meticumedia
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Button btnUpdateInfo;
         private System.Windows.Forms.Button btnCancel;
-        private Controls.MovieEditControl cntrlMovie;
+        private ContentEditControl cntrlContent;
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Meticumedia
 {
@@ -72,7 +73,7 @@ namespace Meticumedia
         /// Determines whether or not the content is to be included
         /// in scanning
         /// </summary>
-        public bool IncludeInScan { get; set; }
+        public virtual bool IncludeInScan { get { return this.DoRenaming; } }
 
         /// <summary>
         /// Indicates whether files in folder are allowed to be renamed by application
@@ -100,7 +101,6 @@ namespace Meticumedia
             this.Path = string.Empty;
             this.Found = true;
             this.Id = 0;
-            this.IncludeInScan = true;
             this.Name = string.Empty;
             this.Overview = string.Empty;
             this.Watched = false;
@@ -144,7 +144,6 @@ namespace Meticumedia
 
             this.Id = content.Id;
             this.Watched = content.Watched;
-            this.IncludeInScan = content.IncludeInScan;
             this.DoRenaming = content.DoRenaming;
             this.LastUpdated = content.LastUpdated;
         }
@@ -173,6 +172,104 @@ namespace Meticumedia
             return genreStr.TrimEnd(';', ' ');
         }
 
+        /// <summary>
+        /// Attempts to find matches between a file name and the content name
+        /// </summary>
+        /// <param name="fileName">File name to match to</param>
+        /// <returns>Collection of matches for file name and content<</returns>
+        public MatchCollection MatchFileToContent(string fileName)
+        {
+            string re = BuildNameRegularExpresionString(true);
+            MatchCollection matches = null;
+            if (!string.IsNullOrEmpty(re))
+                matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
+
+            if (matches != null && matches.Count > 0)
+                return matches;
+
+            re = BuildNameRegularExpresionString(false);
+            if (!string.IsNullOrEmpty(re))
+                return Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
+
+            return null;
+        }
+
+        /// <summary>
+        /// Builds a regular expression string for matching against
+        /// file names. String built such that it will cause matches for:
+        ///     -The full show name with spaces (e.g. "How I Met Your Mother)
+        ///     -The full show name without spaces (e.g. "HowIMetYourMother)
+        ///     -The acronym for the show name (e.g. "himym") - if name has 3 or more words
+        ///     -The name without cosonents (e.g. "BttlstrGlctc")
+        /// "and"/"&" are set to optional matches
+        /// </summary>
+        /// <returns></returns>
+        private string BuildNameRegularExpresionString(bool removeWhitespace)
+        {
+            // Initialize string
+            string showReStr = string.Empty;
+
+            // Get simplified name
+            string showname = FileHelper.SimplifyFileName(this.Name, true, removeWhitespace);
+
+            // Split name words
+            string[] showWords = showname.Split(' ');
+
+            // Create cosonants RE
+            Regex cosonantRe = new Regex("[aeiouy]");
+
+            // Go through each word of the name
+            for (int i = 0; i < showWords.Length; i++)
+            {
+                // Add 'a' for accronym
+                if (showWords[i] == "and" || showWords[i] == "&")
+                {
+                    showReStr += @"((a|&)(nd\W*)?)?";
+                    continue;
+                }
+
+                // Go through each letter of the word
+                for (int j = 0; j < showWords[i].Length; j++)
+                {
+                    // Add letter
+                    if (showWords[i][j] == '-')
+                        showReStr += ".";
+                    else
+                        showReStr += showWords[i][j];
+
+                    // Start optional first letter only
+                    if (j == 0 && showWords.Length > 2)
+                        showReStr += "(";
+
+                    // Consonants are optional
+                    else if (cosonantRe.IsMatch(showWords[i][j].ToString()) && (showWords[i].Length > 5 || showWords.Length > 1))
+                        showReStr += "?";
+
+                    // End of word can contain whitespace/seperators
+                    if (j == showWords[i].Length - 1)
+                    {
+                        // End optional first letter only
+                        if (showWords.Length > 2)
+                            showReStr += @")?";
+
+                        showReStr += @"\W*";
+                    }
+
+                }
+            }
+
+            return showReStr;
+        }
+
+        public virtual void UpdateMissing()
+        {
+        }
+
+        public virtual void UpdateInfoFromDatabase()
+        {
+
+        }        
+
         #endregion
 
         #region XML
@@ -180,7 +277,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML
         /// </summary>
-        private enum XmlElements { Name, DataBaseName, Date, Overview, Genres, Folder, RootFolder, Id, Watched, IncludeInScan, DoRenaming, LastUpdated };
+        private enum XmlElements { Name, DataBaseName, Date, Overview, Genres, Folder, RootFolder, Id, Watched, DoRenaming, LastUpdated };
 
         /// <summary>
         /// XML element name for a single genre
@@ -229,9 +326,6 @@ namespace Meticumedia
                         break;
                     case XmlElements.Watched:
                         value = this.Watched.ToString();
-                        break;
-                    case XmlElements.IncludeInScan:
-                        value = this.IncludeInScan.ToString();
                         break;
                     case XmlElements.DoRenaming:
                         value = this.DoRenaming.ToString();
@@ -301,11 +395,6 @@ namespace Meticumedia
                         bool.TryParse(value, out watched);
                         this.Watched = watched;
                         break;
-                    case XmlElements.IncludeInScan:
-                        bool includeInScan;
-                        bool.TryParse(value, out includeInScan);
-                        this.IncludeInScan = includeInScan;
-                        break;
                     case XmlElements.DoRenaming:
                         bool doRenaming;
                         bool.TryParse(value, out doRenaming);
@@ -318,6 +407,23 @@ namespace Meticumedia
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// XML save to be overriden!
+        /// </summary>
+        public virtual void Save(XmlWriter xw)
+        {
+        }
+
+        /// <summary>
+        /// XML load to be overriden!
+        /// </summary>
+        /// <param name="showNode"></param>
+        /// <returns></returns>
+        public virtual bool Load(XmlNode showNode)
+        {
+            return false;
         }
 
         #endregion

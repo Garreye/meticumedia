@@ -16,14 +16,14 @@ namespace Meticumedia
     /// <summary>
     /// Form for editing properties of a Movie object.
     /// </summary>
-    public partial class MovieEditorForm : Form
+    public partial class ContentEditorForm : Form
     {
         #region Properties
 
         /// <summary>
         /// Resulting movie from editor form. Null when form cancelled.
         /// </summary>
-        public Movie Results { get; private set; }
+        public Content Results { get; private set; }
 
         #endregion
 
@@ -33,14 +33,24 @@ namespace Meticumedia
         /// Constructor with movie to be edited passed in.
         /// </summary>
         /// <param name="movie"></param>
-        public MovieEditorForm(Movie movie)
+        public ContentEditorForm(Content content)
         {
             InitializeComponent();
 
-            // Clone movie (so that changes here won't affect original unintentionally)
-            cntrlMovie.Movie = new Movie(movie);
+            // Clone content (so that changes here won't affect original unintentionally)
+            if (content is Movie)
+            {
+                cntrlContent.ContentType = ContentType.Movie;
+                cntrlContent.Content = new Movie((Movie)content);
+            }
+            else
+            {
+                cntrlContent.ContentType = ContentType.TvShow;
+                cntrlContent.Content = new TvShow((TvShow)content);
+            }
+
             SetUpdateButtonEnable();
-            cntrlMovie.MovieChanged += new EventHandler<EventArgs>(cntrlMovie_MovieChanged);
+            cntrlContent.ContentChanged += new EventHandler<EventArgs>(cntrlContent_ContentChanged);
 
             // Clear results
             this.Results = null;
@@ -56,7 +66,7 @@ namespace Meticumedia
         private void SetUpdateButtonEnable()
         {
             // Enable update button for valid IDs only
-            btnUpdateInfo.Enabled = cntrlMovie.Movie.Id != 0;
+            btnUpdateInfo.Enabled = cntrlContent.Content.Id != 0;
         }
 
         /// <summary>
@@ -64,7 +74,7 @@ namespace Meticumedia
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void cntrlMovie_MovieChanged(object sender, EventArgs e)
+        private void cntrlContent_ContentChanged(object sender, EventArgs e)
         {
             SetUpdateButtonEnable();
         }
@@ -76,7 +86,7 @@ namespace Meticumedia
         /// <param name="e"></param>
         private void btnUpdateInfo_Click(object sender, EventArgs e)
         {
-            cntrlMovie.UpdateMovieInfo();
+            cntrlContent.UpdateContentInfo();
         }
 
         /// <summary>
@@ -86,7 +96,7 @@ namespace Meticumedia
         /// <param name="e"></param>
         private void btnOk_Click(object sender, EventArgs e)
         {
-            this.Results = cntrlMovie.Movie;
+            this.Results = cntrlContent.Content;
             this.Close();
         }
 

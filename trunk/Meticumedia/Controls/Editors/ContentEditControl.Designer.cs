@@ -2,9 +2,9 @@
 // Source code available at http://code.google.com/p/meticumedia/
 // This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
 // --------------------------------------------------------------------------------
-namespace Meticumedia.Controls
+namespace Meticumedia
 {
-    partial class MovieEditControl
+    partial class ContentEditControl
     {
         /// <summary> 
         /// Required designer variable.
@@ -44,6 +44,9 @@ namespace Meticumedia.Controls
             this.label2 = new System.Windows.Forms.Label();
             this.btnDbSearch = new System.Windows.Forms.Button();
             this.gbProperties = new System.Windows.Forms.GroupBox();
+            this.chkIncludeInSchedule = new System.Windows.Forms.CheckBox();
+            this.chkDoMissing = new System.Windows.Forms.CheckBox();
+            this.chkDoRenaming = new System.Windows.Forms.CheckBox();
             this.gbOnlineSearch = new System.Windows.Forms.GroupBox();
             this.cntrlSearch = new Meticumedia.SearchControl();
             ((System.ComponentModel.ISupportInitialize)(this.numId)).BeginInit();
@@ -106,7 +109,7 @@ namespace Meticumedia.Controls
             this.groupBox2.Controls.Add(this.btnAddGenre);
             this.groupBox2.Location = new System.Drawing.Point(10, 96);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(409, 109);
+            this.groupBox2.Size = new System.Drawing.Size(214, 109);
             this.groupBox2.TabIndex = 24;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Genres";
@@ -119,7 +122,7 @@ namespace Meticumedia.Controls
             this.lbGenres.FormattingEnabled = true;
             this.lbGenres.Location = new System.Drawing.Point(47, 19);
             this.lbGenres.Name = "lbGenres";
-            this.lbGenres.Size = new System.Drawing.Size(356, 82);
+            this.lbGenres.Size = new System.Drawing.Size(161, 82);
             this.lbGenres.TabIndex = 0;
             // 
             // label3
@@ -178,6 +181,9 @@ namespace Meticumedia.Controls
             this.gbProperties.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbProperties.Controls.Add(this.chkIncludeInSchedule);
+            this.gbProperties.Controls.Add(this.chkDoMissing);
+            this.gbProperties.Controls.Add(this.chkDoRenaming);
             this.gbProperties.Controls.Add(this.label2);
             this.gbProperties.Controls.Add(this.btnDbSearch);
             this.gbProperties.Controls.Add(this.txtName);
@@ -191,7 +197,42 @@ namespace Meticumedia.Controls
             this.gbProperties.Size = new System.Drawing.Size(425, 211);
             this.gbProperties.TabIndex = 36;
             this.gbProperties.TabStop = false;
-            this.gbProperties.Text = "Movie Properties";
+            this.gbProperties.Text = "Properties";
+            // 
+            // chkIncludeInSchedule
+            // 
+            this.chkIncludeInSchedule.AutoSize = true;
+            this.chkIncludeInSchedule.Location = new System.Drawing.Point(244, 96);
+            this.chkIncludeInSchedule.Name = "chkIncludeInSchedule";
+            this.chkIncludeInSchedule.Size = new System.Drawing.Size(120, 17);
+            this.chkIncludeInSchedule.TabIndex = 39;
+            this.chkIncludeInSchedule.Text = "Include in Schedule";
+            this.chkIncludeInSchedule.UseVisualStyleBackColor = true;
+            this.chkIncludeInSchedule.Visible = false;
+            this.chkIncludeInSchedule.CheckedChanged += new System.EventHandler(this.chkIncludeInSchedule_CheckedChanged);
+            // 
+            // chkDoMissing
+            // 
+            this.chkDoMissing.AutoSize = true;
+            this.chkDoMissing.Location = new System.Drawing.Point(244, 73);
+            this.chkDoMissing.Name = "chkDoMissing";
+            this.chkDoMissing.Size = new System.Drawing.Size(112, 17);
+            this.chkDoMissing.TabIndex = 38;
+            this.chkDoMissing.Text = "Do Missing Check";
+            this.chkDoMissing.UseVisualStyleBackColor = true;
+            this.chkDoMissing.Visible = false;
+            this.chkDoMissing.CheckedChanged += new System.EventHandler(this.chkDoMissing_CheckedChanged);
+            // 
+            // chkDoRenaming
+            // 
+            this.chkDoRenaming.AutoSize = true;
+            this.chkDoRenaming.Location = new System.Drawing.Point(244, 49);
+            this.chkDoRenaming.Name = "chkDoRenaming";
+            this.chkDoRenaming.Size = new System.Drawing.Size(91, 17);
+            this.chkDoRenaming.TabIndex = 37;
+            this.chkDoRenaming.Text = "Do Renaming";
+            this.chkDoRenaming.UseVisualStyleBackColor = true;
+            this.chkDoRenaming.CheckedChanged += new System.EventHandler(this.chkDoRenaming_CheckedChanged);
             // 
             // gbOnlineSearch
             // 
@@ -211,20 +252,20 @@ namespace Meticumedia.Controls
             this.cntrlSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlSearch.ContentType = ContentType.Movie;
+            this.cntrlSearch.ContentType = Meticumedia.ContentType.TvShow;
             this.cntrlSearch.Location = new System.Drawing.Point(6, 19);
             this.cntrlSearch.Name = "cntrlSearch";
             this.cntrlSearch.Size = new System.Drawing.Size(413, 186);
             this.cntrlSearch.TabIndex = 33;
             this.cntrlSearch.SearchResultsSelected += new System.EventHandler<Meticumedia.SearchControl.SearchResultsSelectedArgs>(this.cntrlSearch_SearchResultsSelected);
             // 
-            // MovieEditControl
+            // ContentEditControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.gbProperties);
             this.Controls.Add(this.gbOnlineSearch);
-            this.Name = "MovieEditControl";
+            this.Name = "ContentEditControl";
             this.Size = new System.Drawing.Size(431, 217);
             ((System.ComponentModel.ISupportInitialize)(this.numId)).EndInit();
             this.groupBox2.ResumeLayout(false);
@@ -252,5 +293,8 @@ namespace Meticumedia.Controls
         private System.Windows.Forms.GroupBox gbProperties;
         private System.Windows.Forms.GroupBox gbOnlineSearch;
         private SearchControl cntrlSearch;
+        private System.Windows.Forms.CheckBox chkDoMissing;
+        private System.Windows.Forms.CheckBox chkDoRenaming;
+        private System.Windows.Forms.CheckBox chkIncludeInSchedule;
     }
 }

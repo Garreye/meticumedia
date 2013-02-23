@@ -94,7 +94,7 @@ namespace Meticumedia
 
             // Setup TV
             cmbShows.Items.Clear();
-            TvShowCollection shows = Organization.Shows;
+            ContentCollection shows = Organization.Shows;
             if (result.NewShow != null)
             {
                 cmbShows.Items.Add(result.NewShow);
@@ -122,16 +122,16 @@ namespace Meticumedia
             SetEpisodeName();
 
             if (result.Movie != null)
-                cntrlMovieEdit.Movie = new Movie(result.Movie);
+                cntrlMovieEdit.Content = new Movie(result.Movie);
             else
             {
-                cntrlMovieEdit.Movie = new Movie();
+                cntrlMovieEdit.Content = new Movie();
                 ContentRootFolder defaultMovieFolder;
                 if(Settings.GetDefaultMovieFolder(out defaultMovieFolder))
-                    cntrlMovieEdit.Movie.RootFolder = string.IsNullOrEmpty(rootFolder) ? defaultMovieFolder.FullPath : rootFolder;
-                cntrlMovieEdit.Movie.Path = cntrlMovieEdit.Movie.BuildFilePath(txtSourceFile.Text);
+                    cntrlMovieEdit.Content.RootFolder = string.IsNullOrEmpty(rootFolder) ? defaultMovieFolder.FullPath : rootFolder;
+                cntrlMovieEdit.Content.Path = ((Movie)cntrlMovieEdit.Content).BuildFilePath(txtSourceFile.Text);
             }
-            cntrlMovieEdit.MovieChanged += new EventHandler<EventArgs>(cntrlMovieEdit_MovieChanged);
+            cntrlMovieEdit.ContentChanged += new EventHandler<EventArgs>(cntrlMovieEdit_MovieChanged);
 
             txtDestination.Text = BuildDestination();
         }
@@ -268,7 +268,7 @@ namespace Meticumedia
         /// </summary>
         private void btnNewShow_Click(object sender, EventArgs e)
         {
-            SearchForm form = new SearchForm(FileHelper.RemoveEpisodeInfo(Path.GetFileNameWithoutExtension(txtSourceFile.Text)), true);
+            SearchForm form = new SearchForm(FileHelper.RemoveEpisodeInfo(Path.GetFileNameWithoutExtension(txtSourceFile.Text)), ContentType.TvShow);
             form.ShowDialog();
 
             if (form.DialogResult == System.Windows.Forms.DialogResult.OK)
@@ -362,10 +362,10 @@ namespace Meticumedia
 
                     return fileName + Path.GetExtension(txtSourceFile.Text);
                 case FileHelper.FileCategory.NonTvVideo:
-                    if (cntrlMovieEdit.Movie == null)
+                    if (cntrlMovieEdit.Content == null)
                         return string.Empty;
                     // TODO: don't use default path if alread in movies folder!
-                    return cntrlMovieEdit.Movie.BuildFilePath(txtSourceFile.Text);
+                    return ((Movie)cntrlMovieEdit.Content).BuildFilePath(txtSourceFile.Text);
                 default:
                     throw new Exception("Unknown file category!");
             }
@@ -406,9 +406,9 @@ namespace Meticumedia
             // Build results
             if (rbMovie.Checked)
             {
-                cntrlMovieEdit.Movie.Found = true;
-                cntrlMovieEdit.Movie.Path = Path.GetDirectoryName(txtDestination.Text);
-                this.result = new OrgItem(GetAction(), txtSourceFile.Text, GetCategory(), cntrlMovieEdit.Movie, txtDestination.Text, null);
+                cntrlMovieEdit.Content.Found = true;
+                cntrlMovieEdit.Content.Path = Path.GetDirectoryName(txtDestination.Text);
+                this.result = new OrgItem(GetAction(), txtSourceFile.Text, GetCategory(), (Movie)cntrlMovieEdit.Content, txtDestination.Text, null);
             }
             else
             {

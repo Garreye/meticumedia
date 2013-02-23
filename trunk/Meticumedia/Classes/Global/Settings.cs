@@ -205,7 +205,7 @@ namespace Meticumedia
             if (GetTvFolder(folderPath, out folder))
                 return true;
 
-            folder = new ContentRootFolder();
+            folder = new ContentRootFolder(ContentType.TvShow);
             return false;
         }
 
@@ -234,7 +234,28 @@ namespace Meticumedia
             return false;
         }
 
+        public static List<ContentRootFolder> GetAllRootFolders(ContentType type)
+        {
+            List<ContentRootFolder> allRootFolders;
+
+            switch (type)
+            {
+                case ContentType.Movie:
+                    allRootFolders = Settings.MovieFolders;
+                    break;
+                case ContentType.TvShow:
+                    allRootFolders = Settings.TvFolders;
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
+            }
+            return allRootFolders;
+        }
+
+
         #endregion
+
+
 
         #region XML
 
@@ -361,7 +382,7 @@ namespace Meticumedia
                             MovieFolders = new List<ContentRootFolder>();
                             foreach (XmlNode movieFolderNode in propNode.ChildNodes)
                             {
-                                ContentRootFolder folder = new ContentRootFolder();
+                                ContentRootFolder folder = new ContentRootFolder(ContentType.Movie);
                                 folder.Load(movieFolderNode);
                                 MovieFolders.Add(folder);
                             }
@@ -370,7 +391,7 @@ namespace Meticumedia
                             TvFolders = new List<ContentRootFolder>();
                             foreach (XmlNode tvFolderNode in propNode.ChildNodes)
                             {
-                                ContentRootFolder folder = new ContentRootFolder();
+                                ContentRootFolder folder = new ContentRootFolder(ContentType.TvShow);
                                 folder.Load(tvFolderNode);
                                 TvFolders.Add(folder);
                             }

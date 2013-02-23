@@ -43,13 +43,21 @@ namespace Meticumedia
             this.Name = name;
         }
 
+        public Movie(string name, int id, int year, string directory, string contentFolder) : this(name)
+        {
+            this.Id = id;
+            this.Date = new DateTime(year, 1, 1);
+            this.Path = directory;
+            this.RootFolder = contentFolder;
+        }
+
         /// <summary>
         /// Constructor for cloning a Movie.
         /// </summary>
         /// <param name="movie"></param>
         public Movie(Movie movie) : this()
         {
-            UpdateInfo(movie);
+            Clone(movie);
             this.RootFolder = movie.RootFolder;
             this.Path = movie.Path;
         }
@@ -71,7 +79,7 @@ namespace Meticumedia
         /// Updates this movie with properties from another instance.
         /// </summary>
         /// <param name="movie"></param>
-        public void UpdateInfo(Movie movie)
+        public void Clone(Movie movie)
         {
             this.Name = movie.Name;
             this.DatabaseName = movie.DatabaseName;
@@ -143,7 +151,7 @@ namespace Meticumedia
         /// Saves instance to XML file.
         /// </summary>
         /// <param name="xw">Writer for accessing XML file</param>
-        public void Save(XmlWriter xw)
+        public override void Save(XmlWriter xw)
         {
             // Start movie
             xw.WriteStartElement(ROOT_XML);
@@ -160,7 +168,7 @@ namespace Meticumedia
         /// </summary>
         /// <param name="itemNode">Node to load XML from</param>
         /// <returns>true if sucessfully loaded from XML</returns>
-        public bool Load(XmlNode movieNode)
+        public override bool Load(XmlNode movieNode)
         {
             // Check that node is current type
             if (movieNode.Name != ROOT_XML)

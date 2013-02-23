@@ -466,7 +466,7 @@ namespace Meticumedia
         {
             for (int i = 0; i < Organization.Shows.Count; i++)
                 if (Organization.Shows[i].Name == this.Show)
-                    return Organization.Shows[i];
+                    return (TvShow)Organization.Shows[i];
 
             return null;
         }

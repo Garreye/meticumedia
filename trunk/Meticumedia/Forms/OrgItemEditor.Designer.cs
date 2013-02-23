@@ -57,7 +57,7 @@ namespace Meticumedia
             this.rbMovie = new System.Windows.Forms.RadioButton();
             this.rbTv = new System.Windows.Forms.RadioButton();
             this.gbMovie = new System.Windows.Forms.GroupBox();
-            this.cntrlMovieEdit = new Meticumedia.Controls.MovieEditControl();
+            this.cntrlMovieEdit = new Meticumedia.ContentEditControl();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.txtDestination = new System.Windows.Forms.TextBox();
@@ -360,7 +360,8 @@ namespace Meticumedia
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cntrlMovieEdit.Location = new System.Drawing.Point(6, 13);
-            this.cntrlMovieEdit.Movie = null;
+            this.cntrlMovieEdit.Content = null;
+            this.cntrlMovieEdit.ContentType = ContentType.Movie;
             this.cntrlMovieEdit.Name = "cntrlMovieEdit";
             this.cntrlMovieEdit.Size = new System.Drawing.Size(320, 191);
             this.cntrlMovieEdit.TabIndex = 0;
@@ -482,7 +483,7 @@ namespace Meticumedia
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.RadioButton rbCustom;
         private System.Windows.Forms.Button btnDestination;
-        private Controls.MovieEditControl cntrlMovieEdit;
+        private ContentEditControl cntrlMovieEdit;
         private System.Windows.Forms.Button btnNewShow;
     }
 }

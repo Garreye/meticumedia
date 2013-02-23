@@ -38,11 +38,11 @@ namespace Meticumedia
             this.tpScanFolders = new System.Windows.Forms.TabPage();
             this.cntrlScanFolders = new Meticumedia.ScanFolderControl();
             this.tpTvFolders = new System.Windows.Forms.TabPage();
-            this.cntrlTvFolders = new Meticumedia.ContentFoldersControl();
+            this.cntrlTvFolders = new Meticumedia.ContentFoldersControl(ContentType.TvShow);
             this.tpTvFile = new System.Windows.Forms.TabPage();
             this.cntrlTvFileNameFormat = new Meticumedia.FileNameFormatControl();
             this.tpMovieFolders = new System.Windows.Forms.TabPage();
-            this.cntrlMovieFolders = new Meticumedia.ContentFoldersControl();
+            this.cntrlMovieFolders = new Meticumedia.ContentFoldersControl(ContentType.Movie);
             this.tpMovieFileName = new System.Windows.Forms.TabPage();
             this.cntrlMovieFileNameFormat = new Meticumedia.FileNameFormatControl();
             this.tpFileExt = new System.Windows.Forms.TabPage();

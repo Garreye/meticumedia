@@ -148,7 +148,6 @@ namespace Meticumedia.Controls
             this.show.Name = txtName.Text;
             this.show.Overview = txtDescr.Text;
             this.show.Date = new DateTime((int)numYear.Value, this.show.Date.Month, this.show.Date.Day);
-            this.show.IncludeInScan = chkInlcudeScan.Checked;
             chkDoRenaming.Enabled = chkInlcudeScan.Checked;
             chkDoMissing.Enabled = chkInlcudeScan.Checked;
             this.show.DoRenaming = chkDoRenaming.Checked && chkDoRenaming.Enabled;

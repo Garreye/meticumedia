@@ -82,7 +82,7 @@ namespace Meticumedia
             if (ep.Missing != TvEpisode.MissingStatus.Missing)
                 contextMenu.MenuItems.Add("Play", new EventHandler(HandlePlay));
             contextMenu.MenuItems.Add("Copy Episode String to Clipboard", new EventHandler(HandleCopyToClipboard));
-            contextMenu.MenuItems.Add("Turn off include in scan for show", new EventHandler(HandleTurnOffIncludeInScan));
+            contextMenu.MenuItems.Add("Exclude From Schedule", new EventHandler(HandleExcludeFromSchedule));
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Meticumedia
         /// <summary>
         /// Handles turn off include in scan for show selection from context menu
         /// </summary>
-        private void HandleTurnOffIncludeInScan(object sender, EventArgs e)
+        private void HandleExcludeFromSchedule(object sender, EventArgs e)
         {
             // Ensure items are selected
             if (lvResults.SelectedIndices.Count == 0)
@@ -118,10 +118,10 @@ namespace Meticumedia
             {
                 TvEpisode currEp = results[lvResults.SelectedIndices[i]];
                 TvShow show = currEp.GetShow();
-                show.IncludeInScan = false;
+                show.IncludeInSchedule = false;
             }
 
-            Organization.SaveShows();
+            Organization.Shows.Save();
             UpdateResults();
         }
 
@@ -311,13 +311,13 @@ namespace Meticumedia
         private void UpdateResults()
         {
             // Get shows to check from combo box
-            List<TvShow> shows;
+            List<Content> shows;
             if (cmbShows.SelectedIndex < 1)
                 shows = Organization.Shows;
             else
             {
-                shows = new List<TvShow>();
-                TvShow show = Organization.Shows[cmbShows.SelectedIndex - 1];
+                shows = new List<Content>();
+                Content show = Organization.Shows[cmbShows.SelectedIndex - 1];
                 //show.UpdateMissing();
                 shows.Add(show);
             }
@@ -351,16 +351,16 @@ namespace Meticumedia
         /// <param name="days">Number of days to look for episodes in</param>
         /// <param name="upcoming">Whether to check for upcoming or recent episodes</param>
         /// <returns>List of episodes</returns>
-        private List<TvEpisode> BuildEpisodeList(List<TvShow> shows, int days, bool upcoming)
+        private List<TvEpisode> BuildEpisodeList(List<Content> shows, int days, bool upcoming)
         {
             // Initialize episode list
             List<TvEpisode> epList = new List<TvEpisode>();
 
             // Check every shows for episode that match schedule criteria
             for(int i=0;i<shows.Count;i++)
-                if (shows[i].IncludeInScan)
+                if (((TvShow)shows[i]).IncludeInSchedule)
                 {
-                    foreach (TvSeason season in shows[i].Seasons)
+                    foreach (TvSeason season in ((TvShow)shows[i]).Seasons)
                         foreach (TvEpisode episode in season.Episodes)
                         {
                             TimeSpan timeDiff = episode.AirDate.Subtract(DateTime.Now);

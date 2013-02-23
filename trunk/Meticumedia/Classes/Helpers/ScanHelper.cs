@@ -10,6 +10,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Drawing;
 using System.ComponentModel;
+using System.Threading;
 
 namespace Meticumedia
 {
@@ -96,10 +97,7 @@ namespace Meticumedia
         /// Update list of tv episodes currently in scan directories
         /// </summary>
         public static void UpdateScanDirTvItems()
-        {
-            // Perform an update
-            UpdateTvItems();
-
+        {            
             // Start timer to do update periodically
             scanDirUpdateTimer.Elapsed += new System.Timers.ElapsedEventHandler(scanDirUpdateTimer_Elapsed);
             scanDirUpdateTimer.Enabled = true;
@@ -115,7 +113,7 @@ namespace Meticumedia
             ScanDirTvItems = ScanHelper.DirectoryScan(Settings.ScanDirectories, new List<OrgItem>(), true, true);
 
             // Update missing
-            lock (Organization.ShowsLock)
+            lock (Organization.Shows.ContentLock)
                 foreach (TvShow show in Organization.Shows)
                     show.UpdateMissing();
 
@@ -386,10 +384,10 @@ namespace Meticumedia
             Dictionary<TvShow, MatchCollection> matches = new Dictionary<TvShow, MatchCollection>();
             for (int j = 0; j < Organization.Shows.Count; j++)
             {
-                MatchCollection match = Organization.Shows[j].MatchFileToShow(orgPath.Path);
+                MatchCollection match = Organization.Shows[j].MatchFileToContent(orgPath.Path);
                 if (match != null && match.Count > 0)
                 {
-                    matches.Add(Organization.Shows[j], match);
+                    matches.Add((TvShow)Organization.Shows[j], match);
                 }
             }
 
@@ -397,7 +395,7 @@ namespace Meticumedia
             lock(directoryScanLock)
                 foreach (TvShow show in temporaryShows[updateNumber])
                 {
-                    MatchCollection match = show.MatchFileToShow(orgPath.Path);
+                    MatchCollection match = show.MatchFileToContent(orgPath.Path);
                     newShow = show;
                     if (match != null && match.Count > 0)
                         matches.Add(show, match);
@@ -1053,7 +1051,7 @@ namespace Meticumedia
             }
 
             // Check if any movie folders need to be renamed!
-            foreach (Movie movie in Organization.GetMoviesFromRootFolders(folders)) 
+            foreach (Movie movie in Organization.GetContentFromRootFolders(folders)) 
             {
                 if (!string.IsNullOrEmpty(movie.Name) && movie.Path != movie.BuildFolderPath())
                 {

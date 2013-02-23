@@ -33,8 +33,8 @@ namespace Meticumedia
         /// Constructor with preset search string
         /// </summary>
         /// <param name="searchString"></param>
-        public SearchForm(string searchString, bool show)
-            : this(searchString, show, false)
+        public SearchForm(string searchString, ContentType type)
+            : this(searchString, type, false)
         { }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Meticumedia
         /// <param name="searchString">Search string</param>
         /// <param name="show">Whether search is for tv show (or movie if false)</param>
         /// <param name="showMatchButton">Whether to show match button - for debugging only</param>
-        public SearchForm(string searchString, bool show, bool showMatchButton)
+        public SearchForm(string searchString, ContentType type, bool showMatchButton)
         {
             InitializeComponent();
 
@@ -51,7 +51,7 @@ namespace Meticumedia
             WordHelper.Initialize();
 
             // Set search string text
-            searchControl1.IsShow = show;
+            searchControl1.ContentType = type;
             searchControl1.MatchVisible = showMatchButton;
         }
 

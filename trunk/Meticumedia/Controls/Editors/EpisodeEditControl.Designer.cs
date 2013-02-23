@@ -48,8 +48,8 @@ namespace Meticumedia
             // 
             // txtName
             // 
-            this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtName.Location = new System.Drawing.Point(62, 3);
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(239, 20);
@@ -58,7 +58,6 @@ namespace Meticumedia
             // 
             // chkIgnored
             // 
-            this.chkIgnored.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkIgnored.AutoSize = true;
             this.chkIgnored.Location = new System.Drawing.Point(6, 29);
             this.chkIgnored.Name = "chkIgnored";

@@ -36,10 +36,12 @@ namespace Meticumedia
             WordHelper.Initialize();
             
             // Setup shows control
-            cntrlShows.ShowsChanged += new EventHandler(cntrlShows_ShowsChange);
+            Organization.Shows.ContentSaved += new EventHandler(showsSaved);
 
-            // Setup movies control
+            // Setup content controls
             cntrlMovies.UpdateFolders();
+            cntrlShows.UpdateFolders();
+            cntrlShows.SelectionChanged += cntrlShows_SelectionChanged;
 
             // Setup scan contorl
             cntrlScan.UpdateDirectories();
@@ -62,9 +64,16 @@ namespace Meticumedia
             linkMovieDb.Links.Add(0, linkMovieDb.Text.Length, "www.themoviedb.org");
         }
 
+
         #endregion
 
         #region Event Handling
+
+
+        void cntrlShows_SelectionChanged(object sender, ContentControl.SelectionChangedArgs e)
+        {
+            cntrlEpisodes.TvShow = (TvShow)e.Selections[0];
+        }
 
         /// <summary>
         /// Handler for update of global settings. Triggers controls to update
@@ -75,9 +84,9 @@ namespace Meticumedia
             cntrlScan.UpdateDirectories();
             cntrlScan.UpdateMovieFolders();
             cntrlMovies.UpdateFolders();
-            cntrlMovies.UpdateMoviesInFolders();
+            cntrlMovies.UpdateContentInFolders(false);
             cntrlShows.UpdateFolders();
-            cntrlShows.UpdateShowsInFolders(false);
+            cntrlShows.UpdateContentInFolders(false);
         }
 
         /// <summary>
@@ -95,7 +104,7 @@ namespace Meticumedia
                 {
                     if (e.CompleteItem.NewShow != null || e.CompleteItem.Category == FileHelper.FileCategory.Folder)
                     {
-                        cntrlShows.UpdateShowsInFolders(false);
+                        cntrlShows.UpdateContentInFolders(false);
                         cntrlSched.UpdateShows();
                         return;
                     }
@@ -111,13 +120,13 @@ namespace Meticumedia
                                 if (show.Path == e.CompleteItem.SourcePath)
                                 {
                                     show.Path = e.CompleteItem.DestinationPath;
-                                    cntrlShows.UpdateShowsInFolders(false);
+                                    cntrlShows.UpdateContentInFolders(false);
                                     cntrlSched.UpdateShows();
                                     return;
                                 }
 
                         // Update controls with shows
-                        cntrlShows.UpdateShowsIfNecessary(e.CompleteItem.TvEpisode);
+                        cntrlShows.UpdateDisplayIfNecessary(e.CompleteItem.TvEpisode.Show);
 
                     }
                 }
@@ -126,11 +135,11 @@ namespace Meticumedia
                 {
                     // If new movie as it to movie list
                     if (!Organization.Movies.Contains(e.CompleteItem.Movie))
-                        Organization.AddMovie(e.CompleteItem.Movie);
+                        Organization.Movies.Add(e.CompleteItem.Movie);
 
                     // Trigger movies update
                     if (e.CompleteItem.Category == FileHelper.FileCategory.Folder)
-                        cntrlMovies.UpdateMoviesInFolders();
+                        cntrlMovies.UpdateContentInFolders(false);
                 }
             });
         }
@@ -147,10 +156,16 @@ namespace Meticumedia
         /// Updates controls with show information when a change to a show 
         /// occurs from the shows control.
         /// </summary>
-        private void cntrlShows_ShowsChange(object sender, EventArgs e)
+        private void showsSaved(object sender, EventArgs e)
         {
-            cntrlScan.UpdateShows(false);
-            cntrlSched.UpdateShows();
+            cntrlScan.Invoke((MethodInvoker)delegate
+            {
+                cntrlScan.UpdateShows(false);
+            });
+            cntrlSched.Invoke((MethodInvoker)delegate
+            {
+                cntrlSched.UpdateShows();
+            });
         }
         
         /// <summary>

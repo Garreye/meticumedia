@@ -390,7 +390,8 @@ namespace Meticumedia
                 TvShow show = selectedResult.TvEpisode.GetShow();
                 if (show != null)
                 {
-                    show.IncludeInScan = false;
+                    show.DoRenaming = false;
+                    show.DoMissingCheck = false;
                     if (!showsToBeSet.Contains(show))
                         showsToBeSet.Add(show);
                 }
@@ -404,7 +405,7 @@ namespace Meticumedia
                         break;
                     }
 
-            Organization.SaveShows();
+            Organization.Shows.Save();
             DisplayResults();
         }
 
@@ -428,7 +429,7 @@ namespace Meticumedia
                 selectedResult.Category = FileHelper.FileCategory.Ignored;
 
             }
-            Organization.SaveShows();
+            Organization.Shows.Save();
             DisplayResults();
         }
 
@@ -477,7 +478,7 @@ namespace Meticumedia
             }
                 
 
-            Organization.SaveShows();
+            Organization.Shows.Save();
             DisplayResults();
         }
 
@@ -931,7 +932,7 @@ namespace Meticumedia
             }
 
             bool selected = false;
-            foreach (TvShow show in Organization.GetScannableShows(false))
+            foreach (TvShow show in Organization.Shows.GetScannableContent(false))
             {
                 // Add item
                 cmbShows.Items.Add(show.Name);
@@ -1136,13 +1137,13 @@ namespace Meticumedia
                 scanType = ScanType.TvMissing;
 
                 // Get shows to check from combo box
-                List<TvShow> shows;
+                List<Content> shows;
                 if (cmbShows.SelectedIndex <= 0)
-                    shows = Organization.GetScannableShows(true);
+                    shows = Organization.Shows.GetScannableContent(true);
                 else
                 {
-                    shows = new List<TvShow>();
-                    shows.Add(Organization.GetScannableShows(true)[cmbShows.SelectedIndex - 1]);
+                    shows = new List<Content>();
+                    shows.Add(Organization.Shows.GetScannableContent(true)[cmbShows.SelectedIndex - 1]);
                 }
                 list = shows;
                 sortType = OrgColumnType.Show;

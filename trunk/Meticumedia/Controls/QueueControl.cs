@@ -84,7 +84,7 @@ namespace Meticumedia
             // Register to queuing event
             ScanControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
             ContentListView.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
-            ShowsControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
+            ContentControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
 
             // Register context menu
             lvQueue.ContextMenu = contextMenu;

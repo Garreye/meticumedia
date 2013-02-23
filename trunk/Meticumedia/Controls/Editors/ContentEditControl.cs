@@ -11,28 +11,33 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Meticumedia.Controls
+namespace Meticumedia
 {
     /// <summary>
     /// Control for editing properties of a movie instance
     /// </summary>
-    public partial class MovieEditControl : UserControl
+    public partial class ContentEditControl : UserControl
     {
         #region Properties
 
         /// <summary>
-        /// Movie that is being editied
+        /// Content that is being editied
         /// </summary>
-        public Movie Movie 
+        public Content Content 
         {
-            get { return movie; }
+            get { return content; }
             set 
             { 
-                movie = value;
+                content = value;
                 if (value != null)
-                    DisplayMovie(false);
+                    DisplayContent(false);
             }
         }
+
+        /// <summary>
+        /// Type of content being edited.
+        /// </summary>
+        public ContentType ContentType { get; set; }
 
         #endregion
 
@@ -41,15 +46,15 @@ namespace Meticumedia.Controls
         /// <summary>
         /// Indicates that movie has changed
         /// </summary>
-        public event EventHandler<EventArgs> MovieChanged;
+        public event EventHandler<EventArgs> ContentChanged;
 
         /// <summary>
         /// Triggers MovieChanged event
         /// </summary>
-        protected void OnMovieChanged()
+        protected void OnContentChanged()
         {
-            if (MovieChanged != null && !disableMovieChangedEvent)
-                MovieChanged(this, new EventArgs());
+            if (ContentChanged != null && !disableContentChangedEvent)
+                ContentChanged(this, new EventArgs());
         }
 
         #endregion
@@ -57,14 +62,14 @@ namespace Meticumedia.Controls
         #region Variables
 
         /// <summary>
-        /// The movie instance being edited.
+        /// The content instance being edited.
         /// </summary>
-        private Movie movie = new Movie();
+        private Content content = new Content();
 
         /// <summary>
         /// Flag indicating that movie changed event should be disabled.
         /// </summary>
-        private bool disableMovieChangedEvent = false;
+        private bool disableContentChangedEvent = false;
 
         #endregion
 
@@ -73,7 +78,15 @@ namespace Meticumedia.Controls
         /// <summary>
         /// Default constructor
         /// </summary>
-        public MovieEditControl()
+        public ContentEditControl(ContentType type) : this()
+        {
+            this.ContentType = type;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ContentEditControl()
         {
             InitializeComponent();
         }
@@ -83,47 +96,55 @@ namespace Meticumedia.Controls
         #region Methods
 
         /// <summary>
-        /// Updates movie properties from online database
+        /// Updates content properties from online database
         /// </summary>
-        public void UpdateMovieInfo()
+        public void UpdateContentInfo()
         {
-            this.movie = TheMovieDbHelper.UpdateMovieInfo(this.movie);
-            DisplayMovie(false);
+            this.content.UpdateInfoFromDatabase();
+            DisplayContent(false);
         }
 
         /// <summary>
-        /// Display movie properties in appropriate controls
+        /// Display content properties in appropriate controls
         /// </summary>
-        private void DisplayMovie(bool forceProps)
+        private void DisplayContent(bool forceProps)
         {
-            disableMovieChangedEvent = true;
+            disableContentChangedEvent = true;
 
             // Set which group box to show
-            gbOnlineSearch.Visible = movie.Id <= 0 && !forceProps;
-            gbProperties.Visible = movie.Id > 0 || forceProps;
+            gbOnlineSearch.Visible = content.Id <= 0 && !forceProps;
+            gbProperties.Visible = content.Id > 0 || forceProps;
 
             // Build search string for movie search: use movie name, if empty use folder name
             string searchString = txtName.Text;
             if (string.IsNullOrEmpty(searchString))
             {
-                string[] dirs = movie.Path.Split('\\');
+                string[] dirs = content.Path.Split('\\');
                 searchString = (dirs[dirs.Length - 1]);
             }
             cntrlSearch.SearchString = searchString;
 
             // Set form elements to movie properties
-            txtName.Text = this.movie.Name;
-            numYear.Value = this.movie.Date.Year;
-            numId.Value = this.movie.Id;
+            txtName.Text = this.content.Name;
+            numYear.Value = this.content.Date.Year;
+            numId.Value = this.content.Id;
             lbGenres.Items.Clear();
-            if (this.movie.Genres != null)
-                foreach (string genre in this.movie.Genres)
+            if (this.content.Genres != null)
+                foreach (string genre in this.content.Genres)
                     lbGenres.Items.Add(genre);
+            disableContentChangedEvent = false;
+            chkDoRenaming.Checked = content.DoRenaming;
 
-            disableMovieChangedEvent = false;
+            if (this.ContentType == Meticumedia.ContentType.TvShow)
+            {
+                chkDoMissing.Visible = true;
+                chkDoMissing.Checked = ((TvShow)content).DoMissingCheck;
+                chkIncludeInSchedule.Visible = true;
+                chkIncludeInSchedule.Checked = ((TvShow)content).IncludeInSchedule;
+            }
 
             // Trigger movie changes event
-            OnMovieChanged();
+            OnContentChanged();
         }
 
         #endregion
@@ -141,7 +162,7 @@ namespace Meticumedia.Controls
                 numId.BackColor = Color.Red;
             else
                 numId.BackColor = Color.White;
-            OnMovieChanged();
+            OnContentChanged();
         }
 
         /// <summary>
@@ -151,8 +172,8 @@ namespace Meticumedia.Controls
         /// <param name="e"></param>
         private void txtName_TextChanged(object sender, EventArgs e)
         {
-            this.movie.Name = txtName.Text;
-            OnMovieChanged();
+            this.content.Name = txtName.Text;
+            OnContentChanged();
         }
 
         /// <summary>
@@ -162,8 +183,32 @@ namespace Meticumedia.Controls
         /// <param name="e"></param>
         private void numYear_ValueChanged(object sender, EventArgs e)
         {
-            this.movie.Date = new DateTime((int)numYear.Value, this.movie.Date.Month, this.movie.Date.Day);
-            OnMovieChanged();
+            this.content.Date = new DateTime((int)numYear.Value, this.content.Date.Month, this.content.Date.Day);
+            OnContentChanged();
+        }
+
+        private void chkDoMissing_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.ContentType == ContentType.TvShow)
+            {
+                ((TvShow)content).DoMissingCheck = chkDoMissing.Checked;
+                OnContentChanged();
+            }
+        }
+
+        private void chkIncludeInSchedule_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.ContentType == ContentType.TvShow)
+            {
+                ((TvShow)content).IncludeInSchedule = chkIncludeInSchedule.Checked;
+                OnContentChanged();
+            }
+        }
+
+        private void chkDoRenaming_CheckedChanged(object sender, EventArgs e)
+        {
+            this.content.DoRenaming = chkDoRenaming.Checked;
+            OnContentChanged();
         }
 
         /// <summary>
@@ -178,7 +223,7 @@ namespace Meticumedia.Controls
             for (int i = 0; i < Organization.AllMovieGenres.Count; i++)
             {
                 // Don't list genres already added
-                if (movie.Genres.Contains(Organization.AllMovieGenres[i]))
+                if (content.Genres.Contains(Organization.AllMovieGenres[i]))
                     continue;
 
                 // Add genre name
@@ -194,12 +239,12 @@ namespace Meticumedia.Controls
                 foreach (string genre in Organization.AllMovieGenres)
                     if (genre == selForm.Results)
                     {
-                        this.movie.Genres.Add(genre);
+                        this.content.Genres.Add(genre);
                         break;
                     }
 
             // Refresh display
-            DisplayMovie(false);
+            DisplayContent(false);
         }
 
         /// <summary>
@@ -215,15 +260,15 @@ namespace Meticumedia.Controls
 
             // Remove genre
             string genreToRemove = lbGenres.SelectedItem.ToString();
-            foreach (string genre in this.movie.Genres)
+            foreach (string genre in this.content.Genres)
                 if (genre == genreToRemove)
                 {
-                    this.movie.Genres.Remove(genre);
+                    this.content.Genres.Remove(genre);
                     break;
                 }
 
             // Refresh display
-            DisplayMovie(false);
+            DisplayContent(false);
         }
 
         // <summary>
@@ -238,7 +283,7 @@ namespace Meticumedia.Controls
         }
 
         /// <summary>
-        /// When show is selected from search results it's properties are copied to show.
+        /// When content is selected from search results it's properties are copied to show.
         /// </summary>
         private void cntrlSearch_SearchResultsSelected(object sender, SearchControl.SearchResultsSelectedArgs e)
         {
@@ -247,14 +292,22 @@ namespace Meticumedia.Controls
                 // Update the movie
                 if (cntrlSearch.Results != null)
                 {
-                    this.movie.Clone((Movie)cntrlSearch.Results);
-                    this.movie = TheMovieDbHelper.UpdateMovieInfo(this.movie);
-                    this.movie.Path = this.movie.BuildFolderPath();
+                    switch (this.ContentType)
+                    {
+                        case ContentType.Movie:
+                            ((Movie)this.content).Clone((Movie)cntrlSearch.Results);
+                            break;
+                        case ContentType.TvShow:
+                            ((TvShow)this.content).Clone((TvShow)cntrlSearch.Results);
+                            break;
+                    }                    
+                    this.content.UpdateInfoFromDatabase();
+                    this.content.Path = this.content.BuildFolderPath();
                 }
             }
 
             // Update form
-            DisplayMovie(e.CustomSelected);
+            DisplayContent(e.CustomSelected);
         }
 
         #endregion

@@ -19,14 +19,17 @@ namespace Meticumedia
     /// </summary>
     public partial class ContentFoldersControl : UserControl
     {
+        public ContentType ContentType { get; set; }
+        
         #region Constructor
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public ContentFoldersControl()
+        public ContentFoldersControl(ContentType type)
         {
             InitializeComponent();
+            this.ContentType = type;
         }
 
         #endregion
@@ -65,7 +68,7 @@ namespace Meticumedia
             if (Directory.Exists(folderSel.SelectedPath))
             {
                 // Create new content folder, set it to default if no others exists
-                ContentRootFolder newFolder = new ContentRootFolder(folderSel.SelectedPath, folderSel.SelectedPath);
+                ContentRootFolder newFolder = new ContentRootFolder(this.ContentType, folderSel.SelectedPath, folderSel.SelectedPath);
                 if (contentFolders.Count == 0)
                     newFolder.Default = true;
                 contentFolders.Add(newFolder);
@@ -141,7 +144,7 @@ namespace Meticumedia
 
             // If selection is valid set sub-folder as sub-content folder
             if (!string.IsNullOrEmpty(selForm.Results))
-                selectedFolder.ChildFolders.Add(new ContentRootFolder(selForm.Results, Path.Combine(selectedFolder.FullPath, selForm.Results)));
+                selectedFolder.ChildFolders.Add(new ContentRootFolder(this.ContentType, selForm.Results, Path.Combine(selectedFolder.FullPath, selForm.Results)));
 
             // Refresh displau
             DisplayFoldersTree(selectedFolder);
@@ -177,7 +180,7 @@ namespace Meticumedia
             
             if (MessageBox.Show(message, "Sure?", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 foreach(string subDir in subDirs)
-                    selectedFolder.ChildFolders.Add(new ContentRootFolder(subDir, Path.Combine(selectedFolder.FullPath, subDir)));
+                    selectedFolder.ChildFolders.Add(new ContentRootFolder(this.ContentType, subDir, Path.Combine(selectedFolder.FullPath, subDir)));
 
             // Refresh displau
             DisplayFoldersTree(selectedFolder);
@@ -214,7 +217,7 @@ namespace Meticumedia
                 case ContentType.Movie:
                     folders = Settings.MovieFolders;
                     break;
-                case ContentType.Tv:
+                case ContentType.TvShow:
                     folders = Settings.TvFolders;
                     break;
                 default:
@@ -270,7 +273,7 @@ namespace Meticumedia
                 case ContentType.Movie:
                     Settings.MovieFolders = contentFolders;
                     break;
-                case ContentType.Tv:
+                case ContentType.TvShow:
                     Settings.TvFolders = contentFolders;
                     break;
                 default:
@@ -325,7 +328,7 @@ namespace Meticumedia
             }
 
             // No match
-            match = new ContentRootFolder();
+            match = new ContentRootFolder(folders[0].ContentType);
             return false;
         }
 

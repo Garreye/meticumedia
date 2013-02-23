@@ -43,7 +43,7 @@ namespace Meticumedia
         /// <summary>
         /// Indicates whether search is for show (or movie when false)
         /// </summary>
-        public bool IsShow { get; set; }
+        public ContentType ContentType { get; set; }
 
         public bool MatchVisible
         {
@@ -121,7 +121,7 @@ namespace Meticumedia
             InitializeComponent();
 
             // Defaults
-            this.IsShow = false;
+            this.ContentType = ContentType.Movie;
             this.SearchString = string.Empty;
 
             // Initialize results to null
@@ -155,10 +155,17 @@ namespace Meticumedia
         private void PerformSearch()
         {
             // Do search
-            if (IsShow)
-                searchResults = TvDatabaseHelper.PerformTvShowSearch(txtSearchEntry.Text, true);
-            else
-                searchResults = TheMovieDbHelper.PerformMovieSearch(txtSearchEntry.Text);
+            switch (this.ContentType)
+            {
+                case ContentType.Movie:
+                    searchResults = TheMovieDbHelper.PerformMovieSearch(txtSearchEntry.Text);    
+                    break;
+                case ContentType.TvShow:
+                    searchResults = TvDatabaseHelper.PerformTvShowSearch(txtSearchEntry.Text, true);
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
+            }               
 
             // Display results
             DisplayResults();
@@ -237,10 +244,17 @@ namespace Meticumedia
         private void bntMatch_Click(object sender, EventArgs e)
         {
             Content match;
-            if (IsShow)
-                match = SearchHelper.TvShowSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false);
-            else
-                match = SearchHelper.MovieSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false);
+            switch (this.ContentType)
+            {
+                case ContentType.Movie:
+                    match = SearchHelper.MovieSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false);
+                    break;
+                case ContentType.TvShow:
+                    match = SearchHelper.TvShowSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false);
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
+            }                
             searchResults = new List<Content>();
             searchResults.Add(match);
             DisplayResults();

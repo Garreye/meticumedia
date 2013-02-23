@@ -89,7 +89,7 @@ namespace Meticumedia
             cntrlTvFileNameFormat.LoadFormat(false);
             cntrlMovieFileNameFormat.LoadFormat(true);
             cntrlMovieFolders.LoadFolders(ContentType.Movie);
-            cntrlTvFolders.LoadFolders(ContentType.Tv);
+            cntrlTvFolders.LoadFolders(ContentType.TvShow);
             cntrlFileTypes.LoadFileTypes();
         }
 

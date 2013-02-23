@@ -29,6 +29,16 @@ namespace Meticumedia
         /// </summary>
         public bool DoMissingCheck { get; set; }
 
+        /// <summary>
+        /// Whether to include show in scehdule.
+        /// </summary>
+        public bool IncludeInSchedule { get; set; }
+
+        /// <summary>
+        /// Determines whether or not the content is to be included in scanning.
+        /// </summary>
+        public override bool IncludeInScan { get { return this.DoRenaming || this.DoMissingCheck; } }
+
         #endregion
 
         #region Constructor
@@ -44,6 +54,7 @@ namespace Meticumedia
         {
             this.Name = name;
             this.Id = id;
+            this.Date = new DateTime(year, 1, 1);
             this.Path = directory;
             this.RootFolder = contentFolder;
         }
@@ -64,8 +75,8 @@ namespace Meticumedia
                 this.RootFolder = defaultFolder.FullPath;
             this.Overview = string.Empty;
             this.DoRenaming = true;
-            this.IncludeInScan = true;
             this.DoMissingCheck = true;
+            this.IncludeInSchedule = true;
         }
 
         /// <summary>
@@ -102,7 +113,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// CLones another instance of class 
+        /// Clones another instance of class 
         /// </summary>
         /// <param name="show">Show to clon</param>
         public void Clone(TvShow show)
@@ -113,7 +124,7 @@ namespace Meticumedia
             this.DoRenaming = show.DoRenaming;
             this.Path = show.Path;
             this.Found = show.Found;
-            this.IncludeInScan = show.IncludeInScan;
+            this.IncludeInSchedule = show.IncludeInSchedule;
             this.Genres = show.Genres;
             this.Seasons = show.Seasons;
             this.Id = show.Id;
@@ -127,7 +138,7 @@ namespace Meticumedia
         /// <summary>
         /// Search show directory for episodes and mark the missing status for each
         /// </summary>
-        public void UpdateMissing()
+        public override void UpdateMissing()
         {
             // Mark all as missing - TODO: check file path and check that file still exists, if so don't mark as missing!
             foreach (TvSeason season in Seasons)
@@ -196,102 +207,13 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Builds a regular expression string for matching against
-        /// file names. String built such that it will cause matches for:
-        ///     -The full show name with spaces (e.g. "How I Met Your Mother)
-        ///     -The full show name without spaces (e.g. "HowIMetYourMother)
-        ///     -The acronym for the show name (e.g. "himym") - if name has 3 or more words
-        ///     -The name without cosonents (e.g. "BttlstrGlctc")
-        /// "and"/"&" are set to optional matches
-        /// </summary>
-        /// <returns></returns>
-        private string BuildNameRegularExpresionString(bool removeWhitespace)
-        {
-            // Initialize string
-            string showReStr = string.Empty;
-
-            // Get simplified name
-            string showname = FileHelper.SimplifyFileName(this.Name, true, removeWhitespace);
-
-            // Split name words
-            string[] showWords = showname.Split(' ');
-
-            // Create cosonants RE
-            Regex cosonantRe = new Regex("[aeiouy]");
-
-            // Go through each word of the name
-            for (int i = 0; i < showWords.Length; i++)
-            {
-                // Add 'a' for accronym
-                if (showWords[i] == "and" || showWords[i] == "&")
-                {
-                    showReStr += @"(a|&(nd\W+)?)?";
-                    continue;
-                }
-
-                // Go through each letter of the word
-                for (int j = 0; j < showWords[i].Length; j++)
-                {
-                    // Add letter
-                    if (showWords[i][j] == '-')
-                        showReStr += ".";
-                    else
-                        showReStr += showWords[i][j];
-
-                    // Start optional first letter only
-                    if (j == 0 && showWords.Length > 2)
-                        showReStr += "(";
-
-                    // Consonants are optional
-                    else if (cosonantRe.IsMatch(showWords[i][j].ToString()) && (showWords[i].Length > 5 || showWords.Length > 1))
-                        showReStr += "?";
-
-                    // End of word can contain whitespace/seperators
-                    if (j == showWords[i].Length - 1)
-                    {
-                        // End optional first letter only
-                        if (showWords.Length > 2)
-                            showReStr += @")?";
-
-                        showReStr += @"\W*";
-                    }
-
-                }
-            }
-
-            return showReStr;
-        }
-
-        /// <summary>
-        /// Attempts to find matches between a file name and the show name
-        /// </summary>
-        /// <param name="fileName">Collection of matches for file name and show</param>
-        /// <returns></returns>
-        public MatchCollection MatchFileToShow(string fileName)
-        {
-            string re = BuildNameRegularExpresionString(true);
-            MatchCollection matches = null;
-            if (!string.IsNullOrEmpty(re))
-                matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
-
-            if (matches != null && matches.Count > 0)
-                return matches;
-
-            re = BuildNameRegularExpresionString(false);
-            if (!string.IsNullOrEmpty(re))
-                return Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
-
-            return null;
-        }
-
-        /// <summary>
         /// Attempts to match a file to the show name
         /// </summary>
         /// <param name="fileName">Collection of matches for file name and show</param>
         /// <returns></returns>
         public bool CheckFileToShow(string fileName)
         {
-            MatchCollection matches = MatchFileToShow(fileName);
+            MatchCollection matches = MatchFileToContent(fileName);
             foreach (Match m in matches)
                 if (m.Length >= 3)
                     return true;
@@ -357,6 +279,15 @@ namespace Meticumedia
             return this.Path + "\\" + (new TvSeason(episode1.Season)).ToString() + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public override void UpdateInfoFromDatabase()
+        {
+            TvDatabaseHelper.FullShowSeasonsUpdate(this);
+            this.LastUpdated = DateTime.Now;
+        }
+
         #endregion
 
         #region XML
@@ -369,13 +300,13 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Seasons, DoMissing };
+        private enum XmlElements { Seasons, DoMissing, IncludeInSchedule };
 
         /// <summary>
         /// Saves instance to XML file.
         /// </summary>
         /// <param name="xw">Writer for accessing XML file</param>
-        public void Save(XmlWriter xw)
+        public override void Save(XmlWriter xw)
         {
             // Start show
             xw.WriteStartElement(ROOT_XML);
@@ -398,6 +329,9 @@ namespace Meticumedia
                     case XmlElements.DoMissing:
                         value = this.DoMissingCheck.ToString();
                         break;
+                    case XmlElements.IncludeInSchedule:
+                        value = this.IncludeInSchedule.ToString();
+                        break;
                     default:
                         throw new Exception("Unkonw element!");
                 }
@@ -415,7 +349,7 @@ namespace Meticumedia
         /// </summary>
         /// <param name="itemNode">Node to load XML from</param>
         /// <returns>true if sucessfully loaded from XML</returns>
-        public bool Load(XmlNode showNode)
+        public override bool Load(XmlNode showNode)
         {
             // Check that node is proper type
             if (showNode.Name != ROOT_XML)
@@ -447,6 +381,11 @@ namespace Meticumedia
                         bool doMissing;
                         bool.TryParse(value, out doMissing);
                         this.DoMissingCheck = doMissing;
+                        break;
+                    case XmlElements.IncludeInSchedule:
+                        bool include;
+                        bool.TryParse(value, out include);
+                        this.IncludeInSchedule = include;
                         break;
                 }
             }

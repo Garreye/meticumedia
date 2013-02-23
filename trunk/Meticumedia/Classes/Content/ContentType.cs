@@ -12,5 +12,5 @@ namespace Meticumedia
     /// <summary>
     /// Types of content that can be found in content folders
     /// </summary>
-    public enum ContentType { Movie, Tv }
+    public enum ContentType { Movie, TvShow }
 }

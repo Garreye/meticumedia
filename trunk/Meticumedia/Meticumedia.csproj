@@ -68,7 +68,7 @@
     <Compile Include="Classes\Content\Content.cs" />
     <Compile Include="Classes\Content\ContentSearch.cs" />
     <Compile Include="Classes\Content\ContentType.cs" />
-    <Compile Include="Classes\Global\GenreCollection.cs" />
+    <Compile Include="Classes\Content\GenreCollection.cs" />
     <Compile Include="Classes\Helpers\TvDatabaseAccess.cs" />
     <Compile Include="Classes\Helpers\SearchHelper.cs" />
     <Compile Include="Classes\Helpers\TvDatabaseHelper.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="Classes\Helpers\TheMovieDbHelper.cs" />
     <Compile Include="Classes\Helpers\WordHelper.cs" />
     <Compile Include="Classes\Movies\Movie.cs" />
-    <Compile Include="Classes\Content\ContentRoot.cs" />
+    <Compile Include="Classes\Content\ContentRootFolder.cs" />
     <Compile Include="Classes\Helpers\FileNameFormat.cs" />
     <Compile Include="Classes\Organization\OrgAction.cs" />
     <Compile Include="Classes\Organization\OrgColumn.cs" />
@@ -90,6 +90,7 @@
     <Compile Include="Classes\Helpers\OrgItemListHelper.cs" />
     <Compile Include="Classes\Organization\OrgProcessing.cs" />
     <Compile Include="Classes\Organization\OrgProcessingArgs.cs" />
+    <Compile Include="Classes\Organization\OrgProgressChangesEventArgs.cs" />
     <Compile Include="Classes\Organization\OrgStatus.cs" />
     <Compile Include="Classes\Helpers\RemoveFileWord.cs" />
     <Compile Include="Classes\Helpers\Separator.cs" />
@@ -104,13 +105,25 @@
     <Compile Include="Classes\Tv\TvSeason.cs" />
     <Compile Include="Classes\Tv\TvShow.cs" />
     <Compile Include="Classes\Tv\TvEpisode.cs" />
-    <Compile Include="Classes\Tv\TvShowCollection.cs" />
+    <Compile Include="Classes\Content\ContentCollection.cs" />
     <Compile Include="Classes\Tv\TvShowSearch.cs" />
     <Compile Include="Controls\ContentListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\ContentControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ContentControl.Designer.cs">
+      <DependentUpon>ContentControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\DoubleBufferedListView.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Editors\ContentEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\Editors\ContentEditControl.Designer.cs">
+      <DependentUpon>ContentEditControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\Editors\EpisodeEditControl.cs">
       <SubType>UserControl</SubType>
@@ -124,6 +137,12 @@
     <Compile Include="Controls\Editors\SearchControl.Designer.cs">
       <DependentUpon>SearchControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\EpisodesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\EpisodesControl.Designer.cs">
+      <DependentUpon>EpisodesControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ItemsToQueueArgs.cs" />
     <Compile Include="Controls\LegendBoxControl.cs">
       <SubType>UserControl</SubType>
@@ -136,12 +155,6 @@
     </Compile>
     <Compile Include="Controls\MovieControl.Designer.cs">
       <DependentUpon>MovieControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Editors\MovieEditControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Editors\MovieEditControl.Designer.cs">
-      <DependentUpon>MovieEditControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\ScheduleControl.cs">
       <SubType>UserControl</SubType>
@@ -197,12 +210,6 @@
     <Compile Include="Controls\Settings\ScanFolderControl.Designer.cs">
       <DependentUpon>ScanFolderControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Editors\ShowEditControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Editors\ShowEditControl.Designer.cs">
-      <DependentUpon>ShowEditControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ShowsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -212,17 +219,17 @@
     <Compile Include="Controls\TextProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Forms\ContentEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ContentEditorForm.Designer.cs">
+      <DependentUpon>ContentEditorForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EpisodeEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\EpisodeEditorForm.Designer.cs">
       <DependentUpon>EpisodeEditorForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MovieEditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MovieEditorForm.Designer.cs">
-      <DependentUpon>MovieEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\SearchForm.cs">
       <SubType>Form</SubType>
@@ -248,12 +255,6 @@
     <Compile Include="Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ShowEditForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ShowEditForm.Designer.cs">
-      <DependentUpon>ShowEditForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\MeticumediaForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -264,21 +265,24 @@
     <Compile Include="Classes\Helpers\ScanHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Controls\ContentControl.resx">
+      <DependentUpon>ContentControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\Editors\ContentEditControl.resx">
+      <DependentUpon>ContentEditControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\Editors\EpisodeEditControl.resx">
       <DependentUpon>EpisodeEditControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Editors\SearchControl.resx">
       <DependentUpon>SearchControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controls\EpisodesControl.resx">
+      <DependentUpon>EpisodesControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\LegendBoxControl.resx">
       <DependentUpon>LegendBoxControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\MovieControl.resx">
-      <DependentUpon>MovieControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Editors\MovieEditControl.resx">
-      <DependentUpon>MovieEditControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\ScheduleControl.resx">
       <DependentUpon>ScheduleControl.cs</DependentUpon>
@@ -307,18 +311,11 @@
     <EmbeddedResource Include="Controls\Settings\ScanFolderControl.resx">
       <DependentUpon>ScanFolderControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Editors\ShowEditControl.resx">
-      <DependentUpon>ShowEditControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\ShowsControl.resx">
-      <DependentUpon>ShowsControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
+    <EmbeddedResource Include="Forms\ContentEditorForm.resx">
+      <DependentUpon>ContentEditorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\EpisodeEditorForm.resx">
       <DependentUpon>EpisodeEditorForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MovieEditorForm.resx">
-      <DependentUpon>MovieEditorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SearchForm.resx">
       <DependentUpon>SearchForm.cs</DependentUpon>
@@ -331,9 +328,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ShowEditForm.resx">
-      <DependentUpon>ShowEditForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MeticumediaForm.resx">
       <DependentUpon>MeticumediaForm.cs</DependentUpon>

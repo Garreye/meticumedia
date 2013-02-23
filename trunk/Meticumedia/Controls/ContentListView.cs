@@ -102,6 +102,8 @@ namespace Meticumedia
             }
         }
 
+        public ContentType ContentType { get; set; }
+
         #endregion
 
         #region Variables
@@ -138,10 +140,10 @@ namespace Meticumedia
         /// <summary>
         /// Default constructor
         /// </summary>
-        public ContentListView()
-            : base()
+        public ContentListView() : base()
         {
             this.Contents = new List<Content>();
+            this.ContentType = ContentType.Movie;
 
             // Setup context menu
             this.ContextMenu = contextMenu;
@@ -201,13 +203,11 @@ namespace Meticumedia
                     allWatched = false;
 
             if ((allUnwatched && !allWatched) || (!allWatched && !allUnwatched))
-                contextMenu.MenuItems.Add("Mark as watched", HandleMarkAsWatch);
+                contextMenu.MenuItems.Add("Mark as Watched", HandleMarkAsWatch);
             if ((allWatched && !allUnwatched) || (!allWatched && !allUnwatched))
-                contextMenu.MenuItems.Add("Unmark as watched", HandleUnmarkAsWatch);
+                contextMenu.MenuItems.Add("Unmark as Watched", HandleUnmarkAsWatch);
 
-            contextMenu.MenuItems.Add("Set as sub-folder(s)", HandleSetAsSubFolder);
-
-            
+            contextMenu.MenuItems.Add("Set as Child Root fplder(s)", HandleSetAsSubFolder);
 
             // Set folder to exclude from move list
             string exclude = selContent[0].RootFolder;
@@ -306,7 +306,7 @@ namespace Meticumedia
                 ContentRootFolder folder;
                 if (Settings.GetContentFolder(cnt.RootFolder, out folder))
                     // Convert movie folder as sub-folder
-                    folder.ChildFolders.Add(new ContentRootFolder(path, fullPath));
+                    folder.ChildFolders.Add(new ContentRootFolder(this.ContentType, path, fullPath));
             }
             Settings.Save();
             OnUpdateContentsRequired();
@@ -539,7 +539,7 @@ namespace Meticumedia
             foreach (Content fldr in selFolders)
                 fldr.Watched = watched;
 
-            Organization.SaveMovies();
+            Organization.Movies.Save();
 
             // Refresh display
             DisplayContent(false);
