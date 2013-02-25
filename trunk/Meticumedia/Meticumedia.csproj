@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Classes\Content\Content.cs" />
     <Compile Include="Classes\Content\ContentSearch.cs" />
+    <Compile Include="Classes\Content\ContentSearchMod.cs" />
     <Compile Include="Classes\Content\ContentType.cs" />
     <Compile Include="Classes\Content\GenreCollection.cs" />
     <Compile Include="Classes\Helpers\TvDatabaseAccess.cs" />

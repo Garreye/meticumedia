@@ -103,11 +103,13 @@ namespace Meticumedia
         /// <param name="s1">The first string</param>
         /// <param name="s2">The second string</param>
         /// <returns>Whether the 2 strings are very similar or equivalen</returns>
-        public static bool CompareStrings(string s1, string s2)
+        public static bool CompareStrings(string s1, string s2, out bool theAdded)
         {
             // Both string to lower case
             s1 = s1.ToLower();
             s2 = s2.ToLower();
+
+            theAdded = false;
 
             // If equal compare is good
             if (s1.Equals(s2))
@@ -119,7 +121,10 @@ namespace Meticumedia
             GetStringDiff(s1, s2, out s1Count, out s2Count, out diff);
 
             if (diff.Count == 1 && diff[0] == "the")
+            {
+                theAdded = true;
                 return true;
+            }
 
             // Return unmatched if too many different words
             //if (diff.Count >= s1Count - 1 || diff.Count >= s2Count - 1)
@@ -371,7 +376,7 @@ namespace Meticumedia
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "cd\\d", FileWordType.FilePart),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "vost", FileWordType.LanguageSubstitution),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "hdtv", FileWordType.None),
-            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "lol", FileWordType.None),
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "lol", FileWordType.None)
         };
 
         /// <summary>
@@ -381,13 +386,14 @@ namespace Meticumedia
         {
             new RemoveFileWord(Separator.Nonnumeric, Separator.Nonnumeric, @"(?:19|20)\d{2}", FileWordType.Year, true, false),
             new RemoveFileWord(Separator.Nonnumeric, Separator.Nonnumeric, @"(?:19|20)\d{2}", FileWordType.Year, false, true),
-            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "(?:and|&)", FileWordType.None, false, false)
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "(?:and|&)", FileWordType.None, false, false),
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, @"us|uk", FileWordType.None)
         };
 
         /// <summary>
         /// Optional remove file word types - matches OptionalRemoveWords items
         /// </summary>
-        public enum OptionalSimplifyRemoves { None = 0, Year = 1, YearAndFollowing = 2, And = 4 }
+        public enum OptionalSimplifyRemoves { None = 0, Year = 1, YearAndFollowing = 2, And = 4, Country = 8 }
 
         /// <summary>
         /// Result from simplification process of a string.
@@ -404,15 +410,19 @@ namespace Meticumedia
             /// </summary>
             public Dictionary<FileWordType, List<string>> RemovedWords { get; set; }
 
+            public ContentSearchMod Modifications { get; set; }
+
             /// <summary>
             /// Constructor with known properties
             /// </summary>
             /// <param name="text">Simplified string</param>
             /// <param name="removedWords">Dictionary of words that were removed</param>
-            public SimplifyStringResults(string text, Dictionary<FileWordType, List<string>> removedWords)
+            /// <param name="mods">Modifications made during simplifcation</param>
+            public SimplifyStringResults(string text, Dictionary<FileWordType, List<string>> removedWords, ContentSearchMod mods)
             {
                 this.SimplifiedString = text;
                 this.RemovedWords = removedWords;
+                this.Modifications = mods;
             }
 
             /// <summary>
@@ -497,6 +507,8 @@ namespace Meticumedia
             // All lowercase
             string simplifiedName = input.ToLower();
 
+            ContentSearchMod mods = ContentSearchMod.None;
+
             // Remove unneeded characters: ',!,?,(,),:
             simplifiedName = Regex.Replace(simplifiedName, @"[']+", "");
             simplifiedName = Regex.Replace(simplifiedName, @"[!\?\u0028\u0029\:\]\[]+", " ");
@@ -513,6 +525,7 @@ namespace Meticumedia
                 Match firstWordMatch = Regex.Match(simplifiedName, @"^\W*\w+");
                 if (firstWordMatch.Success)
                     simplifiedName = simplifiedName.Remove(firstWordMatch.Index, firstWordMatch.Length);
+                mods |= ContentSearchMod.WordsRemoved;
             }
 
             // Remove Last word (enabled by bit 1)
@@ -521,6 +534,7 @@ namespace Meticumedia
                 Match lastWordMatch = Regex.Match(simplifiedName, @"(\w+\W*)$");
                 if (lastWordMatch.Success)
                     simplifiedName = simplifiedName.Remove(lastWordMatch.Index, lastWordMatch.Length);
+                mods |= ContentSearchMod.WordsRemoved;
             }
             // Don't remove first and last
             else if (removeFirst && removeLast)
@@ -529,11 +543,16 @@ namespace Meticumedia
             // Remove each optional remove word (enabled by bit 2 + word #)
             for (int j = 0; j < OptionalRemoveWords.Length; j++)
                 if (((int)options & (int)Math.Pow(2, j)) > 0)
-                    simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, OptionalRemoveWords[j]);
+                {
+                    bool removed;
+                    simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, OptionalRemoveWords[j], out removed);
+                    if(removed)
+                        mods |= ContentSearchMod.WordsRemoved;
+                }
 
             // Remove always remove words
             foreach (RemoveFileWord remWord in AlwaysRemoveWords)
-                simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, remWord);
+                simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, remWord);   
 
             // Word splitting
             if (wordSplitEn)
@@ -542,19 +561,30 @@ namespace Meticumedia
                 string[] words = simplifiedName.Split(' ');
 
                 // Build new string with words split up
+                bool split = false;
                 simplifiedName = string.Empty;
                 foreach (string word in words)
                 {
                     string newWord;
-                    WordHelper.TrySplitWords(word, out newWord);
+                    if (WordHelper.TrySplitWords(word, out newWord))
+                        split = true;
                     simplifiedName += newWord + " ";
                 }
+
+                if (split)
+                    mods |= ContentSearchMod.WordSlit;
             }
 
             // Trim
             simplifiedName = simplifiedName.Trim().Replace("  ", " ");
 
-            return new SimplifyStringResults(simplifiedName, removeFileWords);
+            return new SimplifyStringResults(simplifiedName, removeFileWords, mods);
+        }
+
+        private static string RemoveWord(bool disableRemAfter, string input, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord)
+        {
+            bool dummy;
+            return RemoveWord(disableRemAfter, input, removeFileWords, remWord, out dummy);
         }
 
         /// <summary>
@@ -565,7 +595,7 @@ namespace Meticumedia
         /// <param name="removeFileWords">List of removed words from string to add to when removing more</param>
         /// <param name="remWord">Word to be removed</param>
         /// <returns>string with word removed</returns>
-        private static string RemoveWord(bool disableRemAfter, string input, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord)
+        private static string RemoveWord(bool disableRemAfter, string input, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord, out bool removed)
         {
             // Store remove after state
             bool remEverything = remWord.RemoveEverythingAfter;
@@ -579,7 +609,7 @@ namespace Meticumedia
             }
 
             // Perform word remove
-            remWord.RemoveWord(ref input, removeFileWords);
+            removed = remWord.RemoveWord(ref input, removeFileWords);
 
             // Restore remove after state
             if (disableRemAfter)
@@ -625,9 +655,10 @@ namespace Meticumedia
         /// <param name="removeYear">Whether to remove year during simplification</param>
         /// <param name="removeWhitespace">Whether to remove extra whitespace</param>
         /// <returns>Simplified file name</returns>
-        public static string SimplifyFileName(string fileName, bool removeYear, bool removeWhitespace)
+        public static string SimplifyFileName(string fileName, bool removeYear, bool removeWhitespace, bool removeCountry)
         {
             OptionalSimplifyRemoves options = removeYear ? OptionalSimplifyRemoves.Year : OptionalSimplifyRemoves.None;
+            if (removeCountry) options |= OptionalSimplifyRemoves.Country;
             return BuildSimplifyResults(fileName, false, false, options, true, false, removeWhitespace).SimplifiedString;
         }
 
@@ -638,7 +669,7 @@ namespace Meticumedia
         /// <returns>Simplified file name</returns>
         public static string SimplifyFileName(string fileName)
         {
-            return SimplifyFileName(fileName, false, true);
+            return SimplifyFileName(fileName, false, true, false);
         }
 
         #endregion

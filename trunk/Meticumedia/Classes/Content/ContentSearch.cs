@@ -27,20 +27,20 @@ namespace Meticumedia
             /// <summary>
             /// Best match from each thread in search
             /// </summary>
-            public Content[] Matches { get; set; }
+            public List<SearchResult>[] Matches { get; set; }
 
             /// <summary>
             /// Flag indicating whether each thread in search is completed
             /// </summary>
             public bool[] Completes { get; set; }
-
+            
             /// <summary>
             /// Constructor with number of threads search will contain
             /// </summary>
             /// <param name="numSearches"></param>
             public MatchStatus(int numSearches)
             {
-                this.Matches = new Content[numSearches];
+                this.Matches = new List<SearchResult>[numSearches];
                 this.Completes = new bool[numSearches];
             }
         }
@@ -135,7 +135,7 @@ namespace Meticumedia
             {
                 // Get results from current base
                 List<FileHelper.SimplifyStringResults> currSearches = FileHelper.SimplifyString(searchBase);
-                currSearches.Add(new FileHelper.SimplifyStringResults(searchBase, new Dictionary<FileWordType, List<string>>()));
+                currSearches.Add(new FileHelper.SimplifyStringResults(searchBase, new Dictionary<FileWordType, List<string>>(), ContentSearchMod.None));
 
                 // Add each result to full list of searches
                 foreach (FileHelper.SimplifyStringResults results in currSearches)
@@ -171,7 +171,7 @@ namespace Meticumedia
             // Add thread to pool for each search that need to be performed
             for (int i = 0; i < searches.Count; i++)
             {
-                object[] args = { currSeachCnt, i, searches[i].SimplifiedString, folderPath, rootFolder, dirYear };
+                object[] args = { currSeachCnt, i, searches[i].SimplifiedString, folderPath, rootFolder, dirYear, searches[i].Modifications };
                 if (threaded)
                     ThreadPool.QueueUserWorkItem(new WaitCallback(SearchThread), args);
                 else
@@ -196,21 +196,24 @@ namespace Meticumedia
             lock (searchLock)
                 searchStatus.Remove(currSeachCnt);
 
-            // Use match from longest search string (most likely to the content we actually want to match to)
-            Content bestMatch = emptyContent;
-            int bestMatchStrLen = 0;
+            // Use match with lowest amount of modification made to search string and longest length (I think this s the most likely to the content we actually want to match to)
+            int lowestModsMatchStrLen = 0;
+            ContentSearchMod lowMods = ContentSearchMod.All;
+            Content lowestModsMatch = emptyContent;
             for (int i = 0; i < status.Matches.Length; i++)
-                if (status.Matches[i] != null)
+                for (int j = 0; j < status.Matches[i].Count; j++)
                 {
-                    if (searches[i].SimplifiedString.Length > bestMatchStrLen)
+                    if (status.Matches[i][j].Mods < lowMods || (status.Matches[i][j].Mods == lowMods && status.Matches[i][j].MatchedString.Length > lowestModsMatchStrLen))
                     {
-                        bestMatch = status.Matches[i];
-                        bestMatchStrLen = searches[i].SimplifiedString.Length;
+                        lowestModsMatch = status.Matches[i][j].Content;
+                        lowMods = status.Matches[i][j].Mods;
+                        lowestModsMatchStrLen = status.Matches[i][j].MatchedString.Length;
                     }
+
                 }
 
-            // Return empty movie
-            return bestMatch;
+            // Return best match
+            return lowestModsMatch;
         }
 
         /// <summary>
@@ -240,19 +243,33 @@ namespace Meticumedia
             string folderPath = (string)args[3];
             string movieFolder = (string)args[4];
             int year = (int)args[5];
+            ContentSearchMod mods = (ContentSearchMod)args[6];
 
             // Check search is still active
-            Content match = null;
+            List<SearchResult> matches = new List<SearchResult>();
             if (searchStatus.ContainsKey(statusIndex))
-                DoMatch(search, folderPath, movieFolder, year, out match);
+                DoMatch(search, folderPath, movieFolder, year, mods, out matches);
 
             // Check search is still active then put results into status
             lock (searchLock)
                 if (searchStatus.ContainsKey(statusIndex))
                 {
-                    searchStatus[statusIndex].Matches[searchIndex] = match;
+                    searchStatus[statusIndex].Matches[searchIndex] = matches;
                     searchStatus[statusIndex].Completes[searchIndex] = true;
                 }
+        }
+
+        public class SearchResult
+        {
+            public Content Content { get; set; }
+            public ContentSearchMod Mods { get; set; }
+            public string MatchedString { get; set; }
+
+            public SearchResult()
+            {
+                this.Content = null;
+                this.Mods = ContentSearchMod.None;
+            }
         }
 
         /// <summary>
@@ -264,16 +281,20 @@ namespace Meticumedia
         /// <param name="year">Year to match to content</param>
         /// <param name="result">resulting match found from search</param>
         /// <returns>whether match was successful</returns>
-        private bool DoMatch(string search, string folderPath, string rootFolder, int year, out Content result)
+        private bool DoMatch(string search, string folderPath, string rootFolder, int year,  ContentSearchMod baseMods, out List<SearchResult> matches)
         {
-            result = null;
-
             // Search for content
             List<Content> searchResults = PerformSearch(search, false);
+
+            // Initialize resutls
+            matches = new List<SearchResult>();
 
             // Go through results
             foreach (Content searchResult in searchResults)
             {
+                SearchResult result = new SearchResult();
+                result.Mods = baseMods;
+
                 // Verify year in result matches year from folder (if any)
                 if (year != -1 && Math.Abs(year - searchResult.Date.Year) > 3)
                     continue;
@@ -282,15 +303,30 @@ namespace Meticumedia
                 string simplifiedSearch = FileHelper.SimplifyFileName(search);
                 string dbContentName = FileHelper.SimplifyFileName(searchResult.Name);
 
+                bool theAddedToMatch;
+
                 // Try basic match
-                bool match = FileHelper.CompareStrings(simplifiedSearch, dbContentName);
+                bool match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                result.MatchedString = simplifiedSearch;
 
                 // Try match with year removed
                 if (!match)
                 {
-                    simplifiedSearch = FileHelper.SimplifyFileName(search, true, true);
-                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true);
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName);
+                    simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, false);
+                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, false);
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                    result.MatchedString = simplifiedSearch;
+                }
+
+                // Try match with country removed
+                if (!match)
+                {
+                    simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, true);
+                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, true);
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                    if (match)
+                        result.Mods |= ContentSearchMod.WordsRemoved;
+                    result.MatchedString = simplifiedSearch;
                 }
 
                 // Try match with spaces removed
@@ -298,33 +334,41 @@ namespace Meticumedia
                 {
                     string dirNoSpc = simplifiedSearch.Replace(" ", "");
                     string nameNoSpc = dbContentName.Replace(" ", "");
-                    match = FileHelper.CompareStrings(dirNoSpc, nameNoSpc);
+                    match = FileHelper.CompareStrings(dirNoSpc, nameNoSpc, out theAddedToMatch);
+                    result.MatchedString = simplifiedSearch;
+                    if(match)
+                        result.Mods |= ContentSearchMod.SpaceRemoved;
                 }
 
                 // Try match with year added to content name
                 if(!match)
                 {
+                    simplifiedSearch = FileHelper.SimplifyFileName(search);
                     dbContentName = FileHelper.SimplifyFileName(searchResult.Name + " " + searchResult.Date.Year.ToString());
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName);
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                    result.MatchedString = simplifiedSearch;
                 }
 
                 // No match, next result!
                 if(!match)
                     continue;
 
-                // Set results folder/path
-                result = searchResult;
-                result.RootFolder = rootFolder;
-                if (string.IsNullOrEmpty(folderPath))
-                    result.Path = result.BuildFolderPath();
-                else
-                    result.Path = folderPath;                 
+                if (theAddedToMatch)
+                    result.Mods |= ContentSearchMod.TheAdded;
 
-                // Content found
-                return true;
+                // Set results folder/path
+                result.Content = searchResult;
+                result.Content.RootFolder = rootFolder;
+                if (string.IsNullOrEmpty(folderPath))
+                    result.Content.Path = result.Content.BuildFolderPath();
+                else
+                    result.Content.Path = folderPath;                 
+
+                // Save results
+                matches.Add(result);
             }
 
-            return false;
+            return matches.Count > 0;
         }
 
         /// <summary>

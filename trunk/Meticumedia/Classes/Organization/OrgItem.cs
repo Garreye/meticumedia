@@ -865,8 +865,8 @@ namespace Meticumedia
 
                 // Pause here if needed to make queue not go crazy with refreshes
                 int time = (int)(DateTime.Now - startTime).TotalMilliseconds;
-                if (time < 500)
-                    Thread.Sleep(500 - time);
+                if (time < 100)
+                    Thread.Sleep(100 - time);
 
                 // Cleanup folder (delete empty sub-folders)
                 if (this.Category != FileHelper.FileCategory.Folder)

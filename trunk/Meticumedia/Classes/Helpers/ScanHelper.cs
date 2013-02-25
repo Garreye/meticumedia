@@ -642,7 +642,7 @@ namespace Meticumedia
         /// <param name="shows">Shows to scan</param>
         /// <param name="queuedItems">Items currently in queue (to be skipped)</param>
         /// <returns></returns>
-        public static List<OrgItem> RunTvCheckScan(List<TvShow> shows, List<OrgItem> queuedItems)
+        public static List<OrgItem> RunTvCheckScan(List<Content> shows, List<OrgItem> queuedItems)
         {
             // Set running flag
             scanRunning = true;
@@ -659,6 +659,8 @@ namespace Meticumedia
             // Go through each show
             for (int i = 0; i < shows.Count; i++)
             {
+                TvShow show = (TvShow)shows[i];
+                
                 if (cancelRequested)
                     break;
 
@@ -666,7 +668,7 @@ namespace Meticumedia
                 
                 // Go through missing episodes
                 //List<TvEpisode> missingEps = show.GetMissingEpisodes();
-                foreach (TvSeason season in shows[i].Seasons)
+                foreach (TvSeason season in show.Seasons)
                 {
                     if (cancelRequested)
                         break;
@@ -687,11 +689,11 @@ namespace Meticumedia
                         // Missing check
                         if (ep.Missing == TvEpisode.MissingStatus.Missing || ep.Missing == TvEpisode.MissingStatus.InScanDirectory)
                         {
-                            if (shows[i].DoMissingCheck)
+                            if (show.DoMissingCheck)
                             {
                                 // Check directory item for episode
                                 foreach (OrgItem item in directoryItems)
-                                    if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && shows[i].CheckFileToShow(Path.GetFileName(item.SourcePath)))
+                                    if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && show.CheckFileToShow(Path.GetFileName(item.SourcePath)))
                                     {
                                         // Only add item for first part of multi-part file
                                         if (ep.Equals(item.TvEpisode))
@@ -730,7 +732,7 @@ namespace Meticumedia
                                         // TODO: Need episode collection for addressing episodes like seasons, so I can do the following:
                                         // TvEpisode ep2 = show.Seasons[ep.Season].Episodes[ep.Number + 1];
                                         // instead of the below:
-                                        foreach (TvEpisode epEnumerated in shows[i].Seasons[ep.Season].Episodes)
+                                        foreach (TvEpisode epEnumerated in show.Seasons[ep.Season].Episodes)
                                             if (epEnumerated.Number == ep.Number + 1)
                                             {
                                                 ep2 = epEnumerated;
@@ -742,7 +744,7 @@ namespace Meticumedia
                                 }
 
                                 // Build desired path
-                                string builtPath = shows[i].BuildFilePath(ep, ep2, Path.GetExtension(ep.File.FilePath));
+                                string builtPath = show.BuildFilePath(ep, ep2, Path.GetExtension(ep.File.FilePath));
 
                                 // Check if rename needed (or move within folder)
                                 if (ep.File.FilePath != builtPath)
@@ -762,7 +764,7 @@ namespace Meticumedia
                         // TODO: loose file check - do directory scan on TV root folder with recursion off..
 
                         // Add empty item for missing
-                        if (!found && ep.Aired && shows[i].DoMissingCheck)
+                        if (!found && ep.Aired && show.DoMissingCheck)
                         {
                             OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileHelper.FileCategory.TvVideo, null);
                             if (!shows[i].IncludeInScan)

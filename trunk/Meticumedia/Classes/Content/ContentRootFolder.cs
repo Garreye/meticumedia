@@ -131,8 +131,10 @@ namespace Meticumedia
         /// <param name="clearMoviesFound">Enables clearing of found flag on movies in this folder</param>
         /// <param name="clearShowsFound">Enables clearing of found flag on shows in this folder</param>
         /// <returns>List of sub-directories in this content folder</returns>
-        public List<OrgPath> BuildSubDirectories(bool clearMoviesFound, bool clearShowsFound)
+        public List<OrgPath> BuildSubDirectories(ContentType contentType)
         {
+            bool clearMoviesFound = contentType == Meticumedia.ContentType.Movie;
+            bool clearShowsFound = contentType == Meticumedia.ContentType.TvShow;
             List<OrgPath> subFolders = new List<OrgPath>();
             BuildSubDirectories(this, subFolders, clearMoviesFound, clearShowsFound);
             return subFolders;
@@ -317,8 +319,9 @@ namespace Meticumedia
             OrgProcessing processing = new OrgProcessing(UpdateProcess);
             updateNumber = processing.ProcessNumber;
 
-            // Run processing (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
-            processing.Run(BuildSubDirectories(false, true), ref cancel, false, false);
+            // Run processing (build of sub-dirs is recursive, so all child root folder sub-dirs will be included
+
+            processing.Run(BuildSubDirectories(this.ContentType), ref cancel, false, false);
             updateCancelled = cancel;
 
             // Get content collection to add content to

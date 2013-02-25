@@ -1008,7 +1008,7 @@ namespace Meticumedia
                     scanResults = ScanHelper.DirectoryScan((List<OrgFolder>)args[1], queuedItems, false, false);
                     break;
                 case ScanType.TvMissing:
-                    scanResults = ScanHelper.RunTvCheckScan((List<TvShow>)args[1], queuedItems);
+                    scanResults = ScanHelper.RunTvCheckScan((List<Content>)args[1], queuedItems);
                     break;
                 case ScanType.MovieFolder:
                     scanResults = ScanHelper.MovieFolderScan((List<ContentRootFolder>)args[1], queuedItems);

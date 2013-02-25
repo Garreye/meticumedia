@@ -134,6 +134,7 @@ namespace Meticumedia
             this.Header = header;
             this.Footer = footer;
             this.CaseOption = CaseOptionType.None;
+            this.Whitespace = " ";
         }
 
         #endregion

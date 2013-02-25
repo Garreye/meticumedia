@@ -363,6 +363,10 @@ namespace Meticumedia
         /// <param name="fastUpdate">Whether to do fast update (skips episodes updating for TV shows)</param> 
         public static void UpdateContentsFromRootFolders(List<ContentRootFolder> folders, bool fastUpdate)
         {
+            // Check that there's root folders to update
+            if (folders.Count == 0)
+                return;
+
             // Get content type
             ContentType contentType = folders[0].ContentType;
             

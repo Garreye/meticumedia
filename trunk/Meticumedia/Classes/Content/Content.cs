@@ -210,7 +210,7 @@ namespace Meticumedia
             string showReStr = string.Empty;
 
             // Get simplified name
-            string showname = FileHelper.SimplifyFileName(this.Name, true, removeWhitespace);
+            string showname = FileHelper.SimplifyFileName(this.Name, true, removeWhitespace, true);
 
             // Split name words
             string[] showWords = showname.Split(' ');
