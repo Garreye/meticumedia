@@ -215,7 +215,10 @@ namespace Meticumedia
             /// <param name="items">Item currently in the queu</param>
             public QueueItemsChangedArgs(List<OrgItem> items)
             {
-                this.QueueItems = items;
+                this.QueueItems = new List<OrgItem>();
+                foreach (OrgItem item in items)
+                    if (item.QueueStatus != OrgQueueStatus.Completed && item.QueueStatus != OrgQueueStatus.Failed)
+                        this.QueueItems.Add(item);
             }
         }
 
@@ -376,6 +379,20 @@ namespace Meticumedia
                 btnQueuePause.BackColor = basePauseButtonColor;
         }
 
+
+        /// <summary>
+        /// Clear button removes finished items from queue
+        /// </summary>
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ClearQueue();
+        }
+
+        private void chkAutoClear_CheckedChanged(object sender, EventArgs e)
+        {
+            StartQueue();
+        }
+
         #endregion
 
         #region Methods
@@ -428,8 +445,7 @@ namespace Meticumedia
         /// </summary>
         public void UpdateQueue()
         {
-            lock (queueLock)
-                OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, new int[1] { -1 }, true);
+            OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, new int[1] { -1 }, true);
         }
 
         /// <summary>
@@ -458,7 +474,9 @@ namespace Meticumedia
             {
                 for (int i = 0; i < lvQueue.SelectedIndices.Count; i++)
                 {
-                    queueItems[lvQueue.SelectedIndices[i]].Paused = true;
+                    if (queueItems[lvQueue.SelectedIndices[i]].QueueStatus == OrgQueueStatus.Enabled)
+                        queueItems[lvQueue.SelectedIndices[i]].QueueStatus = OrgQueueStatus.Paused;
+
                     selects[i] = lvQueue.SelectedIndices[i];
                 }
             }
@@ -477,13 +495,17 @@ namespace Meticumedia
             int[] selects = new int[lvQueue.SelectedIndices.Count];
             for (int i = 0; i < lvQueue.SelectedIndices.Count; i++)
             {
-                queueItems[lvQueue.SelectedIndices[i]].Paused = false;
+                if (queueItems[lvQueue.SelectedIndices[i]].QueueStatus == OrgQueueStatus.Paused)
+                    queueItems[lvQueue.SelectedIndices[i]].QueueStatus = OrgQueueStatus.Enabled;
                 selects[i] = lvQueue.SelectedIndices[i];
             }
 
             // Refresh queue listview
             if (lvQueue.SelectedIndices.Count > 0)
                 DisplayQueue(selects);
+            
+            // Run queue
+            StartQueue();
         }
 
         /// <summary>
@@ -502,11 +524,11 @@ namespace Meticumedia
                         int index = lvQueue.SelectedIndices[i];
                         queueItems[index].CancelAction();
                         queueItems.RemoveAt(lvQueue.SelectedIndices[i]);
-                    }
-
-                    // Refresh display
-                    DisplayQueue();
+                    }                    
                 }
+
+                // Refresh display
+                DisplayQueue();
 
                 // Disable buttons
                 SetItemButtonEnables(false);
@@ -632,6 +654,24 @@ namespace Meticumedia
                 DisplayQueue(selects);
         }
 
+        /// <summary>
+        /// Clear finished items from queue
+        /// </summary>
+        private void ClearQueue()
+        {
+            lock (queueLock)
+            {
+                for (int i = queueItems.Count - 1; i >= 0; i--)
+                {
+                    // Remove failed items
+                    if (queueItems[i].QueueStatus == OrgQueueStatus.Failed || queueItems[i].QueueStatus == OrgQueueStatus.Completed)
+                        RemoveQueueItem(queueItems[i], i);
+                }
+            }
+            OnQueueItemsChanged(queueItems);
+            DisplayQueue();
+        }
+
         #endregion        
 
         #region Processing
@@ -674,32 +714,32 @@ namespace Meticumedia
                 // Check if paused
                 if (!OrgItem.QueuePaused)
                 {
-                    // Get next unpaused item
+                    // Get next active item
                     OrgItem item = queueItems[0];
-                    int index = 0;
+                    int index = -1;
                     lock (queueLock)
                     {
                         for (int i = 0; i < queueItems.Count; i++)
-                            if (!queueItems[i].Paused)
+                            if (queueItems[i].QueueStatus == OrgQueueStatus.Enabled)
                             {
                                 item = queueItems[i];
                                 index = i;
                                 break;
                             }
+                            else
+                                RemoveQueueItemIfNeeded(queueItems[i], i);
                     }
 
                     // Refresh queue
                     this.Invoke((MethodInvoker)delegate
                     {
-                        UpdateQueue();
+                        lock (queueLock)
+                            UpdateQueue();
                     });
 
                     // If found item is paused, sleep then retry
-                    if (item.Paused)
-                    {
-                        Thread.Sleep(500);
-                        continue;
-                    }
+                    if (item.QueueStatus != OrgQueueStatus.Enabled)
+                        break;
 
                     // Perform action
                     item.ActionProgressChanged += new EventHandler<ProgressChangedEventArgs>(item_ActionProgressChanged);
@@ -707,23 +747,13 @@ namespace Meticumedia
                     item.ActionProgressChanged -= new EventHandler<ProgressChangedEventArgs>(item_ActionProgressChanged);
 
                     // Remove item
-                    if (item.ActionComplete)
+                    this.Invoke((MethodInvoker)delegate
                     {
                         lock (queueLock)
-                        {
-                            if (item.ActionSucess)
-                                OnQueueItemsComplete(item);
-                            queueItems.Remove(item);
-                            this.Invoke((MethodInvoker)delegate
-                            {
-                                //DisplayQueue();
-                                lvQueue.Items.RemoveAt(index);
-                            });
-
-                            OnQueueItemsChanged(queueItems);
-                        }
-                    }
+                            RemoveQueueItemIfNeeded(item, index);
+                    });
                 }
+
                 else
                     Thread.Sleep(500);
             }
@@ -733,6 +763,35 @@ namespace Meticumedia
             {
                 this.pbTotal.Value = 0;
                 this.pbTotal.Message = string.Empty;
+            });
+        }
+
+
+        private void RemoveQueueItemIfNeeded(OrgItem item, int index)
+        {
+            if (item.ActionComplete && chkAutoClear.Checked)
+            {
+                RemoveQueueItem(item, index);
+
+                // Refresh queue items
+                this.Invoke((MethodInvoker)delegate
+                {
+                    DisplayQueue();
+                });
+            }
+
+            OnQueueItemsChanged(queueItems);
+        }
+
+
+        private void RemoveQueueItem(OrgItem item, int index)
+        {
+            if (item.ActionSucess)
+                OnQueueItemsComplete(item);
+            queueItems.Remove(item);
+            this.Invoke((MethodInvoker)delegate
+            {
+                lvQueue.Items.RemoveAt(index);
             });
         }
 
@@ -775,7 +834,8 @@ namespace Meticumedia
                 this.pbTotal.Message = actionStr + " file '" + Path.GetFileName(item.SourcePath) + "'";
 
                 // Update percent in listview
-                UpdateQueue();
+                lock (queueLock)
+                    UpdateQueue();
 
             });
         }

@@ -178,19 +178,23 @@ namespace Meticumedia
                                     itemText = Path.GetFileName(orgItem.DestinationPath);
                                 break;
                             case OrgColumnType.Progress:
-                                if (orgItem.Progress > 0)
+                                switch (orgItem.QueueStatus)
                                 {
-                                    if (orgItem.Paused)
-                                        itemText = "Paused - " + orgItem.Progress.ToString() + "%";
-                                    else
-                                        itemText = orgItem.Progress.ToString() + "%";
-                                }
-                                else
-                                    if (orgItem.Paused)
-                                        itemText = "Paused";
-                                    else
+                                    case OrgQueueStatus.Enabled:
                                         itemText = "Queued";
-
+                                        break;
+                                    case OrgQueueStatus.Paused:
+                                        itemText = "Paused";
+                                        if (orgItem.Progress > 0)
+                                            itemText += " - " + orgItem.Progress.ToString() + "%";
+                                        break;
+                                    case OrgQueueStatus.Failed:
+                                        itemText = "Failed";
+                                        break;
+                                    case OrgQueueStatus.Completed:
+                                        itemText = "Completed";
+                                        break;
+                                }
                                 break;
                             case OrgColumnType.Number:
                                 itemText = orgItem.Number.ToString();
@@ -211,12 +215,12 @@ namespace Meticumedia
                             else
                                 check = true;
 
-                            // Set listview item bckground color based on action
+                            // Set listview item background color based on action
                             switch (orgItem.Action)
                             {
                                 case OrgAction.Copy:
                                 case OrgAction.Move:
-                                    if (!orgItem.Paused && orgItem.Progress > 0 && !orgItem.ActionComplete)
+                                    if (orgItem.QueueStatus != OrgQueueStatus.Paused && orgItem.Progress > 0 && !orgItem.ActionComplete)
                                         backColor = Color.LightYellow;
                                     else
                                         backColor = Color.LightGray;
@@ -241,6 +245,11 @@ namespace Meticumedia
                                         check = false;
                                     break;
                             }
+
+                            if (orgItem.QueueStatus == OrgQueueStatus.Failed)
+                                backColor = Color.Coral;
+                            else if (orgItem.QueueStatus == OrgQueueStatus.Completed)
+                                backColor = Color.White;
 
                             // If update than just grab listview item at current index
                             if (update)

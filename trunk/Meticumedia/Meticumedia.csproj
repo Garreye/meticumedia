@@ -92,6 +92,7 @@
     <Compile Include="Classes\Organization\OrgProcessing.cs" />
     <Compile Include="Classes\Organization\OrgProcessingArgs.cs" />
     <Compile Include="Classes\Organization\OrgProgressChangesEventArgs.cs" />
+    <Compile Include="Classes\Organization\OrgQueueStatus.cs" />
     <Compile Include="Classes\Organization\OrgStatus.cs" />
     <Compile Include="Classes\Helpers\RemoveFileWord.cs" />
     <Compile Include="Classes\Helpers\Separator.cs" />

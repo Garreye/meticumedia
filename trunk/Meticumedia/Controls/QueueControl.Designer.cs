@@ -32,10 +32,6 @@ namespace Meticumedia
         /// </summary>
         private void InitializeComponent()
         {
-            this.lvQueue = new Meticumedia.DoubleBufferedListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnPause = new System.Windows.Forms.Button();
             this.btnPlay = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -44,41 +40,14 @@ namespace Meticumedia
             this.btnMoveTop = new System.Windows.Forms.Button();
             this.btnMoveBottom = new System.Windows.Forms.Button();
             this.btnQueuePause = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
+            this.chkAutoClear = new System.Windows.Forms.CheckBox();
             this.pbTotal = new TextProgressBar();
+            this.lvQueue = new Meticumedia.DoubleBufferedListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
-            // 
-            // lvQueue
-            // 
-            this.lvQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lvQueue.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3});
-            this.lvQueue.FullRowSelect = true;
-            this.lvQueue.Location = new System.Drawing.Point(6, 71);
-            this.lvQueue.Name = "lvQueue";
-            this.lvQueue.Size = new System.Drawing.Size(665, 470);
-            this.lvQueue.TabIndex = 12;
-            this.lvQueue.UseCompatibleStateImageBehavior = false;
-            this.lvQueue.View = System.Windows.Forms.View.Details;
-            this.lvQueue.SelectedIndexChanged += new System.EventHandler(this.lvQueue_SelectedIndexChanged);
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "File";
-            this.columnHeader1.Width = 249;
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "Action";
-            this.columnHeader2.Width = 98;
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "Destination";
-            this.columnHeader3.Width = 284;
             // 
             // btnPause
             // 
@@ -167,6 +136,29 @@ namespace Meticumedia
             this.btnQueuePause.UseVisualStyleBackColor = true;
             this.btnQueuePause.Click += new System.EventHandler(this.btnQueuePause_Click);
             // 
+            // btnClear
+            // 
+            this.btnClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnClear.Location = new System.Drawing.Point(593, 42);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(75, 23);
+            this.btnClear.TabIndex = 23;
+            this.btnClear.Text = "Clear";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
+            // chkAutoClear
+            // 
+            this.chkAutoClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkAutoClear.AutoSize = true;
+            this.chkAutoClear.Location = new System.Drawing.Point(459, 46);
+            this.chkAutoClear.Name = "chkAutoClear";
+            this.chkAutoClear.Size = new System.Drawing.Size(128, 17);
+            this.chkAutoClear.TabIndex = 24;
+            this.chkAutoClear.Text = "Auto-Clear Completed";
+            this.chkAutoClear.UseVisualStyleBackColor = true;
+            this.chkAutoClear.CheckedChanged += new System.EventHandler(this.chkAutoClear_CheckedChanged);
+            // 
             // pbTotal
             // 
             this.pbTotal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -177,10 +169,45 @@ namespace Meticumedia
             this.pbTotal.Size = new System.Drawing.Size(603, 33);
             this.pbTotal.TabIndex = 22;
             // 
+            // lvQueue
+            // 
+            this.lvQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvQueue.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3});
+            this.lvQueue.FullRowSelect = true;
+            this.lvQueue.Location = new System.Drawing.Point(6, 71);
+            this.lvQueue.Name = "lvQueue";
+            this.lvQueue.Size = new System.Drawing.Size(665, 470);
+            this.lvQueue.TabIndex = 12;
+            this.lvQueue.UseCompatibleStateImageBehavior = false;
+            this.lvQueue.View = System.Windows.Forms.View.Details;
+            this.lvQueue.SelectedIndexChanged += new System.EventHandler(this.lvQueue_SelectedIndexChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "File";
+            this.columnHeader1.Width = 249;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Action";
+            this.columnHeader2.Width = 98;
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Destination";
+            this.columnHeader3.Width = 284;
+            // 
             // QueueControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.chkAutoClear);
+            this.Controls.Add(this.btnClear);
             this.Controls.Add(this.pbTotal);
             this.Controls.Add(this.btnQueuePause);
             this.Controls.Add(this.btnMoveBottom);
@@ -194,6 +221,7 @@ namespace Meticumedia
             this.Name = "QueueControl";
             this.Size = new System.Drawing.Size(671, 544);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -212,5 +240,7 @@ namespace Meticumedia
         private System.Windows.Forms.Button btnMoveBottom;
         private System.Windows.Forms.Button btnQueuePause;
         private TextProgressBar pbTotal;
+        private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.CheckBox chkAutoClear;
     }
 }

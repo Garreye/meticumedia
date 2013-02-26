@@ -94,7 +94,7 @@ namespace Meticumedia
         /// <summary>
         /// Item paused
         /// </summary>
-        public bool Paused { get; set; }
+        public OrgQueueStatus QueueStatus { get; set; }
 
         /// <summary>
         /// Global pause for all items.
@@ -853,7 +853,7 @@ namespace Meticumedia
             {
                 this.ActionComplete = true;
                 this.ActionSucess = false;
-                // TODO: notify user! - item stays in queue with failed status maybe..
+                this.QueueStatus = OrgQueueStatus.Failed;
             }
 
             // Check if action is complete
@@ -868,18 +868,22 @@ namespace Meticumedia
                 if (time < 100)
                     Thread.Sleep(100 - time);
 
-                // Cleanup folder (delete empty sub-folders)
-                if (this.Category != FileHelper.FileCategory.Folder)
-                    CleanupFolder();
+                // Check if sucessful
+                if (this.ActionSucess)
+                {
+                    // Cleanup folder (delete empty sub-folders)
+                    if (this.Category != FileHelper.FileCategory.Folder)
+                        CleanupFolder();
 
-                // Add current file to ignore if copy action
-                if (this.Action == OrgAction.Copy)
-                    foreach (OrgFolder sd in Settings.ScanDirectories)
-                        if (sd.FolderPath == this.ScanDirectory.FolderPath)
-                        {
-                            sd.AddIgnoreFile(this.SourcePath);
-                        }
+                    // Add current file to ignore if copy action
+                    if (this.Action == OrgAction.Copy)
+                        foreach (OrgFolder sd in Settings.ScanDirectories)
+                            if (sd.FolderPath == this.ScanDirectory.FolderPath)
+                                sd.AddIgnoreFile(this.SourcePath);
 
+                    // Set Completed status
+                    this.QueueStatus = OrgQueueStatus.Completed;
+                }
             }
 
             // Clear action running
@@ -966,6 +970,8 @@ namespace Meticumedia
             // Rename or move on same drive
             if (this.Action == OrgAction.Rename || (this.Action == OrgAction.Move && Path.GetPathRoot(sourcePath) == Path.GetPathRoot(destinationPath)))
             {
+                if(File.Exists(destinationPath))
+                    File.Delete(destinationPath);
                 File.Move(sourcePath, destinationPath);
                 return true;
             }
@@ -995,7 +1001,7 @@ namespace Meticumedia
             while (true)
             {
                 // Check for pauses in the operation
-                if (this.Paused || OrgItem.QueuePaused)
+                if (this.QueueStatus == OrgQueueStatus.Paused || OrgItem.QueuePaused)
                     break;
 
                 // Move data from source file to buffer, if no more data we're done!
@@ -1019,7 +1025,7 @@ namespace Meticumedia
             destinationStream.Dispose();
 
             // If operation was paused return not completed
-            if (this.Paused || QueuePaused)
+            if (this.QueueStatus == OrgQueueStatus.Paused || QueuePaused)
                 return false;
 
             // For move operation delete the source file now that it's been copied to destination
@@ -1078,7 +1084,7 @@ namespace Meticumedia
                 OnProgressChange((int)progress);
 
                 // Check for pauses in the operation
-                if (this.Paused || OrgItem.QueuePaused)
+                if (this.QueueStatus == OrgQueueStatus.Paused || OrgItem.QueuePaused)
                     break;
 
                 // Create destination path
@@ -1099,7 +1105,7 @@ namespace Meticumedia
             }
 
             // If operation was paused return not completed
-            if (this.Paused || QueuePaused)
+            if (this.QueueStatus == OrgQueueStatus.Paused || QueuePaused)
                 return false;
 
             // Set final progress
@@ -1185,7 +1191,7 @@ namespace Meticumedia
                 // If running action, pause it and wait for it to stop
                 while (actionRunning)
                 {
-                    this.Paused = true;
+                    this.QueueStatus = OrgQueueStatus.Paused;
                     Thread.Sleep(100);
                 }
 
