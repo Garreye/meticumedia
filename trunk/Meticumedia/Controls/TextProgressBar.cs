@@ -14,7 +14,18 @@ public class TextProgressBar : ProgressBar
     /// <summary>
     /// Message to be displayed with progress percent
     /// </summary>
-    public string Message { get; set; }
+    public string Message
+    {
+        get { return message; }
+        set
+        {
+            message = value;
+            Invalidate();
+        }
+    }
+
+
+    private string message = string.Empty;
     
     /// <summary>
     /// Brush for drawing progress string

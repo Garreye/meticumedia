@@ -46,6 +46,25 @@ namespace Meticumedia
 
         #endregion
 
+        #region Events
+
+        /// <summary>
+        /// Event indicating there are items to be sent to the queue
+        /// </summary>
+        public static event EventHandler<ItemsToQueueArgs> ItemsToQueue;
+
+        /// <summary>
+        /// Triggers ItemsToQueue event
+        /// </summary>
+        /// <param name="items"></param>
+        protected static void OnItemsToQueue(List<OrgItem> items)
+        {
+            if (ItemsToQueue != null)
+                ItemsToQueue(null, new ItemsToQueueArgs(items));
+        }
+
+        #endregion
+
         #region Context Menu
 
         /// <summary>
@@ -77,6 +96,7 @@ namespace Meticumedia
 
             // Remove items from log
             contextMenu.MenuItems.Add("Remove Selected", new EventHandler(HandleRemove));
+            contextMenu.MenuItems.Add("Undo Action(s)", new EventHandler(HandleUndo));
         }
 
         /// <summary>
@@ -87,6 +107,11 @@ namespace Meticumedia
         private void HandleRemove(object sender, EventArgs e)
         {
             RemoveSelected();
+        }
+
+        private void HandleUndo(object sender, EventArgs e)
+        {
+            UndoSelected();
         }
 
         #endregion
@@ -210,6 +235,75 @@ namespace Meticumedia
             }
         }
 
+        private void UndoSelected()
+        {
+            string message = string.Empty;
+            List<OrgItem> undoActions = new List<OrgItem>();
+            for (int i = 0; i < lvLog.SelectedIndices.Count; i++)
+            {
+                // Get item
+                int index = lvLog.SelectedIndices[i];
+                OrgItem logItem = filteredLog[index];
+
+                // Create action with reversed source and destination
+                OrgItem undoAction = new OrgItem(logItem);
+                undoAction.SourcePath = logItem.DestinationPath;
+                undoAction.DestinationPath = logItem.SourcePath;
+
+                switch (logItem.Action)
+                {
+                    //If original file still exists, just delete the copy, otherwise move back to original
+                    case OrgAction.Copy:
+                        if (File.Exists(logItem.SourcePath))
+                        {
+                            undoAction.Action = OrgAction.Delete;
+                            undoAction.DestinationPath = string.Empty;
+                        }
+                        else
+                            undoAction.Action = OrgAction.Move;
+                        break;
+
+                    // Move and rename need no changes
+                    case OrgAction.Move:
+                    case OrgAction.Rename:
+                        break;
+
+                    // All other actions are not revesible
+                    default:
+                        undoAction = null;
+                        message += "Action for file '" + logItem.DestinationPath + "' cannot be undone -" + logItem.Action.ToString() + " actions are not reversible" + Environment.NewLine;
+                        break;
+                }
+
+                // Check that undo item is valid
+                if (undoAction != null)
+                {
+                    // Verify that file still exists
+                    if (File.Exists(undoAction.SourcePath))
+                    {
+                        // Check that file is already added to undo list
+                        bool alreadyAdded = false;
+                        foreach(OrgItem item in undoActions)
+                            if (item.SourcePath == undoAction.SourcePath)
+                            {
+                                alreadyAdded = true;
+                                break;
+                            }
+                        if (!alreadyAdded)
+                            undoActions.Add(undoAction);
+                    }
+                    else
+                        message += "Action for file '" + logItem.DestinationPath + "' cannot be undone - file no longer exists!" + Environment.NewLine;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(message))
+                MessageBox.Show(message.TrimEnd());
+
+            if (undoActions.Count > 0)
+                OnItemsToQueue(undoActions);
+        }
+
         /// <summary>
         /// Clear button removes all items from log (and thus listview)
         /// </summary>
@@ -262,12 +356,14 @@ namespace Meticumedia
             DisplayLog();
         }
 
+        List<OrgItem> filteredLog = new List<OrgItem>();
+
         /// <summary>
         /// Displays log of actons in listview 
         /// </summary>
         public void DisplayLog()
         {
-            List<OrgItem> filteredLog = ApplyFilter(Organization.ActionLog);
+            filteredLog = ApplyFilter(Organization.ActionLog);
             OrgItem.AscendingSort = sortAscending;
             OrgItem.Sort(filteredLog, sortType);
             OrgItemListHelper.DisplayOrgItemInList(filteredLog, lvLog, logColumns);

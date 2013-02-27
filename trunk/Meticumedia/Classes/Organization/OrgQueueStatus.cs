@@ -5,5 +5,5 @@ using System.Text;
 
 namespace Meticumedia
 {
-    public enum OrgQueueStatus { Enabled, Paused, Failed, Completed }
+    public enum OrgQueueStatus { Enabled, Paused, Failed, Completed, Cancelled }
 }

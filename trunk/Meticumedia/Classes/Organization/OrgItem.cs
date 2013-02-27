@@ -138,7 +138,7 @@ namespace Meticumedia
         /// <summary>
         /// Whether or not action is currently running.
         /// </summary>
-        private bool actionRunning = true;
+        private bool actionRunning = false;
 
         #endregion
 
@@ -302,6 +302,10 @@ namespace Meticumedia
             this.NewShow = item.NewShow;
             this.Replace = item.Replace;
             this.Number = item.Number;
+            this.QueueStatus = item.QueueStatus;
+            this.ActionComplete = item.ActionComplete;
+            this.Notes = item.Notes;
+            this.ActionTime = item.ActionTime;
         }
 
         #endregion
@@ -849,8 +853,8 @@ namespace Meticumedia
                         throw new Exception("Unknown queue action");
                 }
             }
-            catch
-            {
+            catch (Exception e)
+            { 
                 this.ActionComplete = true;
                 this.ActionSucess = false;
                 this.QueueStatus = OrgQueueStatus.Failed;
@@ -878,7 +882,7 @@ namespace Meticumedia
                     // Add current file to ignore if copy action
                     if (this.Action == OrgAction.Copy)
                         foreach (OrgFolder sd in Settings.ScanDirectories)
-                            if (sd.FolderPath == this.ScanDirectory.FolderPath)
+                            if (this.ScanDirectory != null && sd.FolderPath == this.ScanDirectory.FolderPath)
                                 sd.AddIgnoreFile(this.SourcePath);
 
                     // Set Completed status
@@ -958,6 +962,7 @@ namespace Meticumedia
                     if (!this.Replace && MessageBox.Show("Destination file '" + destinationPath + "' already existst. Queue action will overwrite it, would you like to continue?", "Overwrite destination file?", MessageBoxButtons.YesNo) == DialogResult.No)
                     {
                         this.ActionSucess = false;
+                        this.QueueStatus = OrgQueueStatus.Cancelled;
                         return true;
                     }
                 }
@@ -1057,6 +1062,7 @@ namespace Meticumedia
                 if (results == DialogResult.No)
                 {
                     this.ActionSucess = false;
+                    this.QueueStatus = OrgQueueStatus.Cancelled;
                     return true;
                 }
             }

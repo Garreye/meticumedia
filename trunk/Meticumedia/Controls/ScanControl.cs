@@ -1027,44 +1027,46 @@ namespace Meticumedia
             ScanHelper.ScanProcess process = (ScanHelper.ScanProcess)sender;
             string info = (string)e.UserState;
             
+            // Get progress bar message based on scan type
+            string msg = string.Empty;
+            switch (currentScan)
+            {
+                case ScanType.Directory:
+                    if (process == ScanHelper.ScanProcess.FileCollect)
+                        msg = "Scanning Files";
+                    else if (!string.IsNullOrEmpty(info))
+                        msg = "Directory Scan - Processing File '" + Path.GetFileName(info) + "'";
+                    else if (e.ProgressPercentage == 100)
+                        msg = "Directory Scan - Complete";
+
+                    break;
+                case ScanType.TvMissing:
+                    if (!string.IsNullOrEmpty(info))
+                    {
+                        if (process == ScanHelper.ScanProcess.FileCollect)
+                            msg = "Scanning Files";
+                        else if (process == ScanHelper.ScanProcess.Directory)
+                            msg = "TV Scan - Processing File '" + Path.GetFileName(info) + "'";
+                        else
+                            msg = "TV Scan - Processing Show' " + info + "'";
+                    }
+                    else
+                        msg = "TV Scan - Complete";
+                    break;
+                case ScanType.MovieFolder:
+                    if (process == ScanHelper.ScanProcess.FileCollect)
+                        msg = "Scanning Files";
+                    else if (!string.IsNullOrEmpty(info))
+                        msg = "Movie Scan - Processing File '" + Path.GetFileName(info) + "'";
+                    else if (e.ProgressPercentage == 100)
+                        msg = "Movie Scan - Complete";
+                    break;
+            }
+
             this.Invoke((MethodInvoker)delegate
             {
-                // Set progress bar message based on scan type
-                switch (currentScan)
-                {
-                    case ScanType.Directory:
-                        if (process == ScanHelper.ScanProcess.FileCollect)
-                            pbScanProgress.Message = "Scanning Files";
-                        else if (!string.IsNullOrEmpty(info))
-                            pbScanProgress.Message = "Directory Scan - Processing File '" + Path.GetFileName(info) + "'";
-                        else if (e.ProgressPercentage == 100)
-                            pbScanProgress.Message = "Directory Scan - Complete";
-                        
-                        break;
-                    case ScanType.TvMissing:
-                        if (!string.IsNullOrEmpty(info))
-                        {
-                            if (process == ScanHelper.ScanProcess.FileCollect)
-                                pbScanProgress.Message = "Scanning Files";
-                            else if (process == ScanHelper.ScanProcess.Directory)
-                                pbScanProgress.Message = "TV Scan - Processing File '" + Path.GetFileName(info) + "'";
-                            else
-                                pbScanProgress.Message = "TV Scan - Processing Show' " + info + "'";
-                        }
-                        else
-                            pbScanProgress.Message = "TV Scan - Complete";
-                        break;
-                    case ScanType.MovieFolder:
-                        if (process == ScanHelper.ScanProcess.FileCollect)
-                            pbScanProgress.Message = "Scanning Files";
-                        else if (!string.IsNullOrEmpty(info))
-                            pbScanProgress.Message = "Movie Scan - Processing File '" + Path.GetFileName(info) + "'";
-                        else if (e.ProgressPercentage == 100)
-                            pbScanProgress.Message = "Movie Scan - Complete";
-                        break;
-                }  
-                
-                // Set value
+                // Set message and value
+                pbScanProgress.Message = msg;
                 pbScanProgress.Value = e.ProgressPercentage;
             });
         }

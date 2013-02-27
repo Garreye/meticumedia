@@ -194,6 +194,9 @@ namespace Meticumedia
                                     case OrgQueueStatus.Completed:
                                         itemText = "Completed";
                                         break;
+                                    case OrgQueueStatus.Cancelled:
+                                        itemText = "Cancelled";
+                                        break;
                                 }
                                 break;
                             case OrgColumnType.Number:
@@ -247,7 +250,9 @@ namespace Meticumedia
                             }
 
                             if (orgItem.QueueStatus == OrgQueueStatus.Failed)
-                                backColor = Color.Coral;
+                                backColor = Color.Red;
+                            else if (orgItem.QueueStatus == OrgQueueStatus.Cancelled)
+                                backColor = Color.Yellow;
                             else if (orgItem.QueueStatus == OrgQueueStatus.Completed)
                                 backColor = Color.White;
 

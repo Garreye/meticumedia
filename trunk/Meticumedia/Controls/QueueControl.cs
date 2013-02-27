@@ -85,6 +85,7 @@ namespace Meticumedia
             ScanControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
             ContentListView.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
             ContentControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
+            LogControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
 
             // Register context menu
             lvQueue.ContextMenu = contextMenu;
@@ -217,7 +218,7 @@ namespace Meticumedia
             {
                 this.QueueItems = new List<OrgItem>();
                 foreach (OrgItem item in items)
-                    if (item.QueueStatus != OrgQueueStatus.Completed && item.QueueStatus != OrgQueueStatus.Failed)
+                    if (item.QueueStatus != OrgQueueStatus.Completed && item.QueueStatus != OrgQueueStatus.Failed && item.QueueStatus != OrgQueueStatus.Cancelled)
                         this.QueueItems.Add(item);
             }
         }
@@ -237,7 +238,8 @@ namespace Meticumedia
         /// </summary>
         public event EventHandler<QueueItemsCompleteArgs> QueueItemsComplete;
 
-        /// <summary>
+        /// <summary>+.
+        /// 
         /// Event argument for queue item completed
         /// </summary>
         public class QueueItemsCompleteArgs : EventArgs
@@ -263,8 +265,10 @@ namespace Meticumedia
         /// <param name="item"></param>
         protected void OnQueueItemsComplete(OrgItem item)
         {
+            OrgItem newItem = new OrgItem(item);
+            newItem.QueueStatus = OrgQueueStatus.Enabled;
             if (QueueItemsComplete != null)
-                QueueItemsComplete(this, new QueueItemsCompleteArgs(item));
+                QueueItemsComplete(this, new QueueItemsCompleteArgs(newItem));
         }
 
         #endregion
@@ -390,7 +394,8 @@ namespace Meticumedia
 
         private void chkAutoClear_CheckedChanged(object sender, EventArgs e)
         {
-            StartQueue();
+            if (chkAutoClear.Checked)
+                StartQueue();
         }
 
         #endregion
@@ -409,11 +414,13 @@ namespace Meticumedia
 
             // Add each item to end of queue
             lock (queueLock)
+            {
                 foreach (OrgItem item in items)
                     queueItems.Add(item);
 
-            // Refresh display
-            DisplayQueue();
+                // Refresh display
+                DisplayQueue();
+            }
 
             // Trigger queue items changed event
             OnQueueItemsChanged(queueItems);
@@ -436,8 +443,7 @@ namespace Meticumedia
         /// <param name="select"></param>
         private void DisplayQueue(int[] select)
         {
-            lock (queueLock)
-                OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, select, false);
+            OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, select, false);
         }
 
         /// <summary>
@@ -479,11 +485,11 @@ namespace Meticumedia
 
                     selects[i] = lvQueue.SelectedIndices[i];
                 }
-            }
 
-            // Refresh queue listview
-            if (lvQueue.SelectedIndices.Count > 0)
-                DisplayQueue(selects);
+                // Refresh queue listview
+                if (lvQueue.SelectedIndices.Count > 0)
+                    DisplayQueue(selects);
+            }
         }
 
         /// <summary>
@@ -502,7 +508,8 @@ namespace Meticumedia
 
             // Refresh queue listview
             if (lvQueue.SelectedIndices.Count > 0)
-                DisplayQueue(selects);
+                lock (queueLock)
+                    DisplayQueue(selects);
             
             // Run queue
             StartQueue();
@@ -524,11 +531,11 @@ namespace Meticumedia
                         int index = lvQueue.SelectedIndices[i];
                         queueItems[index].CancelAction();
                         queueItems.RemoveAt(lvQueue.SelectedIndices[i]);
-                    }                    
-                }
+                    }
 
-                // Refresh display
-                DisplayQueue();
+                    // Refresh display
+                    DisplayQueue();
+                }
 
                 // Disable buttons
                 SetItemButtonEnables(false);
@@ -565,11 +572,11 @@ namespace Meticumedia
 
                     selects[i] = index - 1;
                 }
-            }
 
-            // Reresh display
-            if (lvQueue.SelectedIndices.Count > 0)
-                DisplayQueue(selects);
+                // Reresh display
+                if (lvQueue.SelectedIndices.Count > 0)
+                    DisplayQueue(selects);
+            }
         }
 
         /// <summary>
@@ -597,11 +604,11 @@ namespace Meticumedia
                     queueItems.Insert(index + 1, item);
                     selects[i] = index + 1;
                 }
-            }
 
-            // Refresh display
-            if (lvQueue.SelectedIndices.Count > 0)
-                DisplayQueue(selects);
+                // Refresh display
+                if (lvQueue.SelectedIndices.Count > 0)
+                    DisplayQueue(selects);
+            }
         }
 
         /// <summary>
@@ -622,11 +629,11 @@ namespace Meticumedia
                     queueItems.Insert(0, item);
                     selects[i] = lvQueue.SelectedIndices.Count - 1 - i;
                 }
-            }
 
-            // Refresh display
-            if (lvQueue.SelectedIndices.Count > 0)
-                DisplayQueue(selects);
+                // Refresh display
+                if (lvQueue.SelectedIndices.Count > 0)
+                    DisplayQueue(selects);
+            }
         }
 
         /// <summary>
@@ -647,11 +654,11 @@ namespace Meticumedia
                     queueItems.Insert(lvQueue.Items.Count - 1, item);
                     selects[i] = lvQueue.Items.Count - 1 - i;
                 }
-            }
 
-            // Refresh display
-            if (lvQueue.SelectedIndices.Count > 0)
-                DisplayQueue(selects);
+                // Refresh display
+                if (lvQueue.SelectedIndices.Count > 0)
+                    DisplayQueue(selects);
+            }
         }
 
         /// <summary>
@@ -664,12 +671,13 @@ namespace Meticumedia
                 for (int i = queueItems.Count - 1; i >= 0; i--)
                 {
                     // Remove failed items
-                    if (queueItems[i].QueueStatus == OrgQueueStatus.Failed || queueItems[i].QueueStatus == OrgQueueStatus.Completed)
+                    if (queueItems[i].QueueStatus == OrgQueueStatus.Failed || queueItems[i].QueueStatus == OrgQueueStatus.Completed || queueItems[i].QueueStatus == OrgQueueStatus.Cancelled)
                         RemoveQueueItem(queueItems[i], i);
                 }
+                DisplayQueue();
             }
             OnQueueItemsChanged(queueItems);
-            DisplayQueue();
+            
         }
 
         #endregion        
@@ -726,8 +734,8 @@ namespace Meticumedia
                                 index = i;
                                 break;
                             }
-                            else
-                                RemoveQueueItemIfNeeded(queueItems[i], i);
+                            else if (RemoveQueueItemIfNeeded(queueItems[i], i))
+                                i--;
                     }
 
                     // Refresh queue
@@ -738,13 +746,16 @@ namespace Meticumedia
                     });
 
                     // If found item is paused, sleep then retry
-                    if (item.QueueStatus != OrgQueueStatus.Enabled)
+                    if (item.QueueStatus != OrgQueueStatus.Enabled || index == -1)
                         break;
 
                     // Perform action
                     item.ActionProgressChanged += new EventHandler<ProgressChangedEventArgs>(item_ActionProgressChanged);
                     item.PerformAction();
                     item.ActionProgressChanged -= new EventHandler<ProgressChangedEventArgs>(item_ActionProgressChanged);
+
+                    if (item.QueueStatus == OrgQueueStatus.Completed)
+                        OnQueueItemsComplete(item);
 
                     // Remove item
                     this.Invoke((MethodInvoker)delegate
@@ -767,9 +778,10 @@ namespace Meticumedia
         }
 
 
-        private void RemoveQueueItemIfNeeded(OrgItem item, int index)
+        private bool RemoveQueueItemIfNeeded(OrgItem item, int index)
         {
-            if (item.ActionComplete && chkAutoClear.Checked)
+            bool doRemove = item.QueueStatus == OrgQueueStatus.Completed && chkAutoClear.Checked;
+            if (doRemove)
             {
                 RemoveQueueItem(item, index);
 
@@ -781,13 +793,12 @@ namespace Meticumedia
             }
 
             OnQueueItemsChanged(queueItems);
+            return doRemove;
         }
 
 
         private void RemoveQueueItem(OrgItem item, int index)
         {
-            if (item.ActionSucess)
-                OnQueueItemsComplete(item);
             queueItems.Remove(item);
             this.Invoke((MethodInvoker)delegate
             {

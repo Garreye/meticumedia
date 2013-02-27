@@ -178,6 +178,8 @@ namespace Meticumedia.Controls
 
         #endregion
 
+        #region Constructor
+
         public EpisodesControl()
         {
             InitializeComponent();
@@ -190,6 +192,10 @@ namespace Meticumedia.Controls
             episodeContextMenu.Popup += new EventHandler(episodeContextMenu_Popup);
         }
 
+        #endregion
+
+        #region Variables
+
         /// <summary>
         /// List of currently displayed episodes
         /// </summary>
@@ -199,6 +205,8 @@ namespace Meticumedia.Controls
         /// Context menu for episodes list
         /// </summary>
         private ContextMenu episodeContextMenu = new ContextMenu();
+
+        #endregion
 
         #region Context Menu
 

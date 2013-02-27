@@ -597,6 +597,8 @@ namespace Meticumedia
                 if (item.Action != OrgAction.NoRootFolder)
                     item.Action = file.Copy ? OrgAction.Copy : OrgAction.Move;
                 item.DestinationPath = searchResult.BuildFilePath(file.Path);
+                if (File.Exists(item.DestinationPath))
+                    item.Action = OrgAction.AlreadyExists;
                 searchResult.Path = searchResult.BuildFolderPath();
                 item.Movie = searchResult;
                 if (item.Action == OrgAction.AlreadyExists || item.Action == OrgAction.NoRootFolder)
