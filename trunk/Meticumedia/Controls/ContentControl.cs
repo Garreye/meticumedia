@@ -183,6 +183,47 @@ namespace Meticumedia
             return selFolders;
         }
 
+        public List<ContentRootFolder> GetFilteredRootFolders(out bool recursive)
+        {
+            List<ContentRootFolder> baseRootFolders = GetSelectedRootFolders();
+            recursive = false;
+
+            if (cmbRootFilter.Text == "Recursive")
+            {
+                recursive = true;
+                return baseRootFolders;
+            }
+
+            string rootFolderPath = cmbRootFilter.Text.Replace("Non-recursive: ", "");
+            ContentRootFolder filteredFolder;
+            if (baseRootFolders.Count > 0 && GetMatchingRootFolder(rootFolderPath, baseRootFolders[0], out filteredFolder))
+            {
+                List<ContentRootFolder> filteredList = new List<ContentRootFolder>();
+                filteredList.Add(filteredFolder);
+                return filteredList;
+            }
+
+            return baseRootFolders;
+        }
+
+        private bool GetMatchingRootFolder(string path, ContentRootFolder baseFolder, out ContentRootFolder matchedFolder)
+        {
+            if (path == baseFolder.FullPath)
+            {
+                matchedFolder = baseFolder;
+                return true;
+            }
+            else
+                foreach(ContentRootFolder child in baseFolder.ChildFolders)
+                {
+                    if(GetMatchingRootFolder(path, child, out matchedFolder))
+                        return true;
+                }
+
+            matchedFolder = null;
+            return false;
+        }
+
         /// <summary>
         /// Get genre instances from combo box
         /// </summary>
@@ -279,17 +320,18 @@ namespace Meticumedia
             if (cmbFolders.SelectedItem != null)
                 folderName = cmbFolders.SelectedItem.ToString();
 
-            // Get selected genre
-            
+            // Get root folders
+            bool recursive;
+            List<ContentRootFolder> selRootFolders = GetFilteredRootFolders(out recursive);
 
             // Set contents for listview
             switch (ContentType)
             {
                 case ContentType.Movie:
-                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(GetSelectedRootFolders(), GetSelectedGenres(), chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);        
+                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(selRootFolders, recursive, GetSelectedGenres(), chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);        
                     break;
                 case ContentType.TvShow:
-                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(GetSelectedRootFolders(), GetSelectedGenres(), chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);
+                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(selRootFolders, recursive, GetSelectedGenres(), chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);
                     break;
                 default:
                     throw new Exception("Unknown content type");
@@ -353,6 +395,25 @@ namespace Meticumedia
 
             // Set selected index
             cmbFolders.SelectedIndex = indexToSelect;
+        }
+
+        /// <summary>
+        /// Update root folder filters list
+        /// </summary>
+        private void UpdateRootFilters()
+        {
+            cmbRootFilter.Items.Clear();
+            cmbRootFilter.Items.Add("Recursive");
+            if (cmbFolders.SelectedIndex > 0)
+                AddRootFolderFilterItems(GetSelectedRootFolders()[0]);
+            cmbRootFilter.SelectedIndex = 0;
+        }
+
+        private void AddRootFolderFilterItems(ContentRootFolder rootFolder)
+        {
+            cmbRootFilter.Items.Add("Non-recursive: " + rootFolder.FullPath);
+            foreach (ContentRootFolder child in rootFolder.ChildFolders)
+                AddRootFolderFilterItems(child);
         }
 
         /// <summary>
@@ -564,7 +625,6 @@ namespace Meticumedia
             }
 
             UpdateContent(false);
-            UpdateContentInFolders(true);
         }
 
         /// <summary>
@@ -596,12 +656,14 @@ namespace Meticumedia
             if (!this.IsHandleCreated)
             {
                 contentSyncOnLoad = true;
+                UpdateContentInFolders(true);
                 return;
             }
 
             this.Invoke((MethodInvoker)delegate
             {
                 ContentLoadSync();
+                UpdateContentInFolders(true);
             });
         }
 
@@ -650,8 +712,14 @@ namespace Meticumedia
         /// </summary>
         private void cmbFolders_SelectedIndexChanged(object sender, EventArgs e)
         {
+            UpdateRootFilters();
             UpdateContent(false);
             UpdateGenresComboBox();
+        }
+
+        private void cmbRootFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateContent(false);
         }
 
         /// <summary>
@@ -770,7 +838,7 @@ namespace Meticumedia
         /// </summary>
         private void btnEditDir_Click(object sender, EventArgs e)
         {
-            SettingsForm settingForm = new SettingsForm(2);
+            SettingsForm settingForm = new SettingsForm(this.ContentType == Meticumedia.ContentType.Movie ? 3 : 1);
             settingForm.ShowDialog();
         }
 
@@ -829,5 +897,7 @@ namespace Meticumedia
         }
 
         #endregion
+
+
     }
 }

@@ -231,7 +231,7 @@ namespace Meticumedia
         /// <param name="minYear">Minimum for year filter</param>
         /// <param name="maxYear">Maximum for year filter</param>
         /// <param name="nameFilter">String that must be contained in content name - empty string disables filter</param>
-        public void GetContent(GenreCollection genre, List<Content> contents, bool yearFilter, int minYear, int maxYear, string nameFilter)
+        public void GetContent(bool recursive, GenreCollection genre, List<Content> contents, bool yearFilter, int minYear, int maxYear, string nameFilter)
         {
             // Go through all movies
             ContentCollection contentCollection = GetContentCollection();
@@ -255,7 +255,7 @@ namespace Meticumedia
                     bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.Name.ToLower().Contains(nameFilter.ToLower());
 
                     // Check if movie is in the folder
-                    if (ContainsContent(content) && genreMatch && yearMatch && nameMatch)
+                    if (ContainsContent(content, recursive) && genreMatch && yearMatch && nameMatch)
                         contents.Add(content);
                 }
         }
@@ -266,15 +266,15 @@ namespace Meticumedia
         /// </summary>
         /// <param name="content">The movie to check for</param>
         /// <returns>Whether the movie is contained in the folder</returns>
-        public bool ContainsContent(Content content)
+        public bool ContainsContent(Content content, bool recursive)
         {
             // Check if movie content folder matches
             if (content.RootFolder == this.FullPath)
                 return true;
-            else
+            else if (recursive)
                 // Recursion on sub-folders
                 foreach (ContentRootFolder subFolder in this.ChildFolders)
-                    if (subFolder.ContainsContent(content))
+                    if (subFolder.ContainsContent(content, recursive))
                         return true;
 
             // No match

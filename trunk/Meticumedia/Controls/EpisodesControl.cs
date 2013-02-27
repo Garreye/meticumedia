@@ -182,6 +182,9 @@ namespace Meticumedia.Controls
         {
             InitializeComponent();
 
+            SetLegend();
+            TvEpisode.BackColourChanged +=new EventHandler(TvEpisode_BackColourChanged);
+
             // Setup context
             lvEpisodes.ContextMenu = episodeContextMenu;
             episodeContextMenu.Popup += new EventHandler(episodeContextMenu_Popup);

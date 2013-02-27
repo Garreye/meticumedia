@@ -48,6 +48,8 @@ namespace Meticumedia
             this.numMaxYear = new System.Windows.Forms.NumericUpDown();
             this.txtNameFilter = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cmbRootFilter = new System.Windows.Forms.ComboBox();
             this.lvContentFolders = new Meticumedia.ContentListView();
             this.colPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -57,8 +59,13 @@ namespace Meticumedia
             this.lbInvalid = new Meticumedia.LegendBoxControl();
             this.lbUnwatched = new Meticumedia.LegendBoxControl();
             this.pbUpdating = new TextProgressBar();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.numMinYear)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaxYear)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmbFolders
@@ -67,17 +74,16 @@ namespace Meticumedia
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbFolders.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbFolders.FormattingEnabled = true;
-            this.cmbFolders.Location = new System.Drawing.Point(77, 3);
+            this.cmbFolders.Location = new System.Drawing.Point(3, 3);
             this.cmbFolders.Name = "cmbFolders";
-            this.cmbFolders.Size = new System.Drawing.Size(375, 21);
-            this.cmbFolders.Sorted = true;
+            this.cmbFolders.Size = new System.Drawing.Size(228, 21);
             this.cmbFolders.TabIndex = 8;
             this.cmbFolders.SelectedIndexChanged += new System.EventHandler(this.cmbFolders_SelectedIndexChanged);
             // 
             // btnEditFolders
             // 
             this.btnEditFolders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnEditFolders.Location = new System.Drawing.Point(458, 3);
+            this.btnEditFolders.Location = new System.Drawing.Point(550, 3);
             this.btnEditFolders.Name = "btnEditFolders";
             this.btnEditFolders.Size = new System.Drawing.Size(75, 23);
             this.btnEditFolders.TabIndex = 18;
@@ -88,7 +94,7 @@ namespace Meticumedia
             // btnForceRefresh
             // 
             this.btnForceRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnForceRefresh.Location = new System.Drawing.Point(539, 3);
+            this.btnForceRefresh.Location = new System.Drawing.Point(631, 3);
             this.btnForceRefresh.Name = "btnForceRefresh";
             this.btnForceRefresh.Size = new System.Drawing.Size(89, 23);
             this.btnForceRefresh.TabIndex = 19;
@@ -99,7 +105,7 @@ namespace Meticumedia
             // btnEditMovie
             // 
             this.btnEditMovie.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnEditMovie.Location = new System.Drawing.Point(553, 457);
+            this.btnEditMovie.Location = new System.Drawing.Point(645, 457);
             this.btnEditMovie.Name = "btnEditMovie";
             this.btnEditMovie.Size = new System.Drawing.Size(75, 24);
             this.btnEditMovie.TabIndex = 20;
@@ -115,7 +121,7 @@ namespace Meticumedia
             this.cmbGenre.FormattingEnabled = true;
             this.cmbGenre.Location = new System.Drawing.Point(77, 30);
             this.cmbGenre.Name = "cmbGenre";
-            this.cmbGenre.Size = new System.Drawing.Size(343, 21);
+            this.cmbGenre.Size = new System.Drawing.Size(435, 21);
             this.cmbGenre.TabIndex = 22;
             this.cmbGenre.SelectedIndexChanged += new System.EventHandler(this.cmbGenre_SelectedIndexChanged);
             // 
@@ -131,7 +137,7 @@ namespace Meticumedia
             // btnWatched
             // 
             this.btnWatched.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnWatched.Location = new System.Drawing.Point(472, 457);
+            this.btnWatched.Location = new System.Drawing.Point(564, 457);
             this.btnWatched.Name = "btnWatched";
             this.btnWatched.Size = new System.Drawing.Size(75, 24);
             this.btnWatched.TabIndex = 24;
@@ -142,7 +148,7 @@ namespace Meticumedia
             // btnUnwatched
             // 
             this.btnUnwatched.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnUnwatched.Location = new System.Drawing.Point(391, 457);
+            this.btnUnwatched.Location = new System.Drawing.Point(483, 457);
             this.btnUnwatched.Name = "btnUnwatched";
             this.btnUnwatched.Size = new System.Drawing.Size(75, 24);
             this.btnUnwatched.TabIndex = 25;
@@ -154,7 +160,7 @@ namespace Meticumedia
             // 
             this.chkHideWatched.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkHideWatched.AutoSize = true;
-            this.chkHideWatched.Location = new System.Drawing.Point(531, 60);
+            this.chkHideWatched.Location = new System.Drawing.Point(623, 60);
             this.chkHideWatched.Name = "chkHideWatched";
             this.chkHideWatched.Size = new System.Drawing.Size(95, 17);
             this.chkHideWatched.TabIndex = 26;
@@ -175,7 +181,7 @@ namespace Meticumedia
             // 
             this.chkYearFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkYearFilter.AutoSize = true;
-            this.chkYearFilter.Location = new System.Drawing.Point(438, 32);
+            this.chkYearFilter.Location = new System.Drawing.Point(530, 32);
             this.chkYearFilter.Name = "chkYearFilter";
             this.chkYearFilter.Size = new System.Drawing.Size(48, 17);
             this.chkYearFilter.TabIndex = 29;
@@ -186,7 +192,7 @@ namespace Meticumedia
             // numMinYear
             // 
             this.numMinYear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numMinYear.Location = new System.Drawing.Point(492, 31);
+            this.numMinYear.Location = new System.Drawing.Point(584, 31);
             this.numMinYear.Maximum = new decimal(new int[] {
             2050,
             0,
@@ -211,7 +217,7 @@ namespace Meticumedia
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(551, 33);
+            this.label1.Location = new System.Drawing.Point(643, 33);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(16, 13);
             this.label1.TabIndex = 31;
@@ -220,7 +226,7 @@ namespace Meticumedia
             // numMaxYear
             // 
             this.numMaxYear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numMaxYear.Location = new System.Drawing.Point(573, 31);
+            this.numMaxYear.Location = new System.Drawing.Point(665, 31);
             this.numMaxYear.Maximum = new decimal(new int[] {
             2050,
             0,
@@ -247,7 +253,7 @@ namespace Meticumedia
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtNameFilter.Location = new System.Drawing.Point(77, 57);
             this.txtNameFilter.Name = "txtNameFilter";
-            this.txtNameFilter.Size = new System.Drawing.Size(434, 20);
+            this.txtNameFilter.Size = new System.Drawing.Size(526, 20);
             this.txtNameFilter.TabIndex = 33;
             this.txtNameFilter.TextChanged += new System.EventHandler(this.txtNameFilter_TextChanged);
             // 
@@ -259,6 +265,27 @@ namespace Meticumedia
             this.label4.Size = new System.Drawing.Size(60, 13);
             this.label4.TabIndex = 34;
             this.label4.Text = "Name Filter";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(1, 6);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(29, 13);
+            this.label5.TabIndex = 35;
+            this.label5.Text = "Filter";
+            // 
+            // cmbRootFilter
+            // 
+            this.cmbRootFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbRootFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbRootFilter.FormattingEnabled = true;
+            this.cmbRootFilter.Location = new System.Drawing.Point(36, 3);
+            this.cmbRootFilter.Name = "cmbRootFilter";
+            this.cmbRootFilter.Size = new System.Drawing.Size(191, 21);
+            this.cmbRootFilter.TabIndex = 36;
+            this.cmbRootFilter.SelectedIndexChanged += new System.EventHandler(this.cmbRootFilter_SelectedIndexChanged);
             // 
             // lvContentFolders
             // 
@@ -277,7 +304,7 @@ namespace Meticumedia
             this.lvContentFolders.HideWatched = false;
             this.lvContentFolders.Location = new System.Drawing.Point(6, 83);
             this.lvContentFolders.Name = "lvContentFolders";
-            this.lvContentFolders.Size = new System.Drawing.Size(622, 368);
+            this.lvContentFolders.Size = new System.Drawing.Size(714, 368);
             this.lvContentFolders.TabIndex = 1;
             this.lvContentFolders.UseCompatibleStateImageBehavior = false;
             this.lvContentFolders.View = System.Windows.Forms.View.Details;
@@ -339,13 +366,34 @@ namespace Meticumedia
             this.pbUpdating.Location = new System.Drawing.Point(7, 83);
             this.pbUpdating.Message = "Updating Folders";
             this.pbUpdating.Name = "pbUpdating";
-            this.pbUpdating.Size = new System.Drawing.Size(621, 24);
+            this.pbUpdating.Size = new System.Drawing.Size(713, 24);
             this.pbUpdating.TabIndex = 28;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Location = new System.Drawing.Point(75, 2);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.cmbFolders);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.cmbRootFilter);
+            this.splitContainer1.Panel2.Controls.Add(this.label5);
+            this.splitContainer1.Size = new System.Drawing.Size(468, 29);
+            this.splitContainer1.SplitterDistance = 234;
+            this.splitContainer1.TabIndex = 37;
             // 
             // ContentControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.cmbGenre);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtNameFilter);
             this.Controls.Add(this.numMaxYear);
@@ -358,18 +406,21 @@ namespace Meticumedia
             this.Controls.Add(this.btnUnwatched);
             this.Controls.Add(this.btnWatched);
             this.Controls.Add(this.lbUnwatched);
-            this.Controls.Add(this.cmbGenre);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.btnEditMovie);
             this.Controls.Add(this.btnForceRefresh);
             this.Controls.Add(this.btnEditFolders);
-            this.Controls.Add(this.cmbFolders);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.pbUpdating);
             this.Name = "ContentControl";
-            this.Size = new System.Drawing.Size(634, 484);
+            this.Size = new System.Drawing.Size(726, 484);
             ((System.ComponentModel.ISupportInitialize)(this.numMinYear)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaxYear)).EndInit();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -402,5 +453,8 @@ namespace Meticumedia
         private System.Windows.Forms.NumericUpDown numMaxYear;
         private System.Windows.Forms.TextBox txtNameFilter;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox cmbRootFilter;
+        private System.Windows.Forms.SplitContainer splitContainer1;
     }
 }

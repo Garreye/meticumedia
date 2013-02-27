@@ -330,14 +330,14 @@ namespace Meticumedia
         /// <param name="maxYear">Maximum for year filter</param>
         /// <param name="nameFilter">String that must be contained in movie name - empty string disables filter</param>
         /// <returns>List of movies from root folder that match filters</returns>
-        public static List<Content> GetContentFromRootFolders(List<ContentRootFolder> folders, GenreCollection genreFilter, bool yearFilter, int minYear, int maxYear, string nameFilter)
+        public static List<Content> GetContentFromRootFolders(List<ContentRootFolder> folders, bool recursive, GenreCollection genreFilter, bool yearFilter, int minYear, int maxYear, string nameFilter)
         {
             // Initialize movies list
             List<Content> folderMovies = new List<Content>();
 
             // Go through each content folder and get movie from folders that match name
             foreach (ContentRootFolder folder in folders)
-                folder.GetContent(genreFilter, folderMovies, yearFilter, minYear, maxYear, nameFilter);
+                folder.GetContent(recursive, genreFilter, folderMovies, yearFilter, minYear, maxYear, nameFilter);
 
             // Returns list of movies
             return folderMovies;
@@ -352,7 +352,7 @@ namespace Meticumedia
         {
             List<Content> folderContent = new List<Content>();
             foreach (ContentRootFolder folder in folders)
-                folder.GetContent(GetAllGenres(folder.ContentType), folderContent, false, 0, 0, string.Empty);
+                folder.GetContent(true, GetAllGenres(folder.ContentType), folderContent, false, 0, 0, string.Empty);
             return folderContent;
         }
 
