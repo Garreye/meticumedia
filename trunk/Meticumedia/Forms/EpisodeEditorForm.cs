@@ -22,6 +22,14 @@ namespace Meticumedia
         /// TV episode being edited.
         /// </summary>
         public TvEpisode Episode = null;
+
+        public bool NumbersEnabled
+        {
+            set
+            {
+                cntrlEp.NumbersEnabled = value;
+            }
+        }
         
         /// <summary>
         /// Default constructor

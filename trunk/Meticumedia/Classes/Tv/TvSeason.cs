@@ -166,6 +166,7 @@ namespace Meticumedia
                             episode.Load(epNode);
                             Episodes.Add(episode);
                         }
+                        Episodes.Sort();
                         break;
                 }
             }

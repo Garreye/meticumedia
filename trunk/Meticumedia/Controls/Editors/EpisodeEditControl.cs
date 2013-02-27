@@ -26,10 +26,21 @@ namespace Meticumedia
         public TvEpisode Episode
         {
             get { return episode; }
-            set 
-            { 
+            set
+            {
                 episode = new TvEpisode(value);
                 DisplayEpisode();
+            }
+        }
+
+        public bool NumbersEnabled
+        {
+            set
+            {
+                numSeason.Enabled = value;
+                numEpisode.Enabled = value;
+                lblSeason.Enabled = value;
+                lblEpisode.Enabled = value;
             }
         }
 
@@ -41,6 +52,8 @@ namespace Meticumedia
         /// The movie instance being edited.
         /// </summary>
         private TvEpisode episode = new TvEpisode();
+
+        private bool disableEvents = false;
 
         #endregion
 
@@ -67,9 +80,29 @@ namespace Meticumedia
         /// </summary>
         private void DisplayEpisode()
         {
+            disableEvents = true;
+
             // Set form elements to movie properties
             txtName.Text = this.episode.Name;
             chkIgnored.Checked = this.episode.Ignored;
+            if (this.episode.Number >= 0)
+                numEpisode.Value = this.episode.Number;
+            else
+                numEpisode.Value = 0;
+            if (this.episode.Season >= 0)
+                numSeason.Value = this.episode.Season;
+            else
+                numEpisode.Value = 0;
+
+            numYear.Value = this.episode.AirDate.Year;
+            numMonth.Value = this.episode.AirDate.Month;
+            numDay.Value = this.episode.AirDate.Day;
+
+            txtOverview.Text = this.episode.Overview;
+
+            chkDisableDatabase.Checked = this.episode.PreventDatabaseUpdates;
+
+            disableEvents = false;
         }
 
         #endregion
@@ -83,7 +116,8 @@ namespace Meticumedia
         /// <param name="e"></param>
         private void txtName_TextChanged(object sender, EventArgs e)
         {
-            this.episode.Name = txtName.Text;
+            if (!disableEvents)
+                this.episode.Name = txtName.Text;
         }
 
         /// <summary>
@@ -93,9 +127,40 @@ namespace Meticumedia
         /// <param name="e"></param>
         private void chkIgnored_CheckedChanged(object sender, EventArgs e)
         {
-            this.episode.Ignored = chkIgnored.Checked;
+            if (!disableEvents)
+                this.episode.Ignored = chkIgnored.Checked;
         }
 
-        #endregion 
+        private void numSeason_ValueChanged(object sender, EventArgs e)
+        {
+            if (!disableEvents)
+                this.episode.Season = (int)numSeason.Value;
+        }
+
+        private void numEpisode_ValueChanged(object sender, EventArgs e)
+        {
+            if (!disableEvents)
+                this.episode.Number = (int)numEpisode.Value;
+        }
+
+        private void numDate_ValueChanged(object sender, EventArgs e)
+        {
+            if (!disableEvents)
+                this.episode.AirDate = new DateTime((int)numYear.Value, (int)numMonth.Value, (int)numDay.Value);
+        }
+
+        private void txtOverview_TextChanged(object sender, EventArgs e)
+        {
+            if (!disableEvents)
+                this.episode.Overview = txtOverview.Text;
+        }
+
+        private void chkDisableDatabase_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!disableEvents)
+                this.episode.PreventDatabaseUpdates = chkDisableDatabase.Checked;
+        }
+
+        #endregion
     }
 }

@@ -230,10 +230,14 @@ namespace Meticumedia
                                     TvEpisode existingMatch;
                                     if (show.FindEpisode(ep.Season, ep.Number, out existingMatch))
                                     {
-                                        existingMatch.DataBaseName = ep.DataBaseName;
-                                        existingMatch.AirDate = ep.AirDate;
-                                        existingMatch.Overview = ep.Overview;
-                                        existingMatch.InDatabase = true;
+                                        if (!existingMatch.PreventDatabaseUpdates)
+                                        {
+                                            existingMatch.DataBaseName = ep.DataBaseName;
+                                            existingMatch.AirDate = ep.AirDate;
+                                            existingMatch.Overview = ep.Overview;
+                                            existingMatch.InDatabase = true;
+                                            existingMatch.UserDefined = false;
+                                        }
                                     }
                                     else
                                         season.Episodes.Add(ep);

@@ -255,7 +255,9 @@ namespace Meticumedia.Controls
             if ((allIgnored && !allUnignored) || (!allIgnored && !allUnignored))
                 episodeContextMenu.MenuItems.Add("Unignore", new EventHandler(HandleUnignore));
 
-            episodeContextMenu.MenuItems.Add("Delete", new EventHandler(HandleDelete));
+            episodeContextMenu.MenuItems.Add("Delete Episode File", new EventHandler(HandleDelete));
+
+            episodeContextMenu.MenuItems.Add("New Episode", new EventHandler(HandleAddEpisode));
 
             //bool allWatched = true;
             //bool allUnwatched = true;
@@ -339,7 +341,7 @@ namespace Meticumedia.Controls
         /// </summary>
         private void HandleDelete(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Are you want to delete the selected episode? This operation cannot be undone", "Sure?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show("Are you want to delete the files for selected episode? This operation cannot be undone", "Sure?", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 // Get selected episode
                 List<TvEpisode> selEpisodes;
@@ -352,6 +354,40 @@ namespace Meticumedia.Controls
                         items.Add(new OrgItem(OrgAction.Delete, ep.File.FilePath, FileHelper.FileCategory.Trash, null));
                 OnItemsToQueue(items);
             }
+        }
+
+        /// <summary>
+        /// Handle adding new episode selection from context menu
+        /// </summary>
+        private void HandleAddEpisode(object sender, EventArgs e)
+        {
+            // Create episode editor
+            EpisodeEditorForm eef = new EpisodeEditorForm(new TvEpisode());
+            eef.NumbersEnabled = true;
+
+            // Show editor and check for OK
+            if (eef.ShowDialog() == DialogResult.OK)
+            {
+                // Create season if needed
+                if (!this.show.Seasons.Contains(eef.Episode.Season))
+                    this.show.Seasons.Add(new TvSeason(eef.Episode.Season));
+
+                // Check if episode already exists
+                TvEpisode ep;
+                if (this.show.FindEpisode(eef.Episode.Season, eef.Episode.Number, out ep))
+                    if (MessageBox.Show("Episode with this number already exists would you like to replace it?", "Replace", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                        return;
+                    else
+                        this.show.Seasons[eef.Episode.Season].Episodes.Remove(ep);
+
+                // Add episode
+                TvEpisode newEp = new TvEpisode(eef.Episode);
+                this.show.Seasons[eef.Episode.Season].Episodes.Add(newEp);
+                this.show.Seasons[eef.Episode.Season].Episodes.Sort();
+                Organization.Shows.Save();
+                DisplayEpisodesList();
+            }
+            
         }
 
         #endregion

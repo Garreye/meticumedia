@@ -179,6 +179,16 @@ namespace Meticumedia
         /// </summary>
         public bool InDatabase { get; set; }
 
+        /// <summary>
+        /// Whether episode was added to show by user (vs. automatically added from database)
+        /// </summary>
+        public bool UserDefined { get; set; }
+
+        /// <summary>
+        /// Prevent database from updating properties
+        /// </summary>
+        public bool PreventDatabaseUpdates { get; set; }
+
         #endregion
 
         #region Variables
@@ -265,6 +275,8 @@ namespace Meticumedia
             this.Missing = MissingStatus.Missing;
             this.Overview = string.Empty;
             this.Watched = false;
+            this.UserDefined = false;
+            this.PreventDatabaseUpdates = false;
         }
 
         /// <summary>
@@ -273,19 +285,7 @@ namespace Meticumedia
         /// <param name="episode">Instance to clone</param>
         public TvEpisode(TvEpisode episode)
         {
-            this.NameIsUserSet = episode.NameIsUserSet;
-            this.Name = episode.Name;
-            this.DataBaseName = episode.DataBaseName;
-            this.Show = episode.Show;
-            this.Season = episode.Season;
-            this.Number = episode.Number;
-            this.AirDate = episode.AirDate;
-            this.File = new TvFile(episode.File);
-            this.Ignored = episode.Ignored;
-            this.InDatabase = episode.InDatabase;
-            this.Missing = episode.Missing;
-            this.Overview = episode.Overview;
-            this.Watched = episode.Watched;
+            this.UpdateInfo(episode);
         }
 
         #endregion
@@ -311,6 +311,8 @@ namespace Meticumedia
             this.Missing = episode.Missing;
             this.Overview = episode.Overview;
             this.Watched = episode.Watched;
+            this.UserDefined = episode.UserDefined;
+            this.PreventDatabaseUpdates = episode.PreventDatabaseUpdates;
         }
 
         /// <summary>
@@ -498,7 +500,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { NameIsUserSet, Name, DataBaseName, Show, Season, Number, AirDate, Overview, Ignored, Missing, Watched, File };
+        private enum XmlElements { NameIsUserSet, Name, DataBaseName, Show, Season, Number, AirDate, Overview, Ignored, Missing, Watched, File, UserDefined, PreventDatabaseUpdates };
 
         /// <summary>
         /// Root XML element for saving instance to file.
@@ -557,6 +559,12 @@ namespace Meticumedia
                         xw.WriteStartElement(element.ToString());
                         this.File.Save(xw);
                         xw.WriteEndElement();
+                        break;
+                    case XmlElements.UserDefined:
+                        value = this.UserDefined.ToString();
+                        break;
+                    case XmlElements.PreventDatabaseUpdates:
+                        value = this.PreventDatabaseUpdates.ToString();
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -644,6 +652,16 @@ namespace Meticumedia
                         break;
                     case XmlElements.File:
                         this.File.Load(propNode);
+                        break;
+                    case XmlElements.UserDefined:
+                        bool userDef;
+                        bool.TryParse(value, out userDef);
+                        this.UserDefined = userDef;
+                        break;
+                    case XmlElements.PreventDatabaseUpdates:
+                        bool prevent;
+                        bool.TryParse(value, out prevent);
+                        this.PreventDatabaseUpdates = prevent;
                         break;
                 }
             }
