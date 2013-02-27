@@ -75,13 +75,13 @@
     <Compile Include="Classes\Helpers\TvDatabaseHelper.cs" />
     <Compile Include="Classes\Helpers\TvRageAccess.cs" />
     <Compile Include="Classes\Movies\MovieSearch.cs" />
-    <Compile Include="Classes\Helpers\FileNamePortion.cs" />
-    <Compile Include="Classes\Helpers\FileWordType.cs" />
+    <Compile Include="Classes\Settings\FileNamePortion.cs" />
+    <Compile Include="Classes\Settings\FileWordType.cs" />
     <Compile Include="Classes\Helpers\TheMovieDbHelper.cs" />
     <Compile Include="Classes\Helpers\WordHelper.cs" />
     <Compile Include="Classes\Movies\Movie.cs" />
     <Compile Include="Classes\Content\ContentRootFolder.cs" />
-    <Compile Include="Classes\Helpers\FileNameFormat.cs" />
+    <Compile Include="Classes\Settings\FileNameFormat.cs" />
     <Compile Include="Classes\Organization\OrgAction.cs" />
     <Compile Include="Classes\Organization\OrgColumn.cs" />
     <Compile Include="Classes\Organization\OrgColumnType.cs" />
@@ -96,14 +96,15 @@
     <Compile Include="Classes\Organization\OrgStatus.cs" />
     <Compile Include="Classes\Helpers\RemoveFileWord.cs" />
     <Compile Include="Classes\Helpers\Separator.cs" />
-    <Compile Include="Classes\Global\Settings.cs" />
+    <Compile Include="Classes\Settings\GuiSettings.cs" />
+    <Compile Include="Classes\Settings\Settings.cs" />
     <Compile Include="Classes\Tv\TvEpisodeFormat.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Classes\Tv\TvScheduleType.cs" />
     <Compile Include="Classes\Tv\TvFile.cs" />
     <Compile Include="Classes\Tv\TvSeasonCollection.cs" />
-    <Compile Include="Classes\Global\Organization.cs" />
+    <Compile Include="Classes\Organization\Organization.cs" />
     <Compile Include="Classes\Tv\TvSeason.cs" />
     <Compile Include="Classes\Tv\TvShow.cs" />
     <Compile Include="Classes\Tv\TvEpisode.cs" />

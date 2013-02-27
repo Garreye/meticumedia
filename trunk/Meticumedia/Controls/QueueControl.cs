@@ -396,11 +396,22 @@ namespace Meticumedia
         {
             if (chkAutoClear.Checked)
                 StartQueue();
+            Settings.GuiControl.AutoClearCompleted = chkAutoClear.Checked;
+            Settings.Save();
+
         }
 
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Updates saved interface properties from settings
+        /// </summary>
+        public void UpdateFromSettings()
+        {
+            chkAutoClear.Checked = Settings.GuiControl.AutoClearCompleted;
+        }
 
         /// <summary>
         /// Add items to queue.

@@ -838,6 +838,10 @@ namespace Meticumedia
         /// <param name="e"></param>
         private void lvResults_DoubleClick(object sender, EventArgs e)
         {
+            // Prevent check from inverting automatically 
+            if (lvResults.SelectedItems.Count > 0)
+                lvResults.SelectedItems[0].Checked = !lvResults.SelectedItems[0].Checked;
+
             ModifyAction();
         }
 

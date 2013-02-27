@@ -39,6 +39,11 @@ namespace Meticumedia
         /// </summary>
         public ContentType ContentType { get; set; }
 
+        public string SearchEntry
+        {
+            set { cntrlSearch.SearchString = value; }
+        }
+
         #endregion
 
         #region Events

@@ -63,6 +63,8 @@ namespace Meticumedia
         /// </summary>
         public static TvDatabaseHelper.TvDataBaseSelection TvDatabaseSelection = TvDatabaseHelper.TvDataBaseSelection.TvRage;
 
+        public static GuiSettings GuiControl = new GuiSettings();
+
         #endregion
 
         #region Constants
@@ -255,14 +257,12 @@ namespace Meticumedia
 
         #endregion
 
-
-
         #region XML
 
         /// <summary>
         /// Properties that are elements.
         /// </summary>
-        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes };
+        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, Gui };
 
         /// <summary>
         /// Root element for setting XML.
@@ -320,6 +320,9 @@ namespace Meticumedia
                         case XmlElements.IgnoreFileTypes:
                             foreach (string fileType in IgnoreFileTypes)
                                 xw.WriteElementString(FILE_TYPE_XML, fileType);
+                            break;
+                        case XmlElements.Gui:
+                            GuiControl.Save(xw);
                             break;
                         default:
                             throw new Exception("Unkonw element!");
@@ -410,6 +413,9 @@ namespace Meticumedia
                             IgnoreFileTypes = new List<string>();
                             foreach (XmlNode fielTypeNode in propNode.ChildNodes)
                                 IgnoreFileTypes.Add(fielTypeNode.InnerText);
+                            break;
+                        case XmlElements.Gui:
+                            GuiControl.Load(propNode);
                             break;
                     }
                 }

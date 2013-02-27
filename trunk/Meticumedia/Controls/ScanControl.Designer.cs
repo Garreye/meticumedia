@@ -37,7 +37,6 @@ namespace Meticumedia
             this.cmbDirectory = new System.Windows.Forms.ComboBox();
             this.btnEditScanDirs = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.pbScanProgress = new TextProgressBar();
             this.btnEditMovieFolders = new System.Windows.Forms.Button();
             this.rbMovieFolderCheck = new System.Windows.Forms.RadioButton();
             this.cmbMovieFolders = new System.Windows.Forms.ComboBox();
@@ -67,6 +66,7 @@ namespace Meticumedia
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.pbScanProgress = new TextProgressBar();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -138,16 +138,6 @@ namespace Meticumedia
             this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Setup";
-            // 
-            // pbScanProgress
-            // 
-            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbScanProgress.Location = new System.Drawing.Point(134, 102);
-            this.pbScanProgress.Message = null;
-            this.pbScanProgress.Name = "pbScanProgress";
-            this.pbScanProgress.Size = new System.Drawing.Size(546, 23);
-            this.pbScanProgress.TabIndex = 28;
             // 
             // btnEditMovieFolders
             // 
@@ -467,6 +457,7 @@ namespace Meticumedia
             // 
             // lvResults
             // 
+            this.lvResults.Activation = System.Windows.Forms.ItemActivation.TwoClick;
             this.lvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -501,6 +492,16 @@ namespace Meticumedia
             // 
             this.columnHeader3.Text = "Destination";
             this.columnHeader3.Width = 284;
+            // 
+            // pbScanProgress
+            // 
+            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbScanProgress.Location = new System.Drawing.Point(134, 102);
+            this.pbScanProgress.Message = null;
+            this.pbScanProgress.Name = "pbScanProgress";
+            this.pbScanProgress.Size = new System.Drawing.Size(546, 23);
+            this.pbScanProgress.TabIndex = 28;
             // 
             // ScanControl
             // 

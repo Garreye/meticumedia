@@ -51,6 +51,7 @@ namespace Meticumedia
             // Setup queue control
             cntrlQueue.QueueItemsChanged += new EventHandler<QueueControl.QueueItemsChangedArgs>(cntrlQueue_QueueItemsChanged);
             cntrlQueue.QueueItemsComplete += new EventHandler<QueueControl.QueueItemsCompleteArgs>(cntrlQueue_QueueItemsComplete);
+            cntrlQueue.UpdateFromSettings();
   
             // Setup Schedule
             cntrlSched.UpdateShows();

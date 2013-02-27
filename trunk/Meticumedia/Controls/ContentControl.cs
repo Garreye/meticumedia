@@ -492,10 +492,13 @@ namespace Meticumedia
 
             // Update each selected movie folder
             List<ContentRootFolder> rootFolders = null;
-            this.Invoke((MethodInvoker)delegate
-            {
-                rootFolders = GetSelectedRootFolders();
-            });
+            if (this.IsHandleCreated)
+                this.Invoke((MethodInvoker)delegate
+                {
+                    rootFolders = GetSelectedRootFolders();
+                });
+            else
+                rootFolders = Settings.GetAllRootFolders(this.ContentType);
             Organization.UpdateContentsFromRootFolders(rootFolders, false);
         }
 
@@ -513,10 +516,10 @@ namespace Meticumedia
                 if (this.InvokeRequired)
                     this.Invoke((MethodInvoker)delegate
                     {
-                        UpdataProgress(e.ProgressPercentage, (string)e.UserState);
+                        UpdateProgress(e.ProgressPercentage, (string)e.UserState);
                     });
                 else
-                    UpdataProgress(e.ProgressPercentage, (string)e.UserState);
+                    UpdateProgress(e.ProgressPercentage, (string)e.UserState);
 
                 if (e.NewItem)
                 {
@@ -535,7 +538,7 @@ namespace Meticumedia
         /// </summary>
         /// <param name="percent"></param>
         /// <param name="msg"></param>
-        private void UpdataProgress(int percent, string msg)
+        private void UpdateProgress(int percent, string msg)
         {
             pbUpdating.Message = msg;
             pbUpdating.Value = percent;
@@ -640,7 +643,7 @@ namespace Meticumedia
 
             this.Invoke((MethodInvoker)delegate
             {
-                UpdataProgress(e.ProgressPercentage, "Loading " + this.ContentType.ToString() + "s" + (string)e.UserState);
+                UpdateProgress(e.ProgressPercentage, "Loading " + this.ContentType.ToString() + "s" + (string)e.UserState);
             });
             
         }

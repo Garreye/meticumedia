@@ -130,6 +130,7 @@ namespace Meticumedia
                 if(Settings.GetDefaultMovieFolder(out defaultMovieFolder))
                     cntrlMovieEdit.Content.RootFolder = string.IsNullOrEmpty(rootFolder) ? defaultMovieFolder.FullPath : rootFolder;
                 cntrlMovieEdit.Content.Path = ((Movie)cntrlMovieEdit.Content).BuildFilePath(txtSourceFile.Text);
+                cntrlMovieEdit.SearchEntry = FileHelper.BasicSimplify(Path.GetFileNameWithoutExtension(result.SourcePath), false);
             }
             cntrlMovieEdit.ContentChanged += new EventHandler<EventArgs>(cntrlMovieEdit_MovieChanged);
 
