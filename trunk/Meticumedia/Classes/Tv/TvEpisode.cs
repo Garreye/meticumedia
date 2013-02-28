@@ -475,7 +475,7 @@ namespace Meticumedia
 
         #endregion
 
-        #region IComparable Members
+        #region Comparsions
 
         /// <summary>
         /// Compare method for sorting epsiodes, uses airdate.
@@ -487,10 +487,34 @@ namespace Meticumedia
             if (obj is TvEpisode)
             {
                 TvEpisode t2 = (TvEpisode)obj;
-                return this.AirDate.CompareTo(t2.AirDate);
+                return this.Number.CompareTo(t2.Number);
             }
             else
                 throw new ArgumentException("Object is not a TvShow.");
+        }
+
+        /// <summary>
+        /// Compares 2 content instances based on their Name property.
+        /// </summary>
+        /// <param name="x">The first movie.</param>
+        /// <param name="y">The second movie.</param>
+        /// <returns>The comparison results </returns>
+        public static int CompareByAirDate(TvEpisode x, TvEpisode y)
+        {
+            if (x == null)
+            {
+                if (y == null)
+                    return 0;
+                else
+                    return -1;
+            }
+            else
+            {
+                if (y == null)
+                    return 1;
+                else
+                    return x.AirDate.CompareTo(y.AirDate);
+            }
         }
 
         #endregion

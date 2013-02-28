@@ -375,7 +375,7 @@ namespace Meticumedia
                 }
 
             // Sort (reverse to get latest at top) and return episodes  
-            epList.Sort();
+            epList.Sort(TvEpisode.CompareByAirDate);
             if (!upcoming)
                 epList.Reverse();
             return epList;
