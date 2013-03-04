@@ -65,6 +65,8 @@ namespace Meticumedia
 
         public static GuiSettings GuiControl = new GuiSettings();
 
+        public static int NumProcessingThreads = 20;
+
         #endregion
 
         #region Constants

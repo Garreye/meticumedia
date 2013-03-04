@@ -824,6 +824,33 @@ namespace Meticumedia
         /// <param name="e">Progress args</param>
         private void item_ActionProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            // Set progress bar message
+            OrgItem item = (OrgItem)sender;
+            string actionStr = string.Empty;
+            switch (item.Action)
+            {
+                case OrgAction.Copy:
+                    actionStr = "Copying";
+                    break;
+                case OrgAction.Delete:
+                    actionStr = "Deleting";
+                    break;
+                case OrgAction.Move:
+                    actionStr = "Moving";
+                    break;
+                case OrgAction.Rename:
+                    actionStr = "Renaming";
+                    break;
+                default:
+                    actionStr = "Processing";
+                    break;
+            }
+            string msg = actionStr + " file '" + Path.GetFileName(item.SourcePath) + "'";
+            
+            
+            if (e.ProgressPercentage == pbTotal.Value && msg == pbTotal.Message)
+                return;
+            
             this.Invoke((MethodInvoker)delegate
             {
                 // Limit progress value to 100
@@ -832,28 +859,7 @@ namespace Meticumedia
                 // Set progress bar value
                 this.pbTotal.Value = progress;
 
-                // Set progress bar message
-                OrgItem item = (OrgItem)sender;
-                string actionStr = string.Empty;
-                switch (item.Action)
-                {
-                    case OrgAction.Copy:
-                        actionStr = "Copying";
-                        break;
-                    case OrgAction.Delete:
-                        actionStr = "Deleting";
-                        break;
-                    case OrgAction.Move:
-                        actionStr = "Moving";
-                        break;
-                    case OrgAction.Rename:
-                        actionStr = "Renaming";
-                        break;
-                    default:
-                        actionStr = "Processing";
-                        break;
-                }
-                this.pbTotal.Message = actionStr + " file '" + Path.GetFileName(item.SourcePath) + "'";
+                this.pbTotal.Message = msg;
 
                 // Update percent in listview
                 lock (queueLock)

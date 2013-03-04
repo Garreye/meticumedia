@@ -39,6 +39,11 @@ namespace Meticumedia
         /// </summary>
         public override bool IncludeInScan { get { return this.DoRenaming || this.DoMissingCheck; } }
 
+        /// <summary>
+        /// List of alternative names to match to
+        /// </summary>
+        public List<string> AlternativeNameMatches { get; set; }
+
         #endregion
 
         #region Constructor
@@ -77,6 +82,7 @@ namespace Meticumedia
             this.DoRenaming = true;
             this.DoMissingCheck = true;
             this.IncludeInSchedule = true;
+            this.AlternativeNameMatches = new List<string>();
         }
 
         /// <summary>
@@ -133,6 +139,9 @@ namespace Meticumedia
             foreach (TvSeason season in this.Seasons)
                 foreach (TvEpisode episode in season.Episodes)
                     episode.Show = show.Name;
+            this.AlternativeNameMatches = new List<string>();
+            foreach (string altName in show.AlternativeNameMatches)
+                this.AlternativeNameMatches.Add(altName);
         }
 
         /// <summary>
@@ -204,21 +213,6 @@ namespace Meticumedia
             string[] subDirs = Directory.GetDirectories(directory);
             foreach (string subDir in subDirs)
                 UpdateMissingRecursive(subDir);
-        }
-
-        /// <summary>
-        /// Attempts to match a file to the show name
-        /// </summary>
-        /// <param name="fileName">Collection of matches for file name and show</param>
-        /// <returns></returns>
-        public bool CheckFileToShow(string fileName)
-        {
-            MatchCollection matches = MatchFileToContent(fileName);
-            foreach (Match m in matches)
-                if (m.Length >= 3)
-                    return true;
-            return false;
-
         }
 
         /// <summary>
@@ -298,9 +292,14 @@ namespace Meticumedia
         private static readonly string ROOT_XML = "TvShow";
 
         /// <summary>
+        /// XML element name for single match
+        /// </summary>
+        private static readonly string MATCH_XML = "Match";
+
+        /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Seasons, DoMissing, IncludeInSchedule };
+        private enum XmlElements { Seasons, DoMissing, IncludeInSchedule, AlternativeNameMatches };
 
         /// <summary>
         /// Saves instance to XML file.
@@ -331,6 +330,12 @@ namespace Meticumedia
                         break;
                     case XmlElements.IncludeInSchedule:
                         value = this.IncludeInSchedule.ToString();
+                        break;
+                    case XmlElements.AlternativeNameMatches:
+                        xw.WriteStartElement(element.ToString());
+                        foreach (string match in AlternativeNameMatches)
+                            xw.WriteElementString(MATCH_XML, match);
+                        xw.WriteEndElement();
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -386,6 +391,12 @@ namespace Meticumedia
                         bool include;
                         bool.TryParse(value, out include);
                         this.IncludeInSchedule = include;
+                        break;
+                    case XmlElements.AlternativeNameMatches:
+                        this.AlternativeNameMatches = new List<string>();
+                        foreach (XmlNode matchNode in propNode.ChildNodes)
+                            if (!string.IsNullOrWhiteSpace(matchNode.InnerText))
+                                this.AlternativeNameMatches.Add(matchNode.InnerText);
                         break;
                 }
             }

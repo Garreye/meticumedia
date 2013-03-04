@@ -328,17 +328,14 @@ namespace Meticumedia
         /// <param name="subSearch">Whether processing is sub-search(TV only)</param>
         /// <param name="processComplete">Delegate to be called by processing when completed</param>
         /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
-        private static void DirectoryScanProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete complete, ref int numItemsProcessed)
+        private static void DirectoryScanProcess(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, ref int numItemsProcessed, ref int numItemsStarted)
         {
             // Sub-search flag is tv only check flag
             bool tvOnlyCheck = subSearch;
 
             // Check for cancellation
             if (cancelRequested && !background)
-            {
-                complete();
                 return;
-            }
 
             // Get simple file name
             string simpleFile = FileHelper.BasicSimplify(Path.GetFileNameWithoutExtension(orgPath.Path), false);
@@ -348,10 +345,7 @@ namespace Meticumedia
 
             // Check tv
             if (tvOnlyCheck && fileCat != FileHelper.FileCategory.TvVideo)
-            {
-                complete();
                 return;
-            }
 
             // Update progress
             if (!background)
@@ -372,10 +366,7 @@ namespace Meticumedia
 
             // If item is already in the queue, skip it
             if (alreadyQueued)
-            {
-                complete();
                 return;
-            }
 
             // Set whether item is for new show
             TvShow newShow = null;
@@ -386,13 +377,12 @@ namespace Meticumedia
             {
                 MatchCollection match = Organization.Shows[j].MatchFileToContent(orgPath.Path);
                 if (match != null && match.Count > 0)
-                {
                     matches.Add((TvShow)Organization.Shows[j], match);
-                }
             }
 
             // Try to match to temporary show
             lock(directoryScanLock)
+                if(temporaryShows.ContainsKey(updateNumber))
                 foreach (TvShow show in temporaryShows[updateNumber])
                 {
                     MatchCollection match = show.MatchFileToContent(orgPath.Path);
@@ -487,10 +477,7 @@ namespace Meticumedia
                                 if (episode1.Missing == TvEpisode.MissingStatus.Located)
                                 {
                                     if (background || episode1.Ignored)
-                                    {
-                                        complete();
                                         return;
-                                    }
 
                                     action = OrgAction.AlreadyExists;
                                 }
@@ -552,8 +539,6 @@ namespace Meticumedia
                     AddDirScanResult(updateNumber, new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder));
                     break;
             }
-
-            complete();
         }
 
         /// <summary>
@@ -695,7 +680,7 @@ namespace Meticumedia
                             {
                                 // Check directory item for episode
                                 foreach (OrgItem item in directoryItems)
-                                    if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && show.CheckFileToShow(Path.GetFileName(item.SourcePath)))
+                                    if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && item.TvEpisode != null && item.TvEpisode.Show == show.Name)
                                     {
                                         // Only add item for first part of multi-part file
                                         if (ep.Equals(item.TvEpisode))

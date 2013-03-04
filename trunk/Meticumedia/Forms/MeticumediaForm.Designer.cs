@@ -2,8 +2,6 @@
 // Source code available at http://code.google.com/p/meticumedia/
 // This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
 // --------------------------------------------------------------------------------
-using Meticumedia.Controls;
-
 namespace Meticumedia
 {
     partial class MeticumediaForm
@@ -58,7 +56,7 @@ namespace Meticumedia
             this.tpQueue = new System.Windows.Forms.TabPage();
             this.tpLog = new System.Windows.Forms.TabPage();
             this.cntrlShows = new Meticumedia.ShowsControl();
-            this.cntrlEpisodes = new Meticumedia.Controls.EpisodesControl();
+            this.cntrlEpisodes = new Meticumedia.EpisodesControl();
             this.cntrlSched = new Meticumedia.ScheduleControl();
             this.cntrlMovies = new Meticumedia.MovieControl();
             this.cntrlScan = new Meticumedia.ScanControl();

@@ -334,7 +334,7 @@ namespace Meticumedia
             this.idsToUpdate = idsToUpdate;
 
             // Update progress
-            string progressMsg = "Update of '" + this.FullPath + "' started!";
+            string progressMsg = "Update of '" + this.FullPath + "' started - Building threads";
             OnUpdateProgressChange(this, false, 0, progressMsg);
 
             // Initialize processing
@@ -374,11 +374,15 @@ namespace Meticumedia
         /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
         /// <param name="processComplete">Delegate to be called by processing when completed</param>
         /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
-        private void UpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int processNumber, bool background, bool subSearch, OrgProcessing.ProcessComplete complete, ref int numItemsProcessed)
+        private void UpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int processNumber, bool background, bool subSearch, ref int numItemsProcessed, ref int numItemsStarted)
         {
             // Check for cancellation - this method is called from thread pool, so cancellation could have occured by the time this is run
             if (updateCancelled || this.updateNumber != processNumber)
                 return;
+
+            // Set processing messge
+            string progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "' - '" + Path.GetFileName(orgPath.Path) + "' started";
+            OnUpdateProgressChange(this, false, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);
 
             // Get content collection to add content to
             ContentCollection content = GetContentCollection();
@@ -398,8 +402,8 @@ namespace Meticumedia
                     break;
                 }
 
-            // Build progess message
-            string progressMsg = "Updating '" + orgPath.RootFolder.FullPath + "' - Processed '" + Path.GetFileName(orgPath.Path) + "'";
+            // Set completed progess message
+            progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "' - '" + Path.GetFileName(orgPath.Path) + "' complete";
 
             // Check if show found
             if (contentExists && contentComplete)
@@ -412,10 +416,10 @@ namespace Meticumedia
 
                 // Update progress
                 if (this.updateNumber == processNumber)
-                    OnUpdateProgressChange(this, false, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
+                    OnUpdateProgressChange(this, false, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);
 
-                // Call completed delegate
-                complete();
+                // Save
+                GetContentCollection().Save();
                 return;
             }
 
@@ -477,10 +481,15 @@ namespace Meticumedia
                 content.Add(newContent);
 
             // Update progress
-            OnUpdateProgressChange(this, true, (int)Math.Round((double)numItemsProcessed / totalPaths * 100D), progressMsg);
+            OnUpdateProgressChange(this, true, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);
 
-            // Call completed delegate
-            complete();
+            // Save
+            GetContentCollection().Save();
+        }
+
+        private int CalcProgress(int numItemsProcessed, int numItemsStarted, int totalItems)
+        {
+            return (int)Math.Round((double)(numItemsProcessed + numItemsStarted) / (totalItems * 2) * 100D);
         }
 
         /// <summary>

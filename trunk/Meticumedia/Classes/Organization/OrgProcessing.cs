@@ -33,7 +33,7 @@ namespace Meticumedia
         /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
         /// <param name="processComplete">Delegate to be called by processing when completed</param>
         /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
-        public delegate void Processing(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, ProcessComplete processComplete, ref int numItemsProcessed);
+        public delegate void Processing(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, ref int numItemsProcessed, ref int numItemsStarted);
 
         #endregion
 
@@ -88,6 +88,11 @@ namespace Meticumedia
         private int numItemProcessed = 0;
 
         /// <summary>
+        /// Total number of items that have been started during run
+        /// </summary>
+        private int numItemStarted = 0;
+
+        /// <summary>
         /// Lock for modifying numItemProcessed variable
         /// </summary>
         private object processingLock = new object();
@@ -112,7 +117,7 @@ namespace Meticumedia
             for (i = 0; i < paths.Count; i++)
             {
                 // Limit number of threads
-                while (i > numItemProcessed + 25 && (!cancel || background))
+                while (i > numItemProcessed + Settings.NumProcessingThreads && (!cancel || background))
                     Thread.Sleep(100);
 
                 // Check for cancellation
@@ -142,14 +147,11 @@ namespace Meticumedia
             bool background = (bool)args[3];
             bool subSearch = (bool)args[4];
 
-            process(orgPath, updateNumer, totalPaths, this.ProcessNumber, background, subSearch, Complete, ref numItemProcessed);
-        }
+            lock (processingLock)
+                ++numItemStarted;
 
-        /// <summary>
-        /// Method to be called by processing methods upon completion
-        /// </summary>
-        private void Complete()
-        {
+            process(orgPath, updateNumer, totalPaths, this.ProcessNumber, background, subSearch, ref numItemProcessed, ref numItemStarted);
+
             lock (processingLock)
                 ++numItemProcessed;
         }

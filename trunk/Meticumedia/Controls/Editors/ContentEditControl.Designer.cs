@@ -44,6 +44,10 @@ namespace Meticumedia
             this.label2 = new System.Windows.Forms.Label();
             this.btnDbSearch = new System.Windows.Forms.Button();
             this.gbProperties = new System.Windows.Forms.GroupBox();
+            this.gbAltMatchNames = new System.Windows.Forms.GroupBox();
+            this.lbAltNames = new System.Windows.Forms.ListBox();
+            this.btnRemoveMatch = new System.Windows.Forms.Button();
+            this.btnAddMatch = new System.Windows.Forms.Button();
             this.chkIncludeInSchedule = new System.Windows.Forms.CheckBox();
             this.chkDoMissing = new System.Windows.Forms.CheckBox();
             this.chkDoRenaming = new System.Windows.Forms.CheckBox();
@@ -53,6 +57,7 @@ namespace Meticumedia
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numYear)).BeginInit();
             this.gbProperties.SuspendLayout();
+            this.gbAltMatchNames.SuspendLayout();
             this.gbOnlineSearch.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -181,6 +186,7 @@ namespace Meticumedia
             this.gbProperties.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbProperties.Controls.Add(this.gbAltMatchNames);
             this.gbProperties.Controls.Add(this.chkIncludeInSchedule);
             this.gbProperties.Controls.Add(this.chkDoMissing);
             this.gbProperties.Controls.Add(this.chkDoRenaming);
@@ -198,6 +204,53 @@ namespace Meticumedia
             this.gbProperties.TabIndex = 36;
             this.gbProperties.TabStop = false;
             this.gbProperties.Text = "Properties";
+            // 
+            // gbAltMatchNames
+            // 
+            this.gbAltMatchNames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbAltMatchNames.Controls.Add(this.lbAltNames);
+            this.gbAltMatchNames.Controls.Add(this.btnRemoveMatch);
+            this.gbAltMatchNames.Controls.Add(this.btnAddMatch);
+            this.gbAltMatchNames.Location = new System.Drawing.Point(244, 119);
+            this.gbAltMatchNames.Name = "gbAltMatchNames";
+            this.gbAltMatchNames.Size = new System.Drawing.Size(175, 86);
+            this.gbAltMatchNames.TabIndex = 40;
+            this.gbAltMatchNames.TabStop = false;
+            this.gbAltMatchNames.Text = "Alternative Match Names";
+            this.gbAltMatchNames.Visible = false;
+            // 
+            // lbAltNames
+            // 
+            this.lbAltNames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbAltNames.FormattingEnabled = true;
+            this.lbAltNames.Location = new System.Drawing.Point(47, 19);
+            this.lbAltNames.Name = "lbAltNames";
+            this.lbAltNames.Size = new System.Drawing.Size(122, 56);
+            this.lbAltNames.TabIndex = 0;
+            // 
+            // btnRemoveMatch
+            // 
+            this.btnRemoveMatch.Location = new System.Drawing.Point(6, 48);
+            this.btnRemoveMatch.Name = "btnRemoveMatch";
+            this.btnRemoveMatch.Size = new System.Drawing.Size(35, 23);
+            this.btnRemoveMatch.TabIndex = 2;
+            this.btnRemoveMatch.Text = "-";
+            this.btnRemoveMatch.UseVisualStyleBackColor = true;
+            this.btnRemoveMatch.Click += new System.EventHandler(this.btnRemoveMatch_Click);
+            // 
+            // btnAddMatch
+            // 
+            this.btnAddMatch.Location = new System.Drawing.Point(6, 19);
+            this.btnAddMatch.Name = "btnAddMatch";
+            this.btnAddMatch.Size = new System.Drawing.Size(35, 23);
+            this.btnAddMatch.TabIndex = 1;
+            this.btnAddMatch.Text = "+";
+            this.btnAddMatch.UseVisualStyleBackColor = true;
+            this.btnAddMatch.Click += new System.EventHandler(this.btnAddMatch_Click);
             // 
             // chkIncludeInSchedule
             // 
@@ -272,6 +325,7 @@ namespace Meticumedia
             ((System.ComponentModel.ISupportInitialize)(this.numYear)).EndInit();
             this.gbProperties.ResumeLayout(false);
             this.gbProperties.PerformLayout();
+            this.gbAltMatchNames.ResumeLayout(false);
             this.gbOnlineSearch.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -296,5 +350,9 @@ namespace Meticumedia
         private System.Windows.Forms.CheckBox chkDoMissing;
         private System.Windows.Forms.CheckBox chkDoRenaming;
         private System.Windows.Forms.CheckBox chkIncludeInSchedule;
+        private System.Windows.Forms.GroupBox gbAltMatchNames;
+        private System.Windows.Forms.ListBox lbAltNames;
+        private System.Windows.Forms.Button btnRemoveMatch;
+        private System.Windows.Forms.Button btnAddMatch;
     }
 }

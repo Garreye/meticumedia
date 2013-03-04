@@ -19,8 +19,15 @@ namespace Meticumedia
     /// </summary>
     public partial class ContentFoldersControl : UserControl
     {
+        #region Properties
+
+        /// <summary>
+        /// Type of content displayed in control
+        /// </summary>
         public ContentType ContentType { get; set; }
-        
+
+        #endregion
+
         #region Constructor
 
         /// <summary>
@@ -328,7 +335,7 @@ namespace Meticumedia
             }
 
             // No match
-            match = new ContentRootFolder(folders[0].ContentType);
+            match = new ContentRootFolder(this.ContentType);
             return false;
         }
 

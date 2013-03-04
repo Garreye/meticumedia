@@ -1,4 +1,8 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------
+// Source code available at http://code.google.com/p/meticumedia/
+// This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
+// --------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -8,7 +12,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-namespace Meticumedia.Controls
+namespace Meticumedia
 {
     public partial class EpisodesControl : UserControl
     {
@@ -229,33 +233,34 @@ namespace Meticumedia.Controls
 
             // Get selected episodes
             List<TvEpisode> selEpisodes;
-            if (!GetSelectedEpisodes(out selEpisodes))
-                return;
-
-            // Add options
-            episodeContextMenu.MenuItems.Add("Play", new EventHandler(HandlePlay));
-            episodeContextMenu.MenuItems.Add("Edit", new EventHandler(HandleEdit));
-
-            if (selEpisodes.Count == 1 && selEpisodes[0].Missing == TvEpisode.MissingStatus.Missing)
+            if (GetSelectedEpisodes(out selEpisodes))
             {
-                episodeContextMenu.MenuItems.Add("Locate and Move", new EventHandler(HandleLocate));
-                episodeContextMenu.MenuItems.Add("Locate and Copy", new EventHandler(HandleLocate));
+
+                // Add options
+                episodeContextMenu.MenuItems.Add("Play", new EventHandler(HandlePlay));
+                episodeContextMenu.MenuItems.Add("Edit", new EventHandler(HandleEdit));
+
+                if (selEpisodes.Count == 1 && selEpisodes[0].Missing == TvEpisode.MissingStatus.Missing)
+                {
+                    episodeContextMenu.MenuItems.Add("Locate and Move", new EventHandler(HandleLocate));
+                    episodeContextMenu.MenuItems.Add("Locate and Copy", new EventHandler(HandleLocate));
+                }
+
+                bool allIgnored = true;
+                bool allUnignored = true;
+                foreach (TvEpisode ep in selEpisodes)
+                    if (ep.Ignored)
+                        allUnignored = false;
+                    else
+                        allIgnored = false;
+
+                if ((allUnignored && !allIgnored) || (!allIgnored && !allUnignored))
+                    episodeContextMenu.MenuItems.Add("Ignore", new EventHandler(HandleIgnore));
+                if ((allIgnored && !allUnignored) || (!allIgnored && !allUnignored))
+                    episodeContextMenu.MenuItems.Add("Unignore", new EventHandler(HandleUnignore));
+
+                episodeContextMenu.MenuItems.Add("Delete Episode File", new EventHandler(HandleDelete));
             }
-
-            bool allIgnored = true;
-            bool allUnignored = true;
-            foreach (TvEpisode ep in selEpisodes)
-                if (ep.Ignored)
-                    allUnignored = false;
-                else
-                    allIgnored = false;
-
-            if ((allUnignored && !allIgnored) || (!allIgnored && !allUnignored))
-                episodeContextMenu.MenuItems.Add("Ignore", new EventHandler(HandleIgnore));
-            if ((allIgnored && !allUnignored) || (!allIgnored && !allUnignored))
-                episodeContextMenu.MenuItems.Add("Unignore", new EventHandler(HandleUnignore));
-
-            episodeContextMenu.MenuItems.Add("Delete Episode File", new EventHandler(HandleDelete));
 
             episodeContextMenu.MenuItems.Add("New Episode", new EventHandler(HandleAddEpisode));
 

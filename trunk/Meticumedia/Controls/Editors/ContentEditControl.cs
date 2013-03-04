@@ -10,6 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
 
 namespace Meticumedia
 {
@@ -146,6 +147,13 @@ namespace Meticumedia
                 chkDoMissing.Checked = ((TvShow)content).DoMissingCheck;
                 chkIncludeInSchedule.Visible = true;
                 chkIncludeInSchedule.Checked = ((TvShow)content).IncludeInSchedule;
+                gbAltMatchNames.Visible = true;
+
+                lbAltNames.Items.Clear();
+                TvShow show = (TvShow)content;
+                if (show.AlternativeNameMatches != null)
+                    foreach (string altName in show.AlternativeNameMatches)
+                        lbAltNames.Items.Add(altName);
             }
 
             // Trigger movie changes event
@@ -276,6 +284,21 @@ namespace Meticumedia
             DisplayContent(false);
         }
 
+        private void btnAddMatch_Click(object sender, EventArgs e)
+        {
+            string newName = Interaction.InputBox("Enter Name");
+            if (!string.IsNullOrWhiteSpace(newName))
+                ((TvShow)this.content).AlternativeNameMatches.Add(newName);
+
+            // Refresh display
+            DisplayContent(false);
+        }
+
+        private void btnRemoveMatch_Click(object sender, EventArgs e)
+        {
+
+        }
+
         // <summary>
         /// Switch to database search view.
         /// </summary>
@@ -316,5 +339,7 @@ namespace Meticumedia
         }
 
         #endregion
+
+
     }
 }

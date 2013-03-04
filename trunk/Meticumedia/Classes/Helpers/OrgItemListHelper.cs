@@ -181,7 +181,11 @@ namespace Meticumedia
                                 switch (orgItem.QueueStatus)
                                 {
                                     case OrgQueueStatus.Enabled:
-                                        itemText = "Queued";
+                                        
+                                        if (orgItem.Progress > 0)
+                                            itemText = orgItem.Progress.ToString() + "%";
+                                        else
+                                            itemText = "Queued";
                                         break;
                                     case OrgQueueStatus.Paused:
                                         itemText = "Paused";

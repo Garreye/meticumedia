@@ -25,7 +25,7 @@ namespace Meticumedia
         /// <summary>
         /// Worker for updating root folders.
         /// </summary>
-        BackgroundWorker rootFolderUpdater;
+        private BackgroundWorker rootFolderUpdater;
 
         /// <summary>
         /// Flag indicating that update of root folders was cancelled and needs to be restarted once cancellation is complete
@@ -51,6 +51,8 @@ namespace Meticumedia
         /// Type of content displayed in control
         /// </summary>
         public ContentType ContentType { get; set; }
+
+        public bool updaterSet = false;
 
         #endregion
 
@@ -141,8 +143,7 @@ namespace Meticumedia
 
             // Setup root folder update worker
             rootFolderUpdater = new BackgroundWorker();
-            rootFolderUpdater.DoWork += new DoWorkEventHandler(rootFolderUpdater_DoWork);
-            rootFolderUpdater.RunWorkerCompleted += new RunWorkerCompletedEventHandler(rootFolderUpdater_RunWorkerCompleted);
+            
 
             // Setup listview
             lvContentFolders.ItemToEdit += new EventHandler(lvContentFolders_ItemToEdit);
@@ -421,9 +422,16 @@ namespace Meticumedia
         /// </summary>
         public void UpdateContentInFolders(bool full)
         {
-            // Show progress bar
+            // Set progress bar
             pbUpdating.Value = 0;
             btnForceRefresh.Enabled = false;
+
+            if (!this.updaterSet)
+            {
+                rootFolderUpdater.DoWork += new DoWorkEventHandler(rootFolderUpdater_DoWork);
+                rootFolderUpdater.RunWorkerCompleted += new RunWorkerCompletedEventHandler(rootFolderUpdater_RunWorkerCompleted);
+                this.updaterSet = true;
+            }
 
             // If update is already running, cancel it
             if (rootFolderUpdater.IsBusy)
@@ -433,6 +441,7 @@ namespace Meticumedia
             }
             else 
             {
+                Console.WriteLine("Updating called for " + this.ToString());
                 ShowProgressBar();
                 if (cmbFolders.SelectedItem != null)
                     rootFolderUpdater.RunWorkerAsync(cmbFolders.SelectedItem.ToString());
@@ -487,6 +496,8 @@ namespace Meticumedia
         /// </summary>
         private void rootFolderUpdater_DoWork(object sender, DoWorkEventArgs e)
         {
+            Console.WriteLine("Updating started for " + this.ToString());
+            
             // Get root folders to update from arguments
             string folder = (string)e.Argument;
 
@@ -511,27 +522,23 @@ namespace Meticumedia
             if (rootFolder.ContentType != this.ContentType)
                 return;
 
-            if (pbUpdating.Value != e.ProgressPercentage)
+             UpdateProgress(e.ProgressPercentage, (string)e.UserState);
+
+             if (!this.IsHandleCreated)
+                 return;
+
+            if (e.NewItem)
             {
-                if (this.InvokeRequired)
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        UpdateProgress(e.ProgressPercentage, (string)e.UserState);
-                    });
-                else
-                    UpdateProgress(e.ProgressPercentage, (string)e.UserState);
-
-                if (e.NewItem)
+                this.Invoke((MethodInvoker)delegate
                 {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        UpdateContent(true);
-                        UpdateGenresComboBox();
-                    });
-                }
+                    UpdateContent(true);
+                    UpdateGenresComboBox();
+                });
             }
-
         }
+
+        private string pbMessage = string.Empty;
+        private int pbPercent = 0;
 
         /// <summary>
         /// Updates progress bar percent and message
@@ -540,8 +547,17 @@ namespace Meticumedia
         /// <param name="msg"></param>
         private void UpdateProgress(int percent, string msg)
         {
-            pbUpdating.Message = msg;
-            pbUpdating.Value = percent;
+            pbPercent = percent;
+            pbMessage = msg;
+
+            if (!this.IsHandleCreated)
+                return;
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                pbUpdating.Message = msg;
+                pbUpdating.Value = percent;
+            });
         }
         
         /// <summary>
@@ -550,7 +566,7 @@ namespace Meticumedia
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void rootFolderUpdater_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
+        {            
             if (reUpdateRequired)
             {
                 reUpdateRequired = false;
@@ -597,6 +613,8 @@ namespace Meticumedia
                 DoUpdateFolders();
             }
 
+            // Set progress bar
+            UpdateProgress(pbPercent, pbMessage);
         }
 
         /// <summary>

@@ -455,7 +455,7 @@ namespace Meticumedia
                 for (int j = 0; j < optionCombinations; j++)
                 {
                     // Build options
-                    OptionalSimplifyRemoves options = (OptionalSimplifyRemoves)j;
+                    OptionalSimplifyRemoves options = (OptionalSimplifyRemoves)(j >> 2);
 
                     // Don't do both year removes
                     if ((options & OptionalSimplifyRemoves.Year) > 0 && (options & OptionalSimplifyRemoves.YearAndFollowing) > 0)

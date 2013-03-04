@@ -179,17 +179,33 @@ namespace Meticumedia
         /// <returns>Collection of matches for file name and content<</returns>
         public MatchCollection MatchFileToContent(string fileName)
         {
-            string re = BuildNameRegularExpresionString(true);
-            MatchCollection matches = null;
-            if (!string.IsNullOrEmpty(re))
-                matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
+            List<string> names = new List<string>();
+            names.Add(this.Name);
 
-            if (matches != null && matches.Count > 0)
-                return matches;
+            if (this is TvShow)
+            {
+                TvShow show = (TvShow)this;
+                foreach (string altName in show.AlternativeNameMatches)
+                    names.Add(altName);
+            }
 
-            re = BuildNameRegularExpresionString(false);
-            if (!string.IsNullOrEmpty(re))
-                return Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
+            foreach (string name in names)
+            {
+                string re = BuildNameRegularExpresionString(true, name);
+                MatchCollection matches = null;
+                if (!string.IsNullOrEmpty(re))
+                    matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
+
+                if (matches != null && matches.Count > 0)
+                    return matches;
+
+                re = BuildNameRegularExpresionString(false, name);
+                if (!string.IsNullOrEmpty(re))
+                    matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
+
+                if (matches != null && matches.Count > 0)
+                    return matches;
+            }
 
             return null;
         }
@@ -204,13 +220,13 @@ namespace Meticumedia
         /// "and"/"&" are set to optional matches
         /// </summary>
         /// <returns></returns>
-        private string BuildNameRegularExpresionString(bool removeWhitespace)
+        private string BuildNameRegularExpresionString(bool removeWhitespace, string showname)
         {
             // Initialize string
             string showReStr = string.Empty;
 
             // Get simplified name
-            string showname = FileHelper.SimplifyFileName(this.Name, true, removeWhitespace, true);
+            showname = FileHelper.SimplifyFileName(showname, true, removeWhitespace, true);
 
             // Split name words
             string[] showWords = showname.Split(' ');
