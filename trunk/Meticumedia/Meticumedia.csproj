@@ -71,15 +71,15 @@
     <Compile Include="Classes\Content\ContentSearchMod.cs" />
     <Compile Include="Classes\Content\ContentType.cs" />
     <Compile Include="Classes\Content\GenreCollection.cs" />
-    <Compile Include="Classes\Helpers\TvDatabaseAccess.cs" />
-    <Compile Include="Classes\Helpers\SearchHelper.cs" />
-    <Compile Include="Classes\Helpers\TvDatabaseHelper.cs" />
-    <Compile Include="Classes\Helpers\TvRageAccess.cs" />
+    <Compile Include="Classes\Databases\TvDatabaseAccess.cs" />
+    <Compile Include="Classes\Scanning\SearchHelper.cs" />
+    <Compile Include="Classes\Databases\TvDatabaseHelper.cs" />
+    <Compile Include="Classes\Databases\TvRageAccess.cs" />
     <Compile Include="Classes\Movies\MovieSearch.cs" />
     <Compile Include="Classes\Settings\FileNamePortion.cs" />
     <Compile Include="Classes\Settings\FileWordType.cs" />
-    <Compile Include="Classes\Helpers\TheMovieDbHelper.cs" />
-    <Compile Include="Classes\Helpers\WordHelper.cs" />
+    <Compile Include="Classes\Databases\TheMovieDbHelper.cs" />
+    <Compile Include="Classes\FileHandling\WordHelper.cs" />
     <Compile Include="Classes\Movies\Movie.cs" />
     <Compile Include="Classes\Content\ContentRootFolder.cs" />
     <Compile Include="Classes\Settings\FileNameFormat.cs" />
@@ -89,14 +89,14 @@
     <Compile Include="Classes\Organization\OrgFile.cs" />
     <Compile Include="Classes\Organization\OrgFolder.cs" />
     <Compile Include="Classes\Organization\OrgItem.cs" />
-    <Compile Include="Classes\Helpers\OrgItemListHelper.cs" />
+    <Compile Include="Classes\Organization\OrgItemListHelper.cs" />
     <Compile Include="Classes\Organization\OrgProcessing.cs" />
     <Compile Include="Classes\Organization\OrgProcessingArgs.cs" />
     <Compile Include="Classes\Organization\OrgProgressChangesEventArgs.cs" />
     <Compile Include="Classes\Organization\OrgQueueStatus.cs" />
     <Compile Include="Classes\Organization\OrgStatus.cs" />
-    <Compile Include="Classes\Helpers\RemoveFileWord.cs" />
-    <Compile Include="Classes\Helpers\Separator.cs" />
+    <Compile Include="Classes\FileHandling\RemoveFileWord.cs" />
+    <Compile Include="Classes\FileHandling\Separator.cs" />
     <Compile Include="Classes\Settings\GuiSettings.cs" />
     <Compile Include="Classes\Settings\Settings.cs" />
     <Compile Include="Classes\Tv\TvEpisodeFormat.cs">
@@ -265,8 +265,8 @@
     <Compile Include="Forms\MeticumediaForm.Designer.cs">
       <DependentUpon>MeticumediaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Classes\Helpers\FileHelper.cs" />
-    <Compile Include="Classes\Helpers\ScanHelper.cs" />
+    <Compile Include="Classes\FileHandling\FileHelper.cs" />
+    <Compile Include="Classes\Scanning\ScanHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Controls\ContentControl.resx">
