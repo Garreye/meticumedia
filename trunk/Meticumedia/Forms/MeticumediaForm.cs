@@ -65,12 +65,13 @@ namespace Meticumedia
             linkMovieDb.Links.Add(0, linkMovieDb.Text.Length, "www.themoviedb.org");
         }
 
-
         #endregion
 
         #region Event Handling
 
-
+        /// <summary>
+        /// Selection change on shows display forwarded to episode control for updating
+        /// </summary>
         void cntrlShows_SelectionChanged(object sender, ContentControl.SelectionChangedArgs e)
         {
             cntrlEpisodes.TvShow = (TvShow)e.Selections[0];
@@ -127,7 +128,7 @@ namespace Meticumedia
                                 }
 
                         // Update controls with shows
-                        cntrlShows.UpdateDisplayIfNecessary(e.CompleteItem.TvEpisode.Show);
+                        cntrlEpisodes.UpdateDisplayIfNecessary(e.CompleteItem.TvEpisode);
 
                     }
                 }

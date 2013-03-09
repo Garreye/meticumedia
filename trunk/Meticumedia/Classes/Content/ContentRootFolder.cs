@@ -449,6 +449,7 @@ namespace Meticumedia
                 {
                     case ContentType.TvShow:
                         ((TvShow)newContent).Clone((TvShow)match);
+                        ((TvShow)newContent).UpdateMissing();
                         break;
                     case Meticumedia.ContentType.Movie:
                         ((Movie)newContent).Clone((Movie)match);

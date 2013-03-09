@@ -30,7 +30,7 @@ namespace Meticumedia
         #region Constructor
 
         /// <summary>
-        /// Constructor with movie to be edited passed in.
+        /// Constructor with content to be edited passed in.
         /// </summary>
         /// <param name="movie"></param>
         public ContentEditorForm(Content content)

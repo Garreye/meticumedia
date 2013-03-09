@@ -52,7 +52,10 @@ namespace Meticumedia
         /// </summary>
         public ContentType ContentType { get; set; }
 
-        public bool updaterSet = false;
+        /// <summary>
+        /// Flag indicating whether folder update worker has been initialized
+        /// </summary>
+        public bool folderUpdateWorkerInitialized = false;
 
         #endregion
 
@@ -73,14 +76,24 @@ namespace Meticumedia
                 ItemsToQueue(null, new ItemsToQueueArgs(items));
         }
 
+        /// <summary>
+        /// Event indicating selection of content has changed
+        /// </summary>
         public event EventHandler<SelectionChangedArgs> SelectionChanged;
 
+        /// <summary>
+        /// Triggers SelectionChanged event
+        /// </summary>
+        /// <param name="items"></param>
         protected void OnSelectionChanged(List<Content> items)
         {
             if (SelectionChanged != null)
                 SelectionChanged(this, new SelectionChangedArgs(items));
         }
 
+        /// <summary>
+        /// Arguments for selection changes event
+        /// </summary>
         public class SelectionChangedArgs : EventArgs
         {
             /// <summary>
@@ -103,7 +116,7 @@ namespace Meticumedia
         #region Constructors
 
         /// <summary>
-        /// Defaul constructor
+        /// Default constructor
         /// </summary>
         public ContentControl(ContentType type)
         {
@@ -184,6 +197,11 @@ namespace Meticumedia
             return selFolders;
         }
 
+        /// <summary>
+        /// Gets root folders that fall into filter
+        /// </summary>
+        /// <param name="recursive">Whether to search recursively through child root folders</param>
+        /// <returns></returns>
         public List<ContentRootFolder> GetFilteredRootFolders(out bool recursive)
         {
             List<ContentRootFolder> baseRootFolders = GetSelectedRootFolders();
@@ -207,6 +225,13 @@ namespace Meticumedia
             return baseRootFolders;
         }
 
+        /// <summary>
+        /// Get root folder that matches path string, recursive search
+        /// </summary>
+        /// <param name="path">Path to match to</param>
+        /// <param name="baseFolder">Current root folder being searches</param>
+        /// <param name="matchedFolder">Resulting matched root folder</param>
+        /// <returns>Whether match was found</returns>
         private bool GetMatchingRootFolder(string path, ContentRootFolder baseFolder, out ContentRootFolder matchedFolder)
         {
             if (path == baseFolder.FullPath)
@@ -410,6 +435,10 @@ namespace Meticumedia
             cmbRootFilter.SelectedIndex = 0;
         }
 
+        /// <summary>
+        /// Add item to root folder combo box
+        /// </summary>
+        /// <param name="rootFolder"></param>
         private void AddRootFolderFilterItems(ContentRootFolder rootFolder)
         {
             cmbRootFilter.Items.Add("Non-recursive: " + rootFolder.FullPath);
@@ -426,11 +455,11 @@ namespace Meticumedia
             pbUpdating.Value = 0;
             btnForceRefresh.Enabled = false;
 
-            if (!this.updaterSet)
+            if (!this.folderUpdateWorkerInitialized)
             {
                 rootFolderUpdater.DoWork += new DoWorkEventHandler(rootFolderUpdater_DoWork);
                 rootFolderUpdater.RunWorkerCompleted += new RunWorkerCompletedEventHandler(rootFolderUpdater_RunWorkerCompleted);
-                this.updaterSet = true;
+                this.folderUpdateWorkerInitialized = true;
             }
 
             // If update is already running, cancel it
@@ -449,17 +478,7 @@ namespace Meticumedia
                     rootFolderUpdater.RunWorkerAsync("All");
             }
         }
-
-        /// <summary>
-        /// TODO!
-        /// </summary>
-        /// <param name="content"></param>
-        public void UpdateDisplayIfNecessary(string content)
-        {
-            //if (SelectedShow != null && SelectedShow.Name == ep.Show)
-                //DisplayShow(true);
-        }       
-
+    
         /// <summary>
         /// Flag indicating if progress bar is currently shown.
         /// </summary>
@@ -537,7 +556,14 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Message displayed on progress bar
+        /// </summary>
         private string pbMessage = string.Empty;
+
+        /// <summary>
+        /// Percentage displayed on progress bar
+        /// </summary>
         private int pbPercent = 0;
 
         /// <summary>
@@ -570,7 +596,7 @@ namespace Meticumedia
             if (reUpdateRequired)
             {
                 reUpdateRequired = false;
-                rootFolderUpdater.RunWorkerAsync(cmbFolders.SelectedItem == null ? "All" : cmbFolders.SelectedItem.ToString());
+                rootFolderUpdater.RunWorkerAsync(!this.IsHandleCreated || cmbFolders.SelectedItem == null ? "All" : cmbFolders.SelectedItem.ToString());
             }
             else
             {
@@ -629,6 +655,9 @@ namespace Meticumedia
                 HideProgressBar();
         }
 
+        /// <summary>
+        /// Synchronizes genres list to content when loaded
+        /// </summary>
         private void ContentLoadSync()
         {
             UpdateGenresComboBox();
@@ -688,8 +717,6 @@ namespace Meticumedia
             });
         }
 
-        
-
         /// <summary>
         /// Update genres combo box when list is updated
         /// </summary>
@@ -729,7 +756,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Updates displayed movies when selected movie folder is changed.
+        /// Updates displayed movies when selected root folder is changed.
         /// </summary>
         private void cmbFolders_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -738,6 +765,11 @@ namespace Meticumedia
             UpdateGenresComboBox();
         }
 
+        /// <summary>
+        /// Change in root folder filter causes update to displayed content
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void cmbRootFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateContent(false);
@@ -918,7 +950,5 @@ namespace Meticumedia
         }
 
         #endregion
-
-
     }
 }

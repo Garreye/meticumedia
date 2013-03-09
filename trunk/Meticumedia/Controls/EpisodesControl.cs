@@ -14,6 +14,9 @@ using System.IO;
 
 namespace Meticumedia
 {
+    /// <summary>
+    /// Control that displays episodes for a single TV show
+    /// </summary>
     public partial class EpisodesControl : UserControl
     {
         #region Episode Filter Class
@@ -184,6 +187,9 @@ namespace Meticumedia
 
         #region Constructor
 
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public EpisodesControl()
         {
             InitializeComponent();
@@ -263,21 +269,6 @@ namespace Meticumedia
             }
 
             episodeContextMenu.MenuItems.Add("New Episode", new EventHandler(HandleAddEpisode));
-
-            //bool allWatched = true;
-            //bool allUnwatched = true;
-            //foreach (TvEpisode ep in selEpisodes)
-            //    if (ep.Watched)
-            //        allUnwatched = false;
-            //    else
-            //        allWatched = false;
-
-            //if ((allUnwatched && !allWatched) || (!allWatched && !allUnwatched))
-            //    episodeContextMenu.MenuItems.Add("Mark as watched", new EventHandler(HandleMarkAsWatch));
-            //if ((allWatched && !allUnwatched) || (!allWatched && !allUnwatched))
-            //    episodeContextMenu.MenuItems.Add("Unmark as watched", new EventHandler(HandleUnmarkAsWatch));
-
-
         }
 
         /// <summary>
@@ -397,8 +388,11 @@ namespace Meticumedia
 
         #endregion
 
-        #region Selected Show Dsiplay
+        #region Selected Show Display
 
+        /// <summary>
+        /// Show that episodes are being displayed for
+        /// </summary>
         public TvShow TvShow
         {
             get { return show; }
@@ -409,6 +403,9 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Local variable for TvShow property
+        /// </summary>
         private TvShow show = null;
 
         /// <summary>
@@ -544,6 +541,16 @@ namespace Meticumedia
             selEp = null;
             return false;
         }
+
+        /// <summary>
+        /// Refresh display if currently displayed show belongs to episode
+        /// </summary>
+        /// <param name="episode">Episode that has been updated</param>
+        public void UpdateDisplayIfNecessary(TvEpisode episode)
+        {
+            if (show != null && show.Name == episode.Show)
+                DisplayShow(true);
+        }  
 
         #endregion
 
