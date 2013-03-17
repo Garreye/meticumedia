@@ -276,6 +276,8 @@ namespace Meticumedia
 
         #region Database Access
 
+        private static Queue<DateTime> requestTimes = new Queue<DateTime>();
+
         /// <summary>
         /// Performs HTTP get from database.
         /// </summary>
@@ -284,6 +286,23 @@ namespace Meticumedia
         /// <returns>Get results as value of ResultNode with no name</returns>
         private static ResultNode GetRequest(string get, List<GetParam> parameters)
         {
+            // Check rate of requests - maximum is 30 requests every 10 second
+            DateTime oldest;
+            lock (requestTimes)
+            {
+                while (requestTimes.Count >= 20)
+                {
+                    oldest = requestTimes.Peek();
+                    double requestAge = (DateTime.Now - oldest).TotalSeconds;
+                    if (requestAge > 10)
+                        requestTimes.Dequeue();
+                    else
+                        Thread.Sleep((11 - (int)requestAge) * 1000);
+
+                }
+                requestTimes.Enqueue(DateTime.Now);
+            }
+
             // Build URL
             string url = baseApiUrl + get + "?api_key=" + THE_MOVIE_DB_API_KEY;
             if (parameters != null)
@@ -304,7 +323,10 @@ namespace Meticumedia
                     requestSucess = true;
                     break;
                 }
-                catch { }
+                catch 
+                {
+                    Thread.Sleep(3000);
+                }
 
             // If no response return empty results
             if (!requestSucess)
@@ -344,7 +366,8 @@ namespace Meticumedia
                     if (node.Name == "results")
                         foreach (ResultNode resultNode in node.ChildNodes)
                         {
-                            Movie movieResult = ParseMovieResult(new Movie(), resultNode);
+                            Movie movieResult = new Movie();
+                            ParseMovieResult(movieResult, resultNode);
                             if (movieResult.Id > 0)
                                 searchResults.Add(movieResult);
                         }
@@ -359,11 +382,8 @@ namespace Meticumedia
         /// <param name="baseMovie">Movie instance to start with (to keep path/org info from)</param>
         /// <param name="resultNode">Result node from get request containing movie info</param>
         /// <returns>Movie with properties from results node</returns>
-        private static Movie ParseMovieResult(Movie baseMovie, ResultNode resultNode)
+        private static void ParseMovieResult(Movie baseMovie, ResultNode resultNode)
         {
-            // Init results
-            Movie movieResult = baseMovie;
-
             // Go through result child nodes and get properties for movie
             foreach (ResultNode resultPropNode in resultNode.ChildNodes)
                 switch (resultPropNode.Name)
@@ -371,35 +391,33 @@ namespace Meticumedia
                     case "id":
                         int id2;
                         int.TryParse(resultPropNode.Value, out id2);
-                        movieResult.Id = id2;
+                        baseMovie.Id = id2;
                         break;
                     case "title":
-                        movieResult.Name = resultPropNode.Value;
+                        baseMovie.Name = resultPropNode.Value;
                         break;
                     case "original_title":
-                        if (string.IsNullOrEmpty(movieResult.Name))
-                            movieResult.Name = resultPropNode.Value;
+                        if (string.IsNullOrEmpty(baseMovie.Name))
+                            baseMovie.Name = resultPropNode.Value;
                         break;
                     case "release_date":
                         DateTime date;
                         DateTime.TryParse(resultPropNode.Value, out date);
-                        movieResult.Date = date;
+                        baseMovie.Date = date;
                         break;
                     case "genres":
-                        movieResult.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
+                        baseMovie.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
                         foreach (ResultNode genreNode in resultPropNode.ChildNodes)
                         {
                             foreach (ResultNode genrePropNode in genreNode.ChildNodes)
                                 if (genrePropNode.Name == "name")
-                                    movieResult.Genres.Add(genrePropNode.Value);
+                                    baseMovie.Genres.Add(genrePropNode.Value);
                         }
                         break;
                     case "overview":
-                        movieResult.Overview = resultPropNode.Value;
+                        baseMovie.Overview = resultPropNode.Value;
                         break;
                 }
-
-            return movieResult;
         }
 
         /// <summary>
@@ -407,13 +425,14 @@ namespace Meticumedia
         /// </summary>
         /// <param name="baseMovie">Movie to update</param>
         /// <returns></returns>
-        private static Movie GetMovieInfo(Movie baseMovie)
+        private static void GetMovieInfo(Movie baseMovie)
         {
             // Get movie info from database
             ResultNode searchNode = GetRequest(movieGet + baseMovie.Id.ToString(), null);
 
             // Parse info into movie instance
-            return ParseMovieResult(baseMovie, searchNode.ChildNodes[0]);
+            ParseMovieResult(baseMovie, searchNode.ChildNodes[0]);
+            baseMovie.LastUpdated = DateTime.Now;
         }
 
         /// <summary>
@@ -421,7 +440,7 @@ namespace Meticumedia
         /// </summary>
         /// <param name="movie">The movie to update</param>
         /// <returns>The updated movie</returns>
-        public static Movie UpdateMovieInfo(Movie movie)
+        public static void UpdateMovieInfo(Movie movie)
         {
             // Tries up to 5 times - database can fail randomly
             for (int j = 0; j < 5; j++)
@@ -432,14 +451,12 @@ namespace Meticumedia
                     // TmdbMovie fullMovie = tmdbApi.GetMovieInfo(movie.Id);
 
                     // Return new instance of movie with updated information
-                    return GetMovieInfo(movie);
+                    GetMovieInfo(movie);
+                    return;
 
                 }
                 catch { }
             }
-
-            // Update uncessfull, return new instance of movie with no changes
-            return new Movie(movie);
         }
 
         #endregion

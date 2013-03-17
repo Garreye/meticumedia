@@ -66,14 +66,14 @@ namespace Meticumedia
         /// <param name="rootFolder">Root folder content will belong to</param>
         /// <param name="path">Current path of content</param>
         /// <returns>Content from database that was matched, null if no match</returns>
-        protected Content PathMatch(string rootFolder, string path)
+        protected bool PathMatch(string rootFolder, string path, bool fast, out Content match)
         {
             // Get folder name from full path
             string[] dirs = path.Split('\\');
             string endDir = dirs[dirs.Length - 1];
 
             // Do match
-            return ContentMatch(endDir, rootFolder, path);
+            return ContentMatch(endDir, rootFolder, path, fast, out match);
         }
 
         /// <summary>
@@ -98,9 +98,9 @@ namespace Meticumedia
         /// <param name="rootFolder">The root folder the content will belong to</param>
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <returns>Match content item, null if no match</returns>
-        public Content ContentMatch(string search, string rootFolder, string folderPath)
+        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Content match)
         {
-            return ContentMatch(search, rootFolder, folderPath, true);
+            return ContentMatch(search, rootFolder, folderPath, true, fast, out match);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace Meticumedia
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
         /// <returns>Match content item, null if no match</returns>
-        protected Content ContentMatch(string search, string rootFolder, string folderPath, bool threaded)
+        protected bool ContentMatch(string search, string rootFolder, string folderPath, bool threaded, bool fast, out Content match)
         {
             // Create empty content
             Content emptyContent = new Content();
@@ -121,7 +121,10 @@ namespace Meticumedia
 
             // Check for empty search condition
             if (string.IsNullOrEmpty(search))
-                return emptyContent;
+            {
+                match = emptyContent;
+                return false;
+            }
 
             // Get year from search string
             int dirYear = FileHelper.GetYear(search);
@@ -129,34 +132,40 @@ namespace Meticumedia
             // Get list of simplified strings
             List<FileHelper.SimplifyStringResults> searches = new List<FileHelper.SimplifyStringResults>();
             
+            // Get list of search bases
             List<string> searchBases = GetModifiedSearches(search);
 
-            foreach (string searchBase in searchBases)
+            // Fast search - use bases
+            if (fast)
             {
-                // Get results from current base
-                List<FileHelper.SimplifyStringResults> currSearches = FileHelper.SimplifyString(searchBase);
-                currSearches.Add(new FileHelper.SimplifyStringResults(searchBase, new Dictionary<FileWordType, List<string>>(), ContentSearchMod.None));
-
-                // Add each result to full list of searches
-                foreach (FileHelper.SimplifyStringResults results in currSearches)
+                FileHelper.SimplifyStringResults result = FileHelper.BuildSimplifyResults(searchBases[0], false, false, FileHelper.OptionalSimplifyRemoves.None, true, false, true, false);
+                searches.Add(result);
+            }
+            // Full search: Go through each search base and get simplified search options
+            else
+                foreach (string searchBase in searchBases)
                 {
-                    // Check if search already exist
-                    bool exists = false;
-                    foreach (FileHelper.SimplifyStringResults s in searches)
-                        if (s.SimplifiedString == results.SimplifiedString)
-                        {
-                            exists = true;
-                            break;
-                        }
+                    // Get results from current base
+                    List<FileHelper.SimplifyStringResults> currSearches = FileHelper.SimplifyString(searchBase);
+                    currSearches.Add(new FileHelper.SimplifyStringResults(searchBase, new Dictionary<FileWordType, List<string>>(), ContentSearchMod.None));
 
-                    // If doesn't exist add it to searches
-                    if (!exists)
+                    // Add each result to full list of searches
+                    foreach (FileHelper.SimplifyStringResults results in currSearches)
                     {
-                        searches.Add(results);
-                        //Console.WriteLine(results.SimplifiedString);
+                        // Check if search already exist
+                        bool exists = false;
+                        foreach (FileHelper.SimplifyStringResults s in searches)
+                            if (s.SimplifiedString == results.SimplifiedString)
+                            {
+                                exists = true;
+                                break;
+                            }
+
+                        // If doesn't exist add it to searches
+                        if (!exists)
+                            searches.Add(results);
                     }
                 }
-            }
 
             // Create new status
             int currSeachCnt;
@@ -213,7 +222,8 @@ namespace Meticumedia
                 }
 
             // Return best match
-            return lowestModsMatch;
+            match = lowestModsMatch;
+            return !string.IsNullOrWhiteSpace(lowestModsMatch.Name);
         }
 
         /// <summary>
@@ -259,12 +269,29 @@ namespace Meticumedia
                 }
         }
 
+        /// <summary>
+        /// Class for single search result
+        /// </summary>
         public class SearchResult
         {
+            /// <summary>
+            /// Content from search results
+            /// </summary>
             public Content Content { get; set; }
+
+            /// <summary>
+            /// Modifications made to search string
+            /// </summary>
             public ContentSearchMod Mods { get; set; }
+
+            /// <summary>
+            /// String that was matched to content
+            /// </summary>
             public string MatchedString { get; set; }
 
+            /// <summary>
+            /// Default constructor
+            /// </summary>
             public SearchResult()
             {
                 this.Content = null;

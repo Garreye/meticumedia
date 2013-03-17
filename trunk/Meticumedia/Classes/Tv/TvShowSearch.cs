@@ -50,9 +50,9 @@ namespace Meticumedia
         /// <param name="rootFolder">The root folder the content will belong to</param>
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <returns>Match show item, null if no match</returns>
-        public new TvShow ContentMatch(string search, string rootFolder, string folderPath)
+        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out TvShow match)
         {
-            return this.ContentMatch(search, rootFolder, folderPath, true);
+            return this.ContentMatch(search, rootFolder, folderPath, true, fast, out match);
         }
 
         /// <summary>
@@ -63,11 +63,13 @@ namespace Meticumedia
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
         /// <returns>Match show item, null if no match</returns>
-        public new TvShow ContentMatch(string search, string rootFolder, string folderPath, bool threaded)
+        public bool ContentMatch(string search, string rootFolder, string folderPath, bool threaded, bool fast, out TvShow match)
         {
-            Content match = base.ContentMatch(search, rootFolder, folderPath, threaded);
-            TvShow show = new TvShow(match);
-            return TvDatabaseHelper.FullShowSeasonsUpdate(show);
+            Content contentMatch;
+            bool results = base.ContentMatch(search, rootFolder, folderPath, threaded, fast, out contentMatch);
+            match = new TvShow(contentMatch);
+            TvDatabaseHelper.FullShowSeasonsUpdate(match);
+            return results;
         }
 
         /// <summary>
@@ -76,11 +78,13 @@ namespace Meticumedia
         /// <param name="rootFolder">Root folder content will belong to</param>
         /// <param name="path">Current path of content</param>
         /// <returns>Show from database that was matched, null if no match</returns>
-        public new TvShow PathMatch(string rootFolder, string path)
+        public bool PathMatch(string rootFolder, string path, bool fast, out TvShow match)
         {
-            Content match = base.PathMatch(rootFolder, path);
-            TvShow show = new TvShow(match);
-            return TvDatabaseHelper.FullShowSeasonsUpdate(show);
+            Content contentMatch;
+            bool results = base.PathMatch(rootFolder, path, fast, out contentMatch);
+            match = new TvShow(contentMatch);
+            TvDatabaseHelper.FullShowSeasonsUpdate(match);
+            return results;
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Meticumedia
         public Movie(string name, int id, int year, string directory, string contentFolder) : this(name)
         {
             this.Id = id;
-            this.Date = new DateTime(year, 1, 1);
+            this.Date = new DateTime(year > 0 ? year : 1, 1, 1);
             this.Path = directory;
             this.RootFolder = contentFolder;
         }

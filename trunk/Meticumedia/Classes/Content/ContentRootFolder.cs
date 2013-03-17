@@ -45,6 +45,9 @@ namespace Meticumedia
         /// </summary>
         public List<ContentRootFolder> ChildFolders { get; set; }
 
+        /// <summary>
+        /// Type of content contained in folder
+        /// </summary>
         public ContentType ContentType { get; set; }
 
         #endregion
@@ -231,18 +234,20 @@ namespace Meticumedia
         /// <param name="minYear">Minimum for year filter</param>
         /// <param name="maxYear">Maximum for year filter</param>
         /// <param name="nameFilter">String that must be contained in content name - empty string disables filter</param>
-        public void GetContent(bool recursive, GenreCollection genre, List<Content> contents, bool yearFilter, int minYear, int maxYear, string nameFilter)
+        public void GetContent(bool recursive, bool genreEnable, GenreCollection genre, List<Content> contents, bool yearFilter, int minYear, int maxYear, string nameFilter)
         {
             // Go through all movies
             ContentCollection contentCollection = GetContentCollection();
             lock (contentCollection.ContentLock)
+            {
+                Console.WriteLine(contentCollection.ToString() + " lock get");
                 foreach (Content content in contentCollection)
                 {
                     // Apply genre filter
                     bool genreMatch = false;
                     if (content.Genres != null && !genreMatch)
                         foreach (string contentGenre in content.Genres)
-                            if (genre.Contains(contentGenre ))
+                            if (genre.Contains(contentGenre))
                             {
                                 genreMatch = true;
                                 break;
@@ -255,15 +260,27 @@ namespace Meticumedia
                     bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.Name.ToLower().Contains(nameFilter.ToLower());
 
                     // Check if movie is in the folder
-                    if (ContainsContent(content, recursive) && ApplyContentFilter(content, genre, yearFilter, minYear, maxYear, nameFilter))
+                    if (ContainsContent(content, recursive) && ApplyContentFilter(content, genreEnable, genre, yearFilter, minYear, maxYear, nameFilter))
                         contents.Add(content);
                 }
+            }
+            Console.WriteLine(contentCollection.ToString() + " release get");
         }
 
-        public bool ApplyContentFilter(Content content, GenreCollection genre, bool yearFilter, int minYear, int maxYear, string nameFilter)
+        /// <summary>
+        /// Puts a single content item through filtering
+        /// </summary>
+        /// <param name="content">Content to filter</param>
+        /// <param name="genre">Genre content must belong to</param>
+        /// <param name="yearFilter">Enable for year filter</param>
+        /// <param name="minYear">Minimum for year filter</param>
+        /// <param name="maxYear">Maximum for year filter</param>
+        /// <param name="nameFilter">String that must be contained in content name - empty string disables filter</param>
+        /// <returns></returns>
+        public bool ApplyContentFilter(Content content, bool genreEnable, GenreCollection genre, bool yearFilter, int minYear, int maxYear, string nameFilter)
         {
             // Apply genre filter
-            bool genreMatch = false;
+            bool genreMatch = !genreEnable;
             if (content.Genres != null && !genreMatch)
                 foreach (string contentGenre in content.Genres)
                     if (genre.Contains(contentGenre))
@@ -277,6 +294,10 @@ namespace Meticumedia
 
             // Apply text filter
             bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.Name.ToLower().Contains(nameFilter.ToLower());
+
+            bool test = genreMatch && yearMatch && nameMatch;
+            if (!test)
+                test = true;
 
             // Check if movie is in the folder
             return genreMatch && yearMatch && nameMatch;
@@ -317,7 +338,9 @@ namespace Meticumedia
         /// </summary>
         private int updateNumber = 0;
 
-
+        /// <summary>
+        /// Flag for update cancellation
+        /// </summary>
         private bool updateCancelled = false;
 
         /// <summary>
@@ -326,7 +349,7 @@ namespace Meticumedia
         /// <param name="fastUpdate">Whether update is fast, skips detailed updating(e.g. episodes for shows)</param>
         /// <param name="idsToUpdate">List of dtabase IDs that need updating</param>
         /// <returns>Whether update was completed without cancelation</returns>
-        public bool UpdateContent(bool fastUpdate, List<int> idsToUpdate, ref bool cancel)
+        public bool UpdateContent(bool fastUpdate, List<int> idsToUpdate, ref bool cancel, string serverTime)
         {
             updateCancelled = false;
             
@@ -337,22 +360,33 @@ namespace Meticumedia
             string progressMsg = "Update of '" + this.FullPath + "' started - Building threads";
             OnUpdateProgressChange(this, false, 0, progressMsg);
 
-            // Initialize processing
-            OrgProcessing processing = new OrgProcessing(UpdateProcess);
-            updateNumber = processing.ProcessNumber;
+            // Initialize processing - First pass
+            OrgProcessing firstPass = new OrgProcessing(UpdateProcess);
+            updateNumber = firstPass.ProcessNumber;
 
-            // Run processing (build of sub-dirs is recursive, so all child root folder sub-dirs will be included
+            // Run 1st pass (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
+            firstPass.Run(BuildSubDirectories(this.ContentType), ref cancel, true);
+            updateCancelled = cancel;
 
-            processing.Run(BuildSubDirectories(this.ContentType), ref cancel, false, false);
+            // Initialize processing - Second pass
+            OrgProcessing secondPass = new OrgProcessing(UpdateProcess);
+            updateNumber = secondPass.ProcessNumber;
+
+            // Run 2nd pass (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
+            secondPass.Run(BuildSubDirectories(this.ContentType), ref cancel, false); 
             updateCancelled = cancel;
 
             // Get content collection to add content to
             ContentCollection content = GetContentCollection();
 
             // Remove shows that no longer exists
-            content.RemoveMissing(this);
+            if (!cancel)
+                content.RemoveMissing(this);
 
             // Save changes
+            content.Sort();
+            if (!string.IsNullOrEmpty(serverTime))
+                content.LastUpdate = serverTime;
             content.Save();
 
             // Set progress to completed
@@ -374,14 +408,17 @@ namespace Meticumedia
         /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
         /// <param name="processComplete">Delegate to be called by processing when completed</param>
         /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
-        private void UpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int processNumber, bool background, bool subSearch, ref int numItemsProcessed, ref int numItemsStarted)
+        private void UpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int processNumber, ref int numItemsProcessed, ref int numItemsStarted, object processSpecificArgs)
         {
             // Check for cancellation - this method is called from thread pool, so cancellation could have occured by the time this is run
             if (updateCancelled || this.updateNumber != processNumber)
                 return;
 
+            bool firstPass = (bool)processSpecificArgs;
+            string pass = firstPass ? " (First Pass)" : " (Second Pass)";
+
             // Set processing messge
-            string progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "' - '" + Path.GetFileName(orgPath.Path) + "' started";
+            string progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "'" + pass + " - '" + Path.GetFileName(orgPath.Path) + "' started";
             OnUpdateProgressChange(this, false, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);
 
             // Get content collection to add content to
@@ -391,6 +428,7 @@ namespace Meticumedia
             bool contentExists = false;
             bool contentComplete = false;
             Content newContent = null;
+            int index = 0;
             for (int j = 0; j < content.Count; j++)
                 if (orgPath.Path == content[j].Path)
                 {
@@ -399,39 +437,41 @@ namespace Meticumedia
                     if (!string.IsNullOrEmpty(content[j].Name))
                         contentComplete = true;
                     newContent = content[j];
+                    index = j;
                     break;
                 }
 
             // Set completed progess message
-            progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "' - '" + Path.GetFileName(orgPath.Path) + "' complete";
+            progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "'" + pass + " - '" + Path.GetFileName(orgPath.Path) + "' complete";
 
             // Check if show found
             if (contentExists && contentComplete)
             {
                 // Check if show need updating
                 if ((DateTime.Now - newContent.LastUpdated).TotalDays > 7 || idsToUpdate.Contains(newContent.Id))
-                {
                     newContent.UpdateInfoFromDatabase();
-                }
 
                 // Update progress
                 if (this.updateNumber == processNumber)
                     OnUpdateProgressChange(this, false, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);
-
-                // Save
-                GetContentCollection().Save();
+                
                 return;
             }
 
             // Show wasn't found, match path to database
             Content match;
+            bool matchSucess;
             switch (this.ContentType)
             {
                 case ContentType.TvShow:
-                    match = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path);
+                    TvShow showMatch;
+                    matchSucess = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, out showMatch);
+                    match = showMatch;
                     break;
                 case Meticumedia.ContentType.Movie:
-                    match = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path);
+                    Movie movieMatch;
+                    matchSucess = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, out movieMatch);
+                    match = movieMatch;
                     break;
                 default:
                     throw new Exception("unknown content type");
@@ -443,7 +483,7 @@ namespace Meticumedia
                 return;
 
             // Update show info from match
-            if (contentExists && match != null)
+            if (contentExists && matchSucess)
             {
                 switch (this.ContentType)
                 {
@@ -459,7 +499,7 @@ namespace Meticumedia
                 }
                 newContent.LastUpdated = DateTime.Now;
             }
-            else if (match != null)
+            else if (matchSucess)
                 newContent = match;
             else
                 switch (this.ContentType)
@@ -481,13 +521,20 @@ namespace Meticumedia
             if (!contentExists)
                 content.Add(newContent);
 
+            if (content[index].Name.Length < 3)
+                index++;
+
             // Update progress
             OnUpdateProgressChange(this, true, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);
-
-            // Save
-            GetContentCollection().Save();
         }
 
+        /// <summary>
+        /// Calculates update progress percentage
+        /// </summary>
+        /// <param name="numItemsProcessed">Number of items processed</param>
+        /// <param name="numItemsStarted">Number of items started</param>
+        /// <param name="totalItems">Total number of items to be processed</param>
+        /// <returns>Progress percentage</returns>
         private int CalcProgress(int numItemsProcessed, int numItemsStarted, int totalItems)
         {
             return (int)Math.Round((double)(numItemsProcessed + numItemsStarted) / (totalItems * 2) * 100D);

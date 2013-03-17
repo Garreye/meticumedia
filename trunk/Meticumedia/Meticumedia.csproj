@@ -72,10 +72,19 @@
     <Compile Include="Classes\Content\ContentType.cs" />
     <Compile Include="Classes\Content\GenreCollection.cs" />
     <Compile Include="Classes\Databases\TvDatabaseAccess.cs" />
+    <Compile Include="Classes\EnumExtensions.cs" />
+    <Compile Include="Classes\Scanning\MovieFolderScan.cs" />
+    <Compile Include="Classes\Scanning\ScanProcess.cs" />
+    <Compile Include="Classes\Scanning\TvFolderScan.cs" />
+    <Compile Include="Classes\Scanning\TvRenameScan.cs" />
+    <Compile Include="Classes\Scanning\DirectoryScan.cs" />
+    <Compile Include="Classes\Scanning\Scan.cs" />
+    <Compile Include="Classes\Scanning\ScanType.cs" />
     <Compile Include="Classes\Scanning\SearchHelper.cs" />
     <Compile Include="Classes\Databases\TvDatabaseHelper.cs" />
     <Compile Include="Classes\Databases\TvRageAccess.cs" />
     <Compile Include="Classes\Movies\MovieSearch.cs" />
+    <Compile Include="Classes\Scanning\TvMissingScan.cs" />
     <Compile Include="Classes\Settings\FileNamePortion.cs" />
     <Compile Include="Classes\Settings\FileWordType.cs" />
     <Compile Include="Classes\Databases\TheMovieDbHelper.cs" />
@@ -266,7 +275,7 @@
       <DependentUpon>MeticumediaForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\FileHandling\FileHelper.cs" />
-    <Compile Include="Classes\Scanning\ScanHelper.cs" />
+    <Compile Include="Classes\Scanning\TvItemInScanDirHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Controls\ContentControl.resx">

@@ -38,7 +38,12 @@ namespace Meticumedia
         /// <summary>
         /// Type of content being edited.
         /// </summary>
-        public ContentType ContentType { get; set; }
+        public ContentType ContentType
+        {
+            get { return cntrlSearch.ContentType; }
+            set { cntrlSearch.ContentType = value; }
+        }
+
 
         public string SearchEntry
         {

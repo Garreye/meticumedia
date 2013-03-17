@@ -399,7 +399,7 @@ namespace Meticumedia
             else if (this.Missing == MissingStatus.InScanDirectory)
             {
                 // Search through scan directory items
-                foreach (OrgItem item in ScanHelper.ScanDirTvItems)
+                foreach (OrgItem item in TvItemInScanDirHelper.Items)
                 {
                     List<TvEpisode> eps = new List<TvEpisode>();
                     if (item.TvEpisode != null) eps.Add(item.TvEpisode);

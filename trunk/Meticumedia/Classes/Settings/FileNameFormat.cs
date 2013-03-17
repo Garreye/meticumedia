@@ -89,7 +89,7 @@ namespace Meticumedia
             
             // Get info from file using simplify function (pulls out file words and categorizes them)
             FileHelper.OptionalSimplifyRemoves simplifyOptions = FileHelper.OptionalSimplifyRemoves.Year;
-            FileHelper.SimplifyStringResults simpleResult = FileHelper.BuildSimplifyResults(fileName, false, false, simplifyOptions, true, false, true);
+            FileHelper.SimplifyStringResults simpleResult = FileHelper.BuildSimplifyResults(fileName, false, false, simplifyOptions, true, false, true, false);
 
             // Get all video files from folder that don't match current path
             string differentiator = string.Empty;
@@ -152,7 +152,7 @@ namespace Meticumedia
             
             // Get info from file using simplify function (pulls out file words and categorizes them)
             FileHelper.OptionalSimplifyRemoves simplifyOptions = FileHelper.OptionalSimplifyRemoves.Year;
-            FileHelper.SimplifyStringResults simplifyResults = FileHelper.BuildSimplifyResults(fileName, false, false, simplifyOptions, true, false, false);
+            FileHelper.SimplifyStringResults simplifyResults = FileHelper.BuildSimplifyResults(fileName, false, false, simplifyOptions, true, false, false, false);
 
             // Build file name
             string buildName = BuildFileName(episode1, episode2, simplifyResults);

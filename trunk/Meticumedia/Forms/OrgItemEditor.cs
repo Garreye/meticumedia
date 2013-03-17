@@ -275,7 +275,7 @@ namespace Meticumedia
             if (form.DialogResult == System.Windows.Forms.DialogResult.OK)
             {
                 TvShow newShow = new TvShow(form.Results);
-                newShow = TvDatabaseHelper.FullShowSeasonsUpdate(newShow);
+                TvDatabaseHelper.FullShowSeasonsUpdate(newShow);
                 cmbShows.Items.Add(newShow);
                 cmbShows.SelectedItem = newShow;
                 selectedShow = newShow;

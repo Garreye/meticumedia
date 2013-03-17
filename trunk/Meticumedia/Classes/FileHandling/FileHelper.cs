@@ -454,37 +454,41 @@ namespace Meticumedia
                 // Go through all combinations of optional removes
                 for (int j = 0; j < optionCombinations; j++)
                 {
-                    // Build options
-                    OptionalSimplifyRemoves options = (OptionalSimplifyRemoves)(j >> 2);
+                    // With and without breack content removal
+                    for (int k = 0; k < 2; k++)
+                    {
+                        // Build options
+                        OptionalSimplifyRemoves options = (OptionalSimplifyRemoves)(j >> 2);
 
-                    // Don't do both year removes
-                    if ((options & OptionalSimplifyRemoves.Year) > 0 && (options & OptionalSimplifyRemoves.YearAndFollowing) > 0)
-                        continue;
+                        // Don't do both year removes
+                        if ((options & OptionalSimplifyRemoves.Year) > 0 && (options & OptionalSimplifyRemoves.YearAndFollowing) > 0)
+                            continue;
 
-                    // Get results
-                    SimplifyStringResults simpleRes = BuildSimplifyResults(input, (j & 1) > 0, (j & 2) > 0, options, false, i == 1, true);
+                        // Get results
+                        SimplifyStringResults simpleRes = BuildSimplifyResults(input, (j & 1) > 0, (j & 2) > 0, options, false, i == 1, true, k == 1);
 
-                    // Don't allow result that is only the year
-                    if(Regex.IsMatch(simpleRes.SimplifiedString, @"^(19|20)\d{2}$") && !simpleRes.RemovedWords.ContainsKey(FileWordType.Year))
-                        continue;
+                        // Don't allow result that is only the year
+                        if (Regex.IsMatch(simpleRes.SimplifiedString, @"^(19|20)\d{2}$") && !simpleRes.RemovedWords.ContainsKey(FileWordType.Year))
+                            continue;
 
-                    // Don't let common single words through
-                    if (!simpleRes.SimplifiedString.Contains(' ') && simpleRes.SimplifiedString.Length < 4 && WordHelper.IsWord(simpleRes.SimplifiedString))
-                        continue;
+                        // Don't let common single words through
+                        if (!simpleRes.SimplifiedString.Contains(' ') && simpleRes.SimplifiedString.Length < 4 && WordHelper.IsWord(simpleRes.SimplifiedString))
+                            continue;
 
 
-                    // Add to list of simplified strings
-                    bool exists = false;
-                    foreach (SimplifyStringResults simplifyRes in simpliedStrings)
-                        if (simplifyRes.SimplifiedString == simpleRes.SimplifiedString)
-                        {
-                            exists = true;
-                            break;
-                        }
+                        // Add to list of simplified strings
+                        bool exists = false;
+                        foreach (SimplifyStringResults simplifyRes in simpliedStrings)
+                            if (simplifyRes.SimplifiedString == simpleRes.SimplifiedString)
+                            {
+                                exists = true;
+                                break;
+                            }
 
-                    // Check that simplification doesn't already exist!
-                    if (!exists && !string.IsNullOrEmpty(simpleRes.SimplifiedString))
-                        simpliedStrings.Add(simpleRes);
+                        // Check that simplification doesn't already exist!
+                        if (!exists && !string.IsNullOrEmpty(simpleRes.SimplifiedString))
+                            simpliedStrings.Add(simpleRes);
+                    }
                 }
             }
 
@@ -502,12 +506,18 @@ namespace Meticumedia
         /// <param name="wordSplitEn">Enables splitting words in the string using dictionary (e.g. "howimetyourmother" split to "how i met your mother"</param>
         /// <param name="removeWhitespace">Whether to remove extra whitespace</param>
         /// <returns>Simplified string results</returns>
-        public static SimplifyStringResults BuildSimplifyResults(string input, bool removeFirst, bool removeLast, OptionalSimplifyRemoves options, bool disableRemAfter, bool wordSplitEn, bool removeWhitespace)
+        public static SimplifyStringResults BuildSimplifyResults(string input, bool removeFirst, bool removeLast, OptionalSimplifyRemoves options, bool disableRemAfter, bool wordSplitEn, bool removeWhitespace, bool removeBrackContents)
         {
             // All lowercase
-            string simplifiedName = input.ToLower();
+            string simplifiedName = input.ToLower().Replace("&", "and");
 
             ContentSearchMod mods = ContentSearchMod.None;
+
+            if (removeBrackContents)
+            {
+                simplifiedName = Regex.Replace(simplifiedName, @"\([^\)]*\)", " ");
+                mods |= ContentSearchMod.BrackRemoval;
+            }
 
             // Remove unneeded characters: ',!,?,(,),:
             simplifiedName = Regex.Replace(simplifiedName, @"[']+", "");
@@ -659,7 +669,7 @@ namespace Meticumedia
         {
             OptionalSimplifyRemoves options = removeYear ? OptionalSimplifyRemoves.Year : OptionalSimplifyRemoves.None;
             if (removeCountry) options |= OptionalSimplifyRemoves.Country;
-            return BuildSimplifyResults(fileName, false, false, options, true, false, removeWhitespace).SimplifiedString;
+            return BuildSimplifyResults(fileName, false, false, options, true, false, removeWhitespace, false).SimplifiedString;
         }
 
         /// <summary>

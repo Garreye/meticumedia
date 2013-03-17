@@ -63,11 +63,6 @@ namespace Meticumedia
         private BackgroundWorker scanWorker;
 
         /// <summary>
-        /// Types of scans that can be run
-        /// </summary>
-        private enum ScanType { Directory, TvMissing, MovieFolder }
-
-        /// <summary>
         /// Flag indicating that a scan in process was cancel and a new scan should be done once thread has been stopped.
         /// </summary>
         private bool rescanRequired = false;
@@ -122,11 +117,27 @@ namespace Meticumedia
             scanWorker.DoWork += new DoWorkEventHandler(scanWorker_DoWork);
 
             // Register to scan helper progress change (for tracking prgress of running scan)
-            ScanHelper.ScanProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
+            directoryScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
+            tvMissingScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
+            tvRenameScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
+            tvFolderScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
+            movieFolderScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
 
             // Setup context menu
             lvResults.ContextMenu = contextMenu;
             contextMenu.Popup += new EventHandler(contextMenu_Popup);
+
+            // Setup scan type combo box
+            foreach (ScanType type in Enum.GetValues(typeof(ScanType)))
+                cmbScanType.Items.Add(type);
+            cmbScanType.FormattingEnabled = true;
+            cmbScanType.Format += cmbScanType_Format;
+            cmbScanType.SelectedIndex = 0;
+        }
+
+        void cmbScanType_Format(object sender, ListControlConvertEventArgs e)
+        {
+            e.Value = ((ScanType)e.Value).Description();
         }
 
         #endregion
@@ -511,36 +522,25 @@ namespace Meticumedia
         {            
             // Setup columns based on scan type to run
             OrgItemListHelper.OrgColumnSetup colSetup;
-            if (rbDirCheck.Checked)
+            ScanType scanType = (ScanType)cmbScanType.SelectedItem;
+            switch (scanType)
             {
-                colSetup = OrgItemListHelper.OrgColumnSetup.DirectoryScan;
-            }
-            else if (rbMissingCheck.Checked)
-            {
-                colSetup = OrgItemListHelper.OrgColumnSetup.MissingCheck;
-            }
-            else
-            {
-                colSetup = OrgItemListHelper.OrgColumnSetup.MovieFolderCheck;
+                case ScanType.Directory:
+                    colSetup = OrgItemListHelper.OrgColumnSetup.DirectoryScan;
+                    break;
+                case ScanType.TvMissing:
+                case ScanType.TvRename:
+                    colSetup = OrgItemListHelper.OrgColumnSetup.MissingCheck;
+                    break;
+                default:
+                    colSetup = OrgItemListHelper.OrgColumnSetup.RootFolderCheck;
+                    break;
             }
             scanColumns = OrgItemListHelper.SetOrgItemListColumns(colSetup, lvResults);
-
             sortType = OrgColumnType.Source_Folder;
 
             // Run scan
             DoScan();
-        }
-
-        /// <summary>
-        /// Changing scan type radio buttons enable control related to type.
-        /// </summary>
-        private void rbScanType_CheckedChanged(object sender, EventArgs e)
-        {
-            cmbDirectory.Enabled = rbDirCheck.Checked;
-            btnEditScanDirs.Enabled = rbDirCheck.Checked;
-            cmbShows.Enabled = rbMissingCheck.Checked;
-            cmbMovieFolders.Enabled = rbMovieFolderCheck.Checked;
-            btnEditMovieFolders.Enabled = rbMovieFolderCheck.Checked;
         }
 
         /// <summary>
@@ -802,8 +802,6 @@ namespace Meticumedia
         /// </summary>
         private void QueueCheckItems()
         {
-            
-            
             // Get checked items
             List<OrgItem> itemsToQueue = new List<OrgItem>();
             lock (displayItems)
@@ -884,103 +882,88 @@ namespace Meticumedia
 
         #region Updating
 
-        /// <summary>
-        /// Updates scan directories contained in directory scan combo box.
-        /// </summary>
-        public void UpdateDirectories()
+        public void UpdateScanSelection()
         {
             // Save current selection
             string currSelection = string.Empty;
-            if(cmbDirectory.SelectedItem != null)
-                currSelection = cmbDirectory.SelectedItem.ToString();
-            
-            // Rebuild combo box items
-            cmbDirectory.Items.Clear();
-            cmbDirectory.Items.Add("All Folders");
-            bool selected = false;
-            foreach (OrgFolder folder in Settings.ScanDirectories)
-            {
-                // Add item
-                cmbDirectory.Items.Add(folder.FolderPath);
-                
-                // Check if item matches previous selection
-                if (folder.FolderPath == currSelection)
-                {
-                    cmbDirectory.SelectedIndex = cmbDirectory.Items.Count - 1;
-                    selected = true;
-                }
-            }
+            if (cmbScanSelection.SelectedItem != null)
+                currSelection = cmbScanSelection.SelectedItem.ToString();
 
-            // Select first item if previous selection was not set
-            if (!selected)
-                cmbDirectory.SelectedIndex = 0;
-        }
-
-        /// <summary>
-        /// Updates shows contained in TV scan combo box
-        /// </summary>
-        public void UpdateShows(bool allOnly)
-        {
-            // Save current selection
-            string currSelection = string.Empty;
-            if (cmbShows.SelectedItem != null)
-                currSelection = cmbShows.SelectedItem.ToString();
-
-            // Rebuild combo box items
-            cmbShows.Items.Clear();
-            cmbShows.Items.Add("All Shows");
-            if (allOnly)
-            {
-                cmbShows.SelectedIndex = 0;
+            if(cmbScanType.SelectedItem == null)
                 return;
-            }
 
+            // Rebuild combo box items
+            cmbScanSelection.Items.Clear();
             bool selected = false;
-            foreach (TvShow show in Organization.Shows.GetScannableContent(false))
+            ScanType scanType = (ScanType)cmbScanType.SelectedItem;
+            switch(scanType)
             {
-                // Add item
-                cmbShows.Items.Add(show.Name);
+                case ScanType.Directory:
+                    cmbScanSelection.Items.Add("All Scan Directories");
+                    foreach (OrgFolder folder in Settings.ScanDirectories)
+                    {
+                        // Add item
+                        cmbScanSelection.Items.Add(folder.FolderPath);
 
-                // Check if item matches previous selection
-                if (show.Name == currSelection)
-                {
-                    cmbShows.SelectedIndex = cmbShows.Items.Count - 1;
-                    selected = true;
-                }
-            }
+                        // Check if item matches previous selection
+                        if (folder.FolderPath == currSelection)
+                        {
+                            cmbScanSelection.SelectedIndex = cmbScanSelection.Items.Count - 1;
+                            selected = true;
+                        }
+                    }
+                    break;
+                case ScanType.MovieFolder:
+                    cmbScanSelection.Items.Add("All Movie Root Folders");
+                    foreach (ContentRootFolder folder in Settings.MovieFolders)
+                    {
+                        // Add item
+                        cmbScanSelection.Items.Add(folder);
 
-            // Select first item if previous selection was not set
-            if (!selected)
-                cmbShows.SelectedIndex = 0;
+                        // Check if item matches previous selection
+                        if (folder.ToString() == currSelection)
+                        {
+                            cmbScanSelection.SelectedIndex = cmbScanSelection.Items.Count - 1;
+                            selected = true;
+                        }
+                    }
+                    break;
+                case ScanType.TvFolder:
+                    cmbScanSelection.Items.Add("All TV Root Folders");
+                    foreach (ContentRootFolder folder in Settings.TvFolders)
+                    {
+                        // Add item
+                        cmbScanSelection.Items.Add(folder);
+
+                        // Check if item matches previous selection
+                        if (folder.ToString() == currSelection)
+                        {
+                            cmbScanSelection.SelectedIndex = cmbScanSelection.Items.Count - 1;
+                            selected = true;
+                        }
+                    }
+                    break;
+                case ScanType.TvMissing:
+                case ScanType.TvRename:
+                    cmbScanSelection.Items.Add("All Shows");
+                    foreach (TvShow show in Organization.Shows.GetScannableContent(false))
+                    {
+                        // Add item
+                        cmbScanSelection.Items.Add(show.Name);
+
+                        // Check if item matches previous selection
+                        if (show.Name == currSelection)
+                        {
+                            cmbScanSelection.SelectedIndex = cmbScanSelection.Items.Count - 1;
+                            selected = true;
+                        }
+                    }
+                    break;
         }
 
-        /// <summary>
-        /// Updates movie folders contained in movies scan combo box
-        /// </summary>
-        public void UpdateMovieFolders()
-        {
-            // Save current selection
-            string currSelection = cmbMovieFolders.SelectedText;
-            
-            cmbMovieFolders.Items.Clear();
-            cmbMovieFolders.Items.Add("All Folders");
-            bool selected = false;
-            foreach (ContentRootFolder folder in Settings.MovieFolders)
-            {
-                // Add item
-                cmbMovieFolders.Items.Add(folder);
-
-                // Check if item matches previous selection
-                if (folder.ToString() == currSelection)
-                {
-                    cmbShows.SelectedIndex = cmbShows.Items.Count - 1;
-                    selected = true;
-                }
-            }
-
             // Select first item if previous selection was not set
             if (!selected)
-                cmbMovieFolders.SelectedIndex = 0;
+                cmbScanSelection.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -996,6 +979,12 @@ namespace Meticumedia
 
         #region Scanning
 
+        private DirectoryScan directoryScan = new DirectoryScan(false);
+        private TvMissingScan tvMissingScan = new TvMissingScan(false);
+        private TvRenameScan tvRenameScan = new TvRenameScan(false);
+        private TvFolderScan tvFolderScan = new TvFolderScan(false);
+        private MovieFolderScan movieFolderScan = new MovieFolderScan(false);
+
         /// <summary>
         /// Work event for scanning worker.
         /// </summary>
@@ -1009,13 +998,19 @@ namespace Meticumedia
             switch (scanType)
             {
                 case ScanType.Directory:
-                    scanResults = ScanHelper.DirectoryScan((List<OrgFolder>)args[1], queuedItems, false, false);
+                    scanResults = directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false);
                     break;
                 case ScanType.TvMissing:
-                    scanResults = ScanHelper.RunTvCheckScan((List<Content>)args[1], queuedItems);
+                    scanResults = tvMissingScan.RunScan((List<Content>)args[1], queuedItems);
+                    break;
+                case ScanType.TvRename:
+                    scanResults = tvRenameScan.RunScan((List<Content>)args[1], queuedItems);
+                    break;
+                case ScanType.TvFolder:
+                    scanResults = tvFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems);
                     break;
                 case ScanType.MovieFolder:
-                    scanResults = ScanHelper.MovieFolderScan((List<ContentRootFolder>)args[1], queuedItems);
+                    scanResults = movieFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems);
                     break;
                 default:
                     throw new Exception("Unknown scan type!");
@@ -1028,44 +1023,15 @@ namespace Meticumedia
         private void ScanHelper_ScanProgressChange(object sender, ProgressChangedEventArgs e)
         {
             // Get process
-            ScanHelper.ScanProcess process = (ScanHelper.ScanProcess)sender;
+            ScanProcess process = (ScanProcess)sender;
             string info = (string)e.UserState;
             
             // Get progress bar message based on scan type
-            string msg = string.Empty;
-            switch (currentScan)
-            {
-                case ScanType.Directory:
-                    if (process == ScanHelper.ScanProcess.FileCollect)
-                        msg = "Scanning Files";
-                    else if (!string.IsNullOrEmpty(info))
-                        msg = "Directory Scan - Processing File '" + Path.GetFileName(info) + "'";
-                    else if (e.ProgressPercentage == 100)
-                        msg = "Directory Scan - Complete";
-
-                    break;
-                case ScanType.TvMissing:
-                    if (!string.IsNullOrEmpty(info))
-                    {
-                        if (process == ScanHelper.ScanProcess.FileCollect)
-                            msg = "Scanning Files";
-                        else if (process == ScanHelper.ScanProcess.Directory)
-                            msg = "TV Scan - Processing File '" + Path.GetFileName(info) + "'";
-                        else
-                            msg = "TV Scan - Processing Show' " + info + "'";
-                    }
-                    else
-                        msg = "TV Scan - Complete";
-                    break;
-                case ScanType.MovieFolder:
-                    if (process == ScanHelper.ScanProcess.FileCollect)
-                        msg = "Scanning Files";
-                    else if (!string.IsNullOrEmpty(info))
-                        msg = "Movie Scan - Processing File '" + Path.GetFileName(info) + "'";
-                    else if (e.ProgressPercentage == 100)
-                        msg = "Movie Scan - Complete";
-                    break;
-            }
+            string msg = process.Description();
+            if (e.ProgressPercentage == 100)
+                msg += " - Complete";
+            else if (process != ScanProcess.FileCollect)
+                msg += " - Processing File '" + Path.GetFileName(info) + "'";
 
             this.Invoke((MethodInvoker)delegate
             {
@@ -1116,64 +1082,81 @@ namespace Meticumedia
             sortAcending = true;
             
             // Build scan parameters
-            ScanType scanType;
+            ScanType scanType = (ScanType)cmbScanType.SelectedItem;
             object list;
-            if (rbDirCheck.Checked)
+            switch (scanType)
             {
-                // Get folders from combo box
-                scanType = ScanType.Directory;
-                List<OrgFolder> folders;
-                if (cmbDirectory.SelectedIndex == 0)
-                    folders = Settings.ScanDirectories;
-                else
-                {
-                    folders = new List<OrgFolder>();
-                    foreach (OrgFolder fld in Settings.ScanDirectories)
-                        if (fld.FolderPath == cmbDirectory.SelectedItem.ToString())
-                        {
-                            folders.Add(fld);
-                            break;
-                        }
-                }
-                list = folders;
-                sortType = OrgColumnType.Source_Folder;
-            }
-            else if (rbMissingCheck.Checked)
-            {
-                scanType = ScanType.TvMissing;
+                case ScanType.Directory:
+                    // Get folders from combo box
+                    List<OrgFolder> scanDirs;
+                    if (cmbScanSelection.SelectedIndex == 0)
+                        scanDirs = Settings.ScanDirectories;
+                    else
+                    {
+                        scanDirs = new List<OrgFolder>();
+                        foreach (OrgFolder fld in Settings.ScanDirectories)
+                            if (fld.FolderPath == cmbScanSelection.SelectedItem.ToString())
+                            {
+                                scanDirs.Add(fld);
+                                break;
+                            }
+                    }
+                    list = scanDirs;
+                    sortType = OrgColumnType.Source_Folder;
+                    break;
 
-                // Get shows to check from combo box
-                List<Content> shows;
-                if (cmbShows.SelectedIndex <= 0)
-                    shows = Organization.Shows.GetScannableContent(true);
-                else
-                {
-                    shows = new List<Content>();
-                    shows.Add(Organization.Shows.GetScannableContent(true)[cmbShows.SelectedIndex - 1]);
-                }
-                list = shows;
-                sortType = OrgColumnType.Show;
-            }
-            else
-            {
-                scanType = ScanType.MovieFolder;
-
-                // Get folders from combo box
-                List<ContentRootFolder> folders;
-                if (cmbMovieFolders.SelectedIndex == 0)
-                    folders = Settings.MovieFolders;
-                else
-                {
-                    folders = new List<ContentRootFolder>();
-                    foreach (ContentRootFolder fld in Settings.MovieFolders)
-                        if (fld.FullPath == cmbMovieFolders.SelectedItem.ToString())
-                        {
-                            folders.Add(fld);
-                            break;
-                        }
-                }
-                list = folders;
-                sortType = OrgColumnType.Source_Folder;
+                case ScanType.TvRename:
+                case ScanType.TvMissing:
+                    // Get shows to check from combo box
+                    List<Content> shows;
+                    if (cmbScanSelection.SelectedIndex <= 0)
+                        shows = Organization.Shows.GetScannableContent(true);
+                    else
+                    {
+                        shows = new List<Content>();
+                        shows.Add(Organization.Shows.GetScannableContent(true)[cmbScanSelection.SelectedIndex - 1]);
+                    }
+                    list = shows;
+                    sortType = OrgColumnType.Show;
+                    break;
+                case ScanType.TvFolder:
+                    // Get folders from combo box
+                    List<ContentRootFolder> tvFolders;
+                    if (cmbScanSelection.SelectedIndex == 0)
+                        tvFolders = Settings.TvFolders;
+                    else
+                    {
+                        tvFolders = new List<ContentRootFolder>();
+                        foreach (ContentRootFolder fld in Settings.TvFolders)
+                            if (fld.FullPath == cmbScanSelection.SelectedItem.ToString())
+                            {
+                                tvFolders.Add(fld);
+                                break;
+                            }
+                    }
+                    list = tvFolders;
+                    sortType = OrgColumnType.Source_Folder;
+                    break;
+                case ScanType.MovieFolder:
+                    // Get folders from combo box
+                    List<ContentRootFolder> movieFolders;
+                    if (cmbScanSelection.SelectedIndex == 0)
+                        movieFolders = Settings.MovieFolders;
+                    else
+                    {
+                        movieFolders = new List<ContentRootFolder>();
+                        foreach (ContentRootFolder fld in Settings.MovieFolders)
+                            if (fld.FullPath == cmbScanSelection.SelectedItem.ToString())
+                            {
+                                movieFolders.Add(fld);
+                                break;
+                            }
+                    }
+                    list = movieFolders;
+                    sortType = OrgColumnType.Source_Folder;
+                    break;
+                default:
+                    throw new Exception("Unknown scan type");
             }
 
             // Start worker if not busy, otherwise cancel current scan and set rescan required flag
@@ -1186,10 +1169,14 @@ namespace Meticumedia
             else
             {
                 rescanRequired = true;
-                ScanHelper.CancelScan();
+                directoryScan.CancelScan();
+                tvMissingScan.CancelScan();
+                tvRenameScan.CancelScan();
+                tvFolderScan.CancelScan();
+                movieFolderScan.CancelScan();
             }
 
-        }        
+        }
 
         /// <summary>
         /// Displays scan results in listview
@@ -1337,5 +1324,10 @@ namespace Meticumedia
         }
 
         #endregion
+
+        private void cmbScanType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateScanSelection();
+        }
     }
 }

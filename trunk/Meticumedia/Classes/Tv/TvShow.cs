@@ -59,7 +59,7 @@ namespace Meticumedia
         {
             this.Name = name;
             this.Id = id;
-            this.Date = new DateTime(year, 1, 1);
+            this.Date = new DateTime(year > 0 ? year : 1, 1, 1);
             this.Path = directory;
             this.RootFolder = contentFolder;
         }
@@ -159,7 +159,7 @@ namespace Meticumedia
                 UpdateMissingRecursive(this.Path);
 
             // Search through scan directoru
-            foreach (OrgItem item in ScanHelper.ScanDirTvItems)
+            foreach (OrgItem item in TvItemInScanDirHelper.Items)
             {
                 List<TvEpisode> eps = new List<TvEpisode>();
                 if (item.TvEpisode != null) eps.Add(item.TvEpisode);

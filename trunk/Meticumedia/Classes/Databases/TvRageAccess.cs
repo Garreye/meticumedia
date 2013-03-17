@@ -151,12 +151,12 @@ namespace Meticumedia
         /// Gets season/episode information from database
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
-        public override TvShow DoUpdate(TvShow show)
+        public override void DoUpdate(TvShow show)
         {
             // Get mirror
             string mirror;
             if (!GetMirror(MirrorType.Xml, out mirror))
-                return show;
+                return;
 
             // Get show info from database
             string showInfoUrl = mirror + "/showinfo.php?key=" + this.API_KEY + "&sid=" + show.Id;
@@ -249,7 +249,6 @@ namespace Meticumedia
                         break;
                 }
             }
-            return show;
         }
 
         #endregion

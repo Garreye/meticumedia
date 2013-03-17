@@ -32,9 +32,9 @@ namespace Meticumedia
         /// <param name="rootFolder">The root folder the content will belong to</param>
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <returns>Match movie item, null if no match</returns>
-        public new Movie ContentMatch(string search, string rootFolder, string folderPath)
+        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Movie match)
         {
-            return this.ContentMatch(search, rootFolder, folderPath, true);
+            return this.ContentMatch(search, rootFolder, folderPath, true, fast, out match);
         }
 
         /// <summary>
@@ -45,11 +45,13 @@ namespace Meticumedia
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
         /// <returns>Match movie item, null if no match</returns>
-        public new Movie ContentMatch(string search, string rootFolder, string folderPath, bool threaded)
+        public bool ContentMatch(string search, string rootFolder, string folderPath, bool threaded, bool fast, out Movie match)
         {
-            Content match = base.ContentMatch(search, rootFolder, folderPath, threaded);
-            Movie movie = new Movie(match);
-            return TheMovieDbHelper.UpdateMovieInfo(movie); 
+            Content contentMatch;
+            bool results = base.ContentMatch(search, rootFolder, folderPath, threaded, fast, out contentMatch);
+            match = new Movie(contentMatch);
+            TheMovieDbHelper.UpdateMovieInfo(match);
+            return results;
         }
 
         /// <summary>
@@ -58,14 +60,14 @@ namespace Meticumedia
         /// <param name="rootFolder">Root folder content will belong to</param>
         /// <param name="path">Current path of content</param>
         /// <returns>Movie from database that was matched, null if no match</returns>
-        public new Movie PathMatch(string rootFolder, string path)
+        public bool PathMatch(string rootFolder, string path, bool fast, out Movie match)
         {
-            Content match = base.PathMatch(rootFolder, path);
-            Movie movie = new Movie(match);
-            if (movie.Id > 0)
-                return TheMovieDbHelper.UpdateMovieInfo(movie);
-            else
-                return movie;
+            Content contentMatch;
+            bool results = base.PathMatch(rootFolder, path, fast, out contentMatch);
+            match = new Movie(contentMatch);
+            if (match.Id > 0)
+                TheMovieDbHelper.UpdateMovieInfo(match);
+            return results;
         }
 
     }

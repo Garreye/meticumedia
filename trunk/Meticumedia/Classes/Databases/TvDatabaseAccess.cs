@@ -151,17 +151,17 @@ namespace Meticumedia
         /// Gets season/episode information from database.
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
-        public TvShow FullShowSeasonsUpdate(TvShow show)
+        public void FullShowSeasonsUpdate(TvShow show)
         {
             // Check for invalid ID
             if (show.Id == 0)
-                return show;
+                return;
 
             // Try multiple times - databases requests tend to fail randomly
             for (int  i = 0; i < 5; i++)
                 try
                 {
-                    show =  DoUpdate(show);
+                    DoUpdate(show);
 
                     // Remove episodes that are no longer in the TvDb
                     for (int j = show.Seasons.HighestSeason; j >= show.Seasons.LowestSeason; j--)
@@ -178,8 +178,6 @@ namespace Meticumedia
                     break;
                 }
                 catch { }
-
-            return show;
         }
 
         /// <summary>
@@ -187,9 +185,8 @@ namespace Meticumedia
         /// </summary>
         /// <param name="show">Show instance to update</param>
         /// <returns>Updated show instance</returns>
-        public virtual TvShow DoUpdate(TvShow show)
+        public virtual void DoUpdate(TvShow show)
         {
-            return show;
         }
 
         #endregion

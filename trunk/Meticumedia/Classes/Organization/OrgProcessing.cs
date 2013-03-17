@@ -33,7 +33,7 @@ namespace Meticumedia
         /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
         /// <param name="processComplete">Delegate to be called by processing when completed</param>
         /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
-        public delegate void Processing(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool background, bool subSearch, ref int numItemsProcessed, ref int numItemsStarted);
+        public delegate void Processing(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, ref int numItemsProcessed, ref int numItemsStarted, object processSpecificArgs);
 
         #endregion
 
@@ -108,7 +108,7 @@ namespace Meticumedia
         /// <param name="cancel">Cancellation variable</param>
         /// <param name="background">Whether processing is run in background</param>
         /// <param name="subSearch">Whether processing is sub-search type</param>
-        public void Run(List<OrgPath> paths, ref bool cancel, bool background, bool subSearch)
+        public void Run(List<OrgPath> paths, ref bool cancel, object processSpecificArgs)
         {
             // Loop through all paths
             lock (processingLock)
@@ -117,20 +117,20 @@ namespace Meticumedia
             for (i = 0; i < paths.Count; i++)
             {
                 // Limit number of threads
-                while (i > numItemProcessed + Settings.NumProcessingThreads && (!cancel || background))
+                while (i >= numItemProcessed + Settings.NumProcessingThreads && !cancel)
                     Thread.Sleep(100);
 
                 // Check for cancellation
-                if (cancel && !background)
+                if (cancel)
                     break;
 
                 // Create new processing thread for path
-                object[] args = { paths[i], paths.Count, i, background, subSearch };
+                object[] args = { paths[i], paths.Count, i, processSpecificArgs };
                 ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessThread), args);
             }
 
             // Wait for all threads to complete
-            while (numItemProcessed < i && (!cancel || background))
+            while (numItemProcessed < i && !cancel)
                 Thread.Sleep(100);
         }
 
@@ -144,13 +144,12 @@ namespace Meticumedia
             OrgPath orgPath = (OrgPath)args[0];
             int totalPaths = (int)args[1];
             int updateNumer = (int)args[2];
-            bool background = (bool)args[3];
-            bool subSearch = (bool)args[4];
+            object processSpecificArgs = args[3];
 
             lock (processingLock)
                 ++numItemStarted;
 
-            process(orgPath, updateNumer, totalPaths, this.ProcessNumber, background, subSearch, ref numItemProcessed, ref numItemStarted);
+            process(orgPath, updateNumer, totalPaths, this.ProcessNumber, ref numItemProcessed, ref numItemStarted, processSpecificArgs);
 
             lock (processingLock)
                 ++numItemProcessed;

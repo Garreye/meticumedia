@@ -247,10 +247,14 @@ namespace Meticumedia
             switch (this.ContentType)
             {
                 case ContentType.Movie:
-                    match = SearchHelper.MovieSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false);
+                    Movie movieMatch;
+                    SearchHelper.MovieSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false, out movieMatch);
+                    match = movieMatch;
                     break;
                 case ContentType.TvShow:
-                    match = SearchHelper.TvShowSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false);
+                    TvShow showMatch;
+                    SearchHelper.TvShowSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false, out showMatch);
+                    match = showMatch;
                     break;
                 default:
                     throw new Exception("Unknown content type");

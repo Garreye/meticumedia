@@ -20,13 +20,26 @@ namespace Meticumedia
         /// List of all words, loaded from file containing all words in dictionary
         /// </summary>
         private static List<string> words;
+
+        private static Dictionary<int, List<string>> lengthWords;
         
         /// <summary>
         /// Initialize the helper. Load dictionary words into memory.
         /// </summary>
         public static void Initialize()
         {
+            // Get all words
             words = File.ReadAllLines(Path.Combine(Application.StartupPath, "wordsEn.txt")).ToList();
+
+            // Create dictionary of word list based on length
+            lengthWords = new Dictionary<int, List<string>>();
+            foreach (string word in words)
+            {
+                int length = word.Length;
+                if (!lengthWords.ContainsKey(length))
+                    lengthWords.Add(length, new List<string>());
+                lengthWords[length].Add(word);
+            }
         }
 
         /// <summary>
@@ -36,7 +49,7 @@ namespace Meticumedia
         /// <returns></returns>
         public static List<string> GetWords(int length)
         {
-            return words.FindAll(delegate(string s) { return s.Length == length; });
+            return lengthWords[length];
         }
 
         /// <summary>
@@ -47,11 +60,14 @@ namespace Meticumedia
         public static bool IsWord(string word)
         {
             // Don't look for empty words
-            if (string.IsNullOrWhiteSpace(word))
+            if (string.IsNullOrWhiteSpace(word) || !lengthWords.ContainsKey(word.Length))
                 return false;
 
-            List<string> matches = words.FindAll(delegate(string s) { return s.Equals(word.ToLower()); });
-            return matches.Count > 0;
+            foreach (string w in lengthWords[word.Length])
+                if (word.ToLower() == w.ToLower())
+                    return true;
+
+            return false;
         }
 
         /// <summary>

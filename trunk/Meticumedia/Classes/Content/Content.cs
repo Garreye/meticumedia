@@ -277,10 +277,16 @@ namespace Meticumedia
             return showReStr;
         }
 
+        /// <summary>
+        /// Virtual update missing, to be overriden by inherited classes
+        /// </summary>
         public virtual void UpdateMissing()
         {
         }
 
+        /// <summary>
+        /// Virtual update of content from database, to be overriden by inherited classes
+        /// </summary>
         public virtual void UpdateInfoFromDatabase()
         {
 
@@ -426,14 +432,14 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// XML save to be overriden!
+        /// Virtual XML save, to be overriden by inherited class
         /// </summary>
         public virtual void Save(XmlWriter xw)
         {
         }
 
         /// <summary>
-        /// XML load to be overriden!
+        /// Virtual XML load, to be overriden by inherited class
         /// </summary>
         /// <param name="showNode"></param>
         /// <returns></returns>

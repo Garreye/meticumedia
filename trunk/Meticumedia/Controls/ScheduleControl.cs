@@ -43,11 +43,36 @@ namespace Meticumedia
             TvEpisode.BackColourChanged += new EventHandler(TvEpisode_BackColourChanged);
 
             // Register updates to TV items in scan folders
-            ScanHelper.TvScanItemsUpdate += ScanHelper_TvScanItemsUpdate;
+            TvItemInScanDirHelper.ItemsUpdate += ScanHelper_TvScanItemsUpdate;
 
             // Setup context menu for listview
             lvResults.ContextMenu = contextMenu;
             contextMenu.Popup += new EventHandler(contextMenu_Popup);
+
+            Organization.Shows.LoadComplete += Shows_Changed;
+            Organization.Shows.ContentAdded += Shows_Changed;
+
+            this.Load += ScheduleControl_Load;
+        }
+
+        void ScheduleControl_Load(object sender, EventArgs e)
+        {
+            if (updateOnLoadRequired)
+                UpdateShows();
+        }
+
+        void Shows_Changed(object sender, EventArgs e)
+        {
+            if (!this.IsHandleCreated)
+            {
+                updateOnLoadRequired = true;
+                return;
+            }
+            
+            this.Invoke((MethodInvoker)delegate
+            {
+                UpdateShows();
+            });
         }
 
         #endregion
@@ -272,11 +297,13 @@ namespace Meticumedia
 
         #region Updating
 
+        private bool updateOnLoadRequired = false;
+
         /// <summary>
         /// Updates shows contained in show selection combobox
         /// </summary>
         public void UpdateShows()
-        {
+        {            
             // Save current selection
             string currSelection = string.Empty;
             if(cmbShows.SelectedItem != null)
@@ -293,7 +320,7 @@ namespace Meticumedia
                         cmbShows.Items.Add(Organization.Shows[i].Name);
 
                     // Check if item should be selected
-                    if (Organization.Shows[i].Name == currSelection)
+                    if (!string.IsNullOrWhiteSpace(currSelection) && Organization.Shows[i].Name == currSelection)
                     {
                         cmbShows.SelectedIndex = cmbShows.Items.Count - 1;
                         selected = true;
@@ -382,6 +409,5 @@ namespace Meticumedia
         }
 
         #endregion
-
     }
 }

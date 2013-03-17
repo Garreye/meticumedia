@@ -254,19 +254,25 @@ namespace Meticumedia
         /// Get genre instances from combo box
         /// </summary>
         /// <returns>List of genres that are selected</returns>
-        public GenreCollection GetSelectedGenres()
+        public GenreCollection GetSelectedGenres(out bool filterEnable)
         {
             // Get all genres
             GenreCollection allGenres = Organization.GetAllGenres(this.ContentType);
 
             // Get selection string
             if (cmbGenre.SelectedItem == null)
+            {
+                filterEnable = false;
                 return allGenres;
+            }
             string selGenreStr = cmbGenre.SelectedItem.ToString();
 
             // Return all if selected
             if (selGenreStr.StartsWith("All"))
+            {
+                filterEnable = false;
                 return allGenres;
+            }
 
             // Return single select genre as list
             GenreCollection genres = new GenreCollection(this.ContentType);
@@ -276,6 +282,7 @@ namespace Meticumedia
                     genres.Add(genre);
                     break;
                 }
+            filterEnable = true;
             return genres;
         }
 
@@ -317,14 +324,15 @@ namespace Meticumedia
             // Add genres to combo box
             cmbGenre.Items.Clear();
             cmbGenre.Items.Add("All Genres");
-            foreach (string genre in genres)
-            {
-                int item = cmbGenre.Items.Add(genre);
+            lock(genres.AccessLock)
+                foreach (string genre in genres)
+                {
+                    int item = cmbGenre.Items.Add(genre);
 
-                // Reselect genre
-                if (selectedGenre == genre)
-                    cmbGenre.SelectedIndex = item;
-            }
+                    // Reselect genre
+                    if (selectedGenre == genre)
+                        cmbGenre.SelectedIndex = item;
+                }
 
             // Set default selection if needed
             if (cmbGenre.SelectedIndex < 0)
@@ -350,14 +358,17 @@ namespace Meticumedia
             bool recursive;
             List<ContentRootFolder> selRootFolders = GetFilteredRootFolders(out recursive);
 
+            bool genreFilterEnable;
+            GenreCollection genreFilter = GetSelectedGenres(out genreFilterEnable);
+
             // Set contents for listview
             switch (ContentType)
             {
                 case ContentType.Movie:
-                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(selRootFolders, recursive, GetSelectedGenres(), chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);        
+                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(selRootFolders, recursive, genreFilterEnable, genreFilter, chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);        
                     break;
                 case ContentType.TvShow:
-                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(selRootFolders, recursive, GetSelectedGenres(), chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);
+                    lvContentFolders.Contents = Organization.GetContentFromRootFolders(selRootFolders, recursive, genreFilterEnable, genreFilter, chkYearFilter.Checked, (int)numMinYear.Value, (int)numMaxYear.Value, txtNameFilter.Text);
                     break;
                 default:
                     throw new Exception("Unknown content type");
@@ -468,14 +479,19 @@ namespace Meticumedia
                 reUpdateRequired = true;
                 Organization.CancelFolderUpdating(this.ContentType);
             }
-            else 
+            else
             {
                 Console.WriteLine("Updating called for " + this.ToString());
                 ShowProgressBar();
-                if (cmbFolders.SelectedItem != null)
-                    rootFolderUpdater.RunWorkerAsync(cmbFolders.SelectedItem.ToString());
-                else
-                    rootFolderUpdater.RunWorkerAsync("All");
+                string selFolder = "All";
+                if (this.IsHandleCreated)
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        if (cmbFolders.SelectedItem != null)
+                            selFolder = cmbFolders.SelectedItem.ToString();
+                    });
+
+                rootFolderUpdater.RunWorkerAsync(selFolder);
             }
         }
     
@@ -682,17 +698,10 @@ namespace Meticumedia
         /// </summary>
         private void Organization_LoadProgressChange(object sender, ProgressChangedEventArgs e)
         {
-            if(((ContentCollection)sender).ContentType != this.ContentType)
+            if (((ContentCollection)sender).ContentType != this.ContentType)
                 return;
+            UpdateProgress(e.ProgressPercentage, "Loading " + this.ContentType.ToString() + "s" + (string)e.UserState);
 
-            if (!this.IsHandleCreated)
-                return;
-
-            this.Invoke((MethodInvoker)delegate
-            {
-                UpdateProgress(e.ProgressPercentage, "Loading " + this.ContentType.ToString() + "s" + (string)e.UserState);
-            });
-            
         }
 
         /// <summary>

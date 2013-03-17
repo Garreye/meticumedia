@@ -67,6 +67,11 @@ namespace Meticumedia
         public Movie Movie { get; set; }
 
         /// <summary>
+        /// Tv Show
+        /// </summary>
+        public TvShow Show { get; set; }
+
+        /// <summary>
         /// Flag indicating TV episode(s) associated with item are for a newly found show.
         /// </summary>
         public TvShow NewShow { get; set; }
@@ -300,6 +305,7 @@ namespace Meticumedia
             this.Movie = item.Movie;
             this.ScanDirectory = item.ScanDirectory;
             this.NewShow = item.NewShow;
+            this.Show = item.Show;
             this.Replace = item.Replace;
             this.Number = item.Number;
             this.QueueStatus = item.QueueStatus;
@@ -838,7 +844,17 @@ namespace Meticumedia
                     case OrgAction.Move:
                     case OrgAction.Rename:
                         if (this.Category == FileHelper.FileCategory.Folder)
+                        {
                             this.ActionComplete = CopyMoveFolder();
+
+                            if (this.ActionComplete)
+                            {
+                                if (this.Movie != null)
+                                    this.Movie.Path = this.DestinationPath;
+                                else if (this.Show != null)
+                                    this.Show.Path = this.DestinationPath;
+                            }
+                        }
                         else
                             this.ActionComplete = CopyMoveFile(this.SourcePath, this.DestinationPath, 0, 100);
                         break;

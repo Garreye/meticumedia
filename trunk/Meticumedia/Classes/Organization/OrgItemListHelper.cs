@@ -20,7 +20,7 @@ namespace Meticumedia
         /// <summary>
         /// Type of setups for columns for displaying items
         /// </summary>
-        public enum OrgColumnSetup { MissingCheck, DirectoryScan, MovieFolderCheck, Queue, Log }
+        public enum OrgColumnSetup { MissingCheck, DirectoryScan, RootFolderCheck, Queue, Log }
         
         /// <summary>
         /// Sets up the columns of a listview for displaying OrgItem lists.
@@ -44,7 +44,7 @@ namespace Meticumedia
                 columnsToAdd |= OrgColumnType.Progress;
             if (setup == OrgColumnSetup.Log)
                 columnsToAdd |= OrgColumnType.DateTime;
-            if (setup == OrgColumnSetup.MovieFolderCheck)
+            if (setup == OrgColumnSetup.RootFolderCheck)
                 columnsToAdd |= OrgColumnType.Movie;
 
             // Add the enabled columns to the listview

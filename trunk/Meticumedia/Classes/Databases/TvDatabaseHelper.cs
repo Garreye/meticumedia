@@ -95,9 +95,10 @@ namespace Meticumedia
         /// Gets season/episode information from database.
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
-        public static TvShow FullShowSeasonsUpdate(TvShow show)
+        public static void FullShowSeasonsUpdate(TvShow show)
         {
-            return databaseAccess.FullShowSeasonsUpdate(show);
+            databaseAccess.FullShowSeasonsUpdate(show);
+            show.LastUpdated = DateTime.Now;
         }
 
         #endregion

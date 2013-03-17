@@ -44,9 +44,7 @@ namespace Meticumedia
             cntrlShows.SelectionChanged += cntrlShows_SelectionChanged;
 
             // Setup scan contorl
-            cntrlScan.UpdateDirectories();
-            cntrlScan.UpdateShows(true);
-            cntrlScan.UpdateMovieFolders();
+            cntrlScan.UpdateScanSelection();
 
             // Setup queue control
             cntrlQueue.QueueItemsChanged += new EventHandler<QueueControl.QueueItemsChangedArgs>(cntrlQueue_QueueItemsChanged);
@@ -54,7 +52,7 @@ namespace Meticumedia
             cntrlQueue.UpdateFromSettings();
   
             // Setup Schedule
-            cntrlSched.UpdateShows();
+            //cntrlSched.UpdateShows();
 
             // Settings
             SettingsForm.SettingsUpdated += new EventHandler(SettingsForm_SettingsUpdated);
@@ -83,8 +81,7 @@ namespace Meticumedia
         /// </summary>
         private void SettingsForm_SettingsUpdated(object sender, EventArgs e)
         {
-            cntrlScan.UpdateDirectories();
-            cntrlScan.UpdateMovieFolders();
+            cntrlScan.UpdateScanSelection();
             cntrlMovies.UpdateFolders();
             cntrlMovies.UpdateContentInFolders(false);
             cntrlShows.UpdateFolders();
@@ -162,11 +159,7 @@ namespace Meticumedia
         {
             cntrlScan.Invoke((MethodInvoker)delegate
             {
-                cntrlScan.UpdateShows(false);
-            });
-            cntrlSched.Invoke((MethodInvoker)delegate
-            {
-                cntrlSched.UpdateShows();
+                cntrlScan.UpdateScanSelection();
             });
         }
         
@@ -211,6 +204,16 @@ namespace Meticumedia
             System.Diagnostics.Process.Start("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=NE42NQGGL8Q9C&lc=CA&item_name=meticumedia&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted");
         }
 
+
+        private void MeticumediaForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Scan.CancelAllScans();
+            Organization.CancelFolderUpdating(ContentType.Movie);
+            Organization.CancelFolderUpdating(ContentType.TvShow);
+            Organization.Save();
+        }
+
         #endregion
+
     }
 }

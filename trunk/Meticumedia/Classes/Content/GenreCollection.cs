@@ -31,6 +31,13 @@ namespace Meticumedia
         /// </summary>
         private CollectionType genreType;
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Object used for locking collection
+        /// </summary>
         public object AccessLock { get; set; }
 
         #endregion
@@ -54,6 +61,8 @@ namespace Meticumedia
 
         #endregion
 
+        #region Constructor
+
         /// <summary>
         /// Constructor with type of content genre is related to
         /// </summary>
@@ -73,7 +82,11 @@ namespace Meticumedia
             this.genreType = type == ContentType.Movie ? CollectionType.Movie : CollectionType.Tv;
             this.AccessLock = new object();
         }
-        
+
+        #endregion
+
+        #region Methods
+
         /// <summary>
         /// Adds an item to the list
         /// </summary>
@@ -108,28 +121,44 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Remove item with locking
+        /// </summary>
+        /// <param name="item">Item to remove</param>
         public new void Remove(string item)
         {
             lock (AccessLock)
                 base.Remove(item);
         }
 
+        /// <summary>
+        /// RemoveAt with locking
+        /// </summary>
+        /// <param name="index">Index of item to remove</param>
         public new void RemoveAt(int index)
         {
             lock (AccessLock)
                 base.RemoveAt(index);
         }
 
+        /// <summary>
+        /// Sorting with locking
+        /// </summary>
         public new void Sort()
         {
             lock (AccessLock)
                 base.Sort();
         }
 
+        /// <summary>
+        /// Clear with locking
+        /// </summary>
         public new void Clear()
         {
             lock (AccessLock)
                 base.Clear();
         }
+
+        #endregion
     }
 }

@@ -23,12 +23,12 @@ namespace Meticumedia
         /// <summary>
         /// All TV Shows contained within all TV folders. 
         /// </summary>
-        public static ContentCollection Shows = new ContentCollection(ContentType.TvShow);     
+        public static ContentCollection Shows = new ContentCollection(ContentType.TvShow, "Shows");    
 
         /// <summary>
         /// All movies contained within all movie folders.
         /// </summary>
-        public static ContentCollection Movies = new ContentCollection(ContentType.Movie);
+        public static ContentCollection Movies = new ContentCollection(ContentType.Movie, "Movies");
 
         /// <summary>
         /// Contains log of organization actions.
@@ -330,14 +330,14 @@ namespace Meticumedia
         /// <param name="maxYear">Maximum for year filter</param>
         /// <param name="nameFilter">String that must be contained in movie name - empty string disables filter</param>
         /// <returns>List of movies from root folder that match filters</returns>
-        public static List<Content> GetContentFromRootFolders(List<ContentRootFolder> folders, bool recursive, GenreCollection genreFilter, bool yearFilter, int minYear, int maxYear, string nameFilter)
+        public static List<Content> GetContentFromRootFolders(List<ContentRootFolder> folders, bool recursive, bool genreEnable, GenreCollection genreFilter, bool yearFilter, int minYear, int maxYear, string nameFilter)
         {
             // Initialize movies list
             List<Content> folderMovies = new List<Content>();
 
             // Go through each content folder and get movie from folders that match name
             foreach (ContentRootFolder folder in folders)
-                folder.GetContent(recursive, genreFilter, folderMovies, yearFilter, minYear, maxYear, nameFilter);
+                folder.GetContent(recursive, genreEnable, genreFilter, folderMovies, yearFilter, minYear, maxYear, nameFilter);
 
             // Returns list of movies
             return folderMovies;
@@ -352,7 +352,7 @@ namespace Meticumedia
         {
             List<Content> folderContent = new List<Content>();
             foreach (ContentRootFolder folder in folders)
-                folder.GetContent(true, GetAllGenres(folder.ContentType), folderContent, false, 0, 0, string.Empty);
+                folder.GetContent(true, false, GetAllGenres(folder.ContentType), folderContent, false, 0, 0, string.Empty);
             return folderContent;
         }
 
@@ -383,10 +383,10 @@ namespace Meticumedia
                 switch (contentType)
                 {
                     case ContentType.TvShow:
-                        results = folder.UpdateContent(fastUpdate, seriesIds, ref tvUpdateCancelled);
+                        results = folder.UpdateContent(fastUpdate, seriesIds, ref tvUpdateCancelled, time);
                         break;
                     case ContentType.Movie:
-                        results = folder.UpdateContent(fastUpdate, seriesIds, ref movieUpdateCancelled);
+                        results = folder.UpdateContent(fastUpdate, seriesIds, ref movieUpdateCancelled, time);
                         break;
                     default:
                         throw new Exception("Unknown content type");
@@ -397,14 +397,7 @@ namespace Meticumedia
             }
 
             // Clear cancel flag
-            SetUpdateCancel(contentType, false);
-
-            // Save changes
-            ContentCollection collection = GetContentCollection(contentType);
-            collection.Sort();
-            collection.Save();
-            if (!string.IsNullOrEmpty(time))
-                collection.LastUpdate = time;
+            SetUpdateCancel(contentType, false);            
         }
 
         #endregion
