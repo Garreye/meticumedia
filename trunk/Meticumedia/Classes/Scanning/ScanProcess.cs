@@ -13,15 +13,15 @@ namespace Meticumedia
     {
         [Description("Collecting Files to be Analyzed")]
         FileCollect,
-        [Description("Scanning Folder")]
+        [Description("Scanning Scan Folders")]
         Directory,
-        [Description("Scanning Show for Missing Episodes")]
+        [Description("Scanning Shows for Missing Episodes")]
         TvMissing,
-        [Description("Scanning Show for Episode that need to be Renamed")]
+        [Description("Scanning Shows for Episode That Need to be Renamed")]
         TvRename,
-        [Description("Scanning TV Show Root Folder")]
+        [Description("Scanning TV Show Root Folders")]
         TvFolder,
-        [Description("Scanning Movie Root Folder")]
+        [Description("Scanning Movie Root Folders")]
         Movie 
     };
 }
