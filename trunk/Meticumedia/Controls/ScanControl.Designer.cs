@@ -39,7 +39,6 @@ namespace Meticumedia
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.cmbScanType = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.pbScanProgress = new TextProgressBar();
             this.btnRun = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.chkQueueFilter = new System.Windows.Forms.CheckBox();
@@ -64,6 +63,7 @@ namespace Meticumedia
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.pbScanProgress = new TextProgressBar();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -92,7 +92,7 @@ namespace Meticumedia
             this.cmbScanSelection.FormattingEnabled = true;
             this.cmbScanSelection.Location = new System.Drawing.Point(24, 3);
             this.cmbScanSelection.Name = "cmbScanSelection";
-            this.cmbScanSelection.Size = new System.Drawing.Size(498, 21);
+            this.cmbScanSelection.Size = new System.Drawing.Size(500, 21);
             this.cmbScanSelection.TabIndex = 15;
             // 
             // groupBox1
@@ -148,7 +148,7 @@ namespace Meticumedia
             this.cmbScanType.FormattingEnabled = true;
             this.cmbScanType.Location = new System.Drawing.Point(6, 3);
             this.cmbScanType.Name = "cmbScanType";
-            this.cmbScanType.Size = new System.Drawing.Size(362, 21);
+            this.cmbScanType.Size = new System.Drawing.Size(363, 21);
             this.cmbScanType.TabIndex = 29;
             this.cmbScanType.SelectedIndexChanged += new System.EventHandler(this.cmbScanType_SelectedIndexChanged);
             // 
@@ -160,16 +160,6 @@ namespace Meticumedia
             this.label4.Size = new System.Drawing.Size(19, 13);
             this.label4.TabIndex = 36;
             this.label4.Text = "on";
-            // 
-            // pbScanProgress
-            // 
-            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbScanProgress.Location = new System.Drawing.Point(134, 49);
-            this.pbScanProgress.Message = null;
-            this.pbScanProgress.Name = "pbScanProgress";
-            this.pbScanProgress.Size = new System.Drawing.Size(848, 23);
-            this.pbScanProgress.TabIndex = 28;
             // 
             // btnRun
             // 
@@ -466,6 +456,16 @@ namespace Meticumedia
             // 
             this.columnHeader3.Text = "Destination";
             this.columnHeader3.Width = 284;
+            // 
+            // pbScanProgress
+            // 
+            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbScanProgress.Location = new System.Drawing.Point(134, 49);
+            this.pbScanProgress.Message = null;
+            this.pbScanProgress.Name = "pbScanProgress";
+            this.pbScanProgress.Size = new System.Drawing.Size(848, 23);
+            this.pbScanProgress.TabIndex = 28;
             // 
             // ScanControl
             // 

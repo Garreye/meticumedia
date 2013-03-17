@@ -42,6 +42,8 @@ namespace Meticumedia
 
         public string Name { get; set; }
 
+        public bool LoadCompleted { get { return loaded; } }
+
         #endregion
 
         #region Events
@@ -145,51 +147,51 @@ namespace Meticumedia
         {
             lock (ContentLock)
             {
-                Console.WriteLine(this.ToString() + " lock add");
+                //Console.WriteLine(this.ToString() + " lock add");
                 base.Add(item);
             }
             OnContentAdded();
-            Console.WriteLine(this.ToString() + " release add");
+            //Console.WriteLine(this.ToString() + " release add");
         }
 
         public new void Remove(Content item)
         {
             lock (ContentLock)
             {
-                Console.WriteLine(this.ToString() + " lock remove");
+                //Console.WriteLine(this.ToString() + " lock remove");
                 base.Remove(item);
             }
-            Console.WriteLine(this.ToString() + " release remove");
+            //Console.WriteLine(this.ToString() + " release remove");
         }
 
         public new void RemoveAt(int index)
         {
             lock (ContentLock)
             {
-                Console.WriteLine(this.ToString() + " lock removeAt");
+                //Console.WriteLine(this.ToString() + " lock removeAt");
                 base.RemoveAt(index);
             }
-            Console.WriteLine(this.ToString() + " release removeAt");
+            //Console.WriteLine(this.ToString() + " release removeAt");
         }
 
         public new void Sort()
         {
             lock (ContentLock)
             {
-                Console.WriteLine(this.ToString() + " lock sort");
+                //Console.WriteLine(this.ToString() + " lock sort");
                 base.Sort();
             }
-            Console.WriteLine(this.ToString() + " release sort");
+            //Console.WriteLine(this.ToString() + " release sort");
         }
 
         public new void Clear()
         {
             lock (ContentLock)
             {
-                Console.WriteLine(this.ToString() + " lock clear");
+                //Console.WriteLine(this.ToString() + " lock clear");
                 base.Clear();
             }
-            Console.WriteLine(this.ToString() + " release clear");
+            //Console.WriteLine(this.ToString() + " release clear");
         }
 
         #endregion
@@ -208,6 +210,8 @@ namespace Meticumedia
                     string path = Path.Combine(Organization.GetBasePath(false), XML_ROOT + ".xml");
 
                     if (File.Exists(path))
+                    {
+                        ContentCollection loadContent = new ContentCollection(this.ContentType, "Loading Shows");
                         lock (XmlLock)
                         {
 
@@ -216,7 +220,7 @@ namespace Meticumedia
                             xmlDoc.Load(reader);
 
                             // Load show data
-                            ContentCollection loadContent = new ContentCollection(this.ContentType, "Loading Shows");
+
                             XmlNodeList contentNodes = xmlDoc.DocumentElement.ChildNodes;
                             for (int i = 0; i < contentNodes.Count; i++)
                             {
@@ -246,18 +250,18 @@ namespace Meticumedia
                                     }
                                 }
                             }
-
-                            OnLoadProgressChange(100);
-                            lock (ContentLock)
-                            {
-                                Console.WriteLine(this.ToString() + " lock load");
-                                this.LastUpdate = loadContent.LastUpdate;
-                                this.Clear();
-                                foreach (Content content in loadContent)
-                                    base.Add(content);
-                            }
-                            Console.WriteLine(this.ToString() + " release load");
                         }
+                        OnLoadProgressChange(100);
+                        lock (ContentLock)
+                        {
+                            //Console.WriteLine(this.ToString() + " lock load");
+                            this.LastUpdate = loadContent.LastUpdate;
+                            this.Clear();
+                            foreach (Content content in loadContent)
+                                base.Add(content);
+                        }
+                        //Console.WriteLine(this.ToString() + " release load");
+                    }
                 }
                 catch (Exception e)
                 {
@@ -291,7 +295,7 @@ namespace Meticumedia
             // Lock content and file
             lock (ContentLock)
             {
-                Console.WriteLine(this.ToString() + " lock save");
+                //Console.WriteLine(this.ToString() + " lock save");
                 lock (XmlLock)
                 {
                     using (XmlWriter xw = XmlWriter.Create(tempPath))
@@ -308,7 +312,7 @@ namespace Meticumedia
                     File.Move(tempPath, path);
                 }
             }
-            Console.WriteLine(this.ToString() + " release save");
+            //Console.WriteLine(this.ToString() + " release save");
             OnContentSaved();
         }
 
@@ -320,12 +324,12 @@ namespace Meticumedia
         {
             lock (this.ContentLock)
             {
-                Console.WriteLine(this.ToString() + " lock removeMissing");
+                //Console.WriteLine(this.ToString() + " lock removeMissing");
                 for (int i = this.Count - 1; i >= 0; i--)
                     if (!this[i].Found && this[i].RootFolder.StartsWith(rootFolder.FullPath))
                         base.RemoveAt(i);
             }
-            Console.WriteLine(this.ToString() + " release removeMissing");
+            //Console.WriteLine(this.ToString() + " release removeMissing");
         }
 
         /// <summary>

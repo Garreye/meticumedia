@@ -21,7 +21,7 @@ namespace Meticumedia
         /// <param name="shows">Shows to scan</param>
         /// <param name="queuedItems">Items currently in queue (to be skipped)</param>
         /// <returns></returns>
-        public List<OrgItem> RunScan(List<ContentRootFolder> folders, List<OrgItem> queuedItems)
+        public List<OrgItem> RunScan(List<ContentRootFolder> folders, List<OrgItem> queuedItems, bool fast)
         {
             // Set running flag
             scanRunning = true;
@@ -37,7 +37,7 @@ namespace Meticumedia
             // Do directory scan on all TV folders
             DirectoryScan dirScan = new DirectoryScan(false);
             dirScan.ProgressChange += dirScan_ProgressChange;
-            List<OrgItem> results = dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false);
+            List<OrgItem> results = dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false, fast);
 
             // Check if show folder needs to be renamed!
             int number = results.Count;

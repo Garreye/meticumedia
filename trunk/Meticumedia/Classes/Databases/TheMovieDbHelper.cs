@@ -325,7 +325,7 @@ namespace Meticumedia
                 }
                 catch 
                 {
-                    Thread.Sleep(3000);
+                    Thread.Sleep(2000);
                 }
 
             // If no response return empty results

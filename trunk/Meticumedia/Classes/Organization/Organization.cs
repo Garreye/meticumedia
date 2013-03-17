@@ -123,8 +123,10 @@ namespace Meticumedia
         /// </summary>
         public static void Save()
         {
-            Shows.Save();
-            Movies.Save();
+            if (Shows.LoadCompleted)
+                Shows.Save();
+            if (Movies.LoadCompleted)
+                Movies.Save();
             SaveLog();
         }
 

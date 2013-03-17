@@ -21,14 +21,14 @@ namespace Meticumedia
         /// <param name="shows">Shows to scan</param>
         /// <param name="queuedItems">Items currently in queue (to be skipped)</param>
         /// <returns></returns>
-        public List<OrgItem> RunScan(List<Content> shows, List<OrgItem> queuedItems)
+        public List<OrgItem> RunScan(List<Content> shows, List<OrgItem> queuedItems, bool fast)
         {
             // Set running flag
             scanRunning = true;
 
             // Do directory check on all directories (to look for missing episodes)
             DirectoryScan dirScan = new DirectoryScan(false);
-            List<OrgItem> directoryItems = dirScan.RunScan(Settings.ScanDirectories, queuedItems, 70, true, true);
+            List<OrgItem> directoryItems = dirScan.RunScan(Settings.ScanDirectories, queuedItems, 70, true, true, false);
 
             // Initialiaze scan items
             List<OrgItem> missingCheckItem = new List<OrgItem>();

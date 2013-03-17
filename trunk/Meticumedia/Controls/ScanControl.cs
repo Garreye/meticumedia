@@ -878,6 +878,11 @@ namespace Meticumedia
             DisplayResults();
         }
 
+        private void cmbScanType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateScanSelection();
+        }
+
         #endregion
 
         #region Updating
@@ -896,6 +901,7 @@ namespace Meticumedia
             cmbScanSelection.Items.Clear();
             bool selected = false;
             ScanType scanType = (ScanType)cmbScanType.SelectedItem;
+            chkFast.Visible = true;
             switch(scanType)
             {
                 case ScanType.Directory:
@@ -958,6 +964,7 @@ namespace Meticumedia
                             selected = true;
                         }
                     }
+                    chkFast.Visible = false;
                     break;
         }
 
@@ -998,16 +1005,16 @@ namespace Meticumedia
             switch (scanType)
             {
                 case ScanType.Directory:
-                    scanResults = directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false);
+                    scanResults = directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false, (bool)args[2]);
                     break;
                 case ScanType.TvMissing:
-                    scanResults = tvMissingScan.RunScan((List<Content>)args[1], queuedItems);
+                    scanResults = tvMissingScan.RunScan((List<Content>)args[1], queuedItems, (bool)args[2]);
                     break;
                 case ScanType.TvRename:
                     scanResults = tvRenameScan.RunScan((List<Content>)args[1], queuedItems);
                     break;
                 case ScanType.TvFolder:
-                    scanResults = tvFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems);
+                    scanResults = tvFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems, (bool)args[2]);
                     break;
                 case ScanType.MovieFolder:
                     scanResults = movieFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems);
@@ -1080,6 +1087,7 @@ namespace Meticumedia
             pbScanProgress.Value = 0;
             
             sortAcending = true;
+            bool fast = chkFast.Visible && chkFast.Checked;
             
             // Build scan parameters
             ScanType scanType = (ScanType)cmbScanType.SelectedItem;
@@ -1163,7 +1171,7 @@ namespace Meticumedia
             if (!scanWorker.IsBusy)
             {
                 currentScan = scanType;
-                scanWorker.RunWorkerAsync(new object[] { scanType, list });
+                scanWorker.RunWorkerAsync(new object[] { scanType, list, fast });
                 lastRunScan = scanType;
             }
             else
@@ -1325,9 +1333,6 @@ namespace Meticumedia
 
         #endregion
 
-        private void cmbScanType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateScanSelection();
-        }
+
     }
 }

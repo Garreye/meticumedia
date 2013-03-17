@@ -240,7 +240,7 @@ namespace Meticumedia
             ContentCollection contentCollection = GetContentCollection();
             lock (contentCollection.ContentLock)
             {
-                Console.WriteLine(contentCollection.ToString() + " lock get");
+                //Console.WriteLine(contentCollection.ToString() + " lock get");
                 foreach (Content content in contentCollection)
                 {
                     // Apply genre filter
@@ -264,7 +264,7 @@ namespace Meticumedia
                         contents.Add(content);
                 }
             }
-            Console.WriteLine(contentCollection.ToString() + " release get");
+            //Console.WriteLine(contentCollection.ToString() + " release get");
         }
 
         /// <summary>

@@ -143,16 +143,15 @@ namespace Meticumedia
                 case ContentType.Movie:
                     Organization.Movies.LoadProgressChange += new EventHandler<ProgressChangedEventArgs>(Organization_LoadProgressChange);
                     Organization.Movies.LoadComplete += new EventHandler(Organization_LoadComplete);
-                    ContentRootFolder.UpdateProgressChange += new EventHandler<OrgProgressChangesEventArgs>(Organization_FolderUpdateProgressChange);
                     break;
                 case ContentType.TvShow:
                     Organization.Shows.LoadProgressChange += new EventHandler<ProgressChangedEventArgs>(Organization_LoadProgressChange);
                     Organization.Shows.LoadComplete += new EventHandler(Organization_LoadComplete);
-                    ContentRootFolder.UpdateProgressChange += new EventHandler<OrgProgressChangesEventArgs>(Organization_FolderUpdateProgressChange);
                     break;
                 default:
                     throw new Exception("Unknown content type");
             }
+            ContentRootFolder.UpdateProgressChange += new EventHandler<OrgProgressChangesEventArgs>(Organization_FolderUpdateProgressChange);
 
             // Setup root folder update worker
             rootFolderUpdater = new BackgroundWorker();
@@ -162,7 +161,7 @@ namespace Meticumedia
             lvContentFolders.ItemToEdit += new EventHandler(lvContentFolders_ItemToEdit);
             lvContentFolders.SaveContentsRequired += new EventHandler(lvContentFolders_SaveRequired);
             lvContentFolders.UpdateContentsRequired += new EventHandler(lvContentFolders_UpdateContentsRequired);
-        }
+        }        
 
         #endregion
 
@@ -389,7 +388,7 @@ namespace Meticumedia
         public void UpdateFolders()
         {
             // Check that handle is created
-            if (!this.IsHandleCreated)
+            if (!this.IsHandleCreated || this.IsDisposed)
             {
                 folderUpdateRequiredOnLoad = true;
                 return;
@@ -481,10 +480,10 @@ namespace Meticumedia
             }
             else
             {
-                Console.WriteLine("Updating called for " + this.ToString());
+                //Console.WriteLine("Updating called for " + this.ToString());
                 ShowProgressBar();
                 string selFolder = "All";
-                if (this.IsHandleCreated)
+                if (this.IsHandleCreated && !this.IsDisposed)
                     this.Invoke((MethodInvoker)delegate
                     {
                         if (cmbFolders.SelectedItem != null)
@@ -531,14 +530,14 @@ namespace Meticumedia
         /// </summary>
         private void rootFolderUpdater_DoWork(object sender, DoWorkEventArgs e)
         {
-            Console.WriteLine("Updating started for " + this.ToString());
+            //Console.WriteLine("Updating started for " + this.ToString());
             
             // Get root folders to update from arguments
             string folder = (string)e.Argument;
 
             // Update each selected movie folder
             List<ContentRootFolder> rootFolders = null;
-            if (this.IsHandleCreated)
+            if (this.IsHandleCreated && !this.IsDisposed)
                 this.Invoke((MethodInvoker)delegate
                 {
                     rootFolders = GetSelectedRootFolders();
@@ -559,7 +558,7 @@ namespace Meticumedia
 
              UpdateProgress(e.ProgressPercentage, (string)e.UserState);
 
-             if (!this.IsHandleCreated)
+             if (!this.IsHandleCreated && !this.IsDisposed)
                  return;
 
             if (e.NewItem)
@@ -592,7 +591,7 @@ namespace Meticumedia
             pbPercent = percent;
             pbMessage = msg;
 
-            if (!this.IsHandleCreated)
+            if (!this.IsHandleCreated || this.IsDisposed)
                 return;
 
             this.Invoke((MethodInvoker)delegate
@@ -612,11 +611,11 @@ namespace Meticumedia
             if (reUpdateRequired)
             {
                 reUpdateRequired = false;
-                rootFolderUpdater.RunWorkerAsync(!this.IsHandleCreated || cmbFolders.SelectedItem == null ? "All" : cmbFolders.SelectedItem.ToString());
+                rootFolderUpdater.RunWorkerAsync(!this.IsHandleCreated || this.IsDisposed || cmbFolders.SelectedItem == null ? "All" : cmbFolders.SelectedItem.ToString());
             }
             else
             {
-                if (!this.IsHandleCreated)
+                if (!this.IsHandleCreated || this.IsDisposed)
                 {
                     rootFolderSyncOnLoad = true;
                     return;
@@ -712,7 +711,7 @@ namespace Meticumedia
             if (((ContentCollection)sender).ContentType != this.ContentType)
                 return;
 
-            if (!this.IsHandleCreated)
+            if (!this.IsHandleCreated || this.IsDisposed)
             {
                 contentSyncOnLoad = true;
                 UpdateContentInFolders(true);

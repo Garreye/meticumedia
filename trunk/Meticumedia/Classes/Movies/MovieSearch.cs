@@ -50,7 +50,8 @@ namespace Meticumedia
             Content contentMatch;
             bool results = base.ContentMatch(search, rootFolder, folderPath, threaded, fast, out contentMatch);
             match = new Movie(contentMatch);
-            TheMovieDbHelper.UpdateMovieInfo(match);
+            if (results)
+                TheMovieDbHelper.UpdateMovieInfo(match);
             return results;
         }
 

@@ -65,7 +65,7 @@ namespace Meticumedia
         {
             // Run scan to look for TV files
             DirectoryScan scan = new DirectoryScan(true);
-            Items = scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true);
+            Items = scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true, true);
 
             // Update missing
             lock (Organization.Shows.ContentLock)

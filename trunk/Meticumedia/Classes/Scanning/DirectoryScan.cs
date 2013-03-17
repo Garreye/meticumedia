@@ -106,13 +106,13 @@ namespace Meticumedia
         /// <param name="tvOnly">Whether ignore all files that aren't TV video files</param>
         /// <param name="background">Whether scan is running in background (ignores user cancellations)</param>
         /// <returns>List of actions</returns>
-        public List<OrgItem> RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, bool tvOnly, bool skipDatabaseMatching)
+        public List<OrgItem> RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, bool tvOnly, bool skipDatabaseMatching, bool fast)
         {
             // Set scan to running
             scanRunning = true;
 
             // Go thorough each folder and create actions for all files
-            List<OrgItem> results = RunScan(folders, queuedItems, 100, tvOnly, skipDatabaseMatching);
+            List<OrgItem> results = RunScan(folders, queuedItems, 100, tvOnly, skipDatabaseMatching, fast);
 
             scanRunning = false;
             cancelRequested = false;
@@ -130,7 +130,7 @@ namespace Meticumedia
         /// <param name="progressAmount">Percentage that directory scan represents of total scan</param>
         /// <param name="tvOnly">Whether ignore all files that aren't TV video files</param>
         /// <param name="background">Whether scan is running in background (ignores user cancellations)</param>
-        public List<OrgItem> RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, double progressAmount, bool tvOnly, bool skipDatabaseMatching)
+        public List<OrgItem> RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, double progressAmount, bool tvOnly, bool skipDatabaseMatching, bool fast)
         {
             // Update progress
             OnProgressChange(ScanProcess.FileCollect, string.Empty, 0);
@@ -149,7 +149,7 @@ namespace Meticumedia
             }
 
             // Build arguments
-            object[] args = new object[] { tvOnly, skipDatabaseMatching };
+            object[] args = new object[] { tvOnly, skipDatabaseMatching, fast };
 
             // Run processing
             if (this.background)
@@ -184,6 +184,7 @@ namespace Meticumedia
             object[] args = (object[])processSpecificArgs;
             bool tvOnlyCheck = (bool)args[0];
             bool skipMatching = (bool)args[1];
+            bool fast = (bool)args[2];
 
             // Check for cancellation
             if ((cancelRequested && !background) || cancelAllRequested)
@@ -297,7 +298,7 @@ namespace Meticumedia
                             path = defaultTvFolder.FullPath;
 
                         // Perform search for matching TV show
-                        matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, false, out bestMatch);
+                        matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, out bestMatch);
                         bestMatch.RootFolder = Path.Combine(path, bestMatch.Name);
                         TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
 
@@ -349,11 +350,11 @@ namespace Meticumedia
                     }
 
                     // No match to TV show
-                    if (!matched && !tvOnlyCheck)
+                    if (!matched && !tvOnlyCheck && !fast)
                     {
                         // Try to match to a movie
                         OrgItem movieItem;
-                        if (CreateMovieAction(orgPath, out movieItem))
+                        if (CreateMovieAction(orgPath, out movieItem, fast))
                             AddResult(movieItem);
                         else
                         {
@@ -368,7 +369,7 @@ namespace Meticumedia
                 case FileHelper.FileCategory.NonTvVideo:
                     // Create action
                     OrgItem item;
-                    CreateMovieAction(orgPath, out item);
+                    CreateMovieAction(orgPath, out item, fast);
 
                     // If delete action created (for sample file)
                     if (item.Action == OrgAction.Delete)
@@ -409,7 +410,7 @@ namespace Meticumedia
         /// <param name="file">The file to create movie action from</param>
         /// <param name="item">The resulting movie action</param>
         /// <returns>Whether the file was matched to a movie</returns>
-        private bool CreateMovieAction(OrgPath file, out OrgItem item)
+        private bool CreateMovieAction(OrgPath file, out OrgItem item, bool fast)
         {
             // Initialize item
             item = new OrgItem(OrgAction.None, file.Path, FileHelper.FileCategory.NonTvVideo, file.OrgFolder);
@@ -437,7 +438,7 @@ namespace Meticumedia
 
             // Search for match to movie
             Movie searchResult;
-            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, false, out searchResult);
+            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, out searchResult);
 
             // Add closest match item
             if (searchSucess)

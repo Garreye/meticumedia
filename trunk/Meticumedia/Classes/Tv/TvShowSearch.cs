@@ -68,7 +68,8 @@ namespace Meticumedia
             Content contentMatch;
             bool results = base.ContentMatch(search, rootFolder, folderPath, threaded, fast, out contentMatch);
             match = new TvShow(contentMatch);
-            TvDatabaseHelper.FullShowSeasonsUpdate(match);
+            if (results)
+                TvDatabaseHelper.FullShowSeasonsUpdate(match);
             return results;
         }
 
