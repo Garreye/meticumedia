@@ -86,7 +86,8 @@ namespace Meticumedia
             ".rmvb",
             ".divx",
             ".iso",
-            ".dts"
+            ".dts",
+            ".ts"
         };
 
         /// <summary>

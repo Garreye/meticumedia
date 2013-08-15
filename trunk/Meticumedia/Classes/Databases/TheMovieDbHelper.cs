@@ -276,6 +276,9 @@ namespace Meticumedia
 
         #region Database Access
 
+        /// <summary>
+        /// Queue of times when database requests were made
+        /// </summary>
         private static Queue<DateTime> requestTimes = new Queue<DateTime>();
 
         /// <summary>

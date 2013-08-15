@@ -380,7 +380,7 @@ namespace Meticumedia
         };
 
         /// <summary>
-        /// Array of words that to be removed from file names to make SOMETIMES processing easier.
+        /// Array of words that to be removed from file names that SOMETIMES make processing easier.
         /// </summary>
         private static RemoveFileWord[] OptionalRemoveWords = new RemoveFileWord[]
         {

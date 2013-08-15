@@ -1,4 +1,4 @@
-﻿// This concept taken from: http://www.blackwasp.co.uk/EnumDescription.aspx
+﻿// This extension taken from: http://www.blackwasp.co.uk/EnumDescription.aspx
 
 using System;
 using System.Collections.Generic;

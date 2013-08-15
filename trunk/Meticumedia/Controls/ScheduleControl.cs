@@ -107,7 +107,7 @@ namespace Meticumedia
             if (ep.Missing != TvEpisode.MissingStatus.Missing)
                 contextMenu.MenuItems.Add("Play", new EventHandler(HandlePlay));
             contextMenu.MenuItems.Add("Copy Episode String to Clipboard", new EventHandler(HandleCopyToClipboard));
-            contextMenu.MenuItems.Add("Exclude From Schedule", new EventHandler(HandleExcludeFromSchedule));
+            contextMenu.MenuItems.Add("Exclude Show From Schedule", new EventHandler(HandleExcludeFromSchedule));
         }
 
         /// <summary>
