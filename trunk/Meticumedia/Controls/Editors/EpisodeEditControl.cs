@@ -117,7 +117,7 @@ namespace Meticumedia
         private void txtName_TextChanged(object sender, EventArgs e)
         {
             if (!disableEvents)
-                this.episode.Name = txtName.Text;
+                this.episode.UserDefinedName = txtName.Text;
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Meticumedia
         private void numEpisode_ValueChanged(object sender, EventArgs e)
         {
             if (!disableEvents)
-                this.episode.Number = (int)numEpisode.Value;
+                this.episode.UserDefinedNumber = (int)numEpisode.Value;
         }
 
         private void numDate_ValueChanged(object sender, EventArgs e)

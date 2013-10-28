@@ -98,28 +98,36 @@ namespace Meticumedia
         /// <summary>
         /// The name of the episode
         /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// The database name of the episode
-        /// </summary>
-        public string DataBaseName 
+        public string Name 
         {
-            get { return databaseName; }
-            set
+            get
             {
-                databaseName = value;
-                if (!this.NameIsUserSet && !string.IsNullOrEmpty(value))
-                    this.Name = value;
+                if(!string.IsNullOrEmpty(userDefinedName))
+                    return userDefinedName;
+                else
+                    return databaseName;
             }
         }
 
         /// <summary>
-        /// Flag indicating that Name property was overidden by the user
-        /// and that it shouldn't be overriden by database!
+        /// The database name of the episode
         /// </summary>
-        public bool NameIsUserSet { get; set; }
+        public string DatabaseName 
+        {
+            get { return databaseName; }
+            set { databaseName = value; } 
+        }
 
+        /// <summary>
+        /// The user defined name of the episode
+        /// </summary>
+        public string UserDefinedName
+        {
+            get { return userDefinedName; }
+            set { userDefinedName = value; }
+        }
+
+        
         /// <summary>
         /// Name of the show the episode belongs to
         /// </summary>
@@ -133,7 +141,45 @@ namespace Meticumedia
         /// <summary>
         /// The episode's number within the season
         /// </summary>
-        public int Number { get; set; }
+        public int Number 
+        {
+            get
+            {
+                if (userDefinedNumber >= 0)
+                    return userDefinedNumber;
+                else if (databaseDvdNumber >= 0 && this.GetShow() != null && this.GetShow().DvdEpisodeOrder)
+                    return databaseDvdNumber;
+                else
+                    return databaseNumber;
+            }
+        }
+        
+        /// <summary>
+        /// The database's number for the episode within the season 
+        /// </summary>
+        public int DatabaseNumber
+        {
+            get { return databaseNumber; }
+            set { databaseNumber = value; }
+        }
+
+        /// <summary>
+        /// The database's DVD number for the episode within the season 
+        /// </summary>
+        public int DatabaseDvdNumber
+        {
+            get { return databaseDvdNumber; }
+            set { databaseDvdNumber = value; }
+        }
+
+        /// <summary>
+        /// The database's user defined number for the episode within the season 
+        /// </summary>
+        public int UserDefinedNumber
+        {
+            get { return userDefinedNumber; }
+            set { userDefinedNumber = value; }
+        }
 
         /// <summary>
         /// Date when the episode first aired
@@ -204,6 +250,26 @@ namespace Meticumedia
         private string databaseName = string.Empty;
 
         /// <summary>
+        /// Private variable for storing UserDefinedName property
+        /// </summary>
+        private string userDefinedName = string.Empty;
+
+        /// <summary>
+        /// Private variable for storing DatabaseNumber property
+        /// </summary>
+        private int databaseNumber = -1;
+
+        /// <summary>
+        /// Private variable for storing DatabaseDvdNumber property
+        /// </summary>
+        private int databaseDvdNumber = -1;
+
+        /// <summary>
+        /// Private variable for storing UserDefinedNumber property
+        /// </summary>
+        private int userDefinedNumber = -1;
+
+        /// <summary>
         /// Private variable for storing MissingBackColor property
         /// </summary>
         private static Color missingBackColor = Color.LightSkyBlue;
@@ -238,10 +304,9 @@ namespace Meticumedia
         /// <param name="overview">Episdoe overview/description</param>
         public TvEpisode(String name, string show, int season, int number, string air, string overview) : this(show)
         {
-            this.NameIsUserSet = false;
-            this.DataBaseName = name;
+            this.DatabaseName = name;
             this.Season = season;
-            this.Number = number;
+            this.DatabaseNumber = number;
             DateTime airDate;
             DateTime.TryParse(air, out airDate);
             this.AirDate = airDate;
@@ -262,12 +327,9 @@ namespace Meticumedia
         /// </summary>
         public TvEpisode()
         {
-            this.NameIsUserSet = false;
-            this.Name = string.Empty;
-            this.DataBaseName = string.Empty;
+            this.DatabaseName = string.Empty;
             this.Show = string.Empty;
             this.Season = -1;
-            this.Number = -1;
             this.AirDate = new DateTime();
             this.File = new TvFile();
             this.Ignored = false;
@@ -298,12 +360,13 @@ namespace Meticumedia
         /// <param name="episode"></param>
         public void UpdateInfo(TvEpisode episode)
         {
-            this.NameIsUserSet = episode.NameIsUserSet || episode.Name != episode.DataBaseName;
-            this.Name = episode.Name;
-            this.DataBaseName = episode.DataBaseName;
+            this.UserDefinedName = episode.UserDefinedName;
+            this.DatabaseName = episode.DatabaseName;
             this.Show = episode.Show;
             this.Season = episode.Season;
-            this.Number = episode.Number;
+            this.DatabaseNumber = episode.DatabaseNumber;
+            this.DatabaseDvdNumber = episode.DatabaseDvdNumber;
+            this.UserDefinedNumber = episode.UserDefinedNumber;
             this.AirDate = episode.AirDate;
             this.File = new TvFile(episode.File);
             this.Ignored = episode.Ignored;
@@ -313,6 +376,16 @@ namespace Meticumedia
             this.Watched = episode.Watched;
             this.UserDefined = episode.UserDefined;
             this.PreventDatabaseUpdates = episode.PreventDatabaseUpdates;
+        }
+
+        /// <summary>
+        /// Build basic string for searching for this episode
+        /// </summary>
+        /// <returns></returns>
+        public string BuildEpString()
+        {
+            string epInfo = this.Show + " s" + this.Season.ToString("00") + "e" + this.Number.ToString("00");
+            return FileHelper.SimplifyFileName(epInfo);
         }
 
         /// <summary>
@@ -350,13 +423,13 @@ namespace Meticumedia
                 if (fileEpNumber1 == this.Number)
                 {
                     if (fileEpNumber2 > 0)
-                        show.FindEpisode(ep1.Season, fileEpNumber2, out ep2);
+                        show.FindEpisode(ep1.Season, fileEpNumber2, false, out ep2);
                     else
                         ep2 = null;
                 }
                 else if (fileEpNumber2 == this.Number)
                 {
-                    if (fileEpNumber1 > 0 && show.FindEpisode(this.Season, fileEpNumber1, out ep1))
+                    if (fileEpNumber1 > 0 && show.FindEpisode(this.Season, fileEpNumber1, false, out ep1))
                         ep2 = this;
                     else
                         ep1 = this;
@@ -524,7 +597,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { NameIsUserSet, Name, DataBaseName, Show, Season, Number, AirDate, Overview, Ignored, Missing, Watched, File, UserDefined, PreventDatabaseUpdates };
+        private enum XmlElements { Name, NameIsUderDefined, DatabaseName, UserDefinedName, Show, Season, DatabaseNumber, DatabaseDvdNumber, UserDefinedNumber, AirDate, Overview, Ignored, Missing, Watched, File, UserDefined, PreventDatabaseUpdates };
 
         /// <summary>
         /// Root XML element for saving instance to file.
@@ -546,14 +619,16 @@ namespace Meticumedia
                 string value = null;
                 switch (element)
                 {
+                    // Deprecated
                     case XmlElements.Name:
-                        value = this.Name;
+                    case XmlElements.NameIsUderDefined:
                         break;
-                    case XmlElements.DataBaseName:
-                        value = this.DataBaseName;
+
+                    case XmlElements.DatabaseName:
+                        value = this.DatabaseName;
                         break;
-                    case XmlElements.NameIsUserSet:
-                        value = this.NameIsUserSet.ToString();
+                    case XmlElements.UserDefinedName:
+                        value = this.UserDefinedName;
                         break;
                     case XmlElements.Show:
                         value = this.Show;
@@ -561,8 +636,14 @@ namespace Meticumedia
                     case XmlElements.Season:
                         value = this.Season.ToString();
                         break;
-                    case XmlElements.Number:
-                        value = this.Number.ToString();
+                    case XmlElements.DatabaseNumber:
+                        value = this.DatabaseNumber.ToString();
+                        break;
+                    case XmlElements.DatabaseDvdNumber:
+                        value = this.DatabaseDvdNumber.ToString();
+                        break;
+                    case XmlElements.UserDefinedNumber:
+                        value = this.UserDefinedNumber.ToString();
                         break;
                     case XmlElements.AirDate:
                         value = this.AirDate.ToString();
@@ -613,12 +694,16 @@ namespace Meticumedia
             if (epNode.Name != ROOT_XML)
                 return false;
 
+            // Previous version support
+            string name = string.Empty;
+            bool nameIsUserDefined = false;
+
             // Loop through sub-nodes
             foreach (XmlNode propNode in epNode.ChildNodes)
             {
                 // Get element/property type
                 XmlElements element;
-                if (!Enum.TryParse<XmlElements>(propNode.Name, out element))
+                if (!Enum.TryParse<XmlElements>(propNode.Name, true, out element))
                     continue;
 
                 // Get value string
@@ -628,15 +713,16 @@ namespace Meticumedia
                 switch (element)
                 {
                     case XmlElements.Name:
-                        this.Name = value;
+                        name = value;
                         break;
-                    case XmlElements.DataBaseName:
-                        this.DataBaseName = value;
+                    case XmlElements.NameIsUderDefined:
+                        bool.TryParse(value, out nameIsUserDefined);
                         break;
-                    case XmlElements.NameIsUserSet:
-                        bool nameUserSet;
-                        bool.TryParse(value, out nameUserSet);
-                        this.NameIsUserSet = nameUserSet;
+                    case XmlElements.DatabaseName:
+                        this.DatabaseName = value;
+                        break;
+                    case XmlElements.UserDefinedName:
+                        this.UserDefinedName = value;
                         break;
                     case XmlElements.Show:
                         this.Show = value;
@@ -646,10 +732,20 @@ namespace Meticumedia
                         int.TryParse(value, out season);
                         this.Season = season;
                         break;
-                    case XmlElements.Number:
-                        int number;
-                        int.TryParse(value, out number);
-                        this.Number = number;
+                    case XmlElements.DatabaseNumber:
+                        int dbNumber;
+                        int.TryParse(value, out dbNumber);
+                        this.DatabaseNumber = dbNumber;
+                        break;
+                    case XmlElements.DatabaseDvdNumber:
+                        int dbDvdNumber;
+                        int.TryParse(value, out dbDvdNumber);
+                        this.DatabaseDvdNumber = dbDvdNumber;
+                        break;
+                    case XmlElements.UserDefinedNumber:
+                        int udNumber;
+                        int.TryParse(value, out udNumber);
+                        this.UserDefinedNumber = udNumber;
                         break;
                     case XmlElements.AirDate:
                         DateTime airDate;
@@ -689,6 +785,10 @@ namespace Meticumedia
                         break;
                 }
             }
+
+            // Previous version support
+            if (nameIsUserDefined && !string.IsNullOrEmpty(name))
+                this.userDefinedName = name;
 
             // Sucess
             return true;

@@ -97,6 +97,7 @@ namespace Meticumedia
                 }
 
                 // Add parsed show to results
+                searchResult.DatabaseSelection = (int)TvDataBaseSelection.TvRage;
                 searchResults.Add(searchResult);
             }
 
@@ -151,103 +152,111 @@ namespace Meticumedia
         /// Gets season/episode information from database
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
-        public override void DoUpdate(TvShow show)
+        public override bool DoUpdate(TvShow show)
         {
             // Get mirror
             string mirror;
             if (!GetMirror(MirrorType.Xml, out mirror))
-                return;
+                return false;
 
-            // Get show info from database
-            string showInfoUrl = mirror + "/showinfo.php?key=" + this.API_KEY + "&sid=" + show.Id;
-            WebClient webClient = new WebClient();
-            string showInfo = webClient.DownloadString(showInfoUrl);
-
-            // Create XML object from results
-            XmlDocument seriesDoc = new XmlDocument();
-            seriesDoc.InnerXml = showInfo;
-
-            // Parse show info
-            show.Overview = ParseShowInfo(seriesDoc.DocumentElement).Overview;
-
-            // Get episode info from database
-            string episodeListUrl = mirror + "/episode_list.php?key=" + this.API_KEY + "&sid=" + show.Id;
-            webClient = new WebClient();
-            string seriesList = webClient.DownloadString(episodeListUrl);
-
-            // Create xml object with text from mirrors url
-            seriesDoc = new XmlDocument();
-            seriesDoc.InnerXml = seriesList;
-
-            // Get root element and children
-            XmlElement root = seriesDoc.DocumentElement;
-            XmlNodeList nodes = root.ChildNodes;
-
-            // Go through each node and parse out episodes
-            foreach (XmlNode subNode in nodes)
+            try
             {
-                switch (subNode.Name.ToLower())
+                // Get show info from database
+                string showInfoUrl = mirror + "/showinfo.php?key=" + this.API_KEY + "&sid=" + show.Id;
+                WebClient webClient = new WebClient();
+                string showInfo = webClient.DownloadString(showInfoUrl);
+
+                // Create XML object from results
+                XmlDocument seriesDoc = new XmlDocument();
+                seriesDoc.InnerXml = showInfo;
+
+                // Parse show info
+                show.Overview = ParseShowInfo(seriesDoc.DocumentElement).Overview;
+
+                // Get episode info from database
+                string episodeListUrl = mirror + "/episode_list.php?key=" + this.API_KEY + "&sid=" + show.Id;
+                webClient = new WebClient();
+                string seriesList = webClient.DownloadString(episodeListUrl);
+
+                // Create xml object with text from mirrors url
+                seriesDoc = new XmlDocument();
+                seriesDoc.InnerXml = seriesList;
+
+                // Get root element and children
+                XmlElement root = seriesDoc.DocumentElement;
+                XmlNodeList nodes = root.ChildNodes;
+
+                // Go through each node and parse out episodes
+                foreach (XmlNode subNode in nodes)
                 {
-                    case "episodelist":
-                        foreach (XmlNode seasonNode in subNode.ChildNodes)
-                        {
-                            if (seasonNode.Name.ToLower() == "season")
+                    switch (subNode.Name.ToLower())
+                    {
+                        case "episodelist":
+                            foreach (XmlNode seasonNode in subNode.ChildNodes)
                             {
-                                string seasonNoStr = seasonNode.Attributes["no"].Value;
-                                int seasonNo;
-                                int.TryParse(seasonNoStr, out seasonNo);
-                                if (!show.Seasons.Contains(seasonNo))
-                                    show.Seasons.Add(new TvSeason(seasonNo));
-                                TvSeason season = show.Seasons[seasonNo];
-
-                                foreach (XmlNode epNode in seasonNode.ChildNodes)
+                                if (seasonNode.Name.ToLower() == "season")
                                 {
-                                    TvEpisode ep = new TvEpisode(show.Name);
-                                    ep.Season = seasonNo;
-                                    foreach (XmlNode epPropNode in epNode.ChildNodes)
-                                        switch (epPropNode.Name.ToLower())
-                                        {
-                                            case "seasonnum": // episode number within season
-                                                int epNum;
-                                                int.TryParse(epPropNode.InnerText, out epNum);
-                                                ep.Number = epNum;
-                                                break;
-                                            case "airdate":
-                                                DateTime airDate;
-                                                DateTime.TryParse(epPropNode.InnerText, out airDate);
-                                                ep.AirDate = airDate;
-                                                break;
-                                            case "title":
-                                                ep.DataBaseName = epPropNode.InnerText;
-                                                break;
-                                            case "summary":
-                                                ep.Overview = epPropNode.InnerText.Replace('\n', ' ');
-                                                break;
-                                        }
-                                    ep.InDatabase = true;
+                                    string seasonNoStr = seasonNode.Attributes["no"].Value;
+                                    int seasonNo;
+                                    int.TryParse(seasonNoStr, out seasonNo);
+                                    if (!show.Seasons.Contains(seasonNo))
+                                        show.Seasons.Add(new TvSeason(seasonNo));
+                                    TvSeason season = show.Seasons[seasonNo];
 
-                                    // If episode already exists just update it, else add it
-                                    TvEpisode existingMatch;
-                                    if (show.FindEpisode(ep.Season, ep.Number, out existingMatch))
+                                    foreach (XmlNode epNode in seasonNode.ChildNodes)
                                     {
-                                        if (!existingMatch.PreventDatabaseUpdates)
+                                        TvEpisode ep = new TvEpisode(show.Name);
+                                        ep.Season = seasonNo;
+                                        foreach (XmlNode epPropNode in epNode.ChildNodes)
+                                            switch (epPropNode.Name.ToLower())
+                                            {
+                                                case "seasonnum": // episode number within season
+                                                    int epNum;
+                                                    int.TryParse(epPropNode.InnerText, out epNum);
+                                                    ep.DatabaseNumber = epNum;
+                                                    break;
+                                                case "airdate":
+                                                    DateTime airDate;
+                                                    DateTime.TryParse(epPropNode.InnerText, out airDate);
+                                                    ep.AirDate = airDate;
+                                                    break;
+                                                case "title":
+                                                    ep.DatabaseName = epPropNode.InnerText;
+                                                    break;
+                                                case "summary":
+                                                    ep.Overview = epPropNode.InnerText.Replace('\n', ' ');
+                                                    break;
+                                            }
+                                        ep.InDatabase = true;
+
+                                        // If episode already exists just update it, else add it
+                                        TvEpisode existingMatch;
+                                        if (show.FindEpisode(ep.Season, ep.DatabaseNumber, true, out existingMatch))
                                         {
-                                            existingMatch.DataBaseName = ep.DataBaseName;
-                                            existingMatch.AirDate = ep.AirDate;
-                                            existingMatch.Overview = ep.Overview;
-                                            existingMatch.InDatabase = true;
-                                            existingMatch.UserDefined = false;
+                                            if (!existingMatch.PreventDatabaseUpdates)
+                                            {
+                                                existingMatch.DatabaseName = ep.DatabaseName;
+                                                existingMatch.AirDate = ep.AirDate;
+                                                existingMatch.Overview = ep.Overview;
+                                                existingMatch.InDatabase = true;
+                                                existingMatch.UserDefined = false;
+                                            }
                                         }
+                                        else
+                                            season.Episodes.Add(ep);
                                     }
-                                    else
-                                        season.Episodes.Add(ep);
                                 }
+
+
                             }
-
-
-                        }
-                        break;
+                            break;
+                    }
                 }
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 

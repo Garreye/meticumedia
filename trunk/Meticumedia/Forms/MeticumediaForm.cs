@@ -59,7 +59,9 @@ namespace Meticumedia
 
             // Setup database links
             linkTvRage.Links.Add(0, linkTvRage.Text.Length, "www.tvrage.com");
-            linkTvRage2.Links.Add(0, linkTvRage.Text.Length, "www.tvrage.com");
+            linkTheTvDb.Links.Add(0, linkTheTvDb.Text.Length, "www.thetvdb.com");
+            linkTvRage2.Links.Add(0, linkTvRage2.Text.Length, "www.tvrage.com");
+            linkTheTvDb2.Links.Add(0, linkTheTvDb.Text.Length, "www.thetvdb.com");
             linkMovieDb.Links.Add(0, linkMovieDb.Text.Length, "www.themoviedb.org");
         }
 
@@ -185,7 +187,7 @@ namespace Meticumedia
         /// </summary>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            System.Windows.Forms.MessageBox.Show("meticumedia v0.8.3 (alpha)\nCopyright © 2013", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            System.Windows.Forms.MessageBox.Show("meticumedia v0.8.5 (alpha)\nCopyright © 2013", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
@@ -214,6 +216,5 @@ namespace Meticumedia
         }
 
         #endregion
-
     }
 }

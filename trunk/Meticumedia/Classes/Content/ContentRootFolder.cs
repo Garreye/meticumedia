@@ -12,7 +12,7 @@ using System.Xml;
 namespace Meticumedia
 {
     /// <summary>
-    /// Represents a folder that contains folders which contain content
+    /// Represents a root directory that contains directories that are each linked to content (TV show or movies)
     /// </summary>
     public class ContentRootFolder
     {
@@ -329,11 +329,6 @@ namespace Meticumedia
         #region Updating
 
         /// <summary>
-        /// List of database IDs that require updating.
-        /// </summary>
-        private List<int> idsToUpdate;
-
-        /// <summary>
         /// Current update number identifier. Incremented each time update is performed, used to identify each update thread.
         /// </summary>
         private int updateNumber = 0;
@@ -348,14 +343,13 @@ namespace Meticumedia
         /// </summary>
         /// <param name="fastUpdate">Whether update is fast, skips detailed updating(e.g. episodes for shows)</param>
         /// <param name="idsToUpdate">List of dtabase IDs that need updating</param>
+        /// <param name="cancel">Cancelation flag</param>
+        /// <param name="serverTime">Time on online database server</param>
         /// <returns>Whether update was completed without cancelation</returns>
-        public bool UpdateContent(bool fastUpdate, List<int> idsToUpdate, ref bool cancel, string serverTime)
+        public bool UpdateContent(bool fastUpdate, ref bool cancel)
         {
             updateCancelled = false;
             
-            // Set show IDs that need updating - this was from TheTvDb, TvRage doesn't provide this information, but leaving this here for future update where user can select which database to use
-            this.idsToUpdate = idsToUpdate;
-
             // Update progress
             string progressMsg = "Update of '" + this.FullPath + "' started - Building threads";
             OnUpdateProgressChange(this, false, 0, progressMsg);
@@ -385,8 +379,6 @@ namespace Meticumedia
 
             // Save changes
             content.Sort();
-            if (!string.IsNullOrEmpty(serverTime))
-                content.LastUpdate = serverTime;
             content.Save();
 
             // Set progress to completed
@@ -404,21 +396,21 @@ namespace Meticumedia
         /// <param name="pathNum">The path's number out of total being processed</param>
         /// <param name="totalPaths">Total number of paths being processed</param>
         /// <param name="processNumber">The identifier for the OrgProcessing instance</param>
-        /// <param name="background">Whether processing is running as a background operation</param>
-        /// <param name="subSearch">Whether processing is sub-search - specific to instance</param>
-        /// <param name="processComplete">Delegate to be called by processing when completed</param>
         /// <param name="numItemsProcessed">Number of paths that have been processed - used for progress updates</param>
+        /// <param name="numItemsStarted">Number of paths that have had been added to thread pool for processing</param>
+        /// <param name="processSpecificArgs">Arguments specific to this process</param>
         private void UpdateProcess(OrgPath orgPath, int pathNum, int totalPaths, int processNumber, ref int numItemsProcessed, ref int numItemsStarted, object processSpecificArgs)
         {
             // Check for cancellation - this method is called from thread pool, so cancellation could have occured by the time this is run
             if (updateCancelled || this.updateNumber != processNumber)
                 return;
 
+            // First pass run does quick folder update by skipping online database searching
             bool firstPass = (bool)processSpecificArgs;
-            string pass = firstPass ? " (First Pass)" : " (Second Pass)";
+            string passString = firstPass ? " (First Pass)" : " (Second Pass)";
 
             // Set processing messge
-            string progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "'" + pass + " - '" + Path.GetFileName(orgPath.Path) + "' started";
+            string progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "'" + passString + " - '" + Path.GetFileName(orgPath.Path) + "' started";
             OnUpdateProgressChange(this, false, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);
 
             // Get content collection to add content to
@@ -442,13 +434,13 @@ namespace Meticumedia
                 }
 
             // Set completed progess message
-            progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "'" + pass + " - '" + Path.GetFileName(orgPath.Path) + "' complete";
+            progressMsg = "Updating of '" + orgPath.RootFolder.FullPath + "'" + passString + " - '" + Path.GetFileName(orgPath.Path) + "' complete";
 
-            // Check if show found
+            // Check if content found
             if (contentExists && contentComplete)
             {
-                // Check if show need updating
-                if ((DateTime.Now - newContent.LastUpdated).TotalDays > 7 || idsToUpdate.Contains(newContent.Id))
+                // Check if show needs updating
+                if ((DateTime.Now - newContent.LastUpdated).TotalDays > 7)
                     newContent.UpdateInfoFromDatabase();
 
                 // Update progress
@@ -458,7 +450,7 @@ namespace Meticumedia
                 return;
             }
 
-            // Show wasn't found, match path to database
+            // Folder wasn't matched to an existing content instance, try tmatch folder to content from online database
             Content match;
             bool matchSucess;
             switch (this.ContentType)
@@ -482,7 +474,7 @@ namespace Meticumedia
             if (updateCancelled || this.updateNumber != processNumber)
                 return;
 
-            // Update show info from match
+            // Folder already existed, but wasn't previously match to valid content
             if (contentExists && matchSucess)
             {
                 switch (this.ContentType)
@@ -517,12 +509,9 @@ namespace Meticumedia
             // Set found flag
             newContent.Found = true;
 
-            // Add show to list if new
+            // Add content to list if new
             if (!contentExists)
                 content.Add(newContent);
-
-            if (content[index].Name.Length < 3)
-                index++;
 
             // Update progress
             OnUpdateProgressChange(this, true, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);

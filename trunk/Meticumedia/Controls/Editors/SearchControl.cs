@@ -43,7 +43,40 @@ namespace Meticumedia
         /// <summary>
         /// Indicates whether search is for show (or movie when false)
         /// </summary>
-        public ContentType ContentType { get; set; }
+        public ContentType ContentType
+        {
+            get { return type; }
+            set 
+            { 
+                type = value;
+                cmbDatabase.Items.Clear();
+                switch (type)
+                {
+                    case ContentType.Movie:
+                        cmbDatabase.Items.Add("The Movie DB");
+                        cmbDatabase.SelectedIndex = 0;
+                        break;
+                    case ContentType.TvShow:
+                        foreach(TvDataBaseSelection selection in Enum.GetValues(typeof(TvDataBaseSelection)))
+                            cmbDatabase.Items.Add(selection);
+                        cmbDatabase.SelectedIndex = (int)Settings.DefaultTvDatabase;
+                        break;
+                }
+            }
+        }
+
+        public int DatabaseSelection
+        {
+            get
+            {
+                return cmbDatabase.SelectedIndex;
+            }
+            set
+            {
+                cmbDatabase.SelectedIndex = value;
+            }
+        }
+
 
         public bool MatchVisible
         {
@@ -52,6 +85,8 @@ namespace Meticumedia
                 btnMatch.Visible = value;
             }
         }
+
+        private ContentType type = ContentType.Movie;
 
         #endregion
 
@@ -121,7 +156,6 @@ namespace Meticumedia
             InitializeComponent();
 
             // Defaults
-            this.ContentType = ContentType.Movie;
             this.SearchString = string.Empty;
 
             // Initialize results to null
@@ -161,7 +195,8 @@ namespace Meticumedia
                     searchResults = TheMovieDbHelper.PerformMovieSearch(txtSearchEntry.Text);    
                     break;
                 case ContentType.TvShow:
-                    searchResults = TvDatabaseHelper.PerformTvShowSearch(txtSearchEntry.Text, true);
+                    TvDataBaseSelection sel = (TvDataBaseSelection)cmbDatabase.SelectedItem;
+                    searchResults = TvDatabaseHelper.PerformTvShowSearch(sel, txtSearchEntry.Text, true);
                     break;
                 default:
                     throw new Exception("Unknown content type");

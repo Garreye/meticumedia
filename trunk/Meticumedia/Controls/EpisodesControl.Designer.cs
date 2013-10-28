@@ -33,6 +33,8 @@ namespace Meticumedia
         private void InitializeComponent()
         {
             this.gbEpisodes = new System.Windows.Forms.GroupBox();
+            this.btnMoveDown = new System.Windows.Forms.Button();
+            this.btnMoveUp = new System.Windows.Forms.Button();
             this.lbScanDir = new Meticumedia.LegendBoxControl();
             this.lbIgnored = new Meticumedia.LegendBoxControl();
             this.lbUnaired = new Meticumedia.LegendBoxControl();
@@ -56,6 +58,8 @@ namespace Meticumedia
             this.gbEpisodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbEpisodes.Controls.Add(this.btnMoveDown);
+            this.gbEpisodes.Controls.Add(this.btnMoveUp);
             this.gbEpisodes.Controls.Add(this.lbScanDir);
             this.gbEpisodes.Controls.Add(this.lbIgnored);
             this.gbEpisodes.Controls.Add(this.lbUnaired);
@@ -72,6 +76,30 @@ namespace Meticumedia
             this.gbEpisodes.TabIndex = 15;
             this.gbEpisodes.TabStop = false;
             this.gbEpisodes.Text = "Episodes";
+            // 
+            // btnMoveDown
+            // 
+            this.btnMoveDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnMoveDown.Enabled = false;
+            this.btnMoveDown.Location = new System.Drawing.Point(579, 18);
+            this.btnMoveDown.Name = "btnMoveDown";
+            this.btnMoveDown.Size = new System.Drawing.Size(25, 23);
+            this.btnMoveDown.TabIndex = 26;
+            this.btnMoveDown.Text = "\\/";
+            this.btnMoveDown.UseVisualStyleBackColor = true;
+            this.btnMoveDown.Click += new System.EventHandler(this.btnMoveDown_Click);
+            // 
+            // btnMoveUp
+            // 
+            this.btnMoveUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnMoveUp.Enabled = false;
+            this.btnMoveUp.Location = new System.Drawing.Point(548, 18);
+            this.btnMoveUp.Name = "btnMoveUp";
+            this.btnMoveUp.Size = new System.Drawing.Size(25, 23);
+            this.btnMoveUp.TabIndex = 25;
+            this.btnMoveUp.Text = "/\\";
+            this.btnMoveUp.UseVisualStyleBackColor = true;
+            this.btnMoveUp.Click += new System.EventHandler(this.btnMoveUp_Click);
             // 
             // lbScanDir
             // 
@@ -147,9 +175,8 @@ namespace Meticumedia
             // 
             // chkDisplayIgnored
             // 
-            this.chkDisplayIgnored.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkDisplayIgnored.AutoSize = true;
-            this.chkDisplayIgnored.Location = new System.Drawing.Point(505, 22);
+            this.chkDisplayIgnored.Location = new System.Drawing.Point(273, 22);
             this.chkDisplayIgnored.Name = "chkDisplayIgnored";
             this.chkDisplayIgnored.Size = new System.Drawing.Size(99, 17);
             this.chkDisplayIgnored.TabIndex = 12;
@@ -254,5 +281,7 @@ namespace Meticumedia
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox cmbEpFilter;
+        private System.Windows.Forms.Button btnMoveDown;
+        private System.Windows.Forms.Button btnMoveUp;
     }
 }

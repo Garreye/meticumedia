@@ -207,7 +207,7 @@ namespace Meticumedia
             if ((allWatched && !allUnwatched) || (!allWatched && !allUnwatched))
                 contextMenu.MenuItems.Add("Unmark as Watched", HandleUnmarkAsWatch);
 
-            contextMenu.MenuItems.Add("Set as Child Root fplder(s)", HandleSetAsSubFolder);
+            contextMenu.MenuItems.Add("Set as Child Root folder(s)", HandleSetAsSubFolder);
 
             // Set folder to exclude from move list
             string exclude = selContent[0].RootFolder;

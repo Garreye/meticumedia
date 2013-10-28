@@ -14,61 +14,33 @@ namespace Meticumedia
     /// </summary>
     public class TvDatabaseHelper
     {
+        #region Searching/Updating
 
-        #region Database Selection
+        private static TvRageAccess TvRageAccess = new TvRageAccess();
 
-        /// <summary>
-        /// Database access instance
-        /// </summary>
-        private static TvDatabaseAccess databaseAccess = new TvRageAccess();
+        private static TheTvDbAccess TheTvDbAccess = new TheTvDbAccess();
 
-        /// <summary>
-        /// Database selection types
-        /// </summary>
-        public enum TvDataBaseSelection { TvRage, TheTvDb }
-
-        /// <summary>
-        /// Current database selection - TODO: allow user to control in settings!
-        /// </summary>
-        private static TvDataBaseSelection dataBaseSelection = TvDataBaseSelection.TvRage;
-
-        /// <summary>
-        /// Sets database type
-        /// </summary>
-        /// <param name="selection">Database type to set</param>
-        public static void SetDatabase(TvDataBaseSelection selection)
+        private static TvDatabaseAccess GetDataBaseAccess(TvDataBaseSelection selection)
         {
-            // No changes if already set
-            if (selection == dataBaseSelection)
-                return;
-            
-            // Set database access based on selection type
             switch (selection)
             {
-                case TvDataBaseSelection.TvRage:
-                    databaseAccess = new TvRageAccess();
-                    break;
                 case TvDataBaseSelection.TheTvDb:
-                    // Removed to avoid using DotNetZip library, until settings setup to allow switching..
-                    //databaseAccess = new TheTvDbAccess();
-                    break;
+                    return TheTvDbAccess;
+                case TvDataBaseSelection.TvRage:
+                    return TvRageAccess;
                 default:
-                    throw new Exception("Unknown TV database selected");
+                    throw new Exception("Unknown database selection");
             }
         }
-
-        #endregion
-
-        #region Searching/Updating
 
         /// <summary>
         /// Gets database server's time
         /// </summary>
         /// <param name="time">retrieved server time</param>
         /// <returns>whether time was successfully retrieved</returns>
-        public static bool GetServerTime(out string time)
+        public static bool GetServerTime(TvDataBaseSelection selection, out string time)
         {
-            return databaseAccess.GetServerTime(out time);
+            return GetDataBaseAccess(selection).GetServerTime(out time);
         }
 
         /// <summary>
@@ -76,9 +48,9 @@ namespace Meticumedia
         /// </summary>
         /// <param name="info"></param>
         /// <returns></returns>
-        public static bool GetDataToBeUpdated(out List<int> info, out string time)
+        public static bool GetDataToBeUpdated(TvDataBaseSelection selection, out List<int> info, out string time)
         {
-            return databaseAccess.GetDataToBeUpdated(out info, out time);
+            return GetDataBaseAccess(selection).GetDataToBeUpdated(out info, out time);
         }
 
         /// <summary>
@@ -86,9 +58,9 @@ namespace Meticumedia
         /// </summary>
         /// <param name="searchString">The string to search for</param>
         /// <returns>Array of results from the search</returns>
-        public static List<Content> PerformTvShowSearch(string searchString, bool includeSummaries)
+        public static List<Content> PerformTvShowSearch(TvDataBaseSelection selection, string searchString, bool includeSummaries)
         {
-            return databaseAccess.PerformTvShowSearch(searchString, includeSummaries);
+            return GetDataBaseAccess(selection).PerformTvShowSearch(searchString, includeSummaries);
         }
 
         /// <summary>
@@ -97,7 +69,7 @@ namespace Meticumedia
         /// <param name="show">Show to load episode information into</param>
         public static void FullShowSeasonsUpdate(TvShow show)
         {
-            databaseAccess.FullShowSeasonsUpdate(show);
+            GetDataBaseAccess(show.DataBase).FullShowSeasonsUpdate(show);
             show.LastUpdated = DateTime.Now;
         }
 

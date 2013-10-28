@@ -140,6 +140,11 @@ namespace Meticumedia
             OnProgressChange(ScanProcess.FileCollect, string.Empty, 0);
             dirScanProgressAmount = progressAmount;
 
+            // Clear update variables
+            processingFiles = new List<string>();
+            processStarted = 0;
+            processEnded = 0;
+
             // Create processing object
             OrgProcessing processing = new OrgProcessing(ThreadProcess);
             int directoryScanNumber = processing.ProcessNumber;
@@ -205,7 +210,7 @@ namespace Meticumedia
                 return;
 
             // Update progress
-            OnProgressChange(ScanProcess.Directory, orgPath.Path, (int)Math.Round((double)pathNum / totalPaths * dirScanProgressAmount));
+            ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
 
             // Check if file is in the queue
             bool alreadyQueued = false;
@@ -222,7 +227,10 @@ namespace Meticumedia
 
             // If item is already in the queue, skip it
             if (alreadyQueued)
+            {
+                ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
                 return;
+            }
 
             // Set whether item is for new show
             TvShow newShow = null;
@@ -322,10 +330,10 @@ namespace Meticumedia
                         {
                             // Try to get the episode from the show
                             TvEpisode episode1, episode2 = null;
-                            if (bestMatch.FindEpisode(seasonNum, episodeNum1, out episode1))
+                            if (bestMatch.FindEpisode(seasonNum, episodeNum1, false, out episode1))
                             {
                                 if (episodeNum2 != -1)
-                                    bestMatch.FindEpisode(seasonNum, episodeNum2, out episode2);
+                                    bestMatch.FindEpisode(seasonNum, episodeNum2, false, out episode2);
 
                                 OrgAction action = orgPath.Copy ? OrgAction.Copy : OrgAction.Move;
 
@@ -333,7 +341,10 @@ namespace Meticumedia
                                 if (episode1.Missing == TvEpisode.MissingStatus.Located)
                                 {
                                     if (episode1.Ignored)
+                                    {
+                                        ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
                                         return;
+                                    }
 
                                     action = OrgAction.AlreadyExists;
                                 }
@@ -395,6 +406,63 @@ namespace Meticumedia
                     AddResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder));
                     break;
             }
+
+            // Update progress
+            ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
+        }
+
+        /// <summary>
+        /// Lock for processing update variables
+        /// </summary>
+        private object processLock = new object();
+
+        /// <summary>
+        /// List of files currently being processed
+        /// </summary>
+        private List<string> processingFiles = new List<string>();
+
+        /// <summary>
+        /// Number of processes that have been at least started
+        /// </summary>
+        int processStarted = 0;
+
+        /// <summary>
+        /// Number of processes that have completed
+        /// </summary>
+        int processEnded = 0;
+
+        /// <summary>
+        /// Update progress for scan processing
+        /// </summary>
+        /// <param name="file">Current file being processes</param>
+        /// <param name="starting">Whether file processing is just started</param>
+        /// <param name="pathum">The file's number in queue of all files</param>
+        /// <param name="totalPaths">Total number of files queued for processing</param>
+        private void ProcessUpdate(string file, bool starting, int pathum, int totalPaths)
+        {
+            // Add new files to list of files being processed, remove completed files
+            lock (processLock)
+            {
+                if (starting)
+                {
+                    processingFiles.Add(file);
+                    processStarted++;
+                }
+                else
+                {
+                    processingFiles.Remove(file);
+                    processEnded++;
+                }
+            }
+
+            // Update progress
+            int perc = (int)Math.Round((double)(processStarted + processEnded) / (totalPaths * 2) * dirScanProgressAmount);
+            string path;
+            if (processingFiles.Count > 1) 
+                path = processingFiles.Count + " others";
+            else
+                path = processingFiles.Count > 0 ? processingFiles[0] : file;
+            OnProgressChange(ScanProcess.Directory, path, perc);
         }
 
         /// <summary>

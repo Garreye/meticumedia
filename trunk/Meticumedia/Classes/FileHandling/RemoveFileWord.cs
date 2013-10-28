@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 namespace Meticumedia
 {
     /// <summary>
-    /// Class for helping remove words from a string.
+    /// Class for helping remove superfluous words from a string.
     /// </summary>
     public class RemoveFileWord
     {
@@ -43,7 +43,7 @@ namespace Meticumedia
         public bool RemoveFollowingEndWord { get; set; }
 
         /// <summary>
-        /// Whether to remove all characters after match
+        /// Whether to remove all characters after word if matched
         /// </summary>
         public bool RemoveEverythingAfter { get; set; }
 
@@ -101,7 +101,7 @@ namespace Meticumedia
         #region Methods
 
         /// <summary>
-        /// Removes the word from a string and adds removed word to dictionary of removed words indexed by type
+        /// Removes the word from a string and adds it to dictionary of all removed words indexed by type
         /// </summary>
         /// <param name="text">The text to remove word from</param>
         /// <param name="removeFileWords">Dictionary of all removed words from text to add to if word is removed</param>
@@ -125,7 +125,7 @@ namespace Meticumedia
                         if (!removeFileWords.ContainsKey(this.Type))
                             removeFileWords.Add(this.Type, new List<string>());
 
-                        // Add the word
+                        // Add the word to ditcionary
                         removeFileWords[this.Type].Add(text.Substring(match.Groups[g].Index, match.Groups[g].Length));                       
                     }
                     

@@ -32,8 +32,12 @@ namespace Meticumedia
                 content = value;
                 if (value != null)
                     DisplayContent(false);
+                if (content is TvShow)
+                    dvdOrderOnLoad = ((TvShow)value).DvdEpisodeOrder;
             }
         }
+
+        public bool DvdOrderChange { get { return content is TvShow && ((TvShow)content).DvdEpisodeOrder != dvdOrderOnLoad; } }
 
         /// <summary>
         /// Type of content being edited.
@@ -71,6 +75,8 @@ namespace Meticumedia
         #endregion
 
         #region Variables
+
+        private bool dvdOrderOnLoad = false;
 
         /// <summary>
         /// The content instance being edited.
@@ -134,6 +140,7 @@ namespace Meticumedia
                 searchString = (dirs[dirs.Length - 1]);
             }
             cntrlSearch.SearchString = searchString;
+            
 
             // Set form elements to movie properties
             txtName.Text = this.content.Name;
@@ -152,6 +159,12 @@ namespace Meticumedia
                 chkDoMissing.Checked = ((TvShow)content).DoMissingCheck;
                 chkIncludeInSchedule.Visible = true;
                 chkIncludeInSchedule.Checked = ((TvShow)content).IncludeInSchedule;
+                chkDvdOrder.Visible = true;
+                chkDvdOrder.Enabled = ((TvShow)content).DataBase != TvDataBaseSelection.TvRage;
+                chkDvdOrder.Checked = chkDvdOrder.Enabled && ((TvShow)content).DvdEpisodeOrder;
+                cmdDbSel.Items.Clear();
+                cmdDbSel.Items.Add(((TvShow)content).DataBase);
+                cmdDbSel.SelectedIndex = 0;
                 gbAltMatchNames.Visible = true;
 
                 lbAltNames.Items.Clear();
@@ -159,6 +172,14 @@ namespace Meticumedia
                 if (show.AlternativeNameMatches != null)
                     foreach (string altName in show.AlternativeNameMatches)
                         lbAltNames.Items.Add(altName);
+
+                cntrlSearch.DatabaseSelection = (int)show.DataBase;
+            }
+            else
+            {
+                cmdDbSel.Items.Clear();
+                cmdDbSel.Items.Add("TheMovieDb");
+                cmdDbSel.SelectedIndex = 0;
             }
 
             // Trigger movie changes event
@@ -226,6 +247,12 @@ namespace Meticumedia
         private void chkDoRenaming_CheckedChanged(object sender, EventArgs e)
         {
             this.content.DoRenaming = chkDoRenaming.Checked;
+            OnContentChanged();
+        }
+
+        private void chkDvdOrder_CheckedChanged(object sender, EventArgs e)
+        {
+            ((TvShow)this.content).DvdEpisodeOrder = chkDvdOrder.Checked;
             OnContentChanged();
         }
 

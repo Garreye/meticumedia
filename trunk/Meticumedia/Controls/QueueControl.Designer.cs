@@ -157,7 +157,6 @@ namespace Meticumedia
             this.chkAutoClear.TabIndex = 24;
             this.chkAutoClear.Text = "Auto-Clear Completed";
             this.chkAutoClear.UseVisualStyleBackColor = true;
-            this.chkAutoClear.CheckedChanged += new System.EventHandler(this.chkAutoClear_CheckedChanged);
             // 
             // pbTotal
             // 

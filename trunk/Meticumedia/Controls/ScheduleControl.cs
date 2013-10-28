@@ -38,6 +38,14 @@ namespace Meticumedia
             // Remove overview column
             lvResults.Columns.Remove(colOverview);
 
+            // Buil episode filters
+            cmbEpFilter.Items.Clear();
+            List<TvEpisodeFilter> epFilters = TvEpisodeFilter.BuildFilters(null, false, false);
+            foreach (TvEpisodeFilter filter in epFilters)
+                cmbEpFilter.Items.Add(filter);
+            cmbEpFilter.SelectedIndex = 0;
+            cmbEpFilter.SelectedIndexChanged += cmbEpFilter_SelectedIndexChanged;
+
             // Setup legend
             SetLegend();
             TvEpisode.BackColourChanged += new EventHandler(TvEpisode_BackColourChanged);
@@ -259,8 +267,7 @@ namespace Meticumedia
             if (!GetSelectedEpisode(out ep))
                 return;
 
-            string epInfo = ep.Show + " s" + ep.Season.ToString("00") + "e" + ep.Number.ToString("00");
-            Clipboard.SetText(FileHelper.SimplifyFileName(epInfo));
+            Clipboard.SetText(ep.BuildEpString());
         }
 
         /// <summary>
@@ -291,6 +298,11 @@ namespace Meticumedia
                 return;
 
             ep.PlayEpisodeFile();
+        }
+
+        private void cmbEpFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateResults();
         }
 
         #endregion
@@ -336,7 +348,7 @@ namespace Meticumedia
         /// Updates and display resulting TV episodes
         /// </summary>
         private void UpdateResults()
-        {
+        {          
             // Get shows to check from combo box
             List<Content> shows;
             if (cmbShows.SelectedIndex < 1)
@@ -348,9 +360,14 @@ namespace Meticumedia
                 //show.UpdateMissing();
                 shows.Add(show);
             }
+
+            // Get filter
+            TvEpisodeFilter epFilter = (TvEpisodeFilter)cmbEpFilter.SelectedItem;
+            if (epFilter == null)
+                epFilter = new TvEpisodeFilter(TvEpisodeFilter.FilterType.All, 0);
             
             // Get results
-            results = BuildEpisodeList(shows, (int)numDays.Value, ((TvScheduleType)cmbType.SelectedItem) == TvScheduleType.Upcoming);
+            results = BuildEpisodeList(shows, (int)numDays.Value, ((TvScheduleType)cmbType.SelectedItem) == TvScheduleType.Upcoming, epFilter);
 
             // Put results in list
             lvResults.Items.Clear();
@@ -378,7 +395,7 @@ namespace Meticumedia
         /// <param name="days">Number of days to look for episodes in</param>
         /// <param name="upcoming">Whether to check for upcoming or recent episodes</param>
         /// <returns>List of episodes</returns>
-        private List<TvEpisode> BuildEpisodeList(List<Content> shows, int days, bool upcoming)
+        private List<TvEpisode> BuildEpisodeList(List<Content> shows, int days, bool upcoming, TvEpisodeFilter epFilter)
         {
             // Initialize episode list
             List<TvEpisode> epList = new List<TvEpisode>();
@@ -391,7 +408,7 @@ namespace Meticumedia
                         foreach (TvEpisode episode in season.Episodes)
                         {
                             TimeSpan timeDiff = episode.AirDate.Subtract(DateTime.Now);
-                            if (!episode.Ignored && Math.Abs(timeDiff.Days) < days)
+                            if (!episode.Ignored && epFilter.FilterEpisode(episode) && Math.Abs(timeDiff.Days) < days)
                             {
                                 if (upcoming && timeDiff.Days >= 0)
                                     epList.Add(episode);
@@ -409,5 +426,7 @@ namespace Meticumedia
         }
 
         #endregion
+
+        
     }
 }

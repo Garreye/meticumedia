@@ -40,8 +40,14 @@ namespace Meticumedia
         /// </summary>
         public object XmlLock = new object();
 
+        /// <summary>
+        /// Name of collection
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Flag indicating collection loading is complete
+        /// </summary>
         public bool LoadCompleted { get { return loaded; } }
 
         #endregion
@@ -77,6 +83,9 @@ namespace Meticumedia
             loaded = true;
         }
 
+        /// <summary>
+        /// Indication of whether loading is complete
+        /// </summary>
         private bool loaded = false;
 
         /// <summary>
@@ -98,12 +107,12 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Indicates that contents have changed.
+        /// Indicates that contents have been saved.
         /// </summary>
         public event EventHandler ContentSaved;
 
         /// <summary>
-        /// Triggers ShowsChanged event
+        /// Triggers ContentSaved event
         /// </summary>
         protected void OnContentSaved()
         {
@@ -125,6 +134,10 @@ namespace Meticumedia
             this.Name = name;
         }
 
+        /// <summary>
+        /// Override ToString to use Name property
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return this.Name;
@@ -203,83 +216,89 @@ namespace Meticumedia
         /// </summary>
         public void Load()
         {
-                XmlTextReader reader = null;
-                XmlDocument xmlDoc = new XmlDocument();
-                try
+            XmlTextReader reader = null;
+            XmlDocument xmlDoc = new XmlDocument();
+            try
+            {
+                string path = Path.Combine(Organization.GetBasePath(false), XML_ROOT + ".xml");
+
+                if (File.Exists(path))
                 {
-                    string path = Path.Combine(Organization.GetBasePath(false), XML_ROOT + ".xml");
-
-                    if (File.Exists(path))
+                    // Use dummy collection to load into so that loading doesn't hog use of object
+                    ContentCollection loadContent = new ContentCollection(this.ContentType, "Loading Shows");
+                    lock (XmlLock)
                     {
-                        ContentCollection loadContent = new ContentCollection(this.ContentType, "Loading Shows");
-                        lock (XmlLock)
+                        // Load XML
+                        reader = new XmlTextReader(path);
+                        xmlDoc.Load(reader);
+
+                        // Extract data
+                        XmlNodeList contentNodes = xmlDoc.DocumentElement.ChildNodes;
+                        for (int i = 0; i < contentNodes.Count; i++)
                         {
+                            // Update loading progress
+                            OnLoadProgressChange((int)(((double)i / contentNodes.Count) * 100));
 
-                            // Load XML
-                            reader = new XmlTextReader(path);
-                            xmlDoc.Load(reader);
-
-                            // Load show data
-
-                            XmlNodeList contentNodes = xmlDoc.DocumentElement.ChildNodes;
-                            for (int i = 0; i < contentNodes.Count; i++)
+                            // All elements will be content items or last update time
+                            if (contentNodes[i].Name == "LastUpdate")
+                                loadContent.LastUpdate = contentNodes[i].InnerText;
+                            else
                             {
-                                OnLoadProgressChange((int)(((double)i / contentNodes.Count) * 100));
-
-                                if (contentNodes[i].Name == "LastUpdate")
-                                    loadContent.LastUpdate = contentNodes[i].InnerText;
-                                else
+                                // Load content from element based on type
+                                switch (this.ContentType)
                                 {
-                                    switch (this.ContentType)
-                                    {
-                                        case ContentType.TvShow:
-                                            TvShow show = new TvShow();
-                                            if (show.Load(contentNodes[i]))
-                                            {
-                                                loadContent.Add(show);
-                                                show.UpdateMissing();
-                                            }
-                                            break;
-                                        case ContentType.Movie:
-                                            Movie movie = new Movie();
-                                            if (movie.Load(contentNodes[i]))
-                                                loadContent.Add(movie);
-                                            break;
-                                        default:
-                                            throw new Exception("Unknown content type");
-                                    }
+                                    case ContentType.TvShow:
+                                        TvShow show = new TvShow();
+                                        if (show.Load(contentNodes[i]))
+                                        {
+                                            loadContent.Add(show);
+                                            show.UpdateMissing();
+                                        }
+                                        break;
+                                    case ContentType.Movie:
+                                        Movie movie = new Movie();
+                                        if (movie.Load(contentNodes[i]))
+                                            loadContent.Add(movie);
+                                        break;
+                                    default:
+                                        throw new Exception("Unknown content type");
                                 }
                             }
                         }
-                        OnLoadProgressChange(100);
-                        lock (ContentLock)
-                        {
-                            //Console.WriteLine(this.ToString() + " lock load");
-                            this.LastUpdate = loadContent.LastUpdate;
-                            this.Clear();
-                            foreach (Content content in loadContent)
-                                base.Add(content);
-                        }
-                        //Console.WriteLine(this.ToString() + " release load");
                     }
+                    // Update progress
+                    OnLoadProgressChange(100);
+
+                    // Lock collection and load content items from dummy collection
+                    lock (ContentLock)
+                    {
+                        //Console.WriteLine(this.ToString() + " lock load");
+                        this.LastUpdate = loadContent.LastUpdate;
+                        this.Clear();
+                        foreach (Content content in loadContent)
+                            base.Add(content);
+                    }
+                    //Console.WriteLine(this.ToString() + " release load");
                 }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.ToString());
-                }
-                finally
-                {
-                    if (reader != null)
-                        reader.Close();
-                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString(), "Error loading " + this.ContentType + "s from saved data!");
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+            }
 
             // Start updating of TV episode in scan dirs.
-                if (this.ContentType == ContentType.TvShow)
-                {
-                    TvItemInScanDirHelper.DoUpdate();
-                    TvItemInScanDirHelper.StartUpdateTimer();
-                }
+            if (this.ContentType == ContentType.TvShow)
+            {
+                TvItemInScanDirHelper.DoUpdate(false);
+                TvItemInScanDirHelper.StartUpdateTimer();
+            }
 
+            // Trigger load complete event
             OnLoadComplete();
         }
 
@@ -290,6 +309,8 @@ namespace Meticumedia
         {
             // Get path to xml file
             string path = Path.Combine(Organization.GetBasePath(true), XML_ROOT + ".xml");
+
+            // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
             string tempPath = Path.Combine(Organization.GetBasePath(true), XML_ROOT + "_TEMP.xml");
 
             // Lock content and file
@@ -307,12 +328,18 @@ namespace Meticumedia
                             content.Save(xw);
                         xw.WriteEndElement();
                     }
+
+                    // Delete previous save data
                     if (File.Exists(path))
                         File.Delete(path);
+
+                    // Move tempoarary save file to default
                     File.Move(tempPath, path);
                 }
             }
             //Console.WriteLine(this.ToString() + " release save");
+
+            // Trigger content saved event
             OnContentSaved();
         }
 
@@ -333,7 +360,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Get a lists of shows that have the include in scan property enabled.
+        /// Get a lists of content that are set to be included in scanning (by IncludeInScan property)
         /// </summary>
         /// <returns>List of show that are included in scanning</returns>
         public List<Content> GetScannableContent(bool updateMissing)

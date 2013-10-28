@@ -67,14 +67,11 @@ namespace Meticumedia
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             tvEpisode1.AirDate = new System.DateTime(((long)(0)));
-            tvEpisode1.DataBaseName = "";
+            tvEpisode1.DatabaseName = "";
             tvEpisode1.File = tvFile1;
             tvEpisode1.Ignored = false;
             tvEpisode1.InDatabase = false;
             tvEpisode1.Missing = Meticumedia.TvEpisode.MissingStatus.Missing;
-            tvEpisode1.Name = "";
-            tvEpisode1.NameIsUserSet = false;
-            tvEpisode1.Number = -1;
             tvEpisode1.Overview = "";
             tvEpisode1.PreventDatabaseUpdates = false;
             tvEpisode1.Season = -1;

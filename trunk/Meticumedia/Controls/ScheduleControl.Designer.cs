@@ -32,13 +32,6 @@ namespace Meticumedia
         /// </summary>
         private void InitializeComponent()
         {
-            this.lvResults = new Meticumedia.DoubleBufferedListView();
-            this.colShow = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colSeason = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colEpisode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colOverview = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.cmbType = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.numDays = new System.Windows.Forms.NumericUpDown();
@@ -47,64 +40,24 @@ namespace Meticumedia
             this.label1 = new System.Windows.Forms.Label();
             this.cmbShows = new System.Windows.Forms.ComboBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.chkDisplayOverview = new System.Windows.Forms.CheckBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cmbEpFilter = new System.Windows.Forms.ComboBox();
             this.lbScanDir = new Meticumedia.LegendBoxControl();
             this.lbIgnored = new Meticumedia.LegendBoxControl();
             this.lbUnaired = new Meticumedia.LegendBoxControl();
             this.lbMissing = new Meticumedia.LegendBoxControl();
-            this.chkDisplayOverview = new System.Windows.Forms.CheckBox();
+            this.lvResults = new Meticumedia.DoubleBufferedListView();
+            this.colShow = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colSeason = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colEpisode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colOverview = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDays)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // lvResults
-            // 
-            this.lvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.lvResults.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colShow,
-            this.colSeason,
-            this.colEpisode,
-            this.colName,
-            this.colDate,
-            this.colOverview});
-            this.lvResults.FullRowSelect = true;
-            this.lvResults.Location = new System.Drawing.Point(6, 42);
-            this.lvResults.Name = "lvResults";
-            this.lvResults.Size = new System.Drawing.Size(668, 386);
-            this.lvResults.TabIndex = 11;
-            this.lvResults.UseCompatibleStateImageBehavior = false;
-            this.lvResults.View = System.Windows.Forms.View.Details;
-            this.lvResults.DoubleClick += new System.EventHandler(this.lvResults_DoubleClick);
-            // 
-            // colShow
-            // 
-            this.colShow.Text = "Show";
-            this.colShow.Width = 200;
-            // 
-            // colSeason
-            // 
-            this.colSeason.Text = "Season";
-            // 
-            // colEpisode
-            // 
-            this.colEpisode.Text = "Episode";
-            // 
-            // colName
-            // 
-            this.colName.Text = "Name";
-            this.colName.Width = 170;
-            // 
-            // colDate
-            // 
-            this.colDate.Text = "Air Date";
-            this.colDate.Width = 80;
-            // 
-            // colOverview
-            // 
-            this.colOverview.Text = "Overview";
-            this.colOverview.Width = 200;
             // 
             // cmbType
             // 
@@ -119,8 +72,8 @@ namespace Meticumedia
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.numDays);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.lblLastNext);
@@ -189,8 +142,8 @@ namespace Meticumedia
             // 
             // cmbShows
             // 
-            this.cmbShows.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbShows.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbShows.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbShows.FormattingEnabled = true;
             this.cmbShows.Location = new System.Drawing.Point(265, 19);
@@ -201,9 +154,11 @@ namespace Meticumedia
             // 
             // groupBox2
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.cmbEpFilter);
             this.groupBox2.Controls.Add(this.lbScanDir);
             this.groupBox2.Controls.Add(this.lbIgnored);
             this.groupBox2.Controls.Add(this.lbUnaired);
@@ -216,6 +171,37 @@ namespace Meticumedia
             this.groupBox2.TabIndex = 22;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Results";
+            // 
+            // chkDisplayOverview
+            // 
+            this.chkDisplayOverview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkDisplayOverview.AutoSize = true;
+            this.chkDisplayOverview.Location = new System.Drawing.Point(498, 19);
+            this.chkDisplayOverview.Name = "chkDisplayOverview";
+            this.chkDisplayOverview.Size = new System.Drawing.Size(176, 17);
+            this.chkDisplayOverview.TabIndex = 15;
+            this.chkDisplayOverview.Text = "Display Overview (Spoiler Alert!)";
+            this.chkDisplayOverview.UseVisualStyleBackColor = true;
+            this.chkDisplayOverview.CheckedChanged += new System.EventHandler(this.chkDisplayOverview_CheckedChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(6, 20);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(29, 13);
+            this.label2.TabIndex = 31;
+            this.label2.Text = "Filter";
+            // 
+            // cmbEpFilter
+            // 
+            this.cmbEpFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbEpFilter.FormattingEnabled = true;
+            this.cmbEpFilter.Location = new System.Drawing.Point(41, 15);
+            this.cmbEpFilter.Name = "cmbEpFilter";
+            this.cmbEpFilter.Size = new System.Drawing.Size(226, 21);
+            this.cmbEpFilter.TabIndex = 30;
             // 
             // lbScanDir
             // 
@@ -266,17 +252,54 @@ namespace Meticumedia
             this.lbMissing.Size = new System.Drawing.Size(82, 30);
             this.lbMissing.TabIndex = 26;
             // 
-            // chkDisplayOverview
+            // lvResults
             // 
-            this.chkDisplayOverview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkDisplayOverview.AutoSize = true;
-            this.chkDisplayOverview.Location = new System.Drawing.Point(498, 19);
-            this.chkDisplayOverview.Name = "chkDisplayOverview";
-            this.chkDisplayOverview.Size = new System.Drawing.Size(176, 17);
-            this.chkDisplayOverview.TabIndex = 15;
-            this.chkDisplayOverview.Text = "Display Overview (Spoiler Alert!)";
-            this.chkDisplayOverview.UseVisualStyleBackColor = true;
-            this.chkDisplayOverview.CheckedChanged += new System.EventHandler(this.chkDisplayOverview_CheckedChanged);
+            this.lvResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvResults.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colShow,
+            this.colSeason,
+            this.colEpisode,
+            this.colName,
+            this.colDate,
+            this.colOverview});
+            this.lvResults.FullRowSelect = true;
+            this.lvResults.Location = new System.Drawing.Point(6, 42);
+            this.lvResults.Name = "lvResults";
+            this.lvResults.Size = new System.Drawing.Size(668, 386);
+            this.lvResults.TabIndex = 11;
+            this.lvResults.UseCompatibleStateImageBehavior = false;
+            this.lvResults.View = System.Windows.Forms.View.Details;
+            this.lvResults.DoubleClick += new System.EventHandler(this.lvResults_DoubleClick);
+            // 
+            // colShow
+            // 
+            this.colShow.Text = "Show";
+            this.colShow.Width = 200;
+            // 
+            // colSeason
+            // 
+            this.colSeason.Text = "Season";
+            // 
+            // colEpisode
+            // 
+            this.colEpisode.Text = "Episode";
+            // 
+            // colName
+            // 
+            this.colName.Text = "Name";
+            this.colName.Width = 170;
+            // 
+            // colDate
+            // 
+            this.colDate.Text = "Air Date";
+            this.colDate.Width = 80;
+            // 
+            // colOverview
+            // 
+            this.colOverview.Text = "Overview";
+            this.colOverview.Width = 200;
             // 
             // ScheduleControl
             // 
@@ -317,5 +340,7 @@ namespace Meticumedia
         private LegendBoxControl lbUnaired;
         private LegendBoxControl lbMissing;
         private LegendBoxControl lbScanDir;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox cmbEpFilter;
     }
 }

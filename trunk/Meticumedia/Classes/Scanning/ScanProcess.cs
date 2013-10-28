@@ -17,11 +17,11 @@ namespace Meticumedia
     {
         [Description("Collecting Files to be Analyzed")]
         FileCollect,
-        [Description("Scanning Scan Folders")]
+        [Description("Checking Scan Folders")]
         Directory,
-        [Description("Scanning Shows for Missing Episodes")]
+        [Description("Checking Shows for Missing Episodes")]
         TvMissing,
-        [Description("Scanning Shows for Episode That Need to be Renamed")]
+        [Description("Checking Shows for Episode That Need to be Renamed")]
         TvRename,
         [Description("Scanning TV Show Root Folders")]
         TvFolder,

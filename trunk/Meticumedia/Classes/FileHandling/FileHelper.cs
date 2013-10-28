@@ -102,6 +102,7 @@ namespace Meticumedia
         /// </summary>
         /// <param name="s1">The first string</param>
         /// <param name="s2">The second string</param>
+        /// <param name="theAdded">Returns whether "the" was added to one of the inputs to make them match</param>
         /// <returns>Whether the 2 strings are very similar or equivalen</returns>
         public static bool CompareStrings(string s1, string s2, out bool theAdded)
         {
@@ -127,7 +128,6 @@ namespace Meticumedia
             }
 
             // Return unmatched if too many different words
-            //if (diff.Count >= s1Count - 1 || diff.Count >= s2Count - 1)
             if (diff.Count > 0)
                 return false;
 
@@ -170,7 +170,6 @@ namespace Meticumedia
             s2Count = set2.Count();
 
             // Get the words that are different between the two strings
-
             if (s2Count > s1Count)
                 diff = set2.Except(set1).ToList();
             else
@@ -410,6 +409,9 @@ namespace Meticumedia
             /// </summary>
             public Dictionary<FileWordType, List<string>> RemovedWords { get; set; }
 
+            /// <summary>
+            /// Modification made to basic format of string
+            /// </summary>
             public ContentSearchMod Modifications { get; set; }
 
             /// <summary>
@@ -436,7 +438,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Creates of list of simplified strings from an input string (multiple options for which words to remove creates multiple results).
+        /// Creates of list of simplified strings from an input string (multiple results created from enabling various optional word removals).
         /// </summary>
         /// <param name="input">String to be simplified</param>
         /// <returns>List of simplified string results</returns>
@@ -475,7 +477,6 @@ namespace Meticumedia
                         if (!simpleRes.SimplifiedString.Contains(' ') && simpleRes.SimplifiedString.Length < 4 && WordHelper.IsWord(simpleRes.SimplifiedString))
                             continue;
 
-
                         // Add to list of simplified strings
                         bool exists = false;
                         foreach (SimplifyStringResults simplifyRes in simpliedStrings)
@@ -511,8 +512,10 @@ namespace Meticumedia
             // All lowercase
             string simplifiedName = input.ToLower().Replace("&", "and");
 
+            // Initialize string modifications
             ContentSearchMod mods = ContentSearchMod.None;
 
+            // Remove contents inside any brackets
             if (removeBrackContents)
             {
                 simplifiedName = Regex.Replace(simplifiedName, @"\([^\)]*\)", " ");
@@ -527,9 +530,10 @@ namespace Meticumedia
             if (removeWhitespace)
                 simplifiedName = Regex.Replace(simplifiedName, @"\W+|_", " ");
 
+            // Initialize removed words dictionary
             Dictionary<FileWordType, List<string>> removeFileWords = new Dictionary<FileWordType, List<string>>();
 
-            // Remove first word (enabled by bit 0)
+            // Remove first word
             if (removeFirst)
             {
                 Match firstWordMatch = Regex.Match(simplifiedName, @"^\W*\w+");
@@ -538,7 +542,7 @@ namespace Meticumedia
                 mods |= ContentSearchMod.WordsRemoved;
             }
 
-            // Remove Last word (enabled by bit 1)
+            // Remove Last word
             else if (removeLast)
             {
                 Match lastWordMatch = Regex.Match(simplifiedName, @"(\w+\W*)$");
@@ -546,11 +550,12 @@ namespace Meticumedia
                     simplifiedName = simplifiedName.Remove(lastWordMatch.Index, lastWordMatch.Length);
                 mods |= ContentSearchMod.WordsRemoved;
             }
-            // Don't remove first and last
+
+            // Don't allow removal of both first and last words
             else if (removeFirst && removeLast)
                 return null;
 
-            // Remove each optional remove word (enabled by bit 2 + word #)
+            // Process each optional remove word
             for (int j = 0; j < OptionalRemoveWords.Length; j++)
                 if (((int)options & (int)Math.Pow(2, j)) > 0)
                 {
@@ -560,7 +565,7 @@ namespace Meticumedia
                         mods |= ContentSearchMod.WordsRemoved;
                 }
 
-            // Remove always remove words
+            // Process always remove words
             foreach (RemoveFileWord remWord in AlwaysRemoveWords)
                 simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, remWord);   
 
@@ -591,6 +596,14 @@ namespace Meticumedia
             return new SimplifyStringResults(simplifiedName, removeFileWords, mods);
         }
 
+        /// <summary>
+        /// Removes word from string with extra options.
+        /// </summary>
+        /// <param name="disableRemAfter">Disable removing of words that follow defined words to remove</param>
+        /// <param name="input">Input string to remove words from</param>
+        /// <param name="removeFileWords">List of removed words from string to add to when removing more</param>
+        /// <param name="remWord">Word to be removed</param>
+        /// <returns>string with word removed</returns>
         private static string RemoveWord(bool disableRemAfter, string input, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord)
         {
             bool dummy;
@@ -604,6 +617,7 @@ namespace Meticumedia
         /// <param name="input">Input string to remove words from</param>
         /// <param name="removeFileWords">List of removed words from string to add to when removing more</param>
         /// <param name="remWord">Word to be removed</param>
+        /// <param name="removed">Whether word was found and removed from input</param>
         /// <returns>string with word removed</returns>
         private static string RemoveWord(bool disableRemAfter, string input, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord, out bool removed)
         {
@@ -635,7 +649,8 @@ namespace Meticumedia
         /// <summary>
         /// Simplifies a file name string for easier matching against database results.
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="fileName">File name to simplify</param>
+        /// <param name="removeYear">Whether to remove year or not</param>
         /// <returns>The simplified file name string</returns>
         public static string BasicSimplify(string fileName, bool removeYear)
         {

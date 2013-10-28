@@ -21,6 +21,9 @@ namespace Meticumedia
         /// </summary>
         private static List<string> words;
 
+        /// <summary>
+        /// Dictionary of all words, index by length (number of characters)
+        /// </summary>
         private static Dictionary<int, List<string>> lengthWords;
         
         /// <summary>
@@ -45,28 +48,30 @@ namespace Meticumedia
         /// <summary>
         /// Get words from dictionary of a given length
         /// </summary>
-        /// <param name="length"></param>
-        /// <returns></returns>
+        /// <param name="length">Length of words to get</param>
+        /// <returns>List of word with desired length</returns>
         public static List<string> GetWords(int length)
         {
             return lengthWords[length];
         }
 
         /// <summary>
-        /// Check is a word is in the dictionary
+        /// Check if a string matches a word in the dictionary
         /// </summary>
-        /// <param name="word">Word to look for</param>
-        /// <returns>Whether word is in dictionary</returns>
-        public static bool IsWord(string word)
+        /// <param name="input">String to match to dictionary word</param>
+        /// <returns>Whether input string is a word in dictionary</returns>
+        public static bool IsWord(string input)
         {
             // Don't look for empty words
-            if (string.IsNullOrWhiteSpace(word) || !lengthWords.ContainsKey(word.Length))
+            if (string.IsNullOrWhiteSpace(input) || !lengthWords.ContainsKey(input.Length))
                 return false;
 
-            foreach (string w in lengthWords[word.Length])
-                if (word.ToLower() == w.ToLower())
+            // Compare input to all word of same length in dictionary
+            foreach (string w in lengthWords[input.Length])
+                if (input.ToLower() == w.ToLower())
                     return true;
-
+            
+            // No match, not a word!
             return false;
         }
 

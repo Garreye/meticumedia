@@ -13,11 +13,13 @@ using System.Text.RegularExpressions;
 namespace Meticumedia
 {
     /// <summary>
-    /// Represents a folder that contains content for a single item (movie or TV show)
+    /// Represents a single content item (i.e. a movie or a TV show) that links to a single directory on user's computer
     /// </summary>
     public class Content : IComparable, ISerializable
     {        
         #region Properties
+
+        public int DatabaseSelection { get; set; }
 
         /// <summary>
         /// Name of the content
@@ -40,17 +42,17 @@ namespace Meticumedia
         public string Overview { get; set; }
         
         /// <summary>
-        /// Genre of content
+        /// Genres of content
         /// </summary>
         public GenreCollection Genres { get; set; }   
 
         /// <summary>
-        /// Path to folder. Empty string if none.
+        /// Path to directory of content. Empty string if none.
         /// </summary>
         public string Path { get; set; }
 
         /// <summary>
-        /// Flag indicating content was found in directory
+        /// Flag indicating content directory was found in root directory
         /// </summary>
         public bool Found { get; set; }
 
@@ -65,18 +67,18 @@ namespace Meticumedia
         public int Id { get; set; }
 
         /// <summary>
-        /// Indication of whether content has been watched
+        /// Indication of whether content has been watched by user
         /// </summary>
         public bool Watched { get; set; }
 
         /// <summary>
-        /// Determines whether or not the content is to be included
-        /// in scanning
+        /// Determines whether or not the content's directory (and files within it) is to be included
+        /// in scanning of root directory for organization
         /// </summary>
         public virtual bool IncludeInScan { get { return this.DoRenaming; } }
 
         /// <summary>
-        /// Indicates whether files in folder are allowed to be renamed by application
+        /// Indicates whether files in content's directory are allowed to be renamed by application
         /// </summary>
         public bool DoRenaming { get; set; }
 
@@ -128,6 +130,7 @@ namespace Meticumedia
         protected void Clone(Content content)
         {
             this.Name = content.Name;
+            this.DatabaseSelection = content.DatabaseSelection;
             this.DatabaseName = content.DatabaseName;
             this.Date = content.Date;
             this.Overview = content.Overview;
@@ -149,7 +152,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Builds properly formatted path to content folder
+        /// Builds properly formatted path for content's directory. Assumes we want directory name to match content name.
         /// </summary>
         /// <returns>Resulting built path</returns>
         public virtual string BuildFolderPath()
@@ -160,7 +163,7 @@ namespace Meticumedia
         /// <summary>
         /// Builds list of genres into a single concatonated string.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>All genres in single string</returns>
         public string GetGenresString()
         {
             // Add each genre name, followed by semicolon and space
@@ -173,7 +176,7 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Attempts to find matches between a file name and the content name
+        /// Attempts to find matches between a file name and name of this instance
         /// </summary>
         /// <param name="fileName">File name to match to</param>
         /// <returns>Collection of matches for file name and content<</returns>
@@ -182,6 +185,7 @@ namespace Meticumedia
             List<string> names = new List<string>();
             names.Add(this.Name);
 
+            // Load in alternate name for TV shows
             if (this is TvShow)
             {
                 TvShow show = (TvShow)this;
@@ -189,20 +193,25 @@ namespace Meticumedia
                     names.Add(altName);
             }
 
+            // Try to match to each name
             foreach (string name in names)
             {
+                // Build regular expression to match content to - try first without removing whitespace
                 string re = BuildNameRegularExpresionString(true, name);
                 MatchCollection matches = null;
                 if (!string.IsNullOrEmpty(re))
                     matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
 
+                // Return matches if found
                 if (matches != null && matches.Count > 0)
                     return matches;
 
+                // Build regular expression to match content to - this time with removed whitespace
                 re = BuildNameRegularExpresionString(false, name);
                 if (!string.IsNullOrEmpty(re))
                     matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
 
+                // Return matches if found
                 if (matches != null && matches.Count > 0)
                     return matches;
             }
@@ -216,8 +225,8 @@ namespace Meticumedia
         ///     -The full show name with spaces (e.g. "How I Met Your Mother)
         ///     -The full show name without spaces (e.g. "HowIMetYourMother)
         ///     -The acronym for the show name (e.g. "himym") - if name has 3 or more words
-        ///     -The name without cosonents (e.g. "BttlstrGlctc")
-        /// "and"/"&" are set to optional matches
+        ///     -The name without consonents (e.g. "BttlstrGlctc")
+        /// "and"/"&" are set to optional for expression
         /// </summary>
         /// <returns></returns>
         private string BuildNameRegularExpresionString(bool removeWhitespace, string showname)
@@ -237,7 +246,7 @@ namespace Meticumedia
             // Go through each word of the name
             for (int i = 0; i < showWords.Length; i++)
             {
-                // Add 'a' for accronym
+                // Add optional 'a' for accronym
                 if (showWords[i] == "and" || showWords[i] == "&")
                 {
                     showReStr += @"((a|&)(nd\W*)?)?";
@@ -299,7 +308,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML
         /// </summary>
-        private enum XmlElements { Name, DataBaseName, Date, Overview, Genres, Folder, RootFolder, Id, Watched, DoRenaming, LastUpdated };
+        private enum XmlElements { DatabaseSelection, Name, DataBaseName, Date, Overview, Genres, Folder, RootFolder, Id, Watched, DoRenaming, LastUpdated };
 
         /// <summary>
         /// XML element name for a single genre
@@ -319,6 +328,9 @@ namespace Meticumedia
                 string value = null;
                 switch (element)
                 {
+                    case XmlElements.DatabaseSelection:
+                        value = this.DatabaseSelection.ToString();
+                        break;
                     case XmlElements.Name:
                         value = this.Name;
                         break;
@@ -382,6 +394,11 @@ namespace Meticumedia
                 string value = propNode.InnerText;
                 switch (element)
                 {
+                    case XmlElements.DatabaseSelection:
+                        int dbSel;
+                        int.TryParse(value, out dbSel);
+                        this.DatabaseSelection = dbSel;
+                        break;
                     case XmlElements.Name:
                         this.Name = value;
                         break;

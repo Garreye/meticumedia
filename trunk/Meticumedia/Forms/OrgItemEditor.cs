@@ -384,9 +384,9 @@ namespace Meticumedia
             
             if (selectedShow != null)
             {
-                selectedShow.FindEpisode((int)numSeason.Value, (int)numEpisode1.Value, out ep1);
+                selectedShow.FindEpisode((int)numSeason.Value, (int)numEpisode1.Value, false, out ep1);
                 if (chkEpisode2.Checked)
-                    selectedShow.FindEpisode((int)numSeason.Value, (int)numEpisode2.Value, out ep2);
+                    selectedShow.FindEpisode((int)numSeason.Value, (int)numEpisode2.Value, false, out ep2);
             }
 
             if (ep1 == null)

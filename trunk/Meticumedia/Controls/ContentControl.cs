@@ -156,7 +156,6 @@ namespace Meticumedia
             // Setup root folder update worker
             rootFolderUpdater = new BackgroundWorker();
             
-
             // Setup listview
             lvContentFolders.ItemToEdit += new EventHandler(lvContentFolders_ItemToEdit);
             lvContentFolders.SaveContentsRequired += new EventHandler(lvContentFolders_SaveRequired);
@@ -829,14 +828,25 @@ namespace Meticumedia
             // Update movie
             if (editor.Results != null)
             {
+                string currPath = selContent.Path;
                 switch (this.ContentType)
                 {
                     case ContentType.Movie:
                         ((Movie)selContent).Clone((Movie)editor.Results);
+                        selContent.Path = currPath;
                         Organization.Movies.Save();
                         break;
                     case ContentType.TvShow:
                         ((TvShow)selContent).Clone((TvShow)editor.Results);
+                        selContent.Path = currPath;
+
+                        if (editor.DvdOrderChange)
+                        {
+                            TvShow show = (TvShow)selContent;
+                            foreach (TvSeason season in show.Seasons)
+                                season.Episodes.Sort();
+                        }
+
                         Organization.Shows.Save();
                         break;
                 }

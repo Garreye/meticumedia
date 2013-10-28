@@ -41,7 +41,7 @@ namespace Meticumedia
             // btnOk
             // 
             this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOk.Location = new System.Drawing.Point(251, 264);
+            this.btnOk.Location = new System.Drawing.Point(294, 272);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
             this.btnOk.TabIndex = 17;
@@ -62,7 +62,7 @@ namespace Meticumedia
             // btnCancel
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.Location = new System.Drawing.Point(332, 264);
+            this.btnCancel.Location = new System.Drawing.Point(375, 272);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 18;
@@ -79,14 +79,14 @@ namespace Meticumedia
             this.cntrlContent.ContentType = Meticumedia.ContentType.Movie;
             this.cntrlContent.Location = new System.Drawing.Point(12, 41);
             this.cntrlContent.Name = "cntrlContent";
-            this.cntrlContent.Size = new System.Drawing.Size(395, 217);
+            this.cntrlContent.Size = new System.Drawing.Size(438, 225);
             this.cntrlContent.TabIndex = 19;
             // 
             // ContentEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(419, 295);
+            this.ClientSize = new System.Drawing.Size(462, 303);
             this.Controls.Add(this.cntrlContent);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);

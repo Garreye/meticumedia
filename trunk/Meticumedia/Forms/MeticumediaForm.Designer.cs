@@ -43,24 +43,28 @@ namespace Meticumedia
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tcTv = new System.Windows.Forms.TabControl();
             this.tpShows = new System.Windows.Forms.TabPage();
+            this.label4 = new System.Windows.Forms.Label();
+            this.linkTheTvDb = new System.Windows.Forms.LinkLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.cntrlShows = new Meticumedia.ShowsControl();
-            this.cntrlEpisodes = new Meticumedia.EpisodesControl();
             this.linkTvRage = new System.Windows.Forms.LinkLabel();
             this.label1 = new System.Windows.Forms.Label();
             this.tbSchedule = new System.Windows.Forms.TabPage();
+            this.label5 = new System.Windows.Forms.Label();
+            this.linkTheTvDb2 = new System.Windows.Forms.LinkLabel();
             this.linkTvRage2 = new System.Windows.Forms.LinkLabel();
             this.label2 = new System.Windows.Forms.Label();
-            this.cntrlSched = new Meticumedia.ScheduleControl();
             this.tpMovies = new System.Windows.Forms.TabPage();
-            this.cntrlMovies = new Meticumedia.MovieControl();
             this.linkMovieDb = new System.Windows.Forms.LinkLabel();
             this.label3 = new System.Windows.Forms.Label();
             this.tpScan = new System.Windows.Forms.TabPage();
-            this.cntrlScan = new Meticumedia.ScanControl();
             this.tpQueue = new System.Windows.Forms.TabPage();
-            this.cntrlQueue = new Meticumedia.QueueControl();
             this.tpLog = new System.Windows.Forms.TabPage();
+            this.cntrlShows = new Meticumedia.ShowsControl();
+            this.cntrlEpisodes = new Meticumedia.EpisodesControl();
+            this.cntrlSched = new Meticumedia.ScheduleControl();
+            this.cntrlMovies = new Meticumedia.MovieControl();
+            this.cntrlScan = new Meticumedia.ScanControl();
+            this.cntrlQueue = new Meticumedia.QueueControl();
             this.cntrlLog = new Meticumedia.LogControl();
             this.menuStrip1.SuspendLayout();
             this.tcTv.SuspendLayout();
@@ -160,6 +164,8 @@ namespace Meticumedia
             // 
             // tpShows
             // 
+            this.tpShows.Controls.Add(this.label4);
+            this.tpShows.Controls.Add(this.linkTheTvDb);
             this.tpShows.Controls.Add(this.splitContainer1);
             this.tpShows.Controls.Add(this.linkTvRage);
             this.tpShows.Controls.Add(this.label1);
@@ -170,6 +176,28 @@ namespace Meticumedia
             this.tpShows.TabIndex = 0;
             this.tpShows.Text = "TV Shows";
             this.tpShows.UseVisualStyleBackColor = true;
+            // 
+            // label4
+            // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(238, 560);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(12, 13);
+            this.label4.TabIndex = 5;
+            this.label4.Text = "/";
+            // 
+            // linkTheTvDb
+            // 
+            this.linkTheTvDb.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.linkTheTvDb.AutoSize = true;
+            this.linkTheTvDb.Location = new System.Drawing.Point(250, 560);
+            this.linkTheTvDb.Name = "linkTheTvDb";
+            this.linkTheTvDb.Size = new System.Drawing.Size(55, 13);
+            this.linkTheTvDb.TabIndex = 4;
+            this.linkTheTvDb.TabStop = true;
+            this.linkTheTvDb.Text = "TheTVDB";
+            this.linkTheTvDb.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.dbLink_LinkClicked);
             // 
             // splitContainer1
             // 
@@ -191,28 +219,6 @@ namespace Meticumedia
             this.splitContainer1.Size = new System.Drawing.Size(760, 551);
             this.splitContainer1.SplitterDistance = 275;
             this.splitContainer1.TabIndex = 3;
-            // 
-            // cntrlShows
-            // 
-            this.cntrlShows.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlShows.ContentType = Meticumedia.ContentType.TvShow;
-            this.cntrlShows.Location = new System.Drawing.Point(3, 3);
-            this.cntrlShows.Name = "cntrlShows";
-            this.cntrlShows.Size = new System.Drawing.Size(755, 267);
-            this.cntrlShows.TabIndex = 0;
-            // 
-            // cntrlEpisodes
-            // 
-            this.cntrlEpisodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlEpisodes.Location = new System.Drawing.Point(3, 3);
-            this.cntrlEpisodes.Name = "cntrlEpisodes";
-            this.cntrlEpisodes.Size = new System.Drawing.Size(752, 264);
-            this.cntrlEpisodes.TabIndex = 0;
-            this.cntrlEpisodes.TvShow = null;
             // 
             // linkTvRage
             // 
@@ -238,6 +244,8 @@ namespace Meticumedia
             // 
             // tbSchedule
             // 
+            this.tbSchedule.Controls.Add(this.label5);
+            this.tbSchedule.Controls.Add(this.linkTheTvDb2);
             this.tbSchedule.Controls.Add(this.linkTvRage2);
             this.tbSchedule.Controls.Add(this.label2);
             this.tbSchedule.Controls.Add(this.cntrlSched);
@@ -247,6 +255,28 @@ namespace Meticumedia
             this.tbSchedule.TabIndex = 4;
             this.tbSchedule.Text = "TV Schedule";
             this.tbSchedule.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(238, 560);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(12, 13);
+            this.label5.TabIndex = 7;
+            this.label5.Text = "/";
+            // 
+            // linkTheTvDb2
+            // 
+            this.linkTheTvDb2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.linkTheTvDb2.AutoSize = true;
+            this.linkTheTvDb2.Location = new System.Drawing.Point(250, 560);
+            this.linkTheTvDb2.Name = "linkTheTvDb2";
+            this.linkTheTvDb2.Size = new System.Drawing.Size(55, 13);
+            this.linkTheTvDb2.TabIndex = 6;
+            this.linkTheTvDb2.TabStop = true;
+            this.linkTheTvDb2.Text = "TheTVDB";
+            this.linkTheTvDb2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.dbLink_LinkClicked);
             // 
             // linkTvRage2
             // 
@@ -270,16 +300,6 @@ namespace Meticumedia
             this.label2.TabIndex = 3;
             this.label2.Text = "TV Show and Episode Information from";
             // 
-            // cntrlSched
-            // 
-            this.cntrlSched.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlSched.Location = new System.Drawing.Point(3, 3);
-            this.cntrlSched.Name = "cntrlSched";
-            this.cntrlSched.Size = new System.Drawing.Size(769, 554);
-            this.cntrlSched.TabIndex = 0;
-            // 
             // tpMovies
             // 
             this.tpMovies.Controls.Add(this.cntrlMovies);
@@ -291,17 +311,6 @@ namespace Meticumedia
             this.tpMovies.TabIndex = 5;
             this.tpMovies.Text = "Movies";
             this.tpMovies.UseVisualStyleBackColor = true;
-            // 
-            // cntrlMovies
-            // 
-            this.cntrlMovies.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlMovies.ContentType = Meticumedia.ContentType.Movie;
-            this.cntrlMovies.Location = new System.Drawing.Point(3, 3);
-            this.cntrlMovies.Name = "cntrlMovies";
-            this.cntrlMovies.Size = new System.Drawing.Size(769, 554);
-            this.cntrlMovies.TabIndex = 7;
             // 
             // linkMovieDb
             // 
@@ -336,16 +345,6 @@ namespace Meticumedia
             this.tpScan.Text = "Scan";
             this.tpScan.UseVisualStyleBackColor = true;
             // 
-            // cntrlScan
-            // 
-            this.cntrlScan.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlScan.Location = new System.Drawing.Point(3, 3);
-            this.cntrlScan.Name = "cntrlScan";
-            this.cntrlScan.Size = new System.Drawing.Size(769, 570);
-            this.cntrlScan.TabIndex = 0;
-            // 
             // tpQueue
             // 
             this.tpQueue.Controls.Add(this.cntrlQueue);
@@ -357,16 +356,6 @@ namespace Meticumedia
             this.tpQueue.Text = "Queue";
             this.tpQueue.UseVisualStyleBackColor = true;
             // 
-            // cntrlQueue
-            // 
-            this.cntrlQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cntrlQueue.Location = new System.Drawing.Point(3, 3);
-            this.cntrlQueue.Name = "cntrlQueue";
-            this.cntrlQueue.Size = new System.Drawing.Size(769, 570);
-            this.cntrlQueue.TabIndex = 0;
-            // 
             // tpLog
             // 
             this.tpLog.Controls.Add(this.cntrlLog);
@@ -377,6 +366,69 @@ namespace Meticumedia
             this.tpLog.TabIndex = 3;
             this.tpLog.Text = "Log";
             this.tpLog.UseVisualStyleBackColor = true;
+            // 
+            // cntrlShows
+            // 
+            this.cntrlShows.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cntrlShows.ContentType = Meticumedia.ContentType.TvShow;
+            this.cntrlShows.Location = new System.Drawing.Point(3, 3);
+            this.cntrlShows.Name = "cntrlShows";
+            this.cntrlShows.Size = new System.Drawing.Size(755, 267);
+            this.cntrlShows.TabIndex = 0;
+            // 
+            // cntrlEpisodes
+            // 
+            this.cntrlEpisodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cntrlEpisodes.Location = new System.Drawing.Point(3, 3);
+            this.cntrlEpisodes.Name = "cntrlEpisodes";
+            this.cntrlEpisodes.Size = new System.Drawing.Size(752, 264);
+            this.cntrlEpisodes.TabIndex = 0;
+            this.cntrlEpisodes.TvShow = null;
+            // 
+            // cntrlSched
+            // 
+            this.cntrlSched.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cntrlSched.Location = new System.Drawing.Point(3, 3);
+            this.cntrlSched.Name = "cntrlSched";
+            this.cntrlSched.Size = new System.Drawing.Size(769, 554);
+            this.cntrlSched.TabIndex = 0;
+            // 
+            // cntrlMovies
+            // 
+            this.cntrlMovies.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cntrlMovies.ContentType = Meticumedia.ContentType.Movie;
+            this.cntrlMovies.Location = new System.Drawing.Point(3, 3);
+            this.cntrlMovies.Name = "cntrlMovies";
+            this.cntrlMovies.Size = new System.Drawing.Size(769, 554);
+            this.cntrlMovies.TabIndex = 7;
+            // 
+            // cntrlScan
+            // 
+            this.cntrlScan.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cntrlScan.Location = new System.Drawing.Point(3, 3);
+            this.cntrlScan.Name = "cntrlScan";
+            this.cntrlScan.Size = new System.Drawing.Size(769, 570);
+            this.cntrlScan.TabIndex = 0;
+            // 
+            // cntrlQueue
+            // 
+            this.cntrlQueue.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cntrlQueue.Location = new System.Drawing.Point(3, 3);
+            this.cntrlQueue.Name = "cntrlQueue";
+            this.cntrlQueue.Size = new System.Drawing.Size(769, 570);
+            this.cntrlQueue.TabIndex = 0;
             // 
             // cntrlLog
             // 
@@ -452,6 +504,10 @@ namespace Meticumedia
         private EpisodesControl cntrlEpisodes;
         private MovieControl cntrlMovies;
         private ShowsControl cntrlShows;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.LinkLabel linkTheTvDb;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.LinkLabel linkTheTvDb2;
     }
 }
 

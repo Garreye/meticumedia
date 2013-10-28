@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------
+﻿    // --------------------------------------------------------------------------------
 // Source code available at http://code.google.com/p/meticumedia/
 // This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
 // --------------------------------------------------------------------------------
@@ -18,6 +18,11 @@ namespace Meticumedia
     public class TvShow : Content
     {
         #region Properties
+
+        /// <summary>
+        /// Database to use for show episodes
+        /// </summary>
+        public TvDataBaseSelection DataBase { get { return (TvDataBaseSelection)DatabaseSelection; } }
 
         /// <summary>
         /// Episodes of show, indexed by season
@@ -43,6 +48,11 @@ namespace Meticumedia
         /// List of alternative names to match to
         /// </summary>
         public List<string> AlternativeNameMatches { get; set; }
+
+        /// <summary>
+        /// Use DVD episode ordering
+        /// </summary>
+        public bool DvdEpisodeOrder { get; set; }
 
         #endregion
 
@@ -83,6 +93,7 @@ namespace Meticumedia
             this.DoMissingCheck = true;
             this.IncludeInSchedule = true;
             this.AlternativeNameMatches = new List<string>();
+            this.DatabaseSelection = (int)Settings.DefaultTvDatabase;
         }
 
         /// <summary>
@@ -123,7 +134,8 @@ namespace Meticumedia
         /// </summary>
         /// <param name="show">Show to clon</param>
         public void Clone(TvShow show)
-        {            
+        {
+            this.DatabaseSelection = show.DatabaseSelection;
             this.Name = show.Name;
             this.RootFolder = show.RootFolder;
             this.Overview = show.Overview;
@@ -136,6 +148,7 @@ namespace Meticumedia
             this.Id = show.Id;
             this.Date = show.Date;
             this.DoMissingCheck = show.DoMissingCheck;
+            this.DvdEpisodeOrder = show.DvdEpisodeOrder;
             foreach (TvSeason season in this.Seasons)
                 foreach (TvEpisode episode in season.Episodes)
                     episode.Show = show.Name;
@@ -170,7 +183,7 @@ namespace Meticumedia
                     if (ep.Show == this.Name)
                     {
                         TvEpisode matchEp;
-                        if (this.FindEpisode(ep.Season, ep.Number, out matchEp))
+                        if (this.FindEpisode(ep.Season, ep.Number, false, out matchEp))
                             if (matchEp.Missing == TvEpisode.MissingStatus.Missing)
                                 matchEp.Missing = TvEpisode.MissingStatus.InScanDirectory;
                     }
@@ -192,8 +205,8 @@ namespace Meticumedia
                 {
                     // Mark episodes as not missing
                     TvEpisode ep1 = null, ep2 = null;
-                    bool matched1 = FindEpisode(season, episode1, out ep1);
-                    bool matched2 = episode2 != -1 && FindEpisode(season, episode2, out ep2);
+                    bool matched1 = FindEpisode(season, episode1, false, out ep1);
+                    bool matched2 = episode2 != -1 && FindEpisode(season, episode2, false, out ep2);
 
                     if (matched1) ep1.Missing = TvEpisode.MissingStatus.Located;
                     if (matched2) ep2.Missing = TvEpisode.MissingStatus.Located;
@@ -236,12 +249,12 @@ namespace Meticumedia
         /// <param name="episodeNumber">The number of the epsiode within the season</param>
         /// <param name="episode">The matched episode if one is found, else null</param>
         /// <returns>true if the episode was found, false otherwise</returns>
-        public bool FindEpisode(int seasonNumber, int episodeNumber, out TvEpisode episode)
+        public bool FindEpisode(int seasonNumber, int episodeNumber, bool databaseNum, out TvEpisode episode)
         {
             episode = null;
             foreach (TvSeason season in Seasons)
                 foreach (TvEpisode ep in season.Episodes)
-                    if (ep.Season == seasonNumber && ep.Number == episodeNumber)
+                    if (ep.Season == seasonNumber && ((ep.Number == episodeNumber && !databaseNum) || (ep.DatabaseNumber == episodeNumber && databaseNum)))
                     {
                         episode = ep;
                         return true;
@@ -299,7 +312,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Seasons, DoMissing, IncludeInSchedule, AlternativeNameMatches };
+        private enum XmlElements { Seasons, DoMissing, IncludeInSchedule, AlternativeNameMatches, DvdEpisodeOrder };
 
         /// <summary>
         /// Saves instance to XML file.
@@ -336,6 +349,9 @@ namespace Meticumedia
                         foreach (string match in AlternativeNameMatches)
                             xw.WriteElementString(MATCH_XML, match);
                         xw.WriteEndElement();
+                        break;
+                    case XmlElements.DvdEpisodeOrder:
+                        value = this.DvdEpisodeOrder.ToString();
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -397,6 +413,11 @@ namespace Meticumedia
                         foreach (XmlNode matchNode in propNode.ChildNodes)
                             if (!string.IsNullOrWhiteSpace(matchNode.InnerText))
                                 this.AlternativeNameMatches.Add(matchNode.InnerText);
+                        break;
+                    case XmlElements.DvdEpisodeOrder:
+                        bool dvdOrder;
+                        bool.TryParse(value, out dvdOrder);
+                        this.DvdEpisodeOrder = dvdOrder;
                         break;
                 }
             }

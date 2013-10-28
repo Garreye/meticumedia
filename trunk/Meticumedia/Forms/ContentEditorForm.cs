@@ -25,6 +25,8 @@ namespace Meticumedia
         /// </summary>
         public Content Results { get; private set; }
 
+        public bool DvdOrderChange { get { return cntrlContent.DvdOrderChange; } }
+
         #endregion
 
         #region Constructor

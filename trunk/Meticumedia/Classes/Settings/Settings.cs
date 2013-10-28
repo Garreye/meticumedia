@@ -58,14 +58,11 @@ namespace Meticumedia
         /// </summary>
         public static List<string> IgnoreFileTypes = new List<string>();
 
-        /// <summary>
-        /// TV database selection - TODO: currently fixed, to be selectable by user!
-        /// </summary>
-        public static TvDatabaseHelper.TvDataBaseSelection TvDatabaseSelection = TvDatabaseHelper.TvDataBaseSelection.TvRage;
-
         public static GuiSettings GuiControl = new GuiSettings();
 
-        public static int NumProcessingThreads = 10;
+        public static int NumProcessingThreads = 1;
+
+        public static TvDataBaseSelection DefaultTvDatabase = TvDataBaseSelection.TheTvDb;
 
         #endregion
 

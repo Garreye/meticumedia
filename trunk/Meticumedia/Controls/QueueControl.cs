@@ -411,6 +411,7 @@ namespace Meticumedia
         public void UpdateFromSettings()
         {
             chkAutoClear.Checked = Settings.GuiControl.AutoClearCompleted;
+            chkAutoClear.CheckedChanged += chkAutoClear_CheckedChanged;
         }
 
         /// <summary>

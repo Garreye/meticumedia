@@ -42,12 +42,14 @@ namespace Meticumedia
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnSetSelected = new System.Windows.Forms.Button();
             this.btnMatch = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.cmbDatabase = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // btnSimplify
             // 
             this.btnSimplify.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSimplify.Location = new System.Drawing.Point(350, 1);
+            this.btnSimplify.Location = new System.Drawing.Point(350, 30);
             this.btnSimplify.Name = "btnSimplify";
             this.btnSimplify.Size = new System.Drawing.Size(75, 23);
             this.btnSimplify.TabIndex = 27;
@@ -59,7 +61,7 @@ namespace Meticumedia
             // 
             this.txtSearchEntry.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSearchEntry.Location = new System.Drawing.Point(3, 3);
+            this.txtSearchEntry.Location = new System.Drawing.Point(3, 30);
             this.txtSearchEntry.Name = "txtSearchEntry";
             this.txtSearchEntry.Size = new System.Drawing.Size(260, 20);
             this.txtSearchEntry.TabIndex = 26;
@@ -68,7 +70,7 @@ namespace Meticumedia
             // btnSearch
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSearch.Location = new System.Drawing.Point(269, 1);
+            this.btnSearch.Location = new System.Drawing.Point(269, 30);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(75, 23);
             this.btnSearch.TabIndex = 23;
@@ -87,9 +89,9 @@ namespace Meticumedia
             this.columnHeader3,
             this.columnHeader2});
             this.lvSearchResults.FullRowSelect = true;
-            this.lvSearchResults.Location = new System.Drawing.Point(2, 30);
+            this.lvSearchResults.Location = new System.Drawing.Point(2, 59);
             this.lvSearchResults.Name = "lvSearchResults";
-            this.lvSearchResults.Size = new System.Drawing.Size(423, 261);
+            this.lvSearchResults.Size = new System.Drawing.Size(423, 232);
             this.lvSearchResults.TabIndex = 22;
             this.lvSearchResults.UseCompatibleStateImageBehavior = false;
             this.lvSearchResults.View = System.Windows.Forms.View.Details;
@@ -138,10 +140,30 @@ namespace Meticumedia
             this.btnMatch.Visible = false;
             this.btnMatch.Click += new System.EventHandler(this.bntMatch_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 6);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(53, 13);
+            this.label1.TabIndex = 30;
+            this.label1.Text = "Database";
+            // 
+            // cmbDatabase
+            // 
+            this.cmbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDatabase.FormattingEnabled = true;
+            this.cmbDatabase.Location = new System.Drawing.Point(62, 3);
+            this.cmbDatabase.Name = "cmbDatabase";
+            this.cmbDatabase.Size = new System.Drawing.Size(199, 21);
+            this.cmbDatabase.TabIndex = 31;
+            // 
             // SearchControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.cmbDatabase);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.btnMatch);
             this.Controls.Add(this.btnSetSelected);
             this.Controls.Add(this.btnSimplify);
@@ -167,5 +189,7 @@ namespace Meticumedia
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.Button btnSetSelected;
         private System.Windows.Forms.Button btnMatch;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox cmbDatabase;
     }
 }

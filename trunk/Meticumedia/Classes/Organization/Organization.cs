@@ -372,11 +372,6 @@ namespace Meticumedia
             // Get content type
             ContentType contentType = folders[0].ContentType;
             
-            // Get IDs for content that need updating from database (TV only)
-            List<int> seriesIds = new List<int>();
-            string time = string.Empty;
-            if (contentType == ContentType.TvShow)
-                TvDatabaseHelper.GetDataToBeUpdated(out seriesIds, out time);
 
             // Update each folder in list
             foreach (ContentRootFolder folder in folders)
@@ -385,10 +380,10 @@ namespace Meticumedia
                 switch (contentType)
                 {
                     case ContentType.TvShow:
-                        results = folder.UpdateContent(fastUpdate, seriesIds, ref tvUpdateCancelled, time);
+                        results = folder.UpdateContent(fastUpdate, ref tvUpdateCancelled);
                         break;
                     case ContentType.Movie:
-                        results = folder.UpdateContent(fastUpdate, seriesIds, ref movieUpdateCancelled, time);
+                        results = folder.UpdateContent(fastUpdate, ref movieUpdateCancelled);
                         break;
                     default:
                         throw new Exception("Unknown content type");

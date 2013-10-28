@@ -45,7 +45,7 @@ namespace Meticumedia
         /// <summary>
         /// TV item in scan directories is updated every 2 minutes
         /// </summary>
-        private static System.Timers.Timer updateTimer = new System.Timers.Timer(120000);
+        private static System.Timers.Timer updateTimer = new System.Timers.Timer(500);
 
         /// <summary>
         /// Update list of tv episodes currently in scan directories
@@ -61,11 +61,14 @@ namespace Meticumedia
         /// Updates list of TV episodes found in scan directories. Performs a directory scan in background that
         /// only matches to files that are categorized as TV video.
         /// </summary>
-        public static void DoUpdate()
+        public static void DoUpdate(bool dirScanSearch)
         {
             // Run scan to look for TV files
-            DirectoryScan scan = new DirectoryScan(true);
-            Items = scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true, true);
+            if (dirScanSearch)
+            {
+                DirectoryScan scan = new DirectoryScan(true);
+                Items = scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true, true);
+            }
 
             // Update missing
             lock (Organization.Shows.ContentLock)
@@ -83,7 +86,8 @@ namespace Meticumedia
         /// <param name="e"></param>
         static void scanDirUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            DoUpdate();
+            updateTimer.Interval = 120000;
+            DoUpdate(true);
         }
 
         #endregion

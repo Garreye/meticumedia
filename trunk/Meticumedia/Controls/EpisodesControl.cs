@@ -19,153 +19,6 @@ namespace Meticumedia
     /// </summary>
     public partial class EpisodesControl : UserControl
     {
-        #region Episode Filter Class
-
-        /// <summary>
-        /// Defines filter that can be applied to TV episodes.
-        /// </summary>
-        private class EpisodeFilter
-        {
-            #region Properties
-
-            /// <summary>
-            /// Type of filters that can be applies to episodes.
-            /// </summary>
-            public enum FilterType { All, Missing, Unaired, Season };
-
-            /// <summary>
-            /// The type of episode filter being used.
-            /// </summary>
-            public FilterType Type { get; set; }
-
-            /// <summary>
-            /// The season number used when Type is season filter.
-            /// </summary>
-            public int Season { get; set; }
-
-            #endregion
-
-            #region Constructor
-
-            /// <summary>
-            /// Constructor with known properties
-            /// </summary>
-            /// <param name="type"></param>
-            /// <param name="season"></param>
-            public EpisodeFilter(FilterType type, int season)
-            {
-                this.Type = type;
-                this.Season = season;
-            }
-
-            #endregion
-
-            #region Methods
-
-            /// <summary>
-            /// Runs an episode through filter.
-            /// </summary>
-            /// <param name="ep">The episode to filter</param>
-            /// <returns>True if the episode makes it through filter</returns>
-            public bool FilterEpisode(TvEpisode ep)
-            {
-                switch (this.Type)
-                {
-                    case EpisodeFilter.FilterType.All:
-                        return true;
-                    case EpisodeFilter.FilterType.Missing:
-                        if ((ep.Missing == TvEpisode.MissingStatus.Missing || ep.Missing == TvEpisode.MissingStatus.InScanDirectory) && ep.Aired)
-                            return true;
-                        break;
-                    case EpisodeFilter.FilterType.Season:
-                        if (ep.Season == this.Season)
-                            return true;
-                        break;
-                    case EpisodeFilter.FilterType.Unaired:
-                        if (!ep.Aired)
-                            return true;
-                        break;
-                    default:
-                        throw new Exception("Unknown filter type!");
-                }
-
-                return false;
-            }
-
-            /// <summary>
-            /// Return string for filter.
-            /// </summary>
-            /// <returns></returns>
-            public override string ToString()
-            {
-                switch (this.Type)
-                {
-                    case FilterType.All:
-                        return "All Episodes";
-                    case FilterType.Missing:
-                        return "Missing Episodes";
-                    case FilterType.Season:
-                        return "Season " + this.Season;
-                    case FilterType.Unaired:
-                        return "Unaired";
-                    default:
-                        throw new Exception("Unknown type");
-                }
-            }
-
-            /// <summary>
-            /// Equals check for this filter and another filter.
-            /// Uses ToString to compare.
-            /// </summary>
-            /// <param name="obj">EpisodeFilter to compare to</param>
-            /// <returns></returns>
-            public override bool Equals(object obj)
-            {
-                // False for null/invalid objects
-                if (obj == null || !(obj is EpisodeFilter))
-                    return false;
-
-                // Case object to episode
-                EpisodeFilter epFilter = (EpisodeFilter)obj;
-
-                // Compare is on season and episode number only (show name may not be set yet)
-                return epFilter.ToString() == this.ToString();
-            }
-
-            /// <summary>
-            /// Overrides to prevent warning that Equals is overriden but no GetHashCode.
-            /// </summary>
-            /// <returns></returns>
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
-            /// <summary>
-            /// Build array of possible episode filters that can be used for a TvShow.
-            /// </summary>
-            /// <param name="show">The show to build filters for</param>
-            /// <param name="displayIgnored">Whether to add ignored season filters</param>
-            /// <returns></returns>
-            public static List<EpisodeFilter> BuildFilters(TvShow show, bool displayIgnored)
-            {
-                List<EpisodeFilter> filters = new List<EpisodeFilter>();
-
-                filters.Add(new EpisodeFilter(FilterType.All, 0));
-                filters.Add(new EpisodeFilter(FilterType.Missing, 0));
-                filters.Add(new EpisodeFilter(FilterType.Unaired, 0));
-                foreach (TvSeason season in show.Seasons)
-                    if (!season.Ignored || displayIgnored)
-                        filters.Add(new EpisodeFilter(FilterType.Season, season.Number));
-
-                return filters;
-            }
-
-            #endregion
-        }
-
-        #endregion
-
         #region Events
 
         /// <summary>
@@ -241,9 +94,12 @@ namespace Meticumedia
             List<TvEpisode> selEpisodes;
             if (GetSelectedEpisodes(out selEpisodes))
             {
+                bool singleMissing = selEpisodes.Count == 1 && selEpisodes[0].Missing == TvEpisode.MissingStatus.Missing;
 
                 // Add options
-                episodeContextMenu.MenuItems.Add("Play", new EventHandler(HandlePlay));
+                if (!singleMissing)
+                    episodeContextMenu.MenuItems.Add("Play", new EventHandler(HandlePlay));
+                episodeContextMenu.MenuItems.Add("Copy Episode String to Clipboard", new EventHandler(HandleCopyToClipboard));
                 episodeContextMenu.MenuItems.Add("Edit", new EventHandler(HandleEdit));
 
                 if (selEpisodes.Count == 1 && selEpisodes[0].Missing == TvEpisode.MissingStatus.Missing)
@@ -277,6 +133,14 @@ namespace Meticumedia
         private void HandlePlay(object sender, EventArgs e)
         {
             PlaySelectedEpisode();
+        }
+
+        /// <summary>
+        /// Handles copy ep name to clipboard selection from context menu
+        /// </summary>
+        private void HandleCopyToClipboard(object sender, EventArgs e)
+        {
+            CopyEpInfoToClipboard();
         }
 
         /// <summary>
@@ -370,7 +234,7 @@ namespace Meticumedia
 
                 // Check if episode already exists
                 TvEpisode ep;
-                if (this.show.FindEpisode(eef.Episode.Season, eef.Episode.Number, out ep))
+                if (this.show.FindEpisode(eef.Episode.Season, eef.Episode.Number, false, out ep))
                     if (MessageBox.Show("Episode with this number already exists would you like to replace it?", "Replace", MessageBoxButtons.YesNo) != DialogResult.Yes)
                         return;
                     else
@@ -422,12 +286,12 @@ namespace Meticumedia
             gbEpisodes.Text = "Episodes of '" + show.Name + "'";
 
             // Save current filter
-            EpisodeFilter currentFilterSel = (EpisodeFilter)cmbEpFilter.SelectedItem;
+            TvEpisodeFilter currentFilterSel = (TvEpisodeFilter)cmbEpFilter.SelectedItem;
 
             // Buil episode filters
             cmbEpFilter.Items.Clear();
-            List<EpisodeFilter> epFilters = EpisodeFilter.BuildFilters(show, chkDisplayIgnored.Checked);
-            foreach (EpisodeFilter filter in epFilters)
+            List<TvEpisodeFilter> epFilters = TvEpisodeFilter.BuildFilters(show, chkDisplayIgnored.Checked, true);
+            foreach (TvEpisodeFilter filter in epFilters)
                 cmbEpFilter.Items.Add(filter);
 
             // Set filter selection back to what it was befor building if needed
@@ -435,7 +299,7 @@ namespace Meticumedia
             {
                 bool set = false;
                 for (int i = 0; i < cmbEpFilter.Items.Count; i++)
-                    if (((EpisodeFilter)cmbEpFilter.Items[i]).Equals(currentFilterSel))
+                    if (((TvEpisodeFilter)cmbEpFilter.Items[i]).Equals(currentFilterSel))
                     {
                         cmbEpFilter.SelectedIndex = i;
                         set = true;
@@ -464,7 +328,7 @@ namespace Meticumedia
                 return;
 
             // Get filter
-            EpisodeFilter epFilter = (EpisodeFilter)cmbEpFilter.SelectedItem;
+            TvEpisodeFilter epFilter = (TvEpisodeFilter)cmbEpFilter.SelectedItem;
 
             // Clear list
             lvEpisodes.Items.Clear();
@@ -617,7 +481,17 @@ namespace Meticumedia
         /// </summary>
         private void lvEpisodes_DoubleClick(object sender, EventArgs e)
         {
-            PlaySelectedEpisode();
+            List<TvEpisode> selEpisodes;
+            if (GetSelectedEpisodes(out selEpisodes))
+            {
+                bool singleMissing = selEpisodes.Count == 1 && selEpisodes[0].Missing == TvEpisode.MissingStatus.Missing;
+
+                // Add options
+                if (!singleMissing)
+                    PlaySelectedEpisode();
+                else
+                    CopyEpInfoToClipboard();
+            }
         }
 
         /// <summary>
@@ -634,10 +508,34 @@ namespace Meticumedia
             int episodeNumber = int.Parse(item.SubItems[1].Text);
 
             TvEpisode episode;
-            if (show.FindEpisode(seasonNumber, episodeNumber, out episode))
+            if (show.FindEpisode(seasonNumber, episodeNumber, false, out episode))
                 episode.PlayEpisodeFile();
         }
 
+        /// <summary>
+        /// Copy selected episode show name and episode number to clipboard
+        /// </summary>
+        private void CopyEpInfoToClipboard()
+        {
+            TvEpisode ep;
+            if (!GetSelectedEpisode(out ep))
+                return;
+
+            Clipboard.SetText(ep.BuildEpString());
+        }
+
+
+        private void btnMoveUp_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnMoveDown_Click(object sender, EventArgs e)
+        {
+
+        }
+
         #endregion
+
     }
 }

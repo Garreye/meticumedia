@@ -36,7 +36,7 @@ namespace Meticumedia
         /// <summary>
         /// Indicates whether mirors are valid.
         /// </summary>
-        protected static bool mirrorsValid = false;
+        protected bool mirrorsValid = false;
 
         /// <summary>
         /// XML mirrors
@@ -144,7 +144,7 @@ namespace Meticumedia
         /// <returns>Results as list of shows</returns>
         protected virtual List<Content> DoSearch(string mirror, string searchString, bool includeSummaries)
         {
-            return new List<Content>();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -159,25 +159,24 @@ namespace Meticumedia
 
             // Try multiple times - databases requests tend to fail randomly
             for (int  i = 0; i < 5; i++)
-                try
+                if(DoUpdate(show))
                 {
-                    DoUpdate(show);
 
                     // Remove episodes that are no longer in the TvDb
                     for (int j = show.Seasons.HighestSeason; j >= show.Seasons.LowestSeason; j--)
-                        for (int k = show.Seasons[j].Episodes.Count - 1; k >= 0; k--)
-                        {
-                            TvEpisode ep = show.Seasons[j].Episodes[k];
-                            if (!ep.InDatabase && !ep.UserDefined && !ep.PreventDatabaseUpdates)
-                                show.Seasons[j].Episodes.Remove(ep);
-                        }
+                        if(j >= 0)
+                            for (int k = show.Seasons[j].Episodes.Count - 1; k >= 0; k--)
+                            {
+                                TvEpisode ep = show.Seasons[j].Episodes[k];
+                                if (!ep.InDatabase && !ep.UserDefined && !ep.PreventDatabaseUpdates)
+                                    show.Seasons[j].Episodes.Remove(ep);
+                            }
 
                     // Update missing episodes for show
                     show.UpdateMissing();
                     show.LastUpdated = DateTime.Now;
                     break;
                 }
-                catch { }
         }
 
         /// <summary>
@@ -185,8 +184,9 @@ namespace Meticumedia
         /// </summary>
         /// <param name="show">Show instance to update</param>
         /// <returns>Updated show instance</returns>
-        public virtual void DoUpdate(TvShow show)
+        public virtual bool DoUpdate(TvShow show)
         {
+            throw new NotImplementedException();
         }
 
         #endregion

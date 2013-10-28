@@ -150,7 +150,7 @@ namespace Meticumedia
                     GetServerTime(out time);
                     return true;
                 }
-                
+
                 string updateUrl = "http://www.thetvdb.com/api/Updates.php?type=all&time=" + Organization.Shows.LastUpdate;
 
                 WebClient webClient = new WebClient();
@@ -259,6 +259,8 @@ namespace Meticumedia
                             searchResult.Date = airDate;
                             break;
                     }
+
+                searchResult.DatabaseSelection = (int)TvDataBaseSelection.TheTvDb;
                 searchResults.Add(searchResult);
             }
 
@@ -270,99 +272,137 @@ namespace Meticumedia
         /// added shows only, as it will replace all episode information in show.
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
-        public override TvShow DoUpdate(TvShow show)
+        public override bool DoUpdate(TvShow show)
         {
             // Get mirror
             string mirror;
             if (!GetMirror(MirrorType.Zip, out mirror))
-                return show;
+                return false;
 
-            // Download episodes XML string
-            string showUrl = mirror + "/api/" + API_KEY + "/series/" + show.Id + "/all/en.zip";
-            string basePath = Organization.GetBasePath(true);
-            string path = Path.Combine(basePath, "temp_data.zip");
-            string extractPath = Path.Combine(basePath, "en.xml");
-
-            WebClient webClient = new WebClient();
-            webClient.DownloadFile(showUrl, path);
-
-            ZipFile zip = ZipFile.Read(path);
-            foreach (ZipEntry entry in zip.Entries)
-                if (entry.FileName == "en.xml")
-                {
-                    entry.Extract(basePath, ExtractExistingFileAction.OverwriteSilently);
-                    break;
-                }
-            zip.Dispose();
-
-            XmlDocument showDoc = new XmlDocument();
-            showDoc.Load(extractPath);
-
-            // Get root element and children
-            XmlElement root = showDoc.DocumentElement;
-            XmlNodeList rootNodes = root.ChildNodes;
-
-            // Go through each node and get info for each episode
-            foreach (XmlNode node in rootNodes)
+            bool success = true;
+            string tempPath = string.Empty;
+            try
             {
-                if (node.Name == "Episode")
-                {
-                    TvEpisode ep = new TvEpisode(show.Name);
-                    int season = -1;
 
-                    XmlNodeList subNodes = node.ChildNodes;
-                    foreach (XmlNode subNode in subNodes)
+                // Download episodes XML string
+                string showUrl = mirror + "/api/" + API_KEY + "/series/" + show.Id + "/all/en.zip";
+                string basePath = Organization.GetBasePath(true);
+                Guid guid = Guid.NewGuid();
+                tempPath = Path.Combine(basePath, guid.ToString());
+                Directory.CreateDirectory(tempPath);
+                string zipPath = Path.Combine(tempPath, "data" + ".zip");
+                string extractPath = Path.Combine(tempPath, "en.xml");
+
+                WebClient webClient = new WebClient();
+                webClient.DownloadFile(showUrl, zipPath);
+
+                ZipFile zip = ZipFile.Read(zipPath);
+                foreach (ZipEntry entry in zip.Entries)
+                    if (entry.FileName == "en.xml")
                     {
-                        switch (subNode.Name)
+                        entry.Extract(tempPath, ExtractExistingFileAction.OverwriteSilently);
+                        break;
+                    }
+                zip.Dispose();
+
+                XmlDocument showDoc = new XmlDocument();
+                showDoc.Load(extractPath);
+
+                // Get root element and children
+                XmlElement root = showDoc.DocumentElement;
+                XmlNodeList rootNodes = root.ChildNodes;
+
+                // Go through each node and get info for each episode
+                foreach (XmlNode node in rootNodes)
+                {
+                    if (node.Name == "Series")
+                    {
+                        XmlNodeList serNodes = node.ChildNodes;
+                        foreach (XmlNode subNode in serNodes)
                         {
-                            case "EpisodeNumber":
-                                ep.Number = Convert.ToInt32(subNode.InnerText);
-                                break;
-                            case "EpisodeName":
-                                ep.DataBaseName = subNode.InnerText;
-                                break;
-                            case "SeasonNumber":
-                                season = Convert.ToInt32(subNode.InnerText);
-                                ep.Season = season;
-                                break;
-                            case "FirstAired":
-                                DateTime airData;
-                                DateTime.TryParse(subNode.InnerText, out airData);
-                                ep.AirDate = airData;
-                                break;
-                            case "Overview":
-                                ep.Overview = subNode.InnerText;
-                                break;
+                            switch (subNode.Name)
+                            {
+                                case "Genre":
+                                    string[] genres = subNode.InnerText.Split('|');
+                                    foreach(string genre in genres)
+                                        if(!string.IsNullOrWhiteSpace(genre) && !show.Genres.Contains(genre))
+                                            show.Genres.Add(genre);
+                                    break;
+                            }
                         }
                     }
-                    ep.InDatabase = true;
-
-                    if (ep.Number > -1 && season > -1)
+                    else if (node.Name == "Episode")
                     {
-                        if (!show.Seasons.Contains(season))
-                            show.Seasons.Add(new TvSeason(season));
+                        TvEpisode ep = new TvEpisode(show.Name);
+                        int season = -1;
 
-                        // If episode already exists just update it, else add it
-                        TvEpisode existingMatch;
-                        if (show.FindEpisode(ep.Season, ep.Number, out existingMatch))
+                        XmlNodeList subNodes = node.ChildNodes;
+                        foreach (XmlNode subNode in subNodes)
                         {
-                            existingMatch.DataBaseName = ep.DataBaseName;
-                            existingMatch.AirDate = ep.AirDate;
-                            existingMatch.Overview = ep.Overview;
-                            existingMatch.InDatabase = true;
+                            switch (subNode.Name)
+                            {
+                                case "EpisodeNumber":
+                                    int epNumber = 0;
+                                    int.TryParse(subNode.InnerText, out epNumber);
+                                    ep.DatabaseNumber = epNumber;
+                                    break;
+                                case "DVD_episodenumber":
+                                    double dvdNumber = -1;
+                                    if (double.TryParse(subNode.InnerText, out dvdNumber))
+                                        ep.DatabaseDvdNumber = (int)dvdNumber;
+                                    break;
+                                case "EpisodeName":
+                                    ep.DatabaseName = subNode.InnerText;
+                                    break;
+                                case "SeasonNumber":
+                                    season = Convert.ToInt32(subNode.InnerText);
+                                    ep.Season = season;
+                                    break;
+                                case "FirstAired":
+                                    DateTime airData;
+                                    DateTime.TryParse(subNode.InnerText, out airData);
+                                    ep.AirDate = airData;
+                                    break;
+                                case "Overview":
+                                    ep.Overview = subNode.InnerText;
+                                    break;
+                            }
                         }
-                        else
-                            show.Seasons[season].Episodes.Add(ep);
+                        ep.InDatabase = true;
+
+                        if (ep.Number > -1 && season > -1)
+                        {
+                            if (!show.Seasons.Contains(season))
+                                show.Seasons.Add(new TvSeason(season));
+
+                            // If episode already exists just update it, else add it
+                            TvEpisode existingMatch;
+                            if (show.FindEpisode(ep.Season, ep.DatabaseNumber, true, out existingMatch))
+                            {
+                                existingMatch.DatabaseName = ep.DatabaseName;
+                                existingMatch.AirDate = ep.AirDate;
+                                existingMatch.Overview = ep.Overview;
+                                existingMatch.InDatabase = true;
+                            }
+                            else
+                                show.Seasons[season].Episodes.Add(ep);
+                        }
                     }
                 }
+
+                showDoc = null;
+            }
+            catch(Exception e)
+            {
+                success = false;
+            }
+            finally
+            {
+                if (Directory.Exists(tempPath))
+                    Directory.Delete(tempPath, true);
             }
 
-            showDoc = null;
-
-            File.Delete(path);
-            File.Delete(extractPath);
-
-            return show;
+            return success;
         }
 
         #endregion
