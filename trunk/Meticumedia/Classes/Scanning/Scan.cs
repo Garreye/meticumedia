@@ -32,6 +32,15 @@ namespace Meticumedia
 
         protected bool background = false;
 
+        protected bool scanCanceled { get { return (cancelRequested && !background) || cancelAllRequested; } }
+
+        protected int scanNumber { get; private set; }
+
+        protected void IncrementScanNumber()
+        {
+            ++scanNumber;
+        }
+
         /// <summary>
         /// String to use as dir. if TV folders not setup yet
         /// </summary>
@@ -47,18 +56,53 @@ namespace Meticumedia
         #region Events
 
         /// <summary>
-        /// Static event for indicatong scan progress has changed
+        /// Event indicatong scan progress has changed
         /// </summary>
         public event EventHandler<ProgressChangedEventArgs> ProgressChange;
 
         /// <summary>
-        /// Triggers ScanProgressChange event
+        /// Triggers ProgressChange event
         /// </summary>
         public void OnProgressChange(ScanProcess process, string info, int percent)
         {
             if (ProgressChange != null)
                 ProgressChange(process, new ProgressChangedEventArgs(percent, info));
         }
+
+        /// <summary>
+        /// Event indicatong scan progress has changed
+        /// </summary>
+        public event EventHandler<ItemsInitializedArgs> ItemsInitialized;
+
+        /// <summary>
+        /// Triggers ItemsInitialized event
+        /// </summary>
+        public void OnItemsInitialized(ScanProcess process, List<OrgItem> items)
+        {
+            if (ProgressChange != null)
+                ItemsInitialized(process, new ItemsInitializedArgs(items));
+        }
+
+        /// <summary>
+        /// Scan items initilization event arguments
+        /// </summary>
+        public class ItemsInitializedArgs : EventArgs
+        {
+            public List<OrgItem> Items { get; private set; }
+
+            public ItemsInitializedArgs(List<OrgItem> items)
+            {
+                this.Items = items;
+            }
+        }
+
+
+
+        #endregion
+
+        #region Properties
+
+        public List<OrgItem> Items { get; protected set; }
 
         #endregion
 
@@ -67,6 +111,7 @@ namespace Meticumedia
         public Scan(bool background)
         {
             this.background = background;
+            this.Items = new List<OrgItem>();
         }
 
         #endregion

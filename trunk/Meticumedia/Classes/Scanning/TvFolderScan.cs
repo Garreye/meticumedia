@@ -29,6 +29,7 @@ namespace Meticumedia
         {
             // Set running flag
             scanRunning = true;
+            cancelRequested = false;
 
             // Convert all TV folder to scan folders so we can do a scan of them
             List<OrgFolder> tvFoldersAsOrgFolders = new List<OrgFolder>();
@@ -41,7 +42,8 @@ namespace Meticumedia
             // Do directory scan on all TV folders
             DirectoryScan dirScan = new DirectoryScan(false);
             dirScan.ProgressChange += dirScan_ProgressChange;
-            List<OrgItem> results = dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false, fast);
+            dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false, fast);
+            List<OrgItem> results = dirScan.Items;
 
             // Check if show folder needs to be renamed!
             int number = results.Count;
@@ -69,7 +71,6 @@ namespace Meticumedia
 
             // Clear flags
             scanRunning = false;
-            cancelRequested = false;
 
             // Return results
             return results;

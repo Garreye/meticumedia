@@ -23,6 +23,31 @@ namespace Meticumedia
         #region Variables
 
         /// <summary>
+        /// Instance for running directory scan.
+        /// </summary>
+        private DirectoryScan directoryScan = new DirectoryScan(false);
+
+        /// <summary>
+        /// Instance for running TV missing check
+        /// </summary>
+        private TvMissingScan tvMissingScan = new TvMissingScan(false);
+
+        /// <summary>
+        /// Instance for running TV rename check
+        /// </summary>
+        private TvRenameScan tvRenameScan = new TvRenameScan(false);
+
+        /// <summary>
+        /// Instance for running TV folder scan
+        /// </summary>
+        private TvFolderScan tvFolderScan = new TvFolderScan(false);
+        
+        /// <summary>
+        /// Instance for running movie folder scan
+        /// </summary>
+        private MovieFolderScan movieFolderScan = new MovieFolderScan(false);
+
+        /// <summary>
         /// Items currently displayed in listview. May differ from all items due to ignored/hidden items.
         /// </summary>
         private List<OrgItem> displayItems = new List<OrgItem>();
@@ -77,6 +102,21 @@ namespace Meticumedia
         /// </summary>
         private OrgColumnType sortType = OrgColumnType.Source_Folder;
 
+        /// <summary>
+        /// Indicated scan is currently running
+        /// </summary>
+        private bool scanRunning = false;
+
+        /// <summary>
+        /// Flag that scan has been cancelled
+        /// </summary>
+        private bool scanCancelled = false;
+
+        /// <summary>
+        /// Whether to sort ascending (or descending if false)
+        /// </summary>
+        private bool sortAcending = true;
+
         #endregion
 
         #region Events
@@ -117,11 +157,7 @@ namespace Meticumedia
             scanWorker.DoWork += new DoWorkEventHandler(scanWorker_DoWork);
 
             // Register to scan helper progress change (for tracking prgress of running scan)
-            directoryScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
-            tvMissingScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
-            tvRenameScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
-            tvFolderScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
-            movieFolderScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(ScanHelper_ScanProgressChange);
+            directoryScan.ItemsInitialized += scan_ItemsInitialized;
 
             // Setup context menu
             lvResults.ContextMenu = contextMenu;
@@ -133,6 +169,34 @@ namespace Meticumedia
             cmbScanType.FormattingEnabled = true;
             cmbScanType.Format += cmbScanType_Format;
             cmbScanType.SelectedIndex = 0;
+        }
+
+        private void LinkProgressEvents()
+        {
+            directoryScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            tvMissingScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            tvRenameScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            tvFolderScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            movieFolderScan.ProgressChange += new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+        }
+
+        private void UnlinkProgressEvents()
+        {
+            directoryScan.ProgressChange -= new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            tvMissingScan.ProgressChange -= new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            tvRenameScan.ProgressChange -= new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            tvFolderScan.ProgressChange -= new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+            movieFolderScan.ProgressChange -= new EventHandler<ProgressChangedEventArgs>(scan_ScanProgressChange);
+        }
+
+
+        void scan_ItemsInitialized(object sender, Scan.ItemsInitializedArgs e)
+        {
+            this.scanResults = e.Items;
+            this.Invoke((MethodInvoker)delegate
+            {
+                DisplayResults();
+            });
         }
 
         void cmbScanType_Format(object sender, ListControlConvertEventArgs e)
@@ -268,7 +332,7 @@ namespace Meticumedia
             }
 
             // Update display
-            DisplayResults();
+            DisplayResults(true);
 
         }
 
@@ -291,7 +355,7 @@ namespace Meticumedia
             }
 
             // Update display
-            DisplayResults();
+            DisplayResults(true);
         }
 
         /// <summary>
@@ -495,7 +559,16 @@ namespace Meticumedia
 
         #endregion
 
-        #region Events Handling
+        #region GUI Events Handling
+
+        /// <summary>
+        /// Tooltips setup on load
+        /// </summary>
+        private void ScanControl_Load(object sender, EventArgs e)
+        {
+            ToolTip ttFastScan = new ToolTip();
+            ttFastScan.SetToolTip(chkFast, "Skips all items that require database searching.");
+        }
 
         /// <summary>
         /// Edit list button for directory scan list opens settings to scan folders tab.
@@ -519,7 +592,13 @@ namespace Meticumedia
         /// Run button runs a scan.
         /// </summary>
         private void btnRun_Click(object sender, EventArgs e)
-        {            
+        {
+            if (btnRun.Text == "Cancel")
+            {
+                CancelScan();
+                return;
+            }
+            
             // Setup columns based on scan type to run
             OrgItemListHelper.OrgColumnSetup colSetup;
             ScanType scanType = (ScanType)cmbScanType.SelectedItem;
@@ -540,7 +619,24 @@ namespace Meticumedia
             sortType = OrgColumnType.Source_Folder;
 
             // Run scan
+            ScanRunEnables(false);
             DoScan();
+        }
+
+        private void ScanRunEnables(bool enable)
+        {
+            gbActionFilter.Enabled = enable;
+            gbCategoryFilter.Enabled = enable;
+            cmbScanType.Enabled = enable;
+            cmbScanSelection.Enabled = enable;
+
+            if (enable)
+                btnRun.Text = "Run";
+            else
+            {
+                LinkProgressEvents();
+                btnRun.Text = "Cancel";
+            }
         }
 
         /// <summary>
@@ -583,7 +679,7 @@ namespace Meticumedia
                     itemsChecked = true;
                     break;
                 }
-            btnQueueSelected.Enabled = itemsChecked;
+            btnQueueSelected.Enabled = itemsChecked && !scanRunning;
         }
 
         /// <summary>
@@ -887,6 +983,9 @@ namespace Meticumedia
 
         #region Updating
 
+        /// <summary>
+        /// Update scan selection combo box based on scan type that is selected.
+        /// </summary>
         public void UpdateScanSelection()
         {
             // Save current selection
@@ -986,12 +1085,6 @@ namespace Meticumedia
 
         #region Scanning
 
-        private DirectoryScan directoryScan = new DirectoryScan(false);
-        private TvMissingScan tvMissingScan = new TvMissingScan(false);
-        private TvRenameScan tvRenameScan = new TvRenameScan(false);
-        private TvFolderScan tvFolderScan = new TvFolderScan(false);
-        private MovieFolderScan movieFolderScan = new MovieFolderScan(false);
-
         /// <summary>
         /// Work event for scanning worker.
         /// </summary>
@@ -1005,7 +1098,7 @@ namespace Meticumedia
             switch (scanType)
             {
                 case ScanType.Directory:
-                    scanResults = directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false, (bool)args[2]);
+                    directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false, (bool)args[2]);
                     break;
                 case ScanType.TvMissing:
                     scanResults = tvMissingScan.RunScan((List<Content>)args[1], queuedItems, (bool)args[2]);
@@ -1025,10 +1118,17 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Scan progress is shown in progress bar
+        /// Scan progress is shown in progress bar. Results are shown in listview as they are processed.
         /// </summary>
-        private void ScanHelper_ScanProgressChange(object sender, ProgressChangedEventArgs e)
+        private void scan_ScanProgressChange(object sender, ProgressChangedEventArgs e)
         {
+            if (!scanRunning)
+                this.Invoke((MethodInvoker)delegate
+                {
+                    pbScanProgress.Value = 0;
+                    pbScanProgress.Message = string.Empty;
+                });
+            
             // Get process
             ScanProcess process = (ScanProcess)sender;
             string info = (string)e.UserState;
@@ -1037,6 +1137,8 @@ namespace Meticumedia
             string msg = process.Description();
             if (e.ProgressPercentage == 100)
                 msg += " - Complete";
+            else if (process == ScanProcess.Directory)
+                ;
             else if (process != ScanProcess.FileCollect)
                 msg += " - Processing File '" + Path.GetFileName(info) + "'";
 
@@ -1044,7 +1146,11 @@ namespace Meticumedia
             {
                 // Set message and value
                 pbScanProgress.Message = msg;
-                pbScanProgress.Value = e.ProgressPercentage;
+                if (e.ProgressPercentage > 100)
+                    pbScanProgress.Value = 100;
+                else
+                    pbScanProgress.Value = e.ProgressPercentage;
+                DisplayResults(true);
             });
         }
 
@@ -1059,29 +1165,48 @@ namespace Meticumedia
                 rescanRequired = false;
                 DoScan();
             }
+            else if (scanCancelled)
+            {
+                scanCancelled = false;
+                UnlinkProgressEvents();
+                this.Invoke((MethodInvoker)delegate
+               {
+                   for (int i = scanResults.Count - 1; i >= 0; i--)
+                   {
+                       if (scanResults[i].Action == OrgAction.Processing || scanResults[i].Action == OrgAction.TBD)
+                           scanResults.RemoveAt(i);
+                   }
+                   scanRunning = false;
+                   DisplayResults();
+                   ScanRunEnables(true);
+                   pbScanProgress.Value = 0;
+                   pbScanProgress.Message = string.Empty;
+               });
+            }
             else
             {
                 // Display actions in listview
                 lastClickedColumn = 0;
+                UnlinkProgressEvents();
                 this.Invoke((MethodInvoker)delegate
                 {
                     pbScanProgress.Value = 100;
                     Application.DoEvents(); // TODO: is this needed? Seems hacky!
+                    scanRunning = false;
+
                     DisplayResults();
+                    ScanRunEnables(true);
                 });
             }
         }
 
         /// <summary>
-        /// Whether to sort ascending (or descending if false)
-        /// </summary>
-        private bool sortAcending = true;
-
-        /// <summary>
-        /// Perform scan
+        /// Performs scan
         /// </summary>
         private void DoScan()
         {
+            scanRunning = true;
+            
             // Clear results
             lvResults.Items.Clear();
             pbScanProgress.Value = 0;
@@ -1177,20 +1302,31 @@ namespace Meticumedia
             else
             {
                 rescanRequired = true;
-                directoryScan.CancelScan();
-                tvMissingScan.CancelScan();
-                tvRenameScan.CancelScan();
-                tvFolderScan.CancelScan();
-                movieFolderScan.CancelScan();
+                CancelScan();
             }
 
         }
 
         /// <summary>
+        /// Cancels currently running scan.
+        /// </summary>
+        private void CancelScan()
+        {
+            scanCancelled = true;
+            directoryScan.CancelScan();
+            tvMissingScan.CancelScan();
+            tvRenameScan.CancelScan();
+            tvFolderScan.CancelScan();
+            movieFolderScan.CancelScan();
+            pbScanProgress.Value = 0;
+            pbScanProgress.Message = string.Empty;
+        }
+
+        /// <summary>
         /// Displays scan results in listview
         /// </summary>
-        private void DisplayResults()
-        {
+        private void DisplayResults(bool updating = false)
+        {   
             // Update selection
             OrgItem selItem = null;
             int selIndex = -1;
@@ -1201,41 +1337,21 @@ namespace Meticumedia
             }
             
             // Filter and sort items for display
-            lock (displayItems)
-            {
-                displayItems = FilterResults(scanResults);
-                OrgItem.AscendingSort = sortAcending;
-                OrgItem.Sort(displayItems, sortType);
-            }
+            if (!updating)
+                lock (displayItems)
+                {
+                    displayItems = FilterResults(scanResults);
+                    OrgItem.AscendingSort = sortAcending;
+                    OrgItem.Sort(displayItems, sortType);
+                }
 
             // De-register listview events
             lvResults.SelectedIndexChanged -= new System.EventHandler(this.lvResults_SelectedIndexChanged);
             lvResults.ItemChecked -= new System.Windows.Forms.ItemCheckedEventHandler(this.lvResults_ItemChecked);
 
             lock (displayItems)
-                OrgItemListHelper.DisplayOrgItemInList(displayItems, lvResults, scanColumns);
-
-            // Re-select
-            bool reselected = false;
-            for (int i = 0; i < displayItems.Count; i++)
-                if (displayItems[i] == selItem)
-                {
-                    lvResults.Items[i].Selected = true;
-                    lvResults.Items[i].EnsureVisible();
-                    reselected = true;
-                    break;
-                }
-            if(!reselected)
-            {
-                if (selIndex > lvResults.Items.Count - 1)
-                    selIndex = lvResults.Items.Count - 1;
-                if (selIndex >= 0)
-                {
-                    lvResults.Items[selIndex].Selected = true;
-                    lvResults.Items[selIndex].EnsureVisible();
-                }
-            }
-
+                OrgItemListHelper.DisplayOrgItemInList(displayItems, lvResults, scanColumns, new int[1] { -1 }, updating);
+            
             // Re-register listview events
             lvResults.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvResults_ItemChecked);
             lvResults.SelectedIndexChanged += new System.EventHandler(this.lvResults_SelectedIndexChanged);
@@ -1289,6 +1405,9 @@ namespace Meticumedia
                         if (!chkQueueFilter.Checked)
                             continue;
                         break;
+                    case OrgAction.TBD:
+                    case OrgAction.Processing:
+                        break;
                     default:
                         throw new Exception("Bad filter type");
                 }
@@ -1332,7 +1451,6 @@ namespace Meticumedia
         }
 
         #endregion
-
 
     }
 }

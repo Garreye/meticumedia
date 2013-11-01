@@ -217,6 +217,7 @@ namespace Meticumedia
                             bool resultsCheckSet = orgItem.Check != CheckState.Indeterminate;
                             bool check;
                             Color backColor = Color.Transparent;
+                            Color foreColor = Color.Black;
                             if (resultsCheckSet)
                                 check = orgItem.Check == CheckState.Checked;
                             else
@@ -246,10 +247,17 @@ namespace Meticumedia
                                     if (!resultsCheckSet)
                                         check = false;
                                     break;
+                                case OrgAction.Processing:
+                                    check = false;
+                                    foreColor = Color.Gray;
+                                    break;
+                                case OrgAction.TBD:
+                                    check = false;
+                                    foreColor = Color.LightGray;
+                                    break;
                                 default:
                                     // Check only allowed on actions above this
-                                    if (!resultsCheckSet)
-                                        check = false;
+                                    check = false;
                                     break;
                             }
 
@@ -286,6 +294,8 @@ namespace Meticumedia
                             // Apply background color to item
                             if (backColor != Color.Transparent && item.BackColor != backColor)
                                 item.BackColor = backColor;
+                            if(item.ForeColor != foreColor)
+                                item.ForeColor = foreColor;
                         }
                         // Apply change to text for updates
                         else if (update)

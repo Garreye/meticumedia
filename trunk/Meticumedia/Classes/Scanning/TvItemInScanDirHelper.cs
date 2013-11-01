@@ -39,6 +39,8 @@ namespace Meticumedia
 
         #region Updating
 
+        public static bool Initialized = false;
+
         // TV episode from scan directory
         public static List<OrgItem> Items = new List<OrgItem>();
 
@@ -67,7 +69,8 @@ namespace Meticumedia
             if (dirScanSearch)
             {
                 DirectoryScan scan = new DirectoryScan(true);
-                Items = scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true, true);
+                scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true, true);
+                Items = scan.Items;
             }
 
             // Update missing
@@ -77,6 +80,8 @@ namespace Meticumedia
 
             // Trigger event indicating update has occured
             OnItemsUpdate();
+            if (dirScanSearch)
+                Initialized = true;
         }
 
         /// <summary>

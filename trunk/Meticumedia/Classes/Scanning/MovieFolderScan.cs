@@ -167,7 +167,7 @@ namespace Meticumedia
             for (int i = 0; i < files.Count; i++)
             {
                 // Check for cancellation
-                if (cancelRequested || cancelAllRequested)
+                if (scanCanceled)
                     break;
 
                 // Update progress
@@ -221,7 +221,7 @@ namespace Meticumedia
             for (int i = 0; i < files.Count; i++)
             {
                 // Check for cancellation
-                if (cancelRequested || cancelAllRequested)
+                if (scanCanceled)
                     break;
 
                 // Update progress

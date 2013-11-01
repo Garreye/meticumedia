@@ -33,11 +33,6 @@ namespace Meticumedia
         private List<TvShow> temporaryShows = new List<TvShow>();
 
         /// <summary>
-        /// Dictionary of scan results indexed by scan number (multiple scan threads could be running so need index to separate where items belong).
-        /// </summary>
-        private List<OrgItem> scanResults = new List<OrgItem>();
-
-        /// <summary>
         /// Local list of items are currently queued to be processed. (Could perform scan on directory that has items in queue, so we don't want to
         /// proposed actions for those.)
         /// </summary>
@@ -110,18 +105,10 @@ namespace Meticumedia
         /// <param name="tvOnly">Whether ignore all files that aren't TV video files</param>
         /// <param name="background">Whether scan is running in background (ignores user cancellations)</param>
         /// <returns>List of actions</returns>
-        public List<OrgItem> RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, bool tvOnly, bool skipDatabaseMatching, bool fast)
+        public void RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, bool tvOnly, bool skipDatabaseMatching, bool fast)
         {
-            // Set scan to running
-            scanRunning = true;
-
             // Go thorough each folder and create actions for all files
-            List<OrgItem> results = RunScan(folders, queuedItems, 100, tvOnly, skipDatabaseMatching, fast);
-
-            scanRunning = false;
-            cancelRequested = false;
-
-            return results;
+            RunScan(folders, queuedItems, 100, tvOnly, skipDatabaseMatching, fast);           
         }
 
         /// <summary>
@@ -134,46 +121,67 @@ namespace Meticumedia
         /// <param name="progressAmount">Percentage that directory scan represents of total scan</param>
         /// <param name="tvOnly">Whether ignore all files that aren't TV video files</param>
         /// <param name="background">Whether scan is running in background (ignores user cancellations)</param>
-        public List<OrgItem> RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, double progressAmount, bool tvOnly, bool skipDatabaseMatching, bool fast)
+        public void RunScan(List<OrgFolder> folders, List<OrgItem> queuedItems, double progressAmount, bool tvOnly, bool skipDatabaseMatching, bool fast)
         {
+            // Set scan to running
+            scanRunning = true;
+            cancelRequested = false;
+            IncrementScanNumber();
+
             // Update progress
             OnProgressChange(ScanProcess.FileCollect, string.Empty, 0);
             dirScanProgressAmount = progressAmount;
 
             // Clear update variables
-            processingFiles = new List<string>();
             processStarted = 0;
             processEnded = 0;
+
+            // Initialize variables used in scan
+            List<OrgPath> paths;
+            lock (directoryScanLock)
+            {
+                itemsInQueue = queuedItems;
+                temporaryShows = new List<TvShow>();
+
+                // Create items
+                paths = GetFolderFiles(folders);
+                this.Items.Clear();
+                foreach(OrgPath path in paths)
+                    this.Items.Add(new OrgItem(OrgAction.TBD, path.Path, FileHelper.FileCategory.Unknown, path.OrgFolder));
+            }
+            OnItemsInitialized(ScanProcess.Directory, this.Items);
 
             // Create processing object
             OrgProcessing processing = new OrgProcessing(ThreadProcess);
             int directoryScanNumber = processing.ProcessNumber;
 
-            // Initialize variables used in scan
-            lock (directoryScanLock)
-            {
-                itemsInQueue = queuedItems;
-                temporaryShows = new List<TvShow>();
-                scanResults = new List<OrgItem>();
-            }
-
             // Build arguments
-            object[] args = new object[] { tvOnly, skipDatabaseMatching, fast };
+            object[] args = new object[] { tvOnly, skipDatabaseMatching, fast, scanNumber };
 
             // Run processing
             if (this.background)
             {
                 bool cancel = false;
-                processing.Run(GetFolderFiles(folders), ref cancel, args);
+                processing.Run(paths, ref cancel, args);
             }
             else
-                processing.Run(GetFolderFiles(folders), ref cancelRequested, args);
+                processing.Run(paths, ref cancelRequested, args);
 
-            // Update progress
-            OnProgressChange(ScanProcess.Directory, string.Empty, (int)progressAmount);
-
-            // Return results
-            return scanResults;
+            // Set items to new object
+            if (scanCanceled)
+            {
+                lock (directoryScanLock)
+                {
+                    int count = this.Items.Count;
+                    this.Items = new List<OrgItem>();
+                    for (int i = 0; i < count; i++)
+                        this.Items.Add(new OrgItem());
+                }
+            }
+            else
+                OnProgressChange(ScanProcess.Directory, string.Empty, (int)progressAmount);
+            
+            scanRunning = false;
         }
 
         /// <summary>
@@ -194,10 +202,7 @@ namespace Meticumedia
             bool tvOnlyCheck = (bool)args[0];
             bool skipMatching = (bool)args[1];
             bool fast = (bool)args[2];
-
-            // Check for cancellation
-            if ((cancelRequested && !background) || cancelAllRequested)
-                return;
+            int procNumber = (int)scanNumber;
 
             // Get simple file name
             string simpleFile = FileHelper.BasicSimplify(Path.GetFileNameWithoutExtension(orgPath.Path), false);
@@ -209,7 +214,16 @@ namespace Meticumedia
             if (tvOnlyCheck && fileCat != FileHelper.FileCategory.TvVideo)
                 return;
 
+            // Check for cancellation
+            if (scanCanceled || procNumber < scanNumber)
+                return;
+
             // Update progress
+            lock (directoryScanLock)
+            {
+                this.Items[pathNum].Action = OrgAction.Processing;
+                this.Items[pathNum].Category = fileCat;
+            }
             ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
 
             // Check if file is in the queue
@@ -220,7 +234,7 @@ namespace Meticumedia
                     OrgItem newItem = new OrgItem(itemsInQueue[i]);
                     newItem.Action = OrgAction.Queued;
                     newItem.Check = System.Windows.Forms.CheckState.Unchecked;
-                    AddResult(newItem);
+                    UpdateResult(newItem, pathNum, procNumber);
                     alreadyQueued = true;
                     break;
                 }
@@ -254,6 +268,9 @@ namespace Meticumedia
                         matches.Add(show, match);
                 }
 
+            // Check for cancellation
+            if (scanCanceled || procNumber < scanNumber)
+                return;
 
             // Add appropriate action based on file category
             switch (fileCat)
@@ -263,7 +280,7 @@ namespace Meticumedia
                     // Check if sample!
                     if (orgPath.Path.ToLower().Contains("sample"))
                     {
-                        AddDeleteAction(orgPath, fileCat);
+                        SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
                         break;
                     }
 
@@ -358,7 +375,7 @@ namespace Meticumedia
                                     newItem.Check = System.Windows.Forms.CheckState.Unchecked;
                                 else
                                     newItem.Check = System.Windows.Forms.CheckState.Checked;
-                                AddResult(newItem);
+                                UpdateResult(newItem, pathNum, procNumber);
                                 matched = true;
                             }
                         }
@@ -370,11 +387,11 @@ namespace Meticumedia
                         // Try to match to a movie
                         OrgItem movieItem;
                         if (CreateMovieAction(orgPath, out movieItem, fast))
-                            AddResult(movieItem);
+                            UpdateResult(movieItem, pathNum, procNumber);
                         else
                         {
                             OrgItem newItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
-                            AddResult(newItem);
+                            UpdateResult(newItem, pathNum, procNumber);
                         }
                     }
 
@@ -388,24 +405,28 @@ namespace Meticumedia
 
                     // If delete action created (for sample file)
                     if (item.Action == OrgAction.Delete)
-                        AddDeleteAction(orgPath, fileCat);
+                        SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
                     else
-                        AddResult(item);
+                        UpdateResult(item, pathNum, procNumber);
                     break;
 
                 // Trash
                 case FileHelper.FileCategory.Trash:
-                    AddDeleteAction(orgPath, fileCat);
+                    SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
                     break;
                 // Ignore
                 case FileHelper.FileCategory.Ignored:
-                    AddResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder));
+                    UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder), pathNum, procNumber);
                     break;
                 // Unknown
                 default:
-                    AddResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder));
+                    UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder), pathNum, procNumber);
                     break;
             }
+
+            // Check for cancellation
+            if (scanCanceled || procNumber < scanNumber)
+                return;
 
             // Update progress
             ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
@@ -415,11 +436,6 @@ namespace Meticumedia
         /// Lock for processing update variables
         /// </summary>
         private object processLock = new object();
-
-        /// <summary>
-        /// List of files currently being processed
-        /// </summary>
-        private List<string> processingFiles = new List<string>();
 
         /// <summary>
         /// Number of processes that have been at least started
@@ -444,25 +460,16 @@ namespace Meticumedia
             lock (processLock)
             {
                 if (starting)
-                {
-                    processingFiles.Add(file);
                     processStarted++;
-                }
                 else
-                {
-                    processingFiles.Remove(file);
                     processEnded++;
-                }
             }
 
             // Update progress
             int perc = (int)Math.Round((double)(processStarted + processEnded) / (totalPaths * 2) * dirScanProgressAmount);
-            string path;
-            if (processingFiles.Count > 1) 
-                path = processingFiles.Count + " others";
-            else
-                path = processingFiles.Count > 0 ? processingFiles[0] : file;
-            OnProgressChange(ScanProcess.Directory, path, perc);
+
+            if (!scanCanceled)
+                OnProgressChange(ScanProcess.Directory, string.Empty, perc);
         }
 
         /// <summary>
@@ -470,10 +477,13 @@ namespace Meticumedia
         /// </summary>
         /// <param name="scanNum">The scan number to add item to</param>
         /// <param name="item">Item to add to results list</param>
-        private void AddResult(OrgItem item)
+        private void UpdateResult(OrgItem item, int pathNum, int procNum)
         {
+            if (scanCanceled || procNum < scanNumber)
+                return;
+
             lock (directoryScanLock)
-                scanResults.Add(item);
+                this.Items[pathNum].UpdateInfo(item);
         }
 
         /// <summary>
@@ -538,19 +548,19 @@ namespace Meticumedia
         /// <param name="scanResults">The current scan action list to add action to.</param>
         /// <param name="file">The file to be deleted</param>
         /// <param name="fileCat">The category of the file</param>
-        private void AddDeleteAction(OrgPath file, FileHelper.FileCategory fileCat)
+        private void SetDeleteAction(OrgPath file, FileHelper.FileCategory fileCat, int pathNum, int procNum)
         {
             OrgItem newItem;
             if (file.AllowDelete)
             {
                 newItem = new OrgItem(OrgAction.Delete, file.Path, fileCat, file.OrgFolder);
                 newItem.Check = System.Windows.Forms.CheckState.Checked;
-                AddResult(newItem);
+                UpdateResult(newItem, pathNum, procNum);
             }
             else
             {
                 newItem = new OrgItem(OrgAction.None, file.Path, fileCat, file.OrgFolder);
-                AddResult(newItem);
+                UpdateResult(newItem, pathNum, procNum);
             }
         }
 

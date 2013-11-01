@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Meticumedia
 {
@@ -29,10 +30,13 @@ namespace Meticumedia
         {
             // Set running flag
             scanRunning = true;
+            cancelRequested = false;
 
             // Do directory check on all directories (to look for missing episodes)
-            DirectoryScan dirScan = new DirectoryScan(false);
-            List<OrgItem> directoryItems = dirScan.RunScan(Settings.ScanDirectories, queuedItems, 70, true, true, false);
+            while (!TvItemInScanDirHelper.Initialized)
+                Thread.Sleep(100);
+
+            List<OrgItem> directoryItems = TvItemInScanDirHelper.Items;
 
             // Initialiaze scan items
             List<OrgItem> missingCheckItem = new List<OrgItem>();
@@ -121,7 +125,6 @@ namespace Meticumedia
 
             // Clear flags
             scanRunning = false;
-            cancelRequested = false;
 
             // Return results
             return missingCheckItem;

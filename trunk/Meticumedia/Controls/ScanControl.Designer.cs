@@ -46,7 +46,6 @@ namespace Meticumedia
             this.chkTrashCatFilter = new System.Windows.Forms.CheckBox();
             this.chkUnknownCatFilter = new System.Windows.Forms.CheckBox();
             this.chkCustomCatFilter = new System.Windows.Forms.CheckBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.chkNonTvCatFilter = new System.Windows.Forms.CheckBox();
             this.chkTvCatFilter = new System.Windows.Forms.CheckBox();
             this.chkRenameFilter = new System.Windows.Forms.CheckBox();
@@ -54,11 +53,12 @@ namespace Meticumedia
             this.chkDelFilter = new System.Windows.Forms.CheckBox();
             this.chkMoveCopyFilter = new System.Windows.Forms.CheckBox();
             this.chkNoneFilter = new System.Windows.Forms.CheckBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.chkIgnoreCatFilter = new System.Windows.Forms.CheckBox();
             this.btnModAction = new System.Windows.Forms.Button();
             this.chkRenameDelete = new System.Windows.Forms.CheckBox();
             this.chkMoveCopy = new System.Windows.Forms.CheckBox();
+            this.gbActionFilter = new System.Windows.Forms.GroupBox();
+            this.gbCategoryFilter = new System.Windows.Forms.GroupBox();
             this.lvResults = new Meticumedia.DoubleBufferedListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -70,6 +70,8 @@ namespace Meticumedia
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.gbActionFilter.SuspendLayout();
+            this.gbCategoryFilter.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnQueueSelected
@@ -176,21 +178,9 @@ namespace Meticumedia
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox2.Controls.Add(this.chkQueueFilter);
-            this.groupBox2.Controls.Add(this.chkFolderCatFilter);
-            this.groupBox2.Controls.Add(this.chkTrashCatFilter);
-            this.groupBox2.Controls.Add(this.chkUnknownCatFilter);
-            this.groupBox2.Controls.Add(this.chkCustomCatFilter);
-            this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Controls.Add(this.chkNonTvCatFilter);
-            this.groupBox2.Controls.Add(this.chkTvCatFilter);
-            this.groupBox2.Controls.Add(this.chkRenameFilter);
+            this.groupBox2.Controls.Add(this.gbCategoryFilter);
+            this.groupBox2.Controls.Add(this.gbActionFilter);
             this.groupBox2.Controls.Add(this.label2);
-            this.groupBox2.Controls.Add(this.chkDelFilter);
-            this.groupBox2.Controls.Add(this.chkMoveCopyFilter);
-            this.groupBox2.Controls.Add(this.chkNoneFilter);
-            this.groupBox2.Controls.Add(this.label1);
-            this.groupBox2.Controls.Add(this.chkIgnoreCatFilter);
             this.groupBox2.Controls.Add(this.btnModAction);
             this.groupBox2.Controls.Add(this.chkRenameDelete);
             this.groupBox2.Controls.Add(this.chkMoveCopy);
@@ -206,7 +196,7 @@ namespace Meticumedia
             // chkQueueFilter
             // 
             this.chkQueueFilter.AutoSize = true;
-            this.chkQueueFilter.Location = new System.Drawing.Point(363, 22);
+            this.chkQueueFilter.Location = new System.Drawing.Point(290, 20);
             this.chkQueueFilter.Name = "chkQueueFilter";
             this.chkQueueFilter.Size = new System.Drawing.Size(64, 17);
             this.chkQueueFilter.TabIndex = 35;
@@ -219,7 +209,7 @@ namespace Meticumedia
             this.chkFolderCatFilter.AutoSize = true;
             this.chkFolderCatFilter.Checked = true;
             this.chkFolderCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkFolderCatFilter.Location = new System.Drawing.Point(468, 45);
+            this.chkFolderCatFilter.Location = new System.Drawing.Point(388, 20);
             this.chkFolderCatFilter.Name = "chkFolderCatFilter";
             this.chkFolderCatFilter.Size = new System.Drawing.Size(55, 17);
             this.chkFolderCatFilter.TabIndex = 34;
@@ -232,7 +222,7 @@ namespace Meticumedia
             this.chkTrashCatFilter.AutoSize = true;
             this.chkTrashCatFilter.Checked = true;
             this.chkTrashCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkTrashCatFilter.Location = new System.Drawing.Point(331, 45);
+            this.chkTrashCatFilter.Location = new System.Drawing.Point(251, 20);
             this.chkTrashCatFilter.Name = "chkTrashCatFilter";
             this.chkTrashCatFilter.Size = new System.Drawing.Size(53, 17);
             this.chkTrashCatFilter.TabIndex = 33;
@@ -245,7 +235,7 @@ namespace Meticumedia
             this.chkUnknownCatFilter.AutoSize = true;
             this.chkUnknownCatFilter.Checked = true;
             this.chkUnknownCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkUnknownCatFilter.Location = new System.Drawing.Point(390, 45);
+            this.chkUnknownCatFilter.Location = new System.Drawing.Point(310, 20);
             this.chkUnknownCatFilter.Name = "chkUnknownCatFilter";
             this.chkUnknownCatFilter.Size = new System.Drawing.Size(72, 17);
             this.chkUnknownCatFilter.TabIndex = 32;
@@ -258,7 +248,7 @@ namespace Meticumedia
             this.chkCustomCatFilter.AutoSize = true;
             this.chkCustomCatFilter.Checked = true;
             this.chkCustomCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkCustomCatFilter.Location = new System.Drawing.Point(264, 45);
+            this.chkCustomCatFilter.Location = new System.Drawing.Point(184, 20);
             this.chkCustomCatFilter.Name = "chkCustomCatFilter";
             this.chkCustomCatFilter.Size = new System.Drawing.Size(61, 17);
             this.chkCustomCatFilter.TabIndex = 31;
@@ -266,21 +256,12 @@ namespace Meticumedia
             this.chkCustomCatFilter.UseVisualStyleBackColor = true;
             this.chkCustomCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 45);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(77, 13);
-            this.label3.TabIndex = 30;
-            this.label3.Text = "Category Filter:";
-            // 
             // chkNonTvCatFilter
             // 
             this.chkNonTvCatFilter.AutoSize = true;
             this.chkNonTvCatFilter.Checked = true;
             this.chkNonTvCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkNonTvCatFilter.Location = new System.Drawing.Point(165, 45);
+            this.chkNonTvCatFilter.Location = new System.Drawing.Point(85, 20);
             this.chkNonTvCatFilter.Name = "chkNonTvCatFilter";
             this.chkNonTvCatFilter.Size = new System.Drawing.Size(93, 17);
             this.chkNonTvCatFilter.TabIndex = 29;
@@ -293,7 +274,7 @@ namespace Meticumedia
             this.chkTvCatFilter.AutoSize = true;
             this.chkTvCatFilter.Checked = true;
             this.chkTvCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkTvCatFilter.Location = new System.Drawing.Point(89, 44);
+            this.chkTvCatFilter.Location = new System.Drawing.Point(9, 19);
             this.chkTvCatFilter.Name = "chkTvCatFilter";
             this.chkTvCatFilter.Size = new System.Drawing.Size(70, 17);
             this.chkTvCatFilter.TabIndex = 28;
@@ -306,7 +287,7 @@ namespace Meticumedia
             this.chkRenameFilter.AutoSize = true;
             this.chkRenameFilter.Checked = true;
             this.chkRenameFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkRenameFilter.Location = new System.Drawing.Point(228, 21);
+            this.chkRenameFilter.Location = new System.Drawing.Point(155, 19);
             this.chkRenameFilter.Name = "chkRenameFilter";
             this.chkRenameFilter.Size = new System.Drawing.Size(66, 17);
             this.chkRenameFilter.TabIndex = 27;
@@ -329,7 +310,7 @@ namespace Meticumedia
             this.chkDelFilter.AutoSize = true;
             this.chkDelFilter.Checked = true;
             this.chkDelFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDelFilter.Location = new System.Drawing.Point(300, 21);
+            this.chkDelFilter.Location = new System.Drawing.Point(227, 19);
             this.chkDelFilter.Name = "chkDelFilter";
             this.chkDelFilter.Size = new System.Drawing.Size(57, 17);
             this.chkDelFilter.TabIndex = 21;
@@ -342,7 +323,7 @@ namespace Meticumedia
             this.chkMoveCopyFilter.AutoSize = true;
             this.chkMoveCopyFilter.Checked = true;
             this.chkMoveCopyFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkMoveCopyFilter.Location = new System.Drawing.Point(140, 21);
+            this.chkMoveCopyFilter.Location = new System.Drawing.Point(64, 19);
             this.chkMoveCopyFilter.Name = "chkMoveCopyFilter";
             this.chkMoveCopyFilter.Size = new System.Drawing.Size(82, 17);
             this.chkMoveCopyFilter.TabIndex = 20;
@@ -355,7 +336,7 @@ namespace Meticumedia
             this.chkNoneFilter.AutoSize = true;
             this.chkNoneFilter.Checked = true;
             this.chkNoneFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkNoneFilter.Location = new System.Drawing.Point(82, 21);
+            this.chkNoneFilter.Location = new System.Drawing.Point(6, 19);
             this.chkNoneFilter.Name = "chkNoneFilter";
             this.chkNoneFilter.Size = new System.Drawing.Size(52, 17);
             this.chkNoneFilter.TabIndex = 19;
@@ -363,19 +344,10 @@ namespace Meticumedia
             this.chkNoneFilter.UseVisualStyleBackColor = true;
             this.chkNoneFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 22);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 13);
-            this.label1.TabIndex = 18;
-            this.label1.Text = "Action Filter:";
-            // 
             // chkIgnoreCatFilter
             // 
             this.chkIgnoreCatFilter.AutoSize = true;
-            this.chkIgnoreCatFilter.Location = new System.Drawing.Point(529, 45);
+            this.chkIgnoreCatFilter.Location = new System.Drawing.Point(449, 20);
             this.chkIgnoreCatFilter.Name = "chkIgnoreCatFilter";
             this.chkIgnoreCatFilter.Size = new System.Drawing.Size(62, 17);
             this.chkIgnoreCatFilter.TabIndex = 17;
@@ -419,6 +391,36 @@ namespace Meticumedia
             this.chkMoveCopy.UseVisualStyleBackColor = true;
             this.chkMoveCopy.CheckedChanged += new System.EventHandler(this.chkMoveCopy_CheckedChanged);
             // 
+            // gbActionFilter
+            // 
+            this.gbActionFilter.Controls.Add(this.chkNoneFilter);
+            this.gbActionFilter.Controls.Add(this.chkQueueFilter);
+            this.gbActionFilter.Controls.Add(this.chkMoveCopyFilter);
+            this.gbActionFilter.Controls.Add(this.chkDelFilter);
+            this.gbActionFilter.Controls.Add(this.chkRenameFilter);
+            this.gbActionFilter.Location = new System.Drawing.Point(9, 19);
+            this.gbActionFilter.Name = "gbActionFilter";
+            this.gbActionFilter.Size = new System.Drawing.Size(362, 47);
+            this.gbActionFilter.TabIndex = 36;
+            this.gbActionFilter.TabStop = false;
+            this.gbActionFilter.Text = "Action Filter";
+            // 
+            // gbCategoryFilter
+            // 
+            this.gbCategoryFilter.Controls.Add(this.chkTvCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkIgnoreCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkFolderCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkNonTvCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkTrashCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkCustomCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkUnknownCatFilter);
+            this.gbCategoryFilter.Location = new System.Drawing.Point(377, 19);
+            this.gbCategoryFilter.Name = "gbCategoryFilter";
+            this.gbCategoryFilter.Size = new System.Drawing.Size(522, 47);
+            this.gbCategoryFilter.TabIndex = 37;
+            this.gbCategoryFilter.TabStop = false;
+            this.gbCategoryFilter.Text = "Category Filter";
+            // 
             // lvResults
             // 
             this.lvResults.Activation = System.Windows.Forms.ItemActivation.TwoClick;
@@ -431,9 +433,9 @@ namespace Meticumedia
             this.columnHeader2,
             this.columnHeader3});
             this.lvResults.FullRowSelect = true;
-            this.lvResults.Location = new System.Drawing.Point(6, 68);
+            this.lvResults.Location = new System.Drawing.Point(9, 72);
             this.lvResults.Name = "lvResults";
-            this.lvResults.Size = new System.Drawing.Size(969, 331);
+            this.lvResults.Size = new System.Drawing.Size(966, 327);
             this.lvResults.TabIndex = 11;
             this.lvResults.UseCompatibleStateImageBehavior = false;
             this.lvResults.View = System.Windows.Forms.View.Details;
@@ -475,6 +477,7 @@ namespace Meticumedia
             this.Controls.Add(this.groupBox1);
             this.Name = "ScanControl";
             this.Size = new System.Drawing.Size(994, 532);
+            this.Load += new System.EventHandler(this.ScanControl_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -484,6 +487,10 @@ namespace Meticumedia
             this.splitContainer1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.gbActionFilter.ResumeLayout(false);
+            this.gbActionFilter.PerformLayout();
+            this.gbCategoryFilter.ResumeLayout(false);
+            this.gbCategoryFilter.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -507,13 +514,11 @@ namespace Meticumedia
         private System.Windows.Forms.CheckBox chkDelFilter;
         private System.Windows.Forms.CheckBox chkMoveCopyFilter;
         private System.Windows.Forms.CheckBox chkNoneFilter;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkRenameFilter;
         private System.Windows.Forms.CheckBox chkTvCatFilter;
         private System.Windows.Forms.CheckBox chkNonTvCatFilter;
         private System.Windows.Forms.CheckBox chkCustomCatFilter;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox chkTrashCatFilter;
         private System.Windows.Forms.CheckBox chkUnknownCatFilter;
         private System.Windows.Forms.CheckBox chkFolderCatFilter;
@@ -522,5 +527,7 @@ namespace Meticumedia
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox chkFast;
+        private System.Windows.Forms.GroupBox gbCategoryFilter;
+        private System.Windows.Forms.GroupBox gbActionFilter;
     }
 }
