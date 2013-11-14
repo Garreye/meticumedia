@@ -147,7 +147,7 @@ namespace Meticumedia
                 paths = GetFolderFiles(folders);
                 this.Items.Clear();
                 foreach(OrgPath path in paths)
-                    this.Items.Add(new OrgItem(OrgAction.TBD, path.Path, FileHelper.FileCategory.Unknown, path.OrgFolder));
+                    this.Items.Add(new OrgItem(OrgAction.TBD, path.Path, FileCategory.Unknown, path.OrgFolder));
             }
             OnItemsInitialized(ScanProcess.Directory, this.Items);
 
@@ -208,10 +208,10 @@ namespace Meticumedia
             string simpleFile = FileHelper.BasicSimplify(Path.GetFileNameWithoutExtension(orgPath.Path), false);
 
             // Categorize the file
-            FileHelper.FileCategory fileCat = FileHelper.CategorizeFile(orgPath);
+            FileCategory fileCat = FileHelper.CategorizeFile(orgPath);
 
             // Check tv
-            if (tvOnlyCheck && fileCat != FileHelper.FileCategory.TvVideo)
+            if (tvOnlyCheck && fileCat != FileCategory.TvVideo)
                 return;
 
             // Check for cancellation
@@ -276,14 +276,7 @@ namespace Meticumedia
             switch (fileCat)
             {
                 // TV item
-                case FileHelper.FileCategory.TvVideo:
-                    // Check if sample!
-                    if (orgPath.Path.ToLower().Contains("sample"))
-                    {
-                        SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
-                        break;
-                    }
-
+                case FileCategory.TvVideo:
                     bool matched = false;
 
                     TvShow bestMatch = null;
@@ -398,7 +391,7 @@ namespace Meticumedia
                     break;
 
                 // Movie item
-                case FileHelper.FileCategory.NonTvVideo:
+                case FileCategory.NonTvVideo:    
                     // Create action
                     OrgItem item;
                     CreateMovieAction(orgPath, out item, fast);
@@ -411,11 +404,11 @@ namespace Meticumedia
                     break;
 
                 // Trash
-                case FileHelper.FileCategory.Trash:
+                case FileCategory.Trash:
                     SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
                     break;
                 // Ignore
-                case FileHelper.FileCategory.Ignored:
+                case FileCategory.Ignored:
                     UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder), pathNum, procNumber);
                     break;
                 // Unknown
@@ -495,7 +488,7 @@ namespace Meticumedia
         private bool CreateMovieAction(OrgPath file, out OrgItem item, bool fast)
         {
             // Initialize item
-            item = new OrgItem(OrgAction.None, file.Path, FileHelper.FileCategory.NonTvVideo, file.OrgFolder);
+            item = new OrgItem(OrgAction.None, file.Path, FileCategory.NonTvVideo, file.OrgFolder);
 
             // Check if sample!
             if (file.Path.ToLower().Contains("sample"))
@@ -548,7 +541,7 @@ namespace Meticumedia
         /// <param name="scanResults">The current scan action list to add action to.</param>
         /// <param name="file">The file to be deleted</param>
         /// <param name="fileCat">The category of the file</param>
-        private void SetDeleteAction(OrgPath file, FileHelper.FileCategory fileCat, int pathNum, int procNum)
+        private void SetDeleteAction(OrgPath file, FileCategory fileCat, int pathNum, int procNum)
         {
             OrgItem newItem;
             if (file.AllowDelete)

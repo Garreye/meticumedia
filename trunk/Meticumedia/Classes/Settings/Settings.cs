@@ -60,9 +60,17 @@ namespace Meticumedia
 
         public static GuiSettings GuiControl = new GuiSettings();
 
-        public static int NumProcessingThreads = 20;
+#if DEBUG
+        public static int NumProcessingThreads = 1;
+        public static int NumSimultaneousSearches = 1;
+#else
+        public static int NumProcessingThreads = 10;
+        public static int NumSimultaneousSearches = 5;
+#endif
 
         public static TvDataBaseSelection DefaultTvDatabase = TvDataBaseSelection.TheTvDb;
+
+        public static MovieDatabaseSelection DefaultMovieDatabase = MovieDatabaseSelection.TheMovieDb;
 
         #endregion
 

@@ -439,7 +439,7 @@ namespace Meticumedia
             // Build org item
             OrgAction action = copyAction ? OrgAction.Move : OrgAction.Copy;
             string destination = show.BuildFilePath(ep1, ep2, Path.GetExtension(ofd.FileName));
-            OrgItem item = new OrgItem(OrgStatus.Found, action, ofd.FileName, destination, ep1, ep2, FileHelper.FileCategory.TvVideo, null);
+            OrgItem item = new OrgItem(OrgStatus.Found, action, ofd.FileName, destination, ep1, ep2, FileCategory.TvVideo, null);
 
             // Display modifier
             if (showActionModifer)

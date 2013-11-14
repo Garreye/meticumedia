@@ -10,16 +10,27 @@ using System.Text;
 namespace Meticumedia
 {
     /// <summary>
-    /// Helper class for accessing TV database.
+    /// Helper class for accessing TV databases.
     /// </summary>
     public class TvDatabaseHelper
     {
-        #region Searching/Updating
+        #region Databases
 
+        /// <summary>
+        /// TV Rage database
+        /// </summary>
         private static TvRageAccess TvRageAccess = new TvRageAccess();
 
+        /// <summary>
+        /// TheTVDb database
+        /// </summary>
         private static TheTvDbAccess TheTvDbAccess = new TheTvDbAccess();
 
+        /// <summary>
+        /// Get private database to use from selection
+        /// </summary>
+        /// <param name="selection">Database selection</param>
+        /// <returns></returns>
         private static TvDatabaseAccess GetDataBaseAccess(TvDataBaseSelection selection)
         {
             switch (selection)
@@ -32,6 +43,10 @@ namespace Meticumedia
                     throw new Exception("Unknown database selection");
             }
         }
+
+        #endregion
+
+        #region Searching/Updating
 
         /// <summary>
         /// Gets database server's time
@@ -60,7 +75,7 @@ namespace Meticumedia
         /// <returns>Array of results from the search</returns>
         public static List<Content> PerformTvShowSearch(TvDataBaseSelection selection, string searchString, bool includeSummaries)
         {
-            return GetDataBaseAccess(selection).PerformTvShowSearch(searchString, includeSummaries);
+            return GetDataBaseAccess(selection).PerformSearch(searchString, includeSummaries);
         }
 
         /// <summary>
@@ -69,7 +84,7 @@ namespace Meticumedia
         /// <param name="show">Show to load episode information into</param>
         public static void FullShowSeasonsUpdate(TvShow show)
         {
-            GetDataBaseAccess(show.DataBase).FullShowSeasonsUpdate(show);
+            GetDataBaseAccess(show.DataBase).FullUpdate(show);
             show.LastUpdated = DateTime.Now;
         }
 

@@ -48,16 +48,6 @@ namespace Meticumedia
         private MovieFolderScan movieFolderScan = new MovieFolderScan(false);
 
         /// <summary>
-        /// Items currently displayed in listview. May differ from all items due to ignored/hidden items.
-        /// </summary>
-        private List<OrgItem> displayItems = new List<OrgItem>();
-
-        /// <summary>
-        /// List of organization items resulting from last run scan
-        /// </summary>
-        private List<OrgItem> scanResults = new List<OrgItem>();
-
-        /// <summary>
         /// Items that are currently in the queue
         /// </summary>
         private List<OrgItem> queuedItems;
@@ -71,16 +61,6 @@ namespace Meticumedia
         /// Currently run scan type.
         /// </summary>
         private ScanType currentScan = ScanType.Directory;
-
-        /// <summary>
-        /// Set of column contained in the scan listview
-        /// </summary>
-        private Dictionary<OrgColumnType, OrgItemColumn> scanColumns;
-
-        /// <summary>
-        /// Last column clicked in scan listview
-        /// </summary>
-        private OrgColumnType lastClickedColumn = 0;
 
         /// <summary>
         /// Worker for processing scan.
@@ -98,11 +78,6 @@ namespace Meticumedia
         private ContextMenu contextMenu = new ContextMenu();
 
         /// <summary>
-        /// Column type listview is currently sorted on
-        /// </summary>
-        private OrgColumnType sortType = OrgColumnType.Source_Folder;
-
-        /// <summary>
         /// Indicated scan is currently running
         /// </summary>
         private bool scanRunning = false;
@@ -111,11 +86,6 @@ namespace Meticumedia
         /// Flag that scan has been cancelled
         /// </summary>
         private bool scanCancelled = false;
-
-        /// <summary>
-        /// Whether to sort ascending (or descending if false)
-        /// </summary>
-        private bool sortAcending = true;
 
         #endregion
 
@@ -232,14 +202,14 @@ namespace Meticumedia
             bool allAlreadyExists = true;
             bool allValidMovies = true;
             for (int i = 0; i < lvResults.SelectedIndices.Count; i++)
+            foreach(OrgListItem selItem in lvResults.SelectedItems)
             {
-                
-                OrgItem currItem = displayItems[lvResults.SelectedIndices[i]];
+                OrgItem currItem = selItem.OrgItem;
                 if (currItem.Action != OrgAction.AlreadyExists)
                     allAlreadyExists = false;
                 if (currItem.Action == OrgAction.Copy || currItem.Action == OrgAction.Move)
                 {
-                    if (currItem.Category != FileHelper.FileCategory.NonTvVideo)
+                    if (currItem.Category != FileCategory.NonTvVideo)
                         allValidMovies = false;
                 }
                 else
@@ -273,7 +243,7 @@ namespace Meticumedia
                 contextMenu.MenuItems.Add("Unignore Item(s)", new EventHandler(HandleUnignore));
             }
 
-            if (lvResults.SelectedItems.Count == 1 && displayItems[lvResults.SelectedIndices[0]].Status != OrgStatus.Missing)
+            if (lvResults.SelectedItems.Count == 1 && lvResults.DisplayedListItems[lvResults.SelectedIndices[0]].OrgItem.Status != OrgStatus.Missing)
                 contextMenu.MenuItems.Add("Edit Action", new EventHandler(HandleEdit));
 
             if (lastRunScan == ScanType.TvMissing)
@@ -310,10 +280,9 @@ namespace Meticumedia
         private void HandleReplace(object sender, EventArgs e)
         {
             // Change action for each selected item
-            for (int i = 0; i < lvResults.SelectedIndices.Count; i++)
+            foreach (OrgListItem selItem in lvResults.SelectedItems)
             {
-                // Get current item
-                OrgItem currItem = displayItems[lvResults.SelectedIndices[i]];
+                OrgItem currItem = selItem.OrgItem;
 
                 // Check that action is already exists
                 if (currItem.Action == OrgAction.AlreadyExists)
@@ -343,11 +312,11 @@ namespace Meticumedia
         {
             string destinationFolder = ((MenuItem)sender).Text;
 
-            for (int i = 0; i < lvResults.SelectedIndices.Count; i++)
+            foreach (OrgListItem selItem in lvResults.SelectedItems)
             {
-                OrgItem currItem = displayItems[lvResults.SelectedIndices[i]];
+                OrgItem currItem = selItem.OrgItem;
 
-                if (currItem.Category == FileHelper.FileCategory.NonTvVideo && currItem.Movie != null)
+                if (currItem.Category == FileCategory.NonTvVideo && currItem.Movie != null)
                 {
                     currItem.Movie.RootFolder = destinationFolder;
                     currItem.DestinationPath = currItem.Movie.BuildFilePath(currItem.SourcePath);
@@ -376,15 +345,15 @@ namespace Meticumedia
                 return;
 
             // Get selected items
-            for (int i = lvResults.SelectedIndices.Count - 1; i >= 0; i--)
+            foreach (OrgListItem selItem in lvResults.SelectedItems)
             {
-                OrgItem selectedResult = displayItems[lvResults.SelectedIndices[i]];
+                OrgItem selectedResult = selItem.OrgItem;
 
                 foreach (OrgFolder scanDir in Settings.ScanDirectories)
                     if (scanDir.FolderPath == selectedResult.ScanDirectory.FolderPath)
                         scanDir.AddIgnoreFile(selectedResult.SourcePath);
 
-                selectedResult.Category = FileHelper.FileCategory.Ignored;
+                selectedResult.Category = FileCategory.Ignored;
                 selectedResult.Action = OrgAction.None;
                 selectedResult.DestinationPath = string.Empty;
                 selectedResult.Check = CheckState.Unchecked;
@@ -403,14 +372,14 @@ namespace Meticumedia
                 return;
 
             // Get selected items
-            for (int i = lvResults.SelectedIndices.Count - 1; i >= 0; i--)
+            foreach (OrgListItem selItem in lvResults.SelectedItems)
             {
-                OrgItem selectedResult = displayItems[lvResults.SelectedIndices[i]];
+                OrgItem selectedResult = selItem.OrgItem;
 
                 foreach (OrgFolder scanDir in Settings.ScanDirectories)
                     if (scanDir.FolderPath == selectedResult.ScanDirectory.FolderPath)
                         if (scanDir.RemoveIgnoreFile(selectedResult.SourcePath))
-                            selectedResult.Category = FileHelper.FileCategory.Unknown;
+                            selectedResult.Category = FileCategory.Unknown;
             }
             Settings.Save();
             DisplayResults();
@@ -434,7 +403,7 @@ namespace Meticumedia
                 return;
 
             // Open editor for selected item
-            OrgItem selectedResult = displayItems[lvResults.SelectedIndices[0]];
+            OrgItem selectedResult = lvResults.SelectedListItems[0].OrgItem;
 
             // Locate
             List<OrgItem> items;
@@ -456,9 +425,9 @@ namespace Meticumedia
 
             // Get selected shows
             List<TvShow> showsToBeSet = new List<TvShow>();
-            for (int i = lvResults.SelectedIndices.Count - 1; i >= 0; i--)
+            foreach (OrgListItem selItem in lvResults.SelectedItems)
             {
-                OrgItem selectedResult = displayItems[lvResults.SelectedIndices[i]];
+                OrgItem selectedResult = selItem.OrgItem;
                 if (selectedResult.TvEpisode == null)
                     return;
 
@@ -472,13 +441,16 @@ namespace Meticumedia
                 }
             }
 
-            for (int i = lvResults.Items.Count - 1; i >= 0; i--)
+            foreach (OrgListItem displayItem in lvResults.DisplayedListItems)
+            {
+                OrgItem selectedResult = displayItem.OrgItem;
                 foreach (TvShow show in showsToBeSet)
-                    if (displayItems[i].TvEpisode != null && displayItems[i].TvEpisode.Show == show.Name)
+                    if (displayItem.OrgItem[i].TvEpisode != null && displayItem.OrgItem[i].TvEpisode.Show == show.Name)
                     {
-                        displayItems[i].Category = FileHelper.FileCategory.Ignored;
+                        displayItem.OrgItem[i].Category = FileCategory.Ignored;
                         break;
                     }
+            }
 
             Organization.Shows.Save();
             DisplayResults();
@@ -494,14 +466,14 @@ namespace Meticumedia
                 return;
 
             // Get selected item
-            for (int i = lvResults.SelectedIndices.Count - 1; i >= 0; i--)
+            foreach (OrgListItem selItem in lvResults.SelectedItems)
             {
-                OrgItem selectedResult = displayItems[lvResults.SelectedIndices[i]];
+                OrgItem selectedResult = selItem.OrgItem;
                 if (selectedResult.TvEpisode == null)
                     return;
 
                 selectedResult.TvEpisode.Ignored = true;
-                selectedResult.Category = FileHelper.FileCategory.Ignored;
+                selectedResult.Category = FileCategory.Ignored;
 
             }
             Organization.Shows.Save();
@@ -548,7 +520,7 @@ namespace Meticumedia
                 // Get season/show
                 KeyValuePair<TvShow, int> showSeason = new KeyValuePair<TvShow, int>(currResult.TvEpisode.GetShow(), currResult.TvEpisode.Season);
                 if (setShowSeasons.Contains(showSeason))
-                    currResult.Category = FileHelper.FileCategory.Ignored;
+                    currResult.Category = FileCategory.Ignored;
                     
             }
                 
@@ -598,25 +570,25 @@ namespace Meticumedia
                 CancelScan();
                 return;
             }
+
             
             // Setup columns based on scan type to run
-            OrgItemListHelper.OrgColumnSetup colSetup;
+            OrgItemColumnSetup colSetup;
             ScanType scanType = (ScanType)cmbScanType.SelectedItem;
             switch (scanType)
             {
                 case ScanType.Directory:
-                    colSetup = OrgItemListHelper.OrgColumnSetup.DirectoryScan;
+                    colSetup = OrgItemColumnSetup.DirectoryScan;
                     break;
                 case ScanType.TvMissing:
                 case ScanType.TvRename:
-                    colSetup = OrgItemListHelper.OrgColumnSetup.MissingCheck;
+                    colSetup = OrgItemColumnSetup.MissingCheck;
                     break;
                 default:
-                    colSetup = OrgItemListHelper.OrgColumnSetup.RootFolderCheck;
+                    colSetup = OrgItemColumnSetup.RootFolderCheck;
                     break;
             }
-            scanColumns = OrgItemListHelper.SetOrgItemListColumns(colSetup, lvResults);
-            sortType = OrgColumnType.Source_Folder;
+            lvResults.SetColumns(colSetup);
 
             // Run scan
             ScanRunEnables(false);
@@ -647,25 +619,24 @@ namespace Meticumedia
             // Prevent checking on items with no action
             if (e.Item.SubItems.Count > 1)
             {
-                OrgAction action = displayItems[e.Item.Index].Action;
+                OrgAction action = lvResults.DisplayedListItems[e.Item.Index].OrgItem.Action;
                 if (action == OrgAction.None || action == OrgAction.Queued || action == OrgAction.AlreadyExists || action == OrgAction.NoRootFolder)
                     e.Item.Checked = false;
             }
 
             // Mirror check state to scan results list
-            lock (displayItems)
-                displayItems[e.Item.Index].Check = e.Item.Checked ? CheckState.Checked : CheckState.Unchecked;
+            lvResults.DisplayedListItems[e.Item.Index].OrgItem.Check = e.Item.Checked ? CheckState.Checked : CheckState.Unchecked;
 
             // De-register check change events (to prevent this method being called again)
             chkMoveCopy.CheckedChanged -= new System.EventHandler(this.chkMoveCopy_CheckedChanged);
             chkRenameDelete.CheckedChanged -= new System.EventHandler(this.chkRenameDelete_CheckedChanged);
 
             // Set combined check boxes
-            chkMoveCopy.CheckState = GetCheckState(new OrgAction[] { OrgAction.Copy, OrgAction.Move });
+            chkMoveCopy.CheckState = lvResults.GetCheckState(new OrgAction[] { OrgAction.Copy, OrgAction.Move });
             if (lastRunScan == ScanType.Directory)
-                chkRenameDelete.CheckState = GetCheckState(OrgAction.Delete);
+                chkRenameDelete.CheckState = lvResults.GetCheckState(OrgAction.Delete);
             else
-                chkRenameDelete.CheckState = GetCheckState(OrgAction.Rename);
+                chkRenameDelete.CheckState = lvResults.GetCheckState(OrgAction.Rename);
 
             // Re-register check changes events
             chkMoveCopy.CheckedChanged += new System.EventHandler(this.chkMoveCopy_CheckedChanged);
@@ -687,7 +658,7 @@ namespace Meticumedia
         /// </summary>
         private void chkMoveCopy_CheckedChanged(object sender, EventArgs e)
         {
-            SetCheckItems(new OrgAction[] { OrgAction.Copy, OrgAction.Move }, chkMoveCopy.Checked);
+            lvResults.SetCheckItems(new OrgAction[] { OrgAction.Copy, OrgAction.Move }, chkMoveCopy.Checked);
         }
 
         /// <summary>
@@ -698,95 +669,15 @@ namespace Meticumedia
             switch (lastRunScan)
             {
                 case ScanType.Directory:
-                    SetCheckItems(OrgAction.Delete, chkRenameDelete.Checked);
+                    lvResults.SetCheckItems(OrgAction.Delete, chkRenameDelete.Checked);
                     break;
                 case ScanType.TvMissing:
-                    SetCheckItems(OrgAction.Rename, chkRenameDelete.Checked);
+                    lvResults.SetCheckItems(OrgAction.Rename, chkRenameDelete.Checked);
                     break;
                 case ScanType.MovieFolder:
-                    SetCheckItems(OrgAction.Rename, chkRenameDelete.Checked);
+                    lvResults.SetCheckItems(OrgAction.Rename, chkRenameDelete.Checked);
                     break;
             }
-        }
-        
-        /// <summary>
-        /// Set scan item check to for all items with a specific action
-        /// </summary>
-        /// <param name="action">Action type for item to set check</param>
-        /// <param name="check">Value to set checked to</param>
-        private void SetCheckItems(OrgAction action, bool check)
-        {
-            SetCheckItems(new OrgAction[] { action }, check);
-        }
-
-        /// <summary>
-        /// Set scan item check to for all items with a specific actions
-        /// </summary>
-        /// <param name="action">Action types for item to set check</param>
-        /// <param name="check">Value to set checked to</param>
-        private void SetCheckItems(OrgAction[] actions, bool check)
-        {
-            // Get column index for action
-            int actionColIndex = scanColumns[OrgColumnType.Action].Header.Index;
-            if (actionColIndex == -1)
-                return;
-            
-            // Set check state for all items that match any of the action types
-            for(int i=0;i<lvResults.Items.Count;i++)
-                foreach (OrgAction action in actions)
-                    if (lvResults.Items[i].SubItems.Count > 1 && lvResults.Items[i].SubItems[actionColIndex].Text == action.ToString())
-                    {
-                        lvResults.Items[i].Checked = check;
-                        lock (displayItems)
-                            displayItems[i].Check = check ? CheckState.Checked : CheckState.Unchecked;
-                    }
-        }
-
-        /// <summary>
-        /// Get combined check state of all item of set of action types
-        /// </summary>
-        /// <param name="actions">Set of actions types to get check state from</param>
-        /// <returns>Combined check state of all item match any of the specified actions</returns>
-        private CheckState GetCheckState(OrgAction[] actions)
-        {
-            if (scanColumns == null)
-                return CheckState.Unchecked;
-
-            // Get column with action type in it
-            int actionColIndex = scanColumns[OrgColumnType.Action].Header.Index;
-            if (actionColIndex == -1)
-                return CheckState.Unchecked;
-
-            // Set booleans indicating if there are any checked/unchecked item it listview
-            bool check = false;
-            bool notCheck = false;
-            foreach (ListViewItem item in lvResults.Items)
-                foreach (OrgAction action in actions)
-                    if (item.SubItems.Count > 1 && item.SubItems[actionColIndex].Text == action.ToString())
-                    {
-                        if (item.Checked)
-                            check = true;
-                        else
-                            notCheck = true;
-                    };
-
-            // Return combined check state
-            if (check && !notCheck)
-                return CheckState.Checked;
-            else if (check && notCheck)
-                return CheckState.Indeterminate;
-            else
-                return CheckState.Unchecked;
-        }
-
-        /// <summary>
-        /// Get combined check state of all item of specific action types
-        /// </summary>
-        /// <param name="action">Actions type to get check state from</param>
-        /// <returns>Combined check state of all item match the specified action</returns>
-        private CheckState GetCheckState(OrgAction action)
-        {
-            return GetCheckState(new OrgAction[] { action });
         }
 
         /// <summary>
@@ -1414,31 +1305,31 @@ namespace Meticumedia
 
                 switch (result.Category)
                 {
-                    case FileHelper.FileCategory.TvVideo:
+                    case FileCategory.TvVideo:
                         if (!chkTvCatFilter.Checked)
                             continue;
                         break;
-                    case FileHelper.FileCategory.NonTvVideo:
+                    case FileCategory.NonTvVideo:
                         if (!chkNonTvCatFilter.Checked)
                             continue;
                         break;
-                    case FileHelper.FileCategory.Ignored:
+                    case FileCategory.Ignored:
                         if (!chkIgnoreCatFilter.Checked)
                             continue;
                         break;
-                    case FileHelper.FileCategory.Custom:
+                    case FileCategory.Custom:
                         if (!chkCustomCatFilter.Checked)
                             continue;
                         break;
-                    case FileHelper.FileCategory.Unknown:
+                    case FileCategory.Unknown:
                         if (!chkUnknownCatFilter.Checked)
                             continue;
                         break;
-                    case FileHelper.FileCategory.Trash:
+                    case FileCategory.Trash:
                         if (!chkTrashCatFilter.Checked)
                             continue;
                         break;
-                    case FileHelper.FileCategory.Folder:
+                    case FileCategory.Folder:
                         if (!chkFolderCatFilter.Checked)
                             continue;
                         break;

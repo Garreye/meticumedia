@@ -25,6 +25,15 @@ namespace Meticumedia
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// Database to use for movie
+        /// </summary>
+        public MovieDatabaseSelection DataBase { get { return (MovieDatabaseSelection)DatabaseSelection; } }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -87,6 +96,7 @@ namespace Meticumedia
             this.Date = movie.Date;
             this.Found = movie.Found;
             this.Id = movie.Id;
+            this.DatabaseSelection = movie.DatabaseSelection;
             this.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
             if (movie.Genres != null)
                 foreach (string genre in movie.Genres)
@@ -136,6 +146,14 @@ namespace Meticumedia
             }
 
             return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.Name + " (" + this.Date.Year.ToString() + ")"));
+        }
+
+        /// <summary>
+        /// Updates properties from online database
+        /// </summary>
+        public override void UpdateInfoFromDatabase()
+        {
+            MovieDatabaseHelper.UpdateMovieInfo(this);
         }
 
         #endregion

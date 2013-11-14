@@ -59,7 +59,7 @@ namespace Meticumedia
             this.chkMoveCopy = new System.Windows.Forms.CheckBox();
             this.gbActionFilter = new System.Windows.Forms.GroupBox();
             this.gbCategoryFilter = new System.Windows.Forms.GroupBox();
-            this.lvResults = new Meticumedia.DoubleBufferedListView();
+            this.lvResults = new Meticumedia.OrgItemListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -497,7 +497,7 @@ namespace Meticumedia
 
         #endregion
 
-        private DoubleBufferedListView lvResults;
+        private OrgItemListView lvResults;
         private System.Windows.Forms.Button btnQueueSelected;
         private System.Windows.Forms.ComboBox cmbScanSelection;
         private System.Windows.Forms.ColumnHeader columnHeader1;

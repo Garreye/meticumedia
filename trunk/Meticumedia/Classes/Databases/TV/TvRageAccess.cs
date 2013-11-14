@@ -20,6 +20,10 @@ namespace Meticumedia
 
         protected override string API_KEY { get { return "zqWjteEikX3q0IJLx0fc"; } }
 
+        protected override DatabaseAccess.MirrorType SearchMirrorType { get { return MirrorType.Xml; } }
+
+        protected override DatabaseAccess.MirrorType UpdateMirrorType { get { return MirrorType.Xml; } }
+
         #endregion
 
         #region Constuctor
@@ -152,13 +156,9 @@ namespace Meticumedia
         /// Gets season/episode information from database
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
-        public override bool DoUpdate(TvShow show)
+        protected override bool DoUpdate(string mirror, Content content)
         {
-            // Get mirror
-            string mirror;
-            if (!GetMirror(MirrorType.Xml, out mirror))
-                return false;
-
+            TvShow show = (TvShow)content;
             try
             {
                 // Get show info from database

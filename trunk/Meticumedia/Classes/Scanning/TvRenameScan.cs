@@ -97,10 +97,10 @@ namespace Meticumedia
                                 // Check if rename needed (or move within folder)
                                 if (ep.File.FilePath != builtPath)
                                 {
-                                    OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, ep.File.FilePath, builtPath, ep, ep2, FileHelper.FileCategory.TvVideo, null);
+                                    OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, ep.File.FilePath, builtPath, ep, ep2, FileCategory.TvVideo, null);
                                     newItem.Check = System.Windows.Forms.CheckState.Checked;
                                     if (!shows[i].IncludeInScan)
-                                        newItem.Category = FileHelper.FileCategory.Ignored;
+                                        newItem.Category = FileCategory.Ignored;
                                     newItem.Number = number++;
                                     newItem.Show = show;
                                     missingCheckItem.Add(newItem);
@@ -115,9 +115,9 @@ namespace Meticumedia
                         // Add empty item for missing
                         if (!found && ep.Aired && show.DoMissingCheck)
                         {
-                            OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileHelper.FileCategory.TvVideo, null);
+                            OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
                             if (!shows[i].IncludeInScan)
-                                newItem.Category = FileHelper.FileCategory.Ignored;
+                                newItem.Category = FileCategory.Ignored;
                             newItem.Number = number++;
                             newItem.Show = show;
                             missingCheckItem.Add(newItem);

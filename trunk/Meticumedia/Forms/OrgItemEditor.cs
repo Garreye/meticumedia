@@ -81,10 +81,10 @@ namespace Meticumedia
             // Select category
             switch (result.Category)
             {
-                case FileHelper.FileCategory.NonTvVideo:
+                case FileCategory.NonTvVideo:
                     rbMovie.Checked = true;
                     break;
-                case FileHelper.FileCategory.Custom:
+                case FileCategory.Custom:
                     rbCustom.Checked = true;
                     break;
                 default:
@@ -310,16 +310,16 @@ namespace Meticumedia
         /// Gets category from category radio buttons
         /// </summary>
         /// <returns>Item category set in form</returns>
-        private FileHelper.FileCategory GetCategory()
+        private FileCategory GetCategory()
         {
             if (rbDelete.Checked)
-                return FileHelper.FileCategory.Trash;
+                return FileCategory.Trash;
             else if (rbCustom.Checked)
-                return FileHelper.FileCategory.Custom;
+                return FileCategory.Custom;
             else if (rbMovie.Checked)
-                return FileHelper.FileCategory.NonTvVideo;
+                return FileCategory.NonTvVideo;
             else
-                return FileHelper.FileCategory.TvVideo;
+                return FileCategory.TvVideo;
         }
 
         /// <summary>
@@ -341,19 +341,19 @@ namespace Meticumedia
         private string BuildDestination()
         {
             // Get file category
-            FileHelper.FileCategory category = GetCategory();
+            FileCategory category = GetCategory();
 
             // Build destination file based on category
             switch (category)
             {
-                case FileHelper.FileCategory.Unknown:
-                case FileHelper.FileCategory.Ignored:
+                case FileCategory.Unknown:
+                case FileCategory.Ignored:
                     return string.Empty;
-                case FileHelper.FileCategory.Custom:
+                case FileCategory.Custom:
                     return txtDestination.Text;
-                case FileHelper.FileCategory.Trash:
+                case FileCategory.Trash:
                     return FileHelper.DELETE_DIRECTORY;
-                case FileHelper.FileCategory.TvVideo:
+                case FileCategory.TvVideo:
                     if (selectedShow == null)
                         return string.Empty;
 
@@ -362,7 +362,7 @@ namespace Meticumedia
                     string fileName = selectedShow.BuildFilePath(ep1, ep2, string.Empty);
 
                     return fileName + Path.GetExtension(txtSourceFile.Text);
-                case FileHelper.FileCategory.NonTvVideo:
+                case FileCategory.NonTvVideo:
                     if (cntrlMovieEdit.Content == null)
                         return string.Empty;
                     // TODO: don't use default path if alread in movies folder!

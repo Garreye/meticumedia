@@ -23,11 +23,6 @@ namespace Meticumedia
         public static readonly string DELETE_DIRECTORY = "Never Never Land (Permanent Delete)";
 
         /// <summary>
-        /// Categories of useful file types
-        /// </summary>
-        public enum FileCategory { Unknown, Ignored, TvVideo, NonTvVideo, Trash, Custom, Folder };
-
-        /// <summary>
         /// Categorize a file based on extension
         /// </summary>
         /// <param name="file">The file name string</param>
@@ -39,12 +34,16 @@ namespace Meticumedia
             
             // Check if ignored
             if (file.OrgFolder != null && file.OrgFolder.IsIgnored(file.Path))
-                return FileCategory.Ignored;
+                return FileCategory.Ignored;            
 
             // Check against each type
             foreach (string ext in Settings.VideoFileTypes)
                 if (extenstion == ext.ToLower())
                 {
+                    // Check if sample!
+                    if (file.Path.ToLower().Contains("sample"))
+                        return FileCategory.Trash;
+
                     if (IsTvEpisode(file.Path))
                         return FileCategory.TvVideo;
                     else
@@ -104,13 +103,14 @@ namespace Meticumedia
         /// <param name="s2">The second string</param>
         /// <param name="theAdded">Returns whether "the" was added to one of the inputs to make them match</param>
         /// <returns>Whether the 2 strings are very similar or equivalen</returns>
-        public static bool CompareStrings(string s1, string s2, out bool theAdded)
+        public static bool CompareStrings(string s1, string s2, out bool theAdded, out bool singleLetterDiff)
         {
             // Both string to lower case
             s1 = s1.ToLower();
             s2 = s2.ToLower();
 
             theAdded = false;
+            singleLetterDiff = false;
 
             // If equal compare is good
             if (s1.Equals(s2))
@@ -121,10 +121,18 @@ namespace Meticumedia
             List<string> diff;
             GetStringDiff(s1, s2, out s1Count, out s2Count, out diff);
 
-            if (diff.Count == 1 && diff[0] == "the")
+            if (diff.Count == 1)
             {
-                theAdded = true;
-                return true;
+                if (diff[0] == "the")
+                {
+                    theAdded = true;
+                    return true;
+                }
+                else if (diff[0].Length == 1)
+                {
+                    singleLetterDiff = true;
+                    return true;
+                }
             }
 
             // Return unmatched if too many different words
@@ -170,7 +178,25 @@ namespace Meticumedia
             s2Count = set2.Count();
 
             // Get the words that are different between the two strings
-            if (s2Count > s1Count)
+            if(s2Count == s1Count)
+            {
+                List<string> diff1 = set1.Except(set2).ToList();
+                List<string> diff2 = set2.Except(set1).ToList();
+
+                if (diff1.Count == 1 && diff2.Count == 1 && diff1[0].Length > 0 && diff2[0].Length > 0)
+                {
+                    diff = new List<string>();
+                    if (diff1[0].Length > diff2[0].Length)
+                        diff.Add(diff1[0].Replace(diff2[0], string.Empty));
+                    else if (diff2[0].Length > diff1[0].Length)
+                        diff.Add(diff2[0].Replace(diff1[0], string.Empty));
+                    else
+                        diff = diff1;
+                }
+                else
+                    diff = diff1;
+            }
+            else if (s2Count > s1Count)
                 diff = set2.Except(set1).ToList();
             else
                 diff = set1.Except(set2).ToList();
@@ -397,7 +423,7 @@ namespace Meticumedia
         /// <summary>
         /// Result from simplification process of a string.
         /// </summary>
-        public class SimplifyStringResults
+        public class SimplifyStringResults : IComparable
         {
             /// <summary>
             /// Simplified string value.
@@ -435,6 +461,26 @@ namespace Meticumedia
             {
                 return this.SimplifiedString;
             }
+
+            #region IComparable Members
+
+            /// <summary>
+            /// Compare this content instance to another instance. Compares by name.
+            /// </summary>
+            /// <param name="obj">Object to compare this instance to</param>
+            /// <returns>Comparison results</returns>
+            public int CompareTo(object obj)
+            {
+                if (obj is SimplifyStringResults)
+                {
+                    SimplifyStringResults t2 = (SimplifyStringResults)obj;
+                    return ((int)this.Modifications).CompareTo((int)t2.Modifications);
+                }
+                else
+                    throw new ArgumentException("Object is not a SimplifyStringResults type.");
+            }
+
+            #endregion
         }
 
         /// <summary>
@@ -561,8 +607,13 @@ namespace Meticumedia
                 {
                     bool removed;
                     simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, OptionalRemoveWords[j], out removed);
-                    if(removed)
-                        mods |= ContentSearchMod.WordsRemoved;
+                    if (removed)
+                    {
+                        if ((OptionalSimplifyRemoves)j == OptionalSimplifyRemoves.Year || (OptionalSimplifyRemoves)j == OptionalSimplifyRemoves.YearAndFollowing)
+                            mods |= ContentSearchMod.YearRemoved;
+                        else
+                            mods |= ContentSearchMod.WordsRemoved;
+                    }
                 }
 
             // Process always remove words
@@ -685,6 +736,11 @@ namespace Meticumedia
             OptionalSimplifyRemoves options = removeYear ? OptionalSimplifyRemoves.Year : OptionalSimplifyRemoves.None;
             if (removeCountry) options |= OptionalSimplifyRemoves.Country;
             return BuildSimplifyResults(fileName, false, false, options, true, false, removeWhitespace, false).SimplifiedString;
+        }
+
+        public static string SimplifyFileName(string fileName, OptionalSimplifyRemoves options)
+        {
+            return BuildSimplifyResults(fileName, false, false, options, false, false, true, true).SimplifiedString;
         }
 
         /// <summary>

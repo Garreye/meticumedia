@@ -173,14 +173,24 @@ namespace Meticumedia
                     foreach (string altName in show.AlternativeNameMatches)
                         lbAltNames.Items.Add(altName);
 
-                cntrlSearch.DatabaseSelection = (int)show.DataBase;
+                if (content.Id > 0)
+                    cntrlSearch.DatabaseSelection = (int)content.DatabaseSelection;
+                else
+                    cntrlSearch.DatabaseSelection = (int)Settings.DefaultTvDatabase;
             }
             else
             {
                 cmdDbSel.Items.Clear();
-                cmdDbSel.Items.Add("TheMovieDb");
+                cmdDbSel.Items.Add(((Movie)content).DataBase);
                 cmdDbSel.SelectedIndex = 0;
+
+                if (content.Id > 0)
+                    cntrlSearch.DatabaseSelection = (int)content.DatabaseSelection;
+                else
+                    cntrlSearch.DatabaseSelection = (int)Settings.DefaultMovieDatabase;
             }
+
+            
 
             // Trigger movie changes event
             OnContentChanged();

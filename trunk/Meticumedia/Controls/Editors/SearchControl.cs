@@ -53,8 +53,9 @@ namespace Meticumedia
                 switch (type)
                 {
                     case ContentType.Movie:
-                        cmbDatabase.Items.Add("The Movie DB");
-                        cmbDatabase.SelectedIndex = 0;
+                        foreach (MovieDatabaseSelection selection in Enum.GetValues(typeof(MovieDatabaseSelection)))
+                            cmbDatabase.Items.Add(selection);
+                        cmbDatabase.SelectedIndex = (int)Settings.DefaultMovieDatabase;
                         break;
                     case ContentType.TvShow:
                         foreach(TvDataBaseSelection selection in Enum.GetValues(typeof(TvDataBaseSelection)))
@@ -192,11 +193,12 @@ namespace Meticumedia
             switch (this.ContentType)
             {
                 case ContentType.Movie:
-                    searchResults = TheMovieDbHelper.PerformMovieSearch(txtSearchEntry.Text);    
+                    MovieDatabaseSelection movieDbSel = (MovieDatabaseSelection)cmbDatabase.SelectedItem;
+                    searchResults = MovieDatabaseHelper.PerformMovieSearch(movieDbSel, txtSearchEntry.Text, true);    
                     break;
                 case ContentType.TvShow:
-                    TvDataBaseSelection sel = (TvDataBaseSelection)cmbDatabase.SelectedItem;
-                    searchResults = TvDatabaseHelper.PerformTvShowSearch(sel, txtSearchEntry.Text, true);
+                    TvDataBaseSelection tvDbSel = (TvDataBaseSelection)cmbDatabase.SelectedItem;
+                    searchResults = TvDatabaseHelper.PerformTvShowSearch(tvDbSel, txtSearchEntry.Text, true);
                     break;
                 default:
                     throw new Exception("Unknown content type");
@@ -225,7 +227,7 @@ namespace Meticumedia
         /// <param name="e"></param>
         private void btnSimplify_Click(object sender, EventArgs e)
         {
-           txtSearchEntry.Text = FileHelper.SimplifyFileName(txtSearchEntry.Text);
+            txtSearchEntry.Text = FileHelper.SimplifyFileName(txtSearchEntry.Text, FileHelper.OptionalSimplifyRemoves.YearAndFollowing);
         }
 
         /// <summary>
@@ -284,11 +286,13 @@ namespace Meticumedia
                 case ContentType.Movie:
                     Movie movieMatch;
                     SearchHelper.MovieSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false, out movieMatch);
+                    MovieDatabaseHelper.UpdateMovieInfo(movieMatch);
                     match = movieMatch;
                     break;
                 case ContentType.TvShow:
                     TvShow showMatch;
                     SearchHelper.TvShowSearch.ContentMatch(txtSearchEntry.Text, string.Empty, string.Empty, false, out showMatch);
+                    TvDatabaseHelper.FullShowSeasonsUpdate(showMatch);
                     match = showMatch;
                     break;
                 default:

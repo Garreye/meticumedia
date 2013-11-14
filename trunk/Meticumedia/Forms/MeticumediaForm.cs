@@ -103,7 +103,7 @@ namespace Meticumedia
                 // Check if item was a TV episode
                 if (e.CompleteItem.TvEpisode != null)
                 {
-                    if (e.CompleteItem.NewShow != null || e.CompleteItem.Category == FileHelper.FileCategory.Folder)
+                    if (e.CompleteItem.NewShow != null || e.CompleteItem.Category == FileCategory.Folder)
                     {
                         cntrlShows.UpdateContentInFolders(false);
                         cntrlSched.UpdateShows();
@@ -116,7 +116,7 @@ namespace Meticumedia
                         itemShow.UpdateMissing();
 
                         // Update folder path for show if it was renamed!
-                        if (e.CompleteItem.Action == OrgAction.Rename && e.CompleteItem.Category == FileHelper.FileCategory.Folder)
+                        if (e.CompleteItem.Action == OrgAction.Rename && e.CompleteItem.Category == FileCategory.Folder)
                             foreach (TvShow show in Organization.Shows)
                                 if (show.Path == e.CompleteItem.SourcePath)
                                 {
@@ -139,7 +139,7 @@ namespace Meticumedia
                         Organization.Movies.Add(e.CompleteItem.Movie);
 
                     // Trigger movies update
-                    if (e.CompleteItem.Category == FileHelper.FileCategory.Folder)
+                    if (e.CompleteItem.Category == FileCategory.Folder)
                         cntrlMovies.UpdateContentInFolders(false);
                 }
             });

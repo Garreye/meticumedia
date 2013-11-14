@@ -31,7 +31,7 @@ namespace Meticumedia
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new MeticumediaForm());
-                //Application.Run(new SearchForm("", ContentType.TvShow, true));
+                //Application.Run(new SearchForm("", ContentType.Movie, true));
             }
         }
     }

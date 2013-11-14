@@ -14,6 +14,7 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,7 +27,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -74,10 +74,19 @@
     <Compile Include="Classes\Content\ContentSearchMod.cs" />
     <Compile Include="Classes\Content\ContentType.cs" />
     <Compile Include="Classes\Content\GenreCollection.cs" />
-    <Compile Include="Classes\Databases\TheTvDbAccess.cs" />
-    <Compile Include="Classes\Databases\TvDatabaseAccess.cs" />
-    <Compile Include="Classes\Databases\TvDataBaseSelection.cs" />
+    <Compile Include="Classes\Databases\DatabaseAccess.cs" />
+    <Compile Include="Classes\Databases\HttpGetParameter.cs" />
+    <Compile Include="Classes\Databases\JsonNode.cs" />
+    <Compile Include="Classes\Databases\Movies\MovieDatabaseHelper.cs" />
+    <Compile Include="Classes\Databases\Movies\MovieDatabaseSelection.cs" />
+    <Compile Include="Classes\Databases\Movies\RottenTomatoesAccess.cs" />
+    <Compile Include="Classes\Databases\TV\TheTvDbAccess.cs" />
+    <Compile Include="Classes\Databases\TV\TvDatabaseAccess.cs" />
+    <Compile Include="Classes\Databases\TV\TvDataBaseSelection.cs" />
     <Compile Include="Classes\EnumExtensions.cs" />
+    <Compile Include="Classes\FileHandling\FileCategory.cs" />
+    <Compile Include="Classes\Organization\OrgItemColumnSetup.cs" />
+    <Compile Include="Classes\Organization\OrgListItem.cs" />
     <Compile Include="Classes\Scanning\MovieFolderScan.cs" />
     <Compile Include="Classes\Scanning\ScanProcess.cs" />
     <Compile Include="Classes\Scanning\TvFolderScan.cs" />
@@ -86,13 +95,13 @@
     <Compile Include="Classes\Scanning\Scan.cs" />
     <Compile Include="Classes\Scanning\ScanType.cs" />
     <Compile Include="Classes\Scanning\SearchHelper.cs" />
-    <Compile Include="Classes\Databases\TvDatabaseHelper.cs" />
-    <Compile Include="Classes\Databases\TvRageAccess.cs" />
+    <Compile Include="Classes\Databases\TV\TvDatabaseHelper.cs" />
+    <Compile Include="Classes\Databases\TV\TvRageAccess.cs" />
     <Compile Include="Classes\Movies\MovieSearch.cs" />
     <Compile Include="Classes\Scanning\TvMissingScan.cs" />
     <Compile Include="Classes\Settings\FileNamePortion.cs" />
     <Compile Include="Classes\Settings\FileWordType.cs" />
-    <Compile Include="Classes\Databases\TheMovieDbHelper.cs" />
+    <Compile Include="Classes\Databases\Movies\TheMovieDbAccess.cs" />
     <Compile Include="Classes\FileHandling\WordHelper.cs" />
     <Compile Include="Classes\Movies\Movie.cs" />
     <Compile Include="Classes\Content\ContentRootFolder.cs" />
@@ -103,7 +112,6 @@
     <Compile Include="Classes\Organization\OrgFile.cs" />
     <Compile Include="Classes\Organization\OrgFolder.cs" />
     <Compile Include="Classes\Organization\OrgItem.cs" />
-    <Compile Include="Classes\Organization\OrgItemListHelper.cs" />
     <Compile Include="Classes\Organization\OrgProcessing.cs" />
     <Compile Include="Classes\Organization\OrgProcessingArgs.cs" />
     <Compile Include="Classes\Organization\OrgProgressChangesEventArgs.cs" />
@@ -174,6 +182,9 @@
     </Compile>
     <Compile Include="Controls\MovieControl.Designer.cs">
       <DependentUpon>MovieControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\OrgItemListView.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\ScheduleControl.cs">
       <SubType>UserControl</SubType>

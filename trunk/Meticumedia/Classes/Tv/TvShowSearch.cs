@@ -49,24 +49,12 @@ namespace Meticumedia
         /// <param name="search">Search string to match against</param>
         /// <param name="rootFolder">The root folder the content will belong to</param>
         /// <param name="folderPath">Folder path where the content should be moved to</param>
+        /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
         /// <returns>Match show item, null if no match</returns>
         public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out TvShow match)
         {
-            return this.ContentMatch(search, rootFolder, folderPath, true, fast, out match);
-        }
-
-        /// <summary>
-        /// Attempts to match string to show from the online database.
-        /// </summary>
-        /// <param name="search">Search string to match against</param>
-        /// <param name="rootFolder">The root folder the content will belong to</param>
-        /// <param name="folderPath">Folder path where the content should be moved to</param>
-        /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
-        /// <returns>Match show item, null if no match</returns>
-        public bool ContentMatch(string search, string rootFolder, string folderPath, bool threaded, bool fast, out TvShow match)
-        {
             Content contentMatch;
-            bool results = base.ContentMatch(search, rootFolder, folderPath, threaded, fast, out contentMatch);
+            bool results = base.ContentMatch(search, rootFolder, folderPath, fast, out contentMatch);
             match = new TvShow(contentMatch);
             if (results)
                 TvDatabaseHelper.FullShowSeasonsUpdate(match);

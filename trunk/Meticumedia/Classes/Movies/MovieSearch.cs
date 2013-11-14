@@ -22,19 +22,7 @@ namespace Meticumedia
         /// <returns>List of content matching search string from online database</returns>
         protected override List<Content> PerformSearch(string search, bool includeSummaries)
         {
-            return TheMovieDbHelper.PerformMovieSearch(search);
-        }
-
-        /// <summary>
-        /// Attempts to match string to movie from the online database.
-        /// </summary>
-        /// <param name="search">Search string to match against</param>
-        /// <param name="rootFolder">The root folder the content will belong to</param>
-        /// <param name="folderPath">Folder path where the content should be moved to</param>
-        /// <returns>Match movie item, null if no match</returns>
-        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Movie match)
-        {
-            return this.ContentMatch(search, rootFolder, folderPath, true, fast, out match);
+            return MovieDatabaseHelper.PerformMovieSearch(Settings.DefaultMovieDatabase, search, false);
         }
 
         /// <summary>
@@ -45,13 +33,13 @@ namespace Meticumedia
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
         /// <returns>Match movie item, null if no match</returns>
-        public bool ContentMatch(string search, string rootFolder, string folderPath, bool threaded, bool fast, out Movie match)
+        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Movie match)
         {
             Content contentMatch;
-            bool results = base.ContentMatch(search, rootFolder, folderPath, threaded, fast, out contentMatch);
+            bool results = base.ContentMatch(search, rootFolder, folderPath, fast, out contentMatch);
             match = new Movie(contentMatch);
             if (results)
-                TheMovieDbHelper.UpdateMovieInfo(match);
+                MovieDatabaseHelper.UpdateMovieInfo(match);
             return results;
         }
 
@@ -67,7 +55,7 @@ namespace Meticumedia
             bool results = base.PathMatch(rootFolder, path, fast, out contentMatch);
             match = new Movie(contentMatch);
             if (match.Id > 0)
-                TheMovieDbHelper.UpdateMovieInfo(match);
+                MovieDatabaseHelper.UpdateMovieInfo(match);
             return results;
         }
 

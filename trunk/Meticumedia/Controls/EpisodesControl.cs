@@ -211,7 +211,7 @@ namespace Meticumedia
                 List<OrgItem> items = new List<OrgItem>();
                 foreach (TvEpisode ep in selEpisodes)
                     if (File.Exists(ep.File.FilePath))
-                        items.Add(new OrgItem(OrgAction.Delete, ep.File.FilePath, FileHelper.FileCategory.Trash, null));
+                        items.Add(new OrgItem(OrgAction.Delete, ep.File.FilePath, FileCategory.Trash, null));
                 OnItemsToQueue(items);
             }
         }

@@ -29,6 +29,10 @@ namespace Meticumedia
         /// </summary>
         protected override string API_KEY { get { return "F29971EFAF45B40A"; } }
 
+        protected override DatabaseAccess.MirrorType SearchMirrorType { get { return MirrorType.Xml; } }
+
+        protected override DatabaseAccess.MirrorType UpdateMirrorType { get { return MirrorType.Zip; } }
+
         #endregion
 
         #region Mirrors
@@ -272,12 +276,9 @@ namespace Meticumedia
         /// added shows only, as it will replace all episode information in show.
         /// </summary>
         /// <param name="show">Show to load episode information into</param>
-        public override bool DoUpdate(TvShow show)
+        protected override bool DoUpdate(string mirror, Content content)
         {
-            // Get mirror
-            string mirror;
-            if (!GetMirror(MirrorType.Zip, out mirror))
-                return false;
+            TvShow show = (TvShow)content;
 
             bool success = true;
             string tempPath = string.Empty;

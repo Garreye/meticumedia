@@ -12,5 +12,5 @@ namespace Meticumedia
     /// <summary>
     /// Possible status for TV missing/rename check items
     /// </summary>
-    public enum OrgStatus { Found, Missing, Organization };
+    public enum OrgStatus { Found = 1, Missing = 2, Organization = 4, All = 7 };
 }

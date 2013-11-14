@@ -125,8 +125,10 @@ namespace Meticumedia
                         if (!removeFileWords.ContainsKey(this.Type))
                             removeFileWords.Add(this.Type, new List<string>());
 
-                        // Add the word to ditcionary
-                        removeFileWords[this.Type].Add(text.Substring(match.Groups[g].Index, match.Groups[g].Length));                       
+                        // Add the word to ditcionary (if not already in there)
+                        string removeText = text.Substring(match.Groups[g].Index, match.Groups[g].Length);
+                        if(!removeFileWords[this.Type].Contains(removeText))
+                            removeFileWords[this.Type].Add(removeText);                       
                     }
                     
                     // Remove the word from the text

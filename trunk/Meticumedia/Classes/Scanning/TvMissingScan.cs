@@ -84,12 +84,12 @@ namespace Meticumedia
                                     // Only add item for first part of multi-part file
                                     if (ep.Equals(item.TvEpisode))
                                     {
-                                        OrgItem newItem = new OrgItem(OrgStatus.Found, item.Action, item.SourcePath, item.DestinationPath, ep, item.TvEpisode2, FileHelper.FileCategory.TvVideo, item.ScanDirectory);
+                                        OrgItem newItem = new OrgItem(OrgStatus.Found, item.Action, item.SourcePath, item.DestinationPath, ep, item.TvEpisode2, FileCategory.TvVideo, item.ScanDirectory);
                                         newItem.Check = System.Windows.Forms.CheckState.Checked;
                                         newItem.Number = number++;
                                         newItem.Show = show;
                                         if (!shows[i].IncludeInScan)
-                                            newItem.Category = FileHelper.FileCategory.Ignored;
+                                            newItem.Category = FileCategory.Ignored;
                                         missingCheckItem.Add(newItem);
                                         found = true;
                                         break;
@@ -109,9 +109,9 @@ namespace Meticumedia
                         // Add empty item for missing
                         if (!found && ep.Aired && show.DoMissingCheck)
                         {
-                            OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileHelper.FileCategory.TvVideo, null);
+                            OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
                             if (!shows[i].IncludeInScan)
-                                newItem.Category = FileHelper.FileCategory.Ignored;
+                                newItem.Category = FileCategory.Ignored;
                             newItem.Number = number++;
                             newItem.Show = show;
                             missingCheckItem.Add(newItem);

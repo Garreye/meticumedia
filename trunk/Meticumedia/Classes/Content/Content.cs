@@ -13,12 +13,15 @@ using System.Text.RegularExpressions;
 namespace Meticumedia
 {
     /// <summary>
-    /// Represents a single content item (i.e. a movie or a TV show) that links to a single directory on user's computer
+    /// Represents a single content item (i.e. a movie or TV show) that is associated with a single directory on user's computer
     /// </summary>
     public class Content : IComparable, ISerializable
     {        
         #region Properties
 
+        /// <summary>
+        /// Database selection for content information
+        /// </summary>
         public int DatabaseSelection { get; set; }
 
         /// <summary>
@@ -291,6 +294,7 @@ namespace Meticumedia
         /// </summary>
         public virtual void UpdateMissing()
         {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -298,7 +302,7 @@ namespace Meticumedia
         /// </summary>
         public virtual void UpdateInfoFromDatabase()
         {
-
+            throw new NotImplementedException();
         }        
 
         #endregion
@@ -453,6 +457,7 @@ namespace Meticumedia
         /// </summary>
         public virtual void Save(XmlWriter xw)
         {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -462,7 +467,7 @@ namespace Meticumedia
         /// <returns></returns>
         public virtual bool Load(XmlNode showNode)
         {
-            return false;
+            throw new NotImplementedException();
         }
 
         #endregion

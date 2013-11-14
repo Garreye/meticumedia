@@ -340,9 +340,9 @@ namespace Meticumedia
                     content.RootFolder = destinationFolder;
                     content.Path = newPath;
                     if (content is Movie)
-                        items.Add(new OrgItem(OrgAction.Move, currentPath, FileHelper.FileCategory.Folder, content as Movie, newPath, null));
+                        items.Add(new OrgItem(OrgAction.Move, currentPath, FileCategory.Folder, content as Movie, newPath, null));
                     else
-                        items.Add(new OrgItem(OrgAction.Move, currentPath, FileHelper.FileCategory.Folder, null, newPath, null));
+                        items.Add(new OrgItem(OrgAction.Move, currentPath, FileCategory.Folder, null, newPath, null));
                 }
                 OnItemsToQueue(items);
             }
@@ -377,7 +377,7 @@ namespace Meticumedia
 
                 List<OrgItem> items = new List<OrgItem>();
                 foreach (Content content in selContent)
-                    items.Add(new OrgItem(OrgAction.Delete, content.Path, FileHelper.FileCategory.Folder, null));
+                    items.Add(new OrgItem(OrgAction.Delete, content.Path, FileCategory.Folder, null));
                 OnItemsToQueue(items);
             }
         }

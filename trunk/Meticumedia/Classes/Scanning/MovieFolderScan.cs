@@ -174,11 +174,12 @@ namespace Meticumedia
                 OnProgressChange(ScanProcess.Movie, files[i].Path, (int)Math.Round((double)i / files.Count * 70));
 
                 // Categorize the file
-                FileHelper.FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
+                FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
 
                 // Check that video file (tv is okay, may match incorrectly)
-                if (fileCat != FileHelper.FileCategory.NonTvVideo && fileCat != FileHelper.FileCategory.TvVideo)
+                if (fileCat != FileCategory.NonTvVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
                     continue;
+
 
                 // Check that file is not already in the queue
                 bool alreadyQueued = false;
@@ -194,6 +195,14 @@ namespace Meticumedia
                     }
                 if (alreadyQueued)
                     continue;
+
+                // Check for trash
+                if (fileCat == FileCategory.Trash)
+                {
+                    OrgItem delItem = new OrgItem(OrgAction.Delete, files[i].Path, fileCat, files[i].OrgFolder);
+                    scanResults.Add(delItem);
+                    continue;
+                }
 
                 // Try to match file to movie
                 string search = Path.GetFileNameWithoutExtension(files[i].Path);
@@ -228,10 +237,11 @@ namespace Meticumedia
                 OnProgressChange(ScanProcess.Movie, files[i].Path, (int)Math.Round((double)i / files.Count * 20) + 70);
 
                 // Categorize the file
-                FileHelper.FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
+                FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
+
 
                 // Check that video file (tv is okay, may match incorrectly)
-                if (fileCat != FileHelper.FileCategory.NonTvVideo && fileCat != FileHelper.FileCategory.TvVideo)
+                if (fileCat != FileCategory.NonTvVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
                     continue;
 
                 // Check that movie is valide
@@ -250,12 +260,20 @@ namespace Meticumedia
                 if (alreadyQueued)
                     continue;
 
+                // Check for trash
+                if (fileCat == FileCategory.Trash)
+                {
+                    OrgItem delItem = new OrgItem(OrgAction.Delete, files[i].Path, fileCat, files[i].OrgFolder);
+                    scanResults.Add(delItem);
+                    continue;
+                }
+
                 // Check if file needs to be renamed
                 string newPath = movie.BuildFilePathNoFolderChanges(files[i].Path);
                 if (newPath != files[i].Path && !File.Exists(newPath))
                 {
                     // Add rename to results
-                    OrgItem item = new OrgItem(OrgAction.Rename, files[i].Path, FileHelper.FileCategory.NonTvVideo, files[i].OrgFolder);
+                    OrgItem item = new OrgItem(OrgAction.Rename, files[i].Path, FileCategory.NonTvVideo, files[i].OrgFolder);
                     item.Number = number++;
                     if (Path.GetDirectoryName(newPath) != Path.GetDirectoryName(files[i].Path))
                         item.Action = OrgAction.Move;
@@ -272,7 +290,7 @@ namespace Meticumedia
             {
                 if (!string.IsNullOrEmpty(movie.Name) && movie.Path != movie.BuildFolderPath())
                 {
-                    OrgItem item = new OrgItem(OrgAction.Rename, movie.Path, FileHelper.FileCategory.Folder, movie, movie.BuildFolderPath(), null);
+                    OrgItem item = new OrgItem(OrgAction.Rename, movie.Path, FileCategory.Folder, movie, movie.BuildFolderPath(), null);
                     item.Check = System.Windows.Forms.CheckState.Checked;
                     item.Number = number++;
                     scanResults.Add(item);

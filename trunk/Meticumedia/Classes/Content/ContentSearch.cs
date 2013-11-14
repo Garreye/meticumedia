@@ -17,6 +17,40 @@ namespace Meticumedia
     /// </summary>
     public abstract class ContentSearch
     {
+        #region Search Result Classe
+
+        /// <summary>
+        /// Class for single search result
+        /// </summary>
+        private class SearchResult
+        {
+            /// <summary>
+            /// Content from search results
+            /// </summary>
+            public Content Content { get; set; }
+
+            /// <summary>
+            /// Modifications made to search string
+            /// </summary>
+            public ContentSearchMod Mods { get; set; }
+
+            /// <summary>
+            /// String that was matched to content
+            /// </summary>
+            public string MatchedString { get; set; }
+
+            /// <summary>
+            /// Default constructor
+            /// </summary>
+            public SearchResult()
+            {
+                this.Content = null;
+                this.Mods = ContentSearchMod.None;
+            }
+        }
+
+        #endregion
+
         #region Match Status Class
 
         /// <summary>
@@ -24,25 +58,121 @@ namespace Meticumedia
         /// </summary>
         private class MatchStatus
         {
-            /// <summary>
-            /// Best match from each thread in search
-            /// </summary>
-            public List<SearchResult>[] Matches { get; set; }
+            #region Variables
 
             /// <summary>
-            /// Flag indicating whether each thread in search is completed
+            /// Best matches from each thread in search
             /// </summary>
-            public bool[] Completes { get; set; }
-            
+            private List<SearchResult>[] matches;
+
+            /// <summary>
+            /// Searches that have been completed
+            /// </summary>
+            private bool[] completes;
+
+            /// <summary>
+            /// Searches have been started (thread added to thread pool)
+            /// </summary>
+            private bool[] starts;
+
+            #endregion
+
+            #region Properties
+
+            /// <summary>
+            /// Get number of searches started
+            /// </summary>
+            /// <param name="status">Search status</param>
+            /// <returns>Number of searches started</returns>
+            public int NumStarted
+            {
+                get
+                {
+                    int starts = 0;
+                    foreach (bool started in this.starts)
+                        if (started)
+                            ++starts;
+                    return starts;
+                }
+            }
+
+            /// <summary>
+            /// Get number of searches completed
+            /// </summary>
+            /// <param name="status">Search status</param>
+            /// <returns>Number of searches completed</returns>
+            public int NumCompleted
+            {
+                get
+                {
+                    int completed = 0;
+                    foreach (bool complete in this.completes)
+                        if (complete)
+                            ++completed;
+                    return completed;
+                }
+            }
+
+            #endregion
+
+            #region Constructor
+
             /// <summary>
             /// Constructor with number of threads search will contain
             /// </summary>
             /// <param name="numSearches"></param>
             public MatchStatus(int numSearches)
             {
-                this.Matches = new List<SearchResult>[numSearches];
-                this.Completes = new bool[numSearches];
+                this.matches = new List<SearchResult>[numSearches];
+                this.completes = new bool[numSearches];
+                this.starts = new bool[numSearches];
             }
+
+            #endregion
+
+            #region Methods
+
+            /// <summary>
+            /// Get search match with lowest modification to search string
+            /// </summary>
+            /// <param name="status">Search status instance</param>
+            /// <param name="lowestModsMatchStrLen">Length of best result's content name</param>
+            /// <param name="results">Best resulting content</param>
+            /// <returns>Whether a valid content match result was found</returns>
+            public bool GetSearchResultWithLowestMods(out ContentSearchMod modsOnResultsSearch, out Content results)
+            {
+                int lowestModsMatchStrLen = 0;
+                modsOnResultsSearch = ContentSearchMod.All;
+                results = new Content();
+
+                // Use match with lowest amount of modification made to search string and longest length (I think this is the most likely to the content we actually want to match to)
+                for (int i = 0; i < this.matches.Length; i++)
+                    if (this.matches[i] != null)
+                        for (int j = 0; j < this.matches[i].Count; j++)
+                        {
+                            if (this.matches[i][j].Mods < modsOnResultsSearch || (this.matches[i][j].Mods == modsOnResultsSearch && this.matches[i][j].MatchedString.Length > lowestModsMatchStrLen))
+                            {
+                                results = this.matches[i][j].Content;
+                                modsOnResultsSearch = this.matches[i][j].Mods;
+                                lowestModsMatchStrLen = this.matches[i][j].MatchedString.Length;
+                            }
+
+                        }
+                return !string.IsNullOrWhiteSpace(results.Name);
+            }
+
+            public void SetSearchMatches(int index, List<SearchResult> matches)
+            {
+                this.matches[index] = matches;
+                this.completes[index] = true;
+            }
+
+            public void SetSearchStarted(int index)
+            {
+                this.starts[index] = true;
+            }
+
+            #endregion
         }
 
         #endregion
@@ -98,20 +228,7 @@ namespace Meticumedia
         /// <param name="rootFolder">The root folder the content will belong to</param>
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <returns>Match content item, null if no match</returns>
-        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Content match)
-        {
-            return ContentMatch(search, rootFolder, folderPath, true, fast, out match);
-        }
-
-        /// <summary>
-        /// Attempts to match string to content from the online database.
-        /// </summary>
-        /// <param name="search">Search string to match against</param>
-        /// <param name="rootFolder">The root folder the content will belong to</param>
-        /// <param name="folderPath">Folder path where the content should be moved to</param>
-        /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
-        /// <returns>Match content item, null if no match</returns>
-        protected bool ContentMatch(string search, string rootFolder, string folderPath, bool threaded, bool fast, out Content match)
+        protected bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Content match)
         {
             // Create empty content
             Content emptyContent = new Content();
@@ -138,7 +255,7 @@ namespace Meticumedia
             // Fast search - use bases
             if (fast)
             {
-                FileHelper.SimplifyStringResults result = FileHelper.BuildSimplifyResults(searchBases[0], false, false, FileHelper.OptionalSimplifyRemoves.None, true, false, true, false);
+                FileHelper.SimplifyStringResults result = FileHelper.BuildSimplifyResults(searchBases[0], false, false, FileHelper.OptionalSimplifyRemoves.YearAndFollowing, true, false, true, false);
                 searches.Add(result);
             }
             // Full search: Go through each search base and get simplified search options
@@ -166,6 +283,7 @@ namespace Meticumedia
                             searches.Add(results);
                     }
                 }
+            searches.Sort();
 
             // Create new status
             int currSeachCnt;
@@ -177,53 +295,72 @@ namespace Meticumedia
                 searchStatus.Add(currSeachCnt, status);
             }
 
-            // Add thread to pool for each search that need to be performed
-            for (int i = 0; i < searches.Count; i++)
-            {
-                object[] args = { currSeachCnt, i, searches[i].SimplifiedString, folderPath, rootFolder, dirYear, searches[i].Modifications };
-                if (threaded)
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(SearchThread), args);
-                else
-                    SearchThread(args);
+            ContentSearchMod lowMods;
+            Content lowestModsMatch;
 
+            // Add thread to pool for each search that need to be performed
+            int searchNum = 0;
+            while (searchNum < searches.Count)
+            {
+                // Check for any search results so far
+                if (status.GetSearchResultWithLowestMods(out lowMods, out lowestModsMatch))
+                {
+                    // If search results have no mods or just year removed use them as final results
+                    if (lowMods == ContentSearchMod.None || lowMods == ContentSearchMod.YearRemoved)
+                    {
+                        match = lowestModsMatch;
+                        return true;
+                    }
+                }
+
+                // Limit number of search threads created
+                if (status.NumStarted - status.NumCompleted >= Settings.NumSimultaneousSearches)
+                {
+                    Thread.Sleep(100);
+                    continue;
+                }
+
+                // Add next search to thread pool
+                object[] args = { currSeachCnt, searchNum, searches[searchNum].SimplifiedString, folderPath, rootFolder, dirYear, searches[searchNum].Modifications };
+                ThreadPool.QueueUserWorkItem(new WaitCallback(SearchThread), args);
+                lock (searchLock)
+                    status.SetSearchStarted(searchNum);
+
+                searchNum++;
             }
 
             // Wait for all search to complete
-            bool allComplete = false;
-            while (!allComplete)
+            while (status.NumCompleted < searches.Count)
             {
-                Thread.Sleep(10);
+                // Check for any search results so far
+                if (status.GetSearchResultWithLowestMods(out lowMods, out lowestModsMatch))
+                {
+                    // If search results have no mods or just year removed use them as final results
+                    if (lowMods == ContentSearchMod.None || lowMods == ContentSearchMod.YearRemoved)
+                    {
+                        match = lowestModsMatch;
+                        return true;
+                    }
+                }
 
-                // Check if all searches are done
-                allComplete = true;
-                foreach (bool complete in status.Completes)
-                    if (!complete)
-                        allComplete = false;
+                Thread.Sleep(100);
             }
 
             // Clear status
             lock (searchLock)
                 searchStatus.Remove(currSeachCnt);
 
-            // Use match with lowest amount of modification made to search string and longest length (I think this s the most likely to the content we actually want to match to)
-            int lowestModsMatchStrLen = 0;
-            ContentSearchMod lowMods = ContentSearchMod.All;
-            Content lowestModsMatch = emptyContent;
-            for (int i = 0; i < status.Matches.Length; i++)
-                for (int j = 0; j < status.Matches[i].Count; j++)
-                {
-                    if (status.Matches[i][j].Mods < lowMods || (status.Matches[i][j].Mods == lowMods && status.Matches[i][j].MatchedString.Length > lowestModsMatchStrLen))
-                    {
-                        lowestModsMatch = status.Matches[i][j].Content;
-                        lowMods = status.Matches[i][j].Mods;
-                        lowestModsMatchStrLen = status.Matches[i][j].MatchedString.Length;
-                    }
-
-                }
-
-            // Return best match
-            match = lowestModsMatch;
-            return !string.IsNullOrWhiteSpace(lowestModsMatch.Name);
+            // Return result with lowest mods to search string
+            if (status.GetSearchResultWithLowestMods(out lowMods, out lowestModsMatch))
+            {
+                match = lowestModsMatch;
+                return true;
+            }
+            else
+            {
+                match = emptyContent;
+                return false;
+            }
         }
 
         /// <summary>
@@ -263,40 +400,7 @@ namespace Meticumedia
             // Check search is still active then put results into status
             lock (searchLock)
                 if (searchStatus.ContainsKey(statusIndex))
-                {
-                    searchStatus[statusIndex].Matches[searchIndex] = matches;
-                    searchStatus[statusIndex].Completes[searchIndex] = true;
-                }
-        }
-
-        /// <summary>
-        /// Class for single search result
-        /// </summary>
-        public class SearchResult
-        {
-            /// <summary>
-            /// Content from search results
-            /// </summary>
-            public Content Content { get; set; }
-
-            /// <summary>
-            /// Modifications made to search string
-            /// </summary>
-            public ContentSearchMod Mods { get; set; }
-
-            /// <summary>
-            /// String that was matched to content
-            /// </summary>
-            public string MatchedString { get; set; }
-
-            /// <summary>
-            /// Default constructor
-            /// </summary>
-            public SearchResult()
-            {
-                this.Content = null;
-                this.Mods = ContentSearchMod.None;
-            }
+                    searchStatus[statusIndex].SetSearchMatches(searchIndex, matches);
         }
 
         /// <summary>
@@ -331,9 +435,10 @@ namespace Meticumedia
                 string dbContentName = FileHelper.SimplifyFileName(searchResult.Name);
 
                 bool theAddedToMatch;
+                bool singleLetterDiff;
 
                 // Try basic match
-                bool match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                bool match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                 result.MatchedString = simplifiedSearch;
 
                 // Try match with year removed
@@ -341,7 +446,7 @@ namespace Meticumedia
                 {
                     simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, false);
                     dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, false);
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                     result.MatchedString = simplifiedSearch;
                 }
 
@@ -350,7 +455,7 @@ namespace Meticumedia
                 {
                     simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, true);
                     dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, true);
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                     if (match)
                         result.Mods |= ContentSearchMod.WordsRemoved;
                     result.MatchedString = simplifiedSearch;
@@ -361,7 +466,7 @@ namespace Meticumedia
                 {
                     string dirNoSpc = simplifiedSearch.Replace(" ", "");
                     string nameNoSpc = dbContentName.Replace(" ", "");
-                    match = FileHelper.CompareStrings(dirNoSpc, nameNoSpc, out theAddedToMatch);
+                    match = FileHelper.CompareStrings(dirNoSpc, nameNoSpc, out theAddedToMatch, out singleLetterDiff);
                     result.MatchedString = simplifiedSearch;
                     if(match)
                         result.Mods |= ContentSearchMod.SpaceRemoved;
@@ -372,7 +477,7 @@ namespace Meticumedia
                 {
                     simplifiedSearch = FileHelper.SimplifyFileName(search);
                     dbContentName = FileHelper.SimplifyFileName(searchResult.Name + " " + searchResult.Date.Year.ToString());
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch);
+                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                     result.MatchedString = simplifiedSearch;
                 }
 
@@ -382,6 +487,8 @@ namespace Meticumedia
 
                 if (theAddedToMatch)
                     result.Mods |= ContentSearchMod.TheAdded;
+                if (singleLetterDiff)
+                    result.Mods |= ContentSearchMod.SingleLetterAdded;
 
                 // Set results folder/path
                 result.Content = searchResult;

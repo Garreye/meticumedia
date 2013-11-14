@@ -84,7 +84,7 @@ namespace Meticumedia
         /// <summary>
         /// The file categarization.
         /// </summary>
-        public FileHelper.FileCategory Category { get; set; }
+        public FileCategory Category { get; set; }
 
         /// <summary>
         /// The state of the check for the item in the list of item to be organized (scan).
@@ -158,7 +158,7 @@ namespace Meticumedia
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileHelper.FileCategory category, OrgFolder scanDir, TvShow newShow)
+        public OrgItem(OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir, TvShow newShow)
         {
             this.Status = OrgStatus.Found;
             this.Action = action;
@@ -184,7 +184,7 @@ namespace Meticumedia
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgStatus status, OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileHelper.FileCategory category, OrgFolder scanDir)
+        public OrgItem(OrgStatus status, OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
             : this(action, file, destination, episode, episode2, category, scanDir, null)
         {
             this.Status = status;
@@ -199,7 +199,7 @@ namespace Meticumedia
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileHelper.FileCategory category, OrgFolder scanDir)
+        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
         {
             this.Status = status;
             this.Progress = 0;
@@ -225,7 +225,7 @@ namespace Meticumedia
         /// <param name="action">action to be performed</param>
         /// <param name="file">source path</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgAction action, string file, FileHelper.FileCategory category, OrgFolder scanDir)
+        public OrgItem(OrgAction action, string file, FileCategory category, OrgFolder scanDir)
         {
             this.Status = OrgStatus.Found;
             this.Progress = 0;
@@ -253,7 +253,7 @@ namespace Meticumedia
         /// <param name="movie">Movie object related to file</param>
         /// <param name="destination">destination path</param>
         /// <param name="scanDir">path to content folder of movie</param>
-        public OrgItem(OrgAction action, string sourceFile, FileHelper.FileCategory category, Movie movie, string destination, OrgFolder scanDir)
+        public OrgItem(OrgAction action, string sourceFile, FileCategory category, Movie movie, string destination, OrgFolder scanDir)
         {
             this.Status = OrgStatus.Found;
             this.Progress = 0;
@@ -843,7 +843,7 @@ namespace Meticumedia
                     case OrgAction.Copy:
                     case OrgAction.Move:
                     case OrgAction.Rename:
-                        if (this.Category == FileHelper.FileCategory.Folder)
+                        if (this.Category == FileCategory.Folder)
                         {
                             this.ActionComplete = CopyMoveFolder();
 
@@ -859,7 +859,7 @@ namespace Meticumedia
                             this.ActionComplete = CopyMoveFile(this.SourcePath, this.DestinationPath, 0, 100);
                         break;
                     case OrgAction.Delete:
-                        if (this.Category == FileHelper.FileCategory.Folder)
+                        if (this.Category == FileCategory.Folder)
                             DeleteDirectory(this.SourcePath);
                         else
                             File.Delete(this.SourcePath);
@@ -892,7 +892,7 @@ namespace Meticumedia
                 if (this.ActionSucess)
                 {
                     // Cleanup folder (delete empty sub-folders)
-                    if (this.Category != FileHelper.FileCategory.Folder)
+                    if (this.Category != FileCategory.Folder)
                         CleanupFolder();
 
                     // Add current file to ignore if copy action
@@ -1315,8 +1315,8 @@ namespace Meticumedia
                         this.SourcePath = value;
                         break;
                     case XmlElements.Category:
-                        FileHelper.FileCategory category;
-                        if (Enum.TryParse<FileHelper.FileCategory>(value, out category))
+                        FileCategory category;
+                        if (Enum.TryParse<FileCategory>(value, out category))
                             this.Category = category;
                         break;
                     case XmlElements.ActionTime:
