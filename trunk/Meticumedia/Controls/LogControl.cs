@@ -29,9 +29,6 @@ namespace Meticumedia
         {
             InitializeComponent();
 
-            // Setup columns in listview
-            logColumns = OrgItemListHelper.SetOrgItemListColumns(OrgItemListHelper.OrgColumnSetup.Log, lvLog);
-
             // Register to action log loading complete
             Organization.ActionLogLoadComplete += new EventHandler(Organization_ActionLogLoadComplete);
 
@@ -366,7 +363,7 @@ namespace Meticumedia
             filteredLog = ApplyFilter(Organization.ActionLog);
             OrgItem.AscendingSort = sortAscending;
             OrgItem.Sort(filteredLog, sortType);
-            OrgItemListHelper.DisplayOrgItemInList(filteredLog, lvLog, logColumns);
+            //OrgItemListHelper.DisplayOrgItemInList(filteredLog, lvLog, logColumns);
         }
 
         /// <summary>

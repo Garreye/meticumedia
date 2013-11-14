@@ -43,7 +43,7 @@ namespace Meticumedia
             this.btnClear = new System.Windows.Forms.Button();
             this.chkAutoClear = new System.Windows.Forms.CheckBox();
             this.pbTotal = new TextProgressBar();
-            this.lvQueue = new Meticumedia.DoubleBufferedListView();
+            this.lvQueue = new Meticumedia.OrgItemListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -226,7 +226,7 @@ namespace Meticumedia
 
         #endregion
 
-        private DoubleBufferedListView lvQueue;
+        private OrgItemListView lvQueue;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;

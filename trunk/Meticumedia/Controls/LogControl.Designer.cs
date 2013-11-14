@@ -38,7 +38,7 @@ namespace Meticumedia
             this.chkMoveCopyFilter = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.chkRenameFilter = new System.Windows.Forms.CheckBox();
-            this.lvLog = new Meticumedia.DoubleBufferedListView();
+            this.lvLog = new Meticumedia.OrgItemListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -167,7 +167,7 @@ namespace Meticumedia
 
         #endregion
 
-        private DoubleBufferedListView lvLog;
+        private OrgItemListView lvLog;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;

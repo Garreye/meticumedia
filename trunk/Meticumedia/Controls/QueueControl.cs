@@ -70,7 +70,7 @@ namespace Meticumedia
             InitializeComponent();
 
             // Build queue listview columns
-            queueColumns = OrgItemListHelper.SetOrgItemListColumns(OrgItemListHelper.OrgColumnSetup.Queue, lvQueue);
+            //queueColumns = OrgItemListHelper.SetOrgItemListColumns(OrgItemListHelper.OrgColumnSetup.Queue, lvQueue);
 
             // Initialize queue worker
             queueWorker = new BackgroundWorker();
@@ -455,7 +455,8 @@ namespace Meticumedia
         /// <param name="select"></param>
         private void DisplayQueue(int[] select)
         {
-            OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, select, false);
+            // TODO
+            //OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, select, false);
         }
 
         /// <summary>
@@ -463,7 +464,8 @@ namespace Meticumedia
         /// </summary>
         public void UpdateQueue()
         {
-            OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, new int[1] { -1 }, true);
+            // TODO
+            //OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, new int[1] { -1 }, true);
         }
 
         /// <summary>
