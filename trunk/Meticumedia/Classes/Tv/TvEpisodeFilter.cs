@@ -1,4 +1,8 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------
+// Source code available at http://code.google.com/p/meticumedia/
+// This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
+// --------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -94,7 +98,6 @@ namespace Meticumedia
                     return "Missing Episodes";
                 case FilterType.InScanDir:
                     return "Episodes in Scan Directory";
-                    break;
                 case FilterType.Season:
                     return "Season " + this.Season;
                 case FilterType.Unaired:

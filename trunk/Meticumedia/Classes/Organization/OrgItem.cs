@@ -871,7 +871,8 @@ namespace Meticumedia
                 }
             }
             catch (Exception e)
-            { 
+            {
+                Console.WriteLine("Exception caught on OrgItem action: " + e.ToString());
                 this.ActionComplete = true;
                 this.ActionSucess = false;
                 this.QueueStatus = OrgQueueStatus.Failed;

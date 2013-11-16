@@ -395,6 +395,7 @@ namespace Meticumedia
             }
             catch(Exception e)
             {
+                Console.WriteLine("Exception caught on TvDb update: " + e.ToString());
                 success = false;
             }
             finally

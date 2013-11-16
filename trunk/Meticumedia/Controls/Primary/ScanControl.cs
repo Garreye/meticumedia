@@ -1042,9 +1042,7 @@ namespace Meticumedia
             string msg = process.Description();
             if (e.ProgressPercentage == 100)
                 msg += " - Complete";
-            else if (process == ScanProcess.Directory)
-                ;
-            else if (process != ScanProcess.FileCollect)
+            else if (process != ScanProcess.FileCollect && process != ScanProcess.Directory)
                 msg += " - Processing File '" + Path.GetFileName(info) + "'";
 
             this.Invoke((MethodInvoker)delegate

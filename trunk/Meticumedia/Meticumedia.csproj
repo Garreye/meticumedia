@@ -134,80 +134,80 @@
     <Compile Include="Classes\Tv\TvEpisode.cs" />
     <Compile Include="Classes\Content\ContentCollection.cs" />
     <Compile Include="Classes\Tv\TvShowSearch.cs" />
-    <Compile Include="Controls\ContentListView.cs">
+    <Compile Include="Controls\Content\ContentListView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\ContentControl.cs">
+    <Compile Include="Controls\Content\ContentControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\ContentControl.Designer.cs">
+    <Compile Include="Controls\Content\ContentControl.Designer.cs">
       <DependentUpon>ContentControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DoubleBufferedListView.cs">
+    <Compile Include="Controls\Common\DoubleBufferedListView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\Editors\ContentEditControl.cs">
+    <Compile Include="Controls\Content\ContentEditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\Editors\ContentEditControl.Designer.cs">
+    <Compile Include="Controls\Content\ContentEditControl.Designer.cs">
       <DependentUpon>ContentEditControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Editors\EpisodeEditControl.cs">
+    <Compile Include="Controls\Content\EpisodeEditControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\Editors\EpisodeEditControl.Designer.cs">
+    <Compile Include="Controls\Content\EpisodeEditControl.Designer.cs">
       <DependentUpon>EpisodeEditControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Editors\SearchControl.cs">
+    <Compile Include="Controls\Content\SearchControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\Editors\SearchControl.Designer.cs">
+    <Compile Include="Controls\Content\SearchControl.Designer.cs">
       <DependentUpon>SearchControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\EpisodesControl.cs">
+    <Compile Include="Controls\Primary\EpisodesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\EpisodesControl.Designer.cs">
+    <Compile Include="Controls\Primary\EpisodesControl.Designer.cs">
       <DependentUpon>EpisodesControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ItemsToQueueArgs.cs" />
-    <Compile Include="Controls\LegendBoxControl.cs">
+    <Compile Include="Controls\Common\ItemsToQueueArgs.cs" />
+    <Compile Include="Controls\Common\LegendBoxControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\LegendBoxControl.Designer.cs">
+    <Compile Include="Controls\Common\LegendBoxControl.Designer.cs">
       <DependentUpon>LegendBoxControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\MovieControl.cs">
+    <Compile Include="Controls\Primary\MovieControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\MovieControl.Designer.cs">
+    <Compile Include="Controls\Primary\MovieControl.Designer.cs">
       <DependentUpon>MovieControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\OrgItemListView.cs">
+    <Compile Include="Controls\Organization\OrgItemListView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\ScheduleControl.cs">
+    <Compile Include="Controls\Primary\ScheduleControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\ScheduleControl.Designer.cs">
+    <Compile Include="Controls\Primary\ScheduleControl.Designer.cs">
       <DependentUpon>ScheduleControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\LogControl.cs">
+    <Compile Include="Controls\Primary\LogControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\LogControl.Designer.cs">
+    <Compile Include="Controls\Primary\LogControl.Designer.cs">
       <DependentUpon>LogControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\QueueControl.cs">
+    <Compile Include="Controls\Primary\QueueControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\QueueControl.Designer.cs">
+    <Compile Include="Controls\Primary\QueueControl.Designer.cs">
       <DependentUpon>QueueControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ScanControl.cs">
+    <Compile Include="Controls\Primary\ScanControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\ScanControl.Designer.cs">
+    <Compile Include="Controls\Primary\ScanControl.Designer.cs">
       <DependentUpon>ScanControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\Settings\ContentFoldersControl.cs">
@@ -240,13 +240,13 @@
     <Compile Include="Controls\Settings\ScanFolderControl.Designer.cs">
       <DependentUpon>ScanFolderControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ShowsControl.cs">
+    <Compile Include="Controls\Primary\ShowsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\ShowsControl.Designer.cs">
+    <Compile Include="Controls\Primary\ShowsControl.Designer.cs">
       <DependentUpon>ShowsControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\TextProgressBar.cs">
+    <Compile Include="Controls\Common\TextProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Forms\ContentEditorForm.cs">
@@ -295,35 +295,35 @@
     <Compile Include="Classes\Scanning\TvItemInScanDirHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Controls\ContentControl.resx">
+    <EmbeddedResource Include="Controls\Content\ContentControl.resx">
       <DependentUpon>ContentControl.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Editors\ContentEditControl.resx">
+    <EmbeddedResource Include="Controls\Content\ContentEditControl.resx">
       <DependentUpon>ContentEditControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Editors\EpisodeEditControl.resx">
+    <EmbeddedResource Include="Controls\Content\EpisodeEditControl.resx">
       <DependentUpon>EpisodeEditControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Editors\SearchControl.resx">
+    <EmbeddedResource Include="Controls\Content\SearchControl.resx">
       <DependentUpon>SearchControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\EpisodesControl.resx">
+    <EmbeddedResource Include="Controls\Primary\EpisodesControl.resx">
       <DependentUpon>EpisodesControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\LegendBoxControl.resx">
+    <EmbeddedResource Include="Controls\Common\LegendBoxControl.resx">
       <DependentUpon>LegendBoxControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\ScheduleControl.resx">
+    <EmbeddedResource Include="Controls\Primary\ScheduleControl.resx">
       <DependentUpon>ScheduleControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\LogControl.resx">
+    <EmbeddedResource Include="Controls\Primary\LogControl.resx">
       <DependentUpon>LogControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\QueueControl.resx">
+    <EmbeddedResource Include="Controls\Primary\QueueControl.resx">
       <DependentUpon>QueueControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\ScanControl.resx">
+    <EmbeddedResource Include="Controls\Primary\ScanControl.resx">
       <DependentUpon>ScanControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\Settings\ContentFoldersControl.resx">

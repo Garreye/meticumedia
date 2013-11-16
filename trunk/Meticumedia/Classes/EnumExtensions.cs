@@ -1,4 +1,9 @@
-﻿// This extension taken from: http://www.blackwasp.co.uk/EnumDescription.aspx
+﻿// --------------------------------------------------------------------------------
+// Source code available at http://code.google.com/p/meticumedia/
+// This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
+// --------------------------------------------------------------------------------
+
+// This extension copied from: http://www.blackwasp.co.uk/EnumDescription.aspx
 
 using System;
 using System.Collections.Generic;

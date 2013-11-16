@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=meticumedia
-AppVersion=0.8.3
+AppVersion=0.8.5
 DefaultDirName={pf}\meticumedia
 DefaultGroupName=meticumedia
 UninstallDisplayIcon={app}\Meticumedia.exe
@@ -12,6 +12,7 @@ OutputDir=Install
 
 [Files]
 Source: "Meticumedia.exe"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "Ionic.Zip.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "wordsEn.txt"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "license.txt"; DestDir: "{app}"; Flags: ignoreversion;
 
