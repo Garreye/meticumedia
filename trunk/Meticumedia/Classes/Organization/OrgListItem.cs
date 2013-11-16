@@ -23,7 +23,7 @@ namespace Meticumedia
             UpdateListViewItem(lvColumns);
         }
 
-        private void UpdateListViewItem(Dictionary<OrgColumnType, OrgItemColumn> lvColumns)
+        public void UpdateListViewItem(Dictionary<OrgColumnType, OrgItemColumn> lvColumns)
         {
             // Initialize listview item
             int subItemCount = 0;

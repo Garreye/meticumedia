@@ -38,6 +38,9 @@ namespace Meticumedia
             lvLog.ContextMenu = contextMenu;
             contextMenu.Popup += new EventHandler(contextMenu_Popup);
 
+            lvLog.SetColumns(OrgItemColumnSetup.Log);
+            lvLog.ColumnSort = OrgColumnType.DateTime;
+
             // TODO: progress bar for loading
         } 
 
@@ -116,11 +119,6 @@ namespace Meticumedia
         #region Variables
 
         /// <summary>
-        /// Column contained in listview
-        /// </summary>
-        private Dictionary<OrgColumnType, OrgItemColumn> logColumns;
-
-        /// <summary>
         /// Context menu for listview
         /// </summary>
         private ContextMenu contextMenu = new ContextMenu();
@@ -131,50 +129,9 @@ namespace Meticumedia
         /// </summary>
         private bool displayOnLoadRequired = false;
 
-        /// <summary>
-        /// Colum type that listview is currently sorted on.
-        /// </summary>
-        private OrgColumnType sortType = OrgColumnType.DateTime;
-
-        /// <summary>
-        /// Flag indicating whether sorting based on column clicked is currently set to ascending (used for toggling between ascending/descending)
-        /// </summary>
-        private bool sortAscending = false;
-
-        /// <summary>
-        /// Last column clicked in listview
-        /// </summary>
-        private OrgColumnType lastClickedColumn = 0;
-
         #endregion
 
         #region Form Event Handlers
-
-        /// <summary>
-        /// Clicking on listview column sorts the list by value in column
-        /// </summary>
-        private void lvLog_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
-            // Find the column type to sort by
-            sortType = 0;
-            foreach (OrgColumnType colType in Enum.GetValues(typeof(OrgColumnType)))
-                if (logColumns.ContainsKey(colType) && logColumns[colType].Header.Index == e.Column)
-                {
-                    sortType = colType;
-                    break;
-                }
-
-            // Set order
-            if (lastClickedColumn == 0 || lastClickedColumn != sortType)
-                sortAscending = true;
-            else
-                sortAscending = !sortAscending;
-
-            lastClickedColumn = sortType;
-
-            // Sort items and re-display
-            DisplayLog();
-        }
 
         /// <summary>
         /// Displays items in log when control is loaded if needed
@@ -184,6 +141,7 @@ namespace Meticumedia
             if(displayOnLoadRequired)
                 this.Invoke((MethodInvoker)delegate
                 {
+                    lvLog.SetOrgItems(Organization.ActionLog);
                     DisplayLog();
                 });
         }
@@ -203,6 +161,7 @@ namespace Meticumedia
             // Display items in log
             this.Invoke((MethodInvoker)delegate
             {
+                lvLog.SetOrgItems(Organization.ActionLog);
                 DisplayLog();
             });
         }
@@ -232,15 +191,18 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Create actions for undoing the selected items in list and add them to queue
+        /// </summary>
         private void UndoSelected()
         {
             string message = string.Empty;
             List<OrgItem> undoActions = new List<OrgItem>();
-            for (int i = 0; i < lvLog.SelectedIndices.Count; i++)
+            List<OrgItem> selItems = lvLog.GetSelectedOrgItems();
+            for (int i = 0; i < selItems.Count; i++)
             {
                 // Get item
-                int index = lvLog.SelectedIndices[i];
-                OrgItem logItem = filteredLog[index];
+                OrgItem logItem = selItems[i];
 
                 // Create action with reversed source and destination
                 OrgItem undoAction = new OrgItem(logItem);
@@ -316,26 +278,19 @@ namespace Meticumedia
         }
 
         /// <summary>
-        /// Move/copy filter check box refresh list
+        /// Filter check box sets filter and updates
         /// </summary>
-        private void chkMoveCopyFilter_CheckedChanged(object sender, EventArgs e)
+        private void chkFilter_CheckedChanged(object sender, EventArgs e)
         {
-            DisplayLog();
-        }
-
-        /// <summary>
-        /// Rename filter check box refresh list
-        /// </summary>
-        private void chkRenameFilter_CheckedChanged(object sender, EventArgs e)
-        {
-            DisplayLog();
-        }
-
-        /// <summary>
-        /// Delete filter check box refresh list
-        /// </summary>
-        private void chkDelFilter_CheckedChanged(object sender, EventArgs e)
-        {
+            // Action Filter
+            lvLog.ActionFilter = OrgAction.Empty;
+            if (chkMoveCopyFilter.Checked)
+                lvLog.ActionFilter |= OrgAction.Move | OrgAction.Copy;
+            if (chkRenameFilter.Checked)
+                lvLog.ActionFilter |= OrgAction.Rename;
+            if (chkDelFilter.Checked)
+                lvLog.ActionFilter |= OrgAction.Delete;
+            
             DisplayLog();
         }
 
@@ -350,20 +305,21 @@ namespace Meticumedia
         public void AddLogItems(OrgItem item)
         {
             Organization.AddLogItem(item);
-            DisplayLog();
+            lvLog.InsertItem(0, item);
+            //lvLog.SortItems();
+            //lvLog.UpdateDisplay();
         }
-
-        List<OrgItem> filteredLog = new List<OrgItem>();
 
         /// <summary>
         /// Displays log of actons in listview 
         /// </summary>
         public void DisplayLog()
         {
-            filteredLog = ApplyFilter(Organization.ActionLog);
-            OrgItem.AscendingSort = sortAscending;
-            OrgItem.Sort(filteredLog, sortType);
-            //OrgItemListHelper.DisplayOrgItemInList(filteredLog, lvLog, logColumns);
+            //filteredLog = ApplyFilter(Organization.ActionLog);
+            //OrgItem.AscendingSort = sortAscending;
+            //OrgItem.Sort(filteredLog, sortType);
+
+            lvLog.UpdateDisplay();
         }
 
         /// <summary>
@@ -402,6 +358,6 @@ namespace Meticumedia
             return filteredLog;
         }
 
-        #endregion        
+        #endregion   
     }
 }

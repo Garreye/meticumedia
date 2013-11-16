@@ -32,6 +32,7 @@ namespace Meticumedia
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScanControl));
             this.btnQueueSelected = new System.Windows.Forms.Button();
             this.cmbScanSelection = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -39,39 +40,39 @@ namespace Meticumedia
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.cmbScanType = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.pbScanProgress = new TextProgressBar();
             this.btnRun = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.chkQueueFilter = new System.Windows.Forms.CheckBox();
-            this.chkFolderCatFilter = new System.Windows.Forms.CheckBox();
-            this.chkTrashCatFilter = new System.Windows.Forms.CheckBox();
-            this.chkUnknownCatFilter = new System.Windows.Forms.CheckBox();
-            this.chkCustomCatFilter = new System.Windows.Forms.CheckBox();
-            this.chkNonTvCatFilter = new System.Windows.Forms.CheckBox();
+            this.gbCategoryFilter = new System.Windows.Forms.GroupBox();
             this.chkTvCatFilter = new System.Windows.Forms.CheckBox();
+            this.chkIgnoreCatFilter = new System.Windows.Forms.CheckBox();
+            this.chkFolderCatFilter = new System.Windows.Forms.CheckBox();
+            this.chkNonTvCatFilter = new System.Windows.Forms.CheckBox();
+            this.chkTrashCatFilter = new System.Windows.Forms.CheckBox();
+            this.chkCustomCatFilter = new System.Windows.Forms.CheckBox();
+            this.chkUnknownCatFilter = new System.Windows.Forms.CheckBox();
+            this.gbActionFilter = new System.Windows.Forms.GroupBox();
+            this.chkNoneFilter = new System.Windows.Forms.CheckBox();
+            this.chkQueueFilter = new System.Windows.Forms.CheckBox();
+            this.chkMoveCopyFilter = new System.Windows.Forms.CheckBox();
+            this.chkDelFilter = new System.Windows.Forms.CheckBox();
             this.chkRenameFilter = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.chkDelFilter = new System.Windows.Forms.CheckBox();
-            this.chkMoveCopyFilter = new System.Windows.Forms.CheckBox();
-            this.chkNoneFilter = new System.Windows.Forms.CheckBox();
-            this.chkIgnoreCatFilter = new System.Windows.Forms.CheckBox();
             this.btnModAction = new System.Windows.Forms.Button();
             this.chkRenameDelete = new System.Windows.Forms.CheckBox();
             this.chkMoveCopy = new System.Windows.Forms.CheckBox();
-            this.gbActionFilter = new System.Windows.Forms.GroupBox();
-            this.gbCategoryFilter = new System.Windows.Forms.GroupBox();
             this.lvResults = new Meticumedia.OrgItemListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.pbScanProgress = new TextProgressBar();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.gbActionFilter.SuspendLayout();
             this.gbCategoryFilter.SuspendLayout();
+            this.gbActionFilter.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnQueueSelected
@@ -163,6 +164,16 @@ namespace Meticumedia
             this.label4.TabIndex = 36;
             this.label4.Text = "on";
             // 
+            // pbScanProgress
+            // 
+            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbScanProgress.Location = new System.Drawing.Point(134, 49);
+            this.pbScanProgress.Message = null;
+            this.pbScanProgress.Name = "pbScanProgress";
+            this.pbScanProgress.Size = new System.Drawing.Size(848, 23);
+            this.pbScanProgress.TabIndex = 28;
+            // 
             // btnRun
             // 
             this.btnRun.Location = new System.Drawing.Point(7, 49);
@@ -193,16 +204,45 @@ namespace Meticumedia
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Scan";
             // 
-            // chkQueueFilter
+            // gbCategoryFilter
             // 
-            this.chkQueueFilter.AutoSize = true;
-            this.chkQueueFilter.Location = new System.Drawing.Point(290, 20);
-            this.chkQueueFilter.Name = "chkQueueFilter";
-            this.chkQueueFilter.Size = new System.Drawing.Size(64, 17);
-            this.chkQueueFilter.TabIndex = 35;
-            this.chkQueueFilter.Text = "Queued";
-            this.chkQueueFilter.UseVisualStyleBackColor = true;
-            this.chkQueueFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            this.gbCategoryFilter.Controls.Add(this.chkTvCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkIgnoreCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkFolderCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkNonTvCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkTrashCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkCustomCatFilter);
+            this.gbCategoryFilter.Controls.Add(this.chkUnknownCatFilter);
+            this.gbCategoryFilter.Location = new System.Drawing.Point(377, 19);
+            this.gbCategoryFilter.Name = "gbCategoryFilter";
+            this.gbCategoryFilter.Size = new System.Drawing.Size(522, 47);
+            this.gbCategoryFilter.TabIndex = 37;
+            this.gbCategoryFilter.TabStop = false;
+            this.gbCategoryFilter.Text = "Category Filter";
+            // 
+            // chkTvCatFilter
+            // 
+            this.chkTvCatFilter.AutoSize = true;
+            this.chkTvCatFilter.Checked = true;
+            this.chkTvCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkTvCatFilter.Location = new System.Drawing.Point(9, 19);
+            this.chkTvCatFilter.Name = "chkTvCatFilter";
+            this.chkTvCatFilter.Size = new System.Drawing.Size(70, 17);
+            this.chkTvCatFilter.TabIndex = 28;
+            this.chkTvCatFilter.Text = "TV Video";
+            this.chkTvCatFilter.UseVisualStyleBackColor = true;
+            this.chkTvCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            // 
+            // chkIgnoreCatFilter
+            // 
+            this.chkIgnoreCatFilter.AutoSize = true;
+            this.chkIgnoreCatFilter.Location = new System.Drawing.Point(449, 20);
+            this.chkIgnoreCatFilter.Name = "chkIgnoreCatFilter";
+            this.chkIgnoreCatFilter.Size = new System.Drawing.Size(62, 17);
+            this.chkIgnoreCatFilter.TabIndex = 17;
+            this.chkIgnoreCatFilter.Text = "Ignored";
+            this.chkIgnoreCatFilter.UseVisualStyleBackColor = true;
+            this.chkIgnoreCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // chkFolderCatFilter
             // 
@@ -217,6 +257,19 @@ namespace Meticumedia
             this.chkFolderCatFilter.UseVisualStyleBackColor = true;
             this.chkFolderCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
+            // chkNonTvCatFilter
+            // 
+            this.chkNonTvCatFilter.AutoSize = true;
+            this.chkNonTvCatFilter.Checked = true;
+            this.chkNonTvCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkNonTvCatFilter.Location = new System.Drawing.Point(85, 20);
+            this.chkNonTvCatFilter.Name = "chkNonTvCatFilter";
+            this.chkNonTvCatFilter.Size = new System.Drawing.Size(93, 17);
+            this.chkNonTvCatFilter.TabIndex = 29;
+            this.chkNonTvCatFilter.Text = "Non-TV Video";
+            this.chkNonTvCatFilter.UseVisualStyleBackColor = true;
+            this.chkNonTvCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            // 
             // chkTrashCatFilter
             // 
             this.chkTrashCatFilter.AutoSize = true;
@@ -229,19 +282,6 @@ namespace Meticumedia
             this.chkTrashCatFilter.Text = "Trash";
             this.chkTrashCatFilter.UseVisualStyleBackColor = true;
             this.chkTrashCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
-            // 
-            // chkUnknownCatFilter
-            // 
-            this.chkUnknownCatFilter.AutoSize = true;
-            this.chkUnknownCatFilter.Checked = true;
-            this.chkUnknownCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkUnknownCatFilter.Location = new System.Drawing.Point(310, 20);
-            this.chkUnknownCatFilter.Name = "chkUnknownCatFilter";
-            this.chkUnknownCatFilter.Size = new System.Drawing.Size(72, 17);
-            this.chkUnknownCatFilter.TabIndex = 32;
-            this.chkUnknownCatFilter.Text = "Unknown";
-            this.chkUnknownCatFilter.UseVisualStyleBackColor = true;
-            this.chkUnknownCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // chkCustomCatFilter
             // 
@@ -256,31 +296,82 @@ namespace Meticumedia
             this.chkCustomCatFilter.UseVisualStyleBackColor = true;
             this.chkCustomCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
-            // chkNonTvCatFilter
+            // chkUnknownCatFilter
             // 
-            this.chkNonTvCatFilter.AutoSize = true;
-            this.chkNonTvCatFilter.Checked = true;
-            this.chkNonTvCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkNonTvCatFilter.Location = new System.Drawing.Point(85, 20);
-            this.chkNonTvCatFilter.Name = "chkNonTvCatFilter";
-            this.chkNonTvCatFilter.Size = new System.Drawing.Size(93, 17);
-            this.chkNonTvCatFilter.TabIndex = 29;
-            this.chkNonTvCatFilter.Text = "Non-TV Video";
-            this.chkNonTvCatFilter.UseVisualStyleBackColor = true;
-            this.chkNonTvCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            this.chkUnknownCatFilter.AutoSize = true;
+            this.chkUnknownCatFilter.Checked = true;
+            this.chkUnknownCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkUnknownCatFilter.Location = new System.Drawing.Point(310, 20);
+            this.chkUnknownCatFilter.Name = "chkUnknownCatFilter";
+            this.chkUnknownCatFilter.Size = new System.Drawing.Size(72, 17);
+            this.chkUnknownCatFilter.TabIndex = 32;
+            this.chkUnknownCatFilter.Text = "Unknown";
+            this.chkUnknownCatFilter.UseVisualStyleBackColor = true;
+            this.chkUnknownCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
-            // chkTvCatFilter
+            // gbActionFilter
             // 
-            this.chkTvCatFilter.AutoSize = true;
-            this.chkTvCatFilter.Checked = true;
-            this.chkTvCatFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkTvCatFilter.Location = new System.Drawing.Point(9, 19);
-            this.chkTvCatFilter.Name = "chkTvCatFilter";
-            this.chkTvCatFilter.Size = new System.Drawing.Size(70, 17);
-            this.chkTvCatFilter.TabIndex = 28;
-            this.chkTvCatFilter.Text = "TV Video";
-            this.chkTvCatFilter.UseVisualStyleBackColor = true;
-            this.chkTvCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            this.gbActionFilter.Controls.Add(this.chkNoneFilter);
+            this.gbActionFilter.Controls.Add(this.chkQueueFilter);
+            this.gbActionFilter.Controls.Add(this.chkMoveCopyFilter);
+            this.gbActionFilter.Controls.Add(this.chkDelFilter);
+            this.gbActionFilter.Controls.Add(this.chkRenameFilter);
+            this.gbActionFilter.Location = new System.Drawing.Point(9, 19);
+            this.gbActionFilter.Name = "gbActionFilter";
+            this.gbActionFilter.Size = new System.Drawing.Size(362, 47);
+            this.gbActionFilter.TabIndex = 36;
+            this.gbActionFilter.TabStop = false;
+            this.gbActionFilter.Text = "Action Filter";
+            // 
+            // chkNoneFilter
+            // 
+            this.chkNoneFilter.AutoSize = true;
+            this.chkNoneFilter.Checked = true;
+            this.chkNoneFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkNoneFilter.Location = new System.Drawing.Point(6, 19);
+            this.chkNoneFilter.Name = "chkNoneFilter";
+            this.chkNoneFilter.Size = new System.Drawing.Size(52, 17);
+            this.chkNoneFilter.TabIndex = 19;
+            this.chkNoneFilter.Text = "None";
+            this.chkNoneFilter.UseVisualStyleBackColor = true;
+            this.chkNoneFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            // 
+            // chkQueueFilter
+            // 
+            this.chkQueueFilter.AutoSize = true;
+            this.chkQueueFilter.Location = new System.Drawing.Point(290, 20);
+            this.chkQueueFilter.Name = "chkQueueFilter";
+            this.chkQueueFilter.Size = new System.Drawing.Size(64, 17);
+            this.chkQueueFilter.TabIndex = 35;
+            this.chkQueueFilter.Text = "Queued";
+            this.chkQueueFilter.UseVisualStyleBackColor = true;
+            this.chkQueueFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            // 
+            // chkMoveCopyFilter
+            // 
+            this.chkMoveCopyFilter.AutoSize = true;
+            this.chkMoveCopyFilter.Checked = true;
+            this.chkMoveCopyFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkMoveCopyFilter.Location = new System.Drawing.Point(64, 19);
+            this.chkMoveCopyFilter.Name = "chkMoveCopyFilter";
+            this.chkMoveCopyFilter.Size = new System.Drawing.Size(82, 17);
+            this.chkMoveCopyFilter.TabIndex = 20;
+            this.chkMoveCopyFilter.Text = "Move/Copy";
+            this.chkMoveCopyFilter.UseVisualStyleBackColor = true;
+            this.chkMoveCopyFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
+            // 
+            // chkDelFilter
+            // 
+            this.chkDelFilter.AutoSize = true;
+            this.chkDelFilter.Checked = true;
+            this.chkDelFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDelFilter.Location = new System.Drawing.Point(227, 19);
+            this.chkDelFilter.Name = "chkDelFilter";
+            this.chkDelFilter.Size = new System.Drawing.Size(57, 17);
+            this.chkDelFilter.TabIndex = 21;
+            this.chkDelFilter.Text = "Delete";
+            this.chkDelFilter.UseVisualStyleBackColor = true;
+            this.chkDelFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // chkRenameFilter
             // 
@@ -304,56 +395,6 @@ namespace Meticumedia
             this.label2.Size = new System.Drawing.Size(77, 13);
             this.label2.TabIndex = 22;
             this.label2.Text = "Check Control:";
-            // 
-            // chkDelFilter
-            // 
-            this.chkDelFilter.AutoSize = true;
-            this.chkDelFilter.Checked = true;
-            this.chkDelFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDelFilter.Location = new System.Drawing.Point(227, 19);
-            this.chkDelFilter.Name = "chkDelFilter";
-            this.chkDelFilter.Size = new System.Drawing.Size(57, 17);
-            this.chkDelFilter.TabIndex = 21;
-            this.chkDelFilter.Text = "Delete";
-            this.chkDelFilter.UseVisualStyleBackColor = true;
-            this.chkDelFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
-            // 
-            // chkMoveCopyFilter
-            // 
-            this.chkMoveCopyFilter.AutoSize = true;
-            this.chkMoveCopyFilter.Checked = true;
-            this.chkMoveCopyFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkMoveCopyFilter.Location = new System.Drawing.Point(64, 19);
-            this.chkMoveCopyFilter.Name = "chkMoveCopyFilter";
-            this.chkMoveCopyFilter.Size = new System.Drawing.Size(82, 17);
-            this.chkMoveCopyFilter.TabIndex = 20;
-            this.chkMoveCopyFilter.Text = "Move/Copy";
-            this.chkMoveCopyFilter.UseVisualStyleBackColor = true;
-            this.chkMoveCopyFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
-            // 
-            // chkNoneFilter
-            // 
-            this.chkNoneFilter.AutoSize = true;
-            this.chkNoneFilter.Checked = true;
-            this.chkNoneFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkNoneFilter.Location = new System.Drawing.Point(6, 19);
-            this.chkNoneFilter.Name = "chkNoneFilter";
-            this.chkNoneFilter.Size = new System.Drawing.Size(52, 17);
-            this.chkNoneFilter.TabIndex = 19;
-            this.chkNoneFilter.Text = "None";
-            this.chkNoneFilter.UseVisualStyleBackColor = true;
-            this.chkNoneFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
-            // 
-            // chkIgnoreCatFilter
-            // 
-            this.chkIgnoreCatFilter.AutoSize = true;
-            this.chkIgnoreCatFilter.Location = new System.Drawing.Point(449, 20);
-            this.chkIgnoreCatFilter.Name = "chkIgnoreCatFilter";
-            this.chkIgnoreCatFilter.Size = new System.Drawing.Size(62, 17);
-            this.chkIgnoreCatFilter.TabIndex = 17;
-            this.chkIgnoreCatFilter.Text = "Ignored";
-            this.chkIgnoreCatFilter.UseVisualStyleBackColor = true;
-            this.chkIgnoreCatFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // btnModAction
             // 
@@ -391,36 +432,6 @@ namespace Meticumedia
             this.chkMoveCopy.UseVisualStyleBackColor = true;
             this.chkMoveCopy.CheckedChanged += new System.EventHandler(this.chkMoveCopy_CheckedChanged);
             // 
-            // gbActionFilter
-            // 
-            this.gbActionFilter.Controls.Add(this.chkNoneFilter);
-            this.gbActionFilter.Controls.Add(this.chkQueueFilter);
-            this.gbActionFilter.Controls.Add(this.chkMoveCopyFilter);
-            this.gbActionFilter.Controls.Add(this.chkDelFilter);
-            this.gbActionFilter.Controls.Add(this.chkRenameFilter);
-            this.gbActionFilter.Location = new System.Drawing.Point(9, 19);
-            this.gbActionFilter.Name = "gbActionFilter";
-            this.gbActionFilter.Size = new System.Drawing.Size(362, 47);
-            this.gbActionFilter.TabIndex = 36;
-            this.gbActionFilter.TabStop = false;
-            this.gbActionFilter.Text = "Action Filter";
-            // 
-            // gbCategoryFilter
-            // 
-            this.gbCategoryFilter.Controls.Add(this.chkTvCatFilter);
-            this.gbCategoryFilter.Controls.Add(this.chkIgnoreCatFilter);
-            this.gbCategoryFilter.Controls.Add(this.chkFolderCatFilter);
-            this.gbCategoryFilter.Controls.Add(this.chkNonTvCatFilter);
-            this.gbCategoryFilter.Controls.Add(this.chkTrashCatFilter);
-            this.gbCategoryFilter.Controls.Add(this.chkCustomCatFilter);
-            this.gbCategoryFilter.Controls.Add(this.chkUnknownCatFilter);
-            this.gbCategoryFilter.Location = new System.Drawing.Point(377, 19);
-            this.gbCategoryFilter.Name = "gbCategoryFilter";
-            this.gbCategoryFilter.Size = new System.Drawing.Size(522, 47);
-            this.gbCategoryFilter.TabIndex = 37;
-            this.gbCategoryFilter.TabStop = false;
-            this.gbCategoryFilter.Text = "Category Filter";
-            // 
             // lvResults
             // 
             this.lvResults.Activation = System.Windows.Forms.ItemActivation.TwoClick;
@@ -432,7 +443,9 @@ namespace Meticumedia
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
+            this.lvResults.ColumnSort = Meticumedia.OrgColumnType.Source_Folder;
             this.lvResults.FullRowSelect = true;
+            this.lvResults.HideSelection = false;
             this.lvResults.Location = new System.Drawing.Point(9, 72);
             this.lvResults.Name = "lvResults";
             this.lvResults.Size = new System.Drawing.Size(966, 327);
@@ -458,16 +471,6 @@ namespace Meticumedia
             this.columnHeader3.Text = "Destination";
             this.columnHeader3.Width = 284;
             // 
-            // pbScanProgress
-            // 
-            this.pbScanProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbScanProgress.Location = new System.Drawing.Point(134, 49);
-            this.pbScanProgress.Message = null;
-            this.pbScanProgress.Name = "pbScanProgress";
-            this.pbScanProgress.Size = new System.Drawing.Size(848, 23);
-            this.pbScanProgress.TabIndex = 28;
-            // 
             // ScanControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -486,10 +489,10 @@ namespace Meticumedia
             this.splitContainer1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.gbActionFilter.ResumeLayout(false);
-            this.gbActionFilter.PerformLayout();
             this.gbCategoryFilter.ResumeLayout(false);
             this.gbCategoryFilter.PerformLayout();
+            this.gbActionFilter.ResumeLayout(false);
+            this.gbActionFilter.PerformLayout();
             this.ResumeLayout(false);
 
         }

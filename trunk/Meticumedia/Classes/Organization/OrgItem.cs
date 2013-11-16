@@ -284,6 +284,7 @@ namespace Meticumedia
         /// </summary>
         public OrgItem()
         {
+            this.Status = OrgStatus.Found;
             this.Replace = false;
         }
 

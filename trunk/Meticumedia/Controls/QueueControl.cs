@@ -24,21 +24,6 @@ namespace Meticumedia
         #region Variables
 
         /// <summary>
-        /// Organization actions currently in the queue
-        /// </summary>
-        private List<OrgItem> queueItems = new List<OrgItem>();
-
-        /// <summary>
-        /// Lock for access queueItems list
-        /// </summary>
-        private object queueLock = new object();
-
-        /// <summary>
-        /// Set of columns in the queue listview
-        /// </summary>
-        private Dictionary<OrgColumnType, OrgItemColumn> queueColumns;
-
-        /// <summary>
         /// Worker for running queue actions
         /// </summary>
         private BackgroundWorker queueWorker;
@@ -70,7 +55,7 @@ namespace Meticumedia
             InitializeComponent();
 
             // Build queue listview columns
-            //queueColumns = OrgItemListHelper.SetOrgItemListColumns(OrgItemListHelper.OrgColumnSetup.Queue, lvQueue);
+            lvQueue.SetColumns(OrgItemColumnSetup.Queue);
 
             // Initialize queue worker
             queueWorker = new BackgroundWorker();
@@ -119,11 +104,6 @@ namespace Meticumedia
             // Check for selection
             if (lvQueue.SelectedItems.Count == 0)
                 return;
-
-            // Get selected
-            List<OrgItem> items = new List<OrgItem>();
-            foreach (int index in lvQueue.SelectedIndices)
-                items.Add(queueItems[index]);
 
             // TODO: check which of these need to be shown!
             contextMenu.MenuItems.Add("Pause Selected", new EventHandler(HandlePause));
@@ -425,17 +405,17 @@ namespace Meticumedia
                 ((TabControl)this.Parent.Parent).SelectedTab = ((TabPage)this.Parent);
 
             // Add each item to end of queue
-            lock (queueLock)
+            //lock (queueLock)
             {
                 foreach (OrgItem item in items)
-                    queueItems.Add(item);
+                    lvQueue.AddItem(item);
 
                 // Refresh display
                 DisplayQueue();
             }
 
             // Trigger queue items changed event
-            OnQueueItemsChanged(queueItems);
+            OnQueueItemsChanged(lvQueue.GetOrgItems());
 
             // Run queue
             StartQueue();
@@ -446,26 +426,16 @@ namespace Meticumedia
         /// </summary>
         private void DisplayQueue()
         {
-            DisplayQueue(new int[1] { -1 });
+            lvQueue.UpdateDisplay();
         }
 
-        /// <summary>
-        /// Displays queue in listview with specific items selected.
-        /// </summary>
-        /// <param name="select"></param>
-        private void DisplayQueue(int[] select)
-        {
-            // TODO
-            //OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, select, false);
-        }
 
         /// <summary>
         /// Updates queue items in listview (doesn't clear and re-add, simply updates fields)
         /// </summary>
         public void UpdateQueue()
         {
-            // TODO
-            //OrgItemListHelper.DisplayOrgItemInList(queueItems, lvQueue, queueColumns, new int[1] { -1 }, true);
+            lvQueue.UpdateDisplay();
         }
 
         /// <summary>
@@ -488,22 +458,16 @@ namespace Meticumedia
         /// </summary>
         private void PauseSelected()
         {
-            // Assert paused property on all selected items and save selection
-            int[] selects = new int[lvQueue.SelectedIndices.Count];
-            lock (queueLock)
+            List<OrgItem> selItems = lvQueue.GetSelectedOrgItems();
+            for (int i = 0; i < selItems.Count; i++)
             {
-                for (int i = 0; i < lvQueue.SelectedIndices.Count; i++)
-                {
-                    if (queueItems[lvQueue.SelectedIndices[i]].QueueStatus == OrgQueueStatus.Enabled)
-                        queueItems[lvQueue.SelectedIndices[i]].QueueStatus = OrgQueueStatus.Paused;
-
-                    selects[i] = lvQueue.SelectedIndices[i];
-                }
-
-                // Refresh queue listview
-                if (lvQueue.SelectedIndices.Count > 0)
-                    DisplayQueue(selects);
+                if (selItems[i].QueueStatus == OrgQueueStatus.Enabled)
+                    selItems[i].QueueStatus = OrgQueueStatus.Paused;
             }
+
+            if (selItems.Count > 0)
+                lvQueue.UpdateDisplay();
+            lvQueue.Focus();
         }
 
         /// <summary>
@@ -512,18 +476,17 @@ namespace Meticumedia
         private void ResumeSelected()
         {
             // Deassert paused property on all selected items and save selection
-            int[] selects = new int[lvQueue.SelectedIndices.Count];
-            for (int i = 0; i < lvQueue.SelectedIndices.Count; i++)
+            List<OrgItem> selItems = lvQueue.GetSelectedOrgItems();
+            for (int i = 0; i < selItems.Count; i++)
             {
-                if (queueItems[lvQueue.SelectedIndices[i]].QueueStatus == OrgQueueStatus.Paused)
-                    queueItems[lvQueue.SelectedIndices[i]].QueueStatus = OrgQueueStatus.Enabled;
-                selects[i] = lvQueue.SelectedIndices[i];
+                if (selItems[i].QueueStatus == OrgQueueStatus.Paused)
+                    selItems[i].QueueStatus = OrgQueueStatus.Enabled;
             }
 
             // Refresh queue listview
             if (lvQueue.SelectedIndices.Count > 0)
-                lock (queueLock)
-                    DisplayQueue(selects);
+                    DisplayQueue();
+            lvQueue.Focus();
             
             // Run queue
             StartQueue();
@@ -536,26 +499,15 @@ namespace Meticumedia
         {
             // Confirm cancel with user
             if (MessageBox.Show("Are you sure you want to remove the selected items from the queue?", "Sure?", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
-                // Remove all selected items from queue (and listview)
-                lock (queueLock)
-                {
-                    for (int i = lvQueue.SelectedIndices.Count - 1; i >= 0; i--)
-                    {
-                        int index = lvQueue.SelectedIndices[i];
-                        queueItems[index].CancelAction();
-                        queueItems.RemoveAt(lvQueue.SelectedIndices[i]);
-                    }
-
-                    // Refresh display
-                    DisplayQueue();
-                }
+            {                
+                // Remove all selected items from queue
+                lvQueue.RemoveSelectedItems();
 
                 // Disable buttons
                 SetItemButtonEnables(false);
 
                 // Trigger queue items changed event
-                OnQueueItemsChanged(queueItems);
+                OnQueueItemsChanged(lvQueue.GetOrgItems());
             }
         }
         
@@ -565,32 +517,9 @@ namespace Meticumedia
         private void MoveUpSelected()
         {
             // Move each selected item up by one
-            int[] selects = new int[lvQueue.SelectedIndices.Count];
-            lock (queueLock)
-            {
-                for (int i = lvQueue.SelectedIndices.Count - 1; i >= 0; i--)
-                {
-                    // Can't move top item up!
-                    if (lvQueue.SelectedIndices[i] == 0)
-                    {
-                        selects[i] = 0;
-                        continue;
-                    }
+            lvQueue.MoveUpSelectedItems();
+            lvQueue.Focus();
 
-                    // Move item up
-                    int index = lvQueue.SelectedIndices[i];
-                    OrgItem item = queueItems[index];
-
-                    queueItems.Remove(item);
-                    queueItems.Insert(index - 1, item);
-
-                    selects[i] = index - 1;
-                }
-
-                // Reresh display
-                if (lvQueue.SelectedIndices.Count > 0)
-                    DisplayQueue(selects);
-            }
         }
 
         /// <summary>
@@ -599,30 +528,8 @@ namespace Meticumedia
         private void MoveDownSelected()
         {
             // Move each selected item down by one
-            int[] selects = new int[lvQueue.SelectedIndices.Count];
-            lock (queueLock)
-            {
-                for (int i = lvQueue.SelectedIndices.Count - 1; i >= 0; i--)
-                {
-                    // Can't move last item down!
-                    if (lvQueue.SelectedIndices[i] >= lvQueue.Items.Count - 1)
-                    {
-                        selects[i] = lvQueue.Items.Count - 1;
-                        continue;
-                    }
-
-                    // Move item down
-                    int index = lvQueue.SelectedIndices[i];
-                    OrgItem item = queueItems[index];
-                    queueItems.Remove(item);
-                    queueItems.Insert(index + 1, item);
-                    selects[i] = index + 1;
-                }
-
-                // Refresh display
-                if (lvQueue.SelectedIndices.Count > 0)
-                    DisplayQueue(selects);
-            }
+            lvQueue.MoveDownSelectedItems();
+            lvQueue.Focus();
         }
 
         /// <summary>
@@ -630,24 +537,9 @@ namespace Meticumedia
         /// </summary>
         private void MoveToTopSelected()
         {
-            // Move selected item to top (loop in reverse order to maintain order within selections)
-            int[] selects = new int[lvQueue.SelectedIndices.Count];
-            lock (queueLock)
-            {
-                for (int i = lvQueue.SelectedIndices.Count - 1; i >= 0; i--)
-                {
-                    // Move item to top
-                    int index = lvQueue.SelectedIndices[i] + lvQueue.SelectedIndices.Count - 1 - i;
-                    OrgItem item = queueItems[index];
-                    queueItems.Remove(item);
-                    queueItems.Insert(0, item);
-                    selects[i] = lvQueue.SelectedIndices.Count - 1 - i;
-                }
-
-                // Refresh display
-                if (lvQueue.SelectedIndices.Count > 0)
-                    DisplayQueue(selects);
-            }
+            // Move selected item to top
+            lvQueue.MoveSelectedItemToTop();
+            lvQueue.Focus();
         }
 
         /// <summary>
@@ -656,23 +548,8 @@ namespace Meticumedia
         private void MoveToBottomSelected()
         {
             // Move selected items to bottom
-            int[] selects = new int[lvQueue.SelectedIndices.Count];
-            lock (queueLock)
-            {
-                for (int i = 0; i < lvQueue.SelectedIndices.Count; i++)
-                {
-                    // Move item to bottom
-                    int index = lvQueue.SelectedIndices[i] - i;
-                    OrgItem item = queueItems[index];
-                    queueItems.Remove(item);
-                    queueItems.Insert(lvQueue.Items.Count - 1, item);
-                    selects[i] = lvQueue.Items.Count - 1 - i;
-                }
-
-                // Refresh display
-                if (lvQueue.SelectedIndices.Count > 0)
-                    DisplayQueue(selects);
-            }
+            lvQueue.MoveSelectedItemToBottom();
+            lvQueue.Focus();
         }
 
         /// <summary>
@@ -680,18 +557,14 @@ namespace Meticumedia
         /// </summary>
         private void ClearQueue()
         {
-            lock (queueLock)
+            List<OrgItem> items = lvQueue.GetOrgItems();
+            for (int i = items.Count - 1; i >= 0; i--)
             {
-                for (int i = queueItems.Count - 1; i >= 0; i--)
-                {
-                    // Remove failed items
-                    if (queueItems[i].QueueStatus == OrgQueueStatus.Failed || queueItems[i].QueueStatus == OrgQueueStatus.Completed || queueItems[i].QueueStatus == OrgQueueStatus.Cancelled)
-                        RemoveQueueItem(queueItems[i], i);
-                }
-                DisplayQueue();
+                // Remove completed/failed items
+                if (items[i].QueueStatus == OrgQueueStatus.Failed || items[i].QueueStatus == OrgQueueStatus.Completed || items[i].QueueStatus == OrgQueueStatus.Cancelled)
+                    RemoveQueueItem(items[i]);
             }
-            OnQueueItemsChanged(queueItems);
-            
+            OnQueueItemsChanged(lvQueue.GetOrgItems());
         }
 
         #endregion        
@@ -724,6 +597,7 @@ namespace Meticumedia
         private void QueueRun()
         {
             // Check if queue is empty
+            List<OrgItem> queueItems = lvQueue.GetOrgItems();
             if (queueItems.Count == 0)
                 return;
 
@@ -731,32 +605,34 @@ namespace Meticumedia
             Thread.Sleep(1000);
 
             // Get next queue item
-            while (queueItems.Count > 0)
+            while (true)
             {
+                // Refresh items
+                queueItems = lvQueue.GetOrgItems();
+                if (queueItems.Count == 0)
+                    break;
+
                 // Check if paused
                 if (!OrgItem.QueuePaused)
                 {
                     // Get next active item
                     OrgItem item = queueItems[0];
                     int index = -1;
-                    lock (queueLock)
-                    {
-                        for (int i = 0; i < queueItems.Count; i++)
-                            if (queueItems[i].QueueStatus == OrgQueueStatus.Enabled)
-                            {
-                                item = queueItems[i];
-                                index = i;
-                                break;
-                            }
-                            else if (RemoveQueueItemIfNeeded(queueItems[i], i))
-                                i--;
-                    }
+
+                    for (int i = 0; i < queueItems.Count; i++)
+                        if (queueItems[i].QueueStatus == OrgQueueStatus.Enabled)
+                        {
+                            item = queueItems[i];
+                            index = i;
+                            break;
+                        }
+                        else if (RemoveQueueItemIfNeeded(queueItems[i]))
+                            i--;
 
                     // Refresh queue
                     this.Invoke((MethodInvoker)delegate
                     {
-                        lock (queueLock)
-                            UpdateQueue();
+                        UpdateQueue();
                     });
 
                     // If found item is paused, sleep then retry
@@ -774,8 +650,7 @@ namespace Meticumedia
                     // Remove item
                     this.Invoke((MethodInvoker)delegate
                     {
-                        lock (queueLock)
-                            RemoveQueueItemIfNeeded(item, index);
+                        RemoveQueueItemIfNeeded(item);
                     });
                 }
 
@@ -792,12 +667,12 @@ namespace Meticumedia
         }
 
 
-        private bool RemoveQueueItemIfNeeded(OrgItem item, int index)
+        private bool RemoveQueueItemIfNeeded(OrgItem item)
         {
             bool doRemove = item.QueueStatus == OrgQueueStatus.Completed && chkAutoClear.Checked;
             if (doRemove)
             {
-                RemoveQueueItem(item, index);
+                RemoveQueueItem(item);
 
                 // Refresh queue items
                 this.Invoke((MethodInvoker)delegate
@@ -806,17 +681,16 @@ namespace Meticumedia
                 });
             }
 
-            OnQueueItemsChanged(queueItems);
+            OnQueueItemsChanged(lvQueue.GetOrgItems());
             return doRemove;
         }
 
 
-        private void RemoveQueueItem(OrgItem item, int index)
+        private void RemoveQueueItem(OrgItem item)
         {
-            queueItems.Remove(item);
             this.Invoke((MethodInvoker)delegate
             {
-                lvQueue.Items.RemoveAt(index);
+                lvQueue.RemoveItem(item);
             });
         }
 
@@ -865,8 +739,7 @@ namespace Meticumedia
                 this.pbTotal.Message = msg;
 
                 // Update percent in listview
-                lock (queueLock)
-                    UpdateQueue();
+                UpdateQueue();
 
             });
         }

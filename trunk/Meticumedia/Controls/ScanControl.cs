@@ -119,6 +119,7 @@ namespace Meticumedia
 
             // Initialize queue items list
             this.queuedItems = new List<OrgItem>();
+            lvResults.SetColumns(OrgItemColumnSetup.DirectoryScan);
 
             // Setup scan worker
             scanWorker = new BackgroundWorker();
@@ -162,9 +163,9 @@ namespace Meticumedia
 
         void scan_ItemsInitialized(object sender, Scan.ItemsInitializedArgs e)
         {
-            lvResults.OrgItems = e.Items;
             this.Invoke((MethodInvoker)delegate
             {
+                lvResults.SetOrgItems(e.Items);
                 DisplayResults();
             });
         }
@@ -201,15 +202,14 @@ namespace Meticumedia
             // Check if all selected item are consistent
             bool allAlreadyExists = true;
             bool allValidMovies = true;
-            for (int i = 0; i < lvResults.SelectedIndices.Count; i++)
-            foreach(OrgListItem selItem in lvResults.SelectedItems)
+            List<OrgItem> selItems = lvResults.GetSelectedOrgItems();
+            for (int i = 0; i < selItems.Count; i++)
             {
-                OrgItem currItem = selItem.OrgItem;
-                if (currItem.Action != OrgAction.AlreadyExists)
+                if (selItems[i].Action != OrgAction.AlreadyExists)
                     allAlreadyExists = false;
-                if (currItem.Action == OrgAction.Copy || currItem.Action == OrgAction.Move)
+                if (selItems[i].Action == OrgAction.Copy || selItems[i].Action == OrgAction.Move)
                 {
-                    if (currItem.Category != FileCategory.NonTvVideo)
+                    if (selItems[i].Category != FileCategory.NonTvVideo)
                         allValidMovies = false;
                 }
                 else
@@ -243,7 +243,7 @@ namespace Meticumedia
                 contextMenu.MenuItems.Add("Unignore Item(s)", new EventHandler(HandleUnignore));
             }
 
-            if (lvResults.SelectedItems.Count == 1 && lvResults.DisplayedListItems[lvResults.SelectedIndices[0]].OrgItem.Status != OrgStatus.Missing)
+            if (selItems.Count == 1 && selItems[0].Status != OrgStatus.Missing)
                 contextMenu.MenuItems.Add("Edit Action", new EventHandler(HandleEdit));
 
             if (lastRunScan == ScanType.TvMissing)
@@ -256,7 +256,6 @@ namespace Meticumedia
                 ignoreItem.MenuItems.Add("Season(s)", new EventHandler(HandleIgnoreTvSeason));
                 ignoreItem.MenuItems.Add("Show(s) (disables include in scan)", new EventHandler(HandleTurnOffIncludeInScan));
             }
-
         }
 
         /// <summary>
@@ -403,7 +402,7 @@ namespace Meticumedia
                 return;
 
             // Open editor for selected item
-            OrgItem selectedResult = lvResults.SelectedListItems[0].OrgItem;
+            OrgItem selectedResult = lvResults.GetSelectedListItems()[0].OrgItem;
 
             // Locate
             List<OrgItem> items;
@@ -441,13 +440,13 @@ namespace Meticumedia
                 }
             }
 
-            foreach (OrgListItem displayItem in lvResults.DisplayedListItems)
+            List<OrgItem> displayItems = lvResults.GetDisplayedOrgItems();
+            foreach (OrgItem displayItem in displayItems)
             {
-                OrgItem selectedResult = displayItem.OrgItem;
                 foreach (TvShow show in showsToBeSet)
-                    if (displayItem.OrgItem.TvEpisode != null && displayItem.OrgItem.TvEpisode.Show == show.Name)
+                    if (displayItem.TvEpisode != null && displayItem.TvEpisode.Show == show.Name)
                     {
-                        displayItem.OrgItem.Category = FileCategory.Ignored;
+                        displayItem.Category = FileCategory.Ignored;
                         break;
                     }
             }
@@ -492,38 +491,37 @@ namespace Meticumedia
             List<KeyValuePair<TvShow, int>> setShowSeasons = new List<KeyValuePair<TvShow, int>>();
 
             // Get selected item
-            for (int i = lvResults.SelectedListItems.Count - 1; i >= 0; i--)
+            List<OrgItem> selItems = lvResults.GetSelectedOrgItems();
+            for (int i = selItems.Count - 1; i >= 0; i--)
             {
                 // Make sure it's a tv item
-                OrgItem selectedResult = lvResults.SelectedListItems[i].OrgItem;
-                if (selectedResult.TvEpisode == null)
+                if (selItems[i].TvEpisode == null)
                     return;
 
                 // Set show's season to ignored
-                TvShow show = selectedResult.TvEpisode.GetShow();
-                show.Seasons[selectedResult.TvEpisode.Season].Ignored = true;
+                TvShow show = selItems[i].TvEpisode.GetShow();
+                show.Seasons[selItems[i].TvEpisode.Season].Ignored = true;
 
                 // Save season
-                KeyValuePair<TvShow, int> showSeason = new KeyValuePair<TvShow, int>(show, selectedResult.TvEpisode.Season);
+                KeyValuePair<TvShow, int> showSeason = new KeyValuePair<TvShow, int>(show, selItems[i].TvEpisode.Season);
                 if (!setShowSeasons.Contains(showSeason))
                     setShowSeasons.Add(showSeason);
             }
 
             // Ignore all season episodes
-            for (int i = lvResults.DisplayedListItems.Count - 1; i >= 0; i--)
+            List<OrgItem> displayItems = lvResults.GetDisplayedOrgItems();
+            for (int i = displayItems.Count - 1; i >= 0; i--)
             {
                 // Make sure it's a tv item
-                OrgItem currResult = lvResults.DisplayedListItems[i].OrgItem;
-                if (currResult.TvEpisode == null)
+                if (displayItems[i].TvEpisode == null)
                     return;
 
                 // Get season/show
-                KeyValuePair<TvShow, int> showSeason = new KeyValuePair<TvShow, int>(currResult.TvEpisode.GetShow(), currResult.TvEpisode.Season);
+                KeyValuePair<TvShow, int> showSeason = new KeyValuePair<TvShow, int>(displayItems[i].TvEpisode.GetShow(), displayItems[i].TvEpisode.Season);
                 if (setShowSeasons.Contains(showSeason))
-                    currResult.Category = FileCategory.Ignored;
+                    displayItems[i].Category = FileCategory.Ignored;
                     
-            }
-                
+            } 
 
             Organization.Shows.Save();
             DisplayResults();
@@ -617,15 +615,19 @@ namespace Meticumedia
         private void lvResults_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
             // Prevent checking on items with no action
-            if (e.Item.SubItems.Count > 1)
+            if (e != null)
             {
-                OrgAction action = lvResults.DisplayedListItems[e.Item.Index].OrgItem.Action;
-                if (action == OrgAction.None || action == OrgAction.Queued || action == OrgAction.AlreadyExists || action == OrgAction.NoRootFolder)
-                    e.Item.Checked = false;
-            }
+                List<OrgItem> displayItems = lvResults.GetDisplayedOrgItems();
+                if (e.Item.SubItems.Count > 1)
+                {
+                    OrgAction action = displayItems[e.Item.Index].Action;
+                    if (action == OrgAction.None || action == OrgAction.Queued || action == OrgAction.AlreadyExists || action == OrgAction.NoRootFolder)
+                        e.Item.Checked = false;
+                }
 
-            // Mirror check state to scan results list
-            lvResults.DisplayedListItems[e.Item.Index].OrgItem.Check = e.Item.Checked ? CheckState.Checked : CheckState.Unchecked;
+                // Mirror check state to scan results list
+                displayItems[e.Item.Index].Check = e.Item.Checked ? CheckState.Checked : CheckState.Unchecked;
+            }
 
             // De-register check change events (to prevent this method being called again)
             chkMoveCopy.CheckedChanged -= new System.EventHandler(this.chkMoveCopy_CheckedChanged);
@@ -706,7 +708,7 @@ namespace Meticumedia
                 return;
 
             // Open editor for selected item
-            OrgItem selectedResult = lvResults.DisplayedListItems[0].OrgItem;
+            OrgItem selectedResult = lvResults.GetSelectedOrgItems()[0];
             if (selectedResult.Action == OrgAction.Queued)
                 return;
 
@@ -723,9 +725,9 @@ namespace Meticumedia
                 // Automatically apply the movie to unknown items with similar names
                 if (lastRunScan == ScanType.Directory && sam.Result.Movie != null && (sam.Result.Action == OrgAction.Move || sam.Result.Action == OrgAction.Copy))
                 {
-                    foreach (OrgListItem listItem in lvResults.DisplayedListItems)
+                    List<OrgItem> displayItems = lvResults.GetDisplayedOrgItems();
+                    foreach (OrgItem item in displayItems)
                     {
-                        OrgItem item = listItem.OrgItem;
                         if (item.Action == OrgAction.None && item.Movie == null && item.SourcePath.Length == sam.Result.SourcePath.Length)
                         {
                             int diffCnt = 0;
@@ -760,7 +762,7 @@ namespace Meticumedia
                 return OrgStatus.Missing;
 
             // Retun status for selected item
-            return lvResults.SelectedListItems[0].OrgItem.Status;
+            return lvResults.GetSelectedOrgItems()[0].Status;
         }
 
         /// <summary>
@@ -774,7 +776,7 @@ namespace Meticumedia
                 return OrgAction.Queued;
 
             // Retun status for selected item
-            return lvResults.SelectedListItems[0].OrgItem.Action;
+            return lvResults.GetSelectedOrgItems()[0].Action;
         }
 
         /// <summary>
@@ -793,16 +795,17 @@ namespace Meticumedia
             // Get checked items
             List<OrgItem> itemsToQueue = new List<OrgItem>();
             //lock (displayItems)
-                for (int i = 0; i < lvResults.DisplayedListItems.Count; i++)
-                    if (lvResults.DisplayedListItems[i].OrgItem.Check == CheckState.Checked)
-                    {
-                        // Add item
-                        itemsToQueue.Add(new OrgItem(lvResults.DisplayedListItems[i].OrgItem));
+            List<OrgItem> displayItems = lvResults.GetDisplayedOrgItems();
+            for (int i = 0; i < displayItems.Count; i++)
+                if (displayItems[i].Check == CheckState.Checked)
+                {
+                    // Add item
+                    itemsToQueue.Add(new OrgItem(displayItems[i]));
 
-                        // Update item in scan list
-                        lvResults.DisplayedListItems[i].OrgItem.Action = OrgAction.Queued;
-                        lvResults.DisplayedListItems[i].OrgItem.Check = CheckState.Unchecked;
-                    }
+                    // Update item in scan list
+                    displayItems[i].Action = OrgAction.Queued;
+                    displayItems[i].Check = CheckState.Unchecked;
+                }
 
             if (lastRunScan == ScanType.MovieFolder || lastRunScan == ScanType.TvMissing)
             {
@@ -836,6 +839,36 @@ namespace Meticumedia
         /// </summary>
         private void chkFilter_CheckedChanged(object sender, EventArgs e)
         {
+            // Action Filter
+            lvResults.ActionFilter = OrgAction.NoRootFolder | OrgAction.TBD | OrgAction.Processing;;
+            if (chkNoneFilter.Checked) 
+                lvResults.ActionFilter |= OrgAction.None | OrgAction.AlreadyExists;
+            if (chkMoveCopyFilter.Checked)
+                lvResults.ActionFilter |= OrgAction.Move | OrgAction.Copy;
+            if (chkRenameFilter.Checked)
+                lvResults.ActionFilter |= OrgAction.Rename;
+            if (chkDelFilter.Checked)
+                lvResults.ActionFilter |= OrgAction.Delete;
+            if (chkQueueFilter.Checked)
+                lvResults.ActionFilter |= OrgAction.Queued;
+            
+            // Category Filter
+            lvResults.CategoryFilter = FileCategory.Empty;
+            if (chkTvCatFilter.Checked)
+                lvResults.CategoryFilter |= FileCategory.TvVideo;
+            if (chkNonTvCatFilter.Checked)
+                lvResults.CategoryFilter |= FileCategory.NonTvVideo;
+            if (chkCustomCatFilter.Checked)
+                lvResults.CategoryFilter |= FileCategory.Custom;
+            if (chkTrashCatFilter.Checked)
+                lvResults.CategoryFilter |= FileCategory.Trash;
+            if (chkUnknownCatFilter.Checked)
+                lvResults.CategoryFilter |= FileCategory.Unknown;
+            if (chkFolderCatFilter.Checked)
+                lvResults.CategoryFilter |= FileCategory.Folder;
+            if (chkIgnoreCatFilter.Checked)
+                lvResults.CategoryFilter |= FileCategory.Ignored;
+
             DisplayResults();
         }
 
@@ -960,26 +993,33 @@ namespace Meticumedia
 
             // Perform appropriate scan
             ScanType scanType = (ScanType)args[0];
+            List<OrgItem> scanResults = new List<OrgItem>();
             switch (scanType)
             {
                 case ScanType.Directory:
                     directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false, (bool)args[2]);
                     break;
                 case ScanType.TvMissing:
-                    lvResults.OrgItems = tvMissingScan.RunScan((List<Content>)args[1], queuedItems, (bool)args[2]);
+                    scanResults = tvMissingScan.RunScan((List<Content>)args[1], queuedItems, (bool)args[2]);
                     break;
                 case ScanType.TvRename:
-                    lvResults.OrgItems = tvRenameScan.RunScan((List<Content>)args[1], queuedItems);
+                    scanResults = tvRenameScan.RunScan((List<Content>)args[1], queuedItems);
                     break;
                 case ScanType.TvFolder:
-                    lvResults.OrgItems = tvFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems, (bool)args[2]);
+                    scanResults = tvFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems, (bool)args[2]);
                     break;
                 case ScanType.MovieFolder:
-                    lvResults.OrgItems = movieFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems);
+                    scanResults = movieFolderScan.RunScan((List<ContentRootFolder>)args[1], queuedItems);
                     break;
                 default:
                     throw new Exception("Unknown scan type!");
             }
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                if (scanType != ScanType.Directory)
+                    lvResults.SetOrgItems(scanResults);
+            });
         }
 
         /// <summary>
@@ -1036,7 +1076,7 @@ namespace Meticumedia
                 UnlinkProgressEvents();
                 this.Invoke((MethodInvoker)delegate
                {
-                   List<OrgItem> items = lvResults.OrgItems;
+                   List<OrgItem> items = lvResults.GetOrgItems();
                    for (int i = items.Count - 1; i >= 0; i--)
                    {
                        if (items[i].Action == OrgAction.Processing || items[i].Action == OrgAction.TBD)
@@ -1175,6 +1215,11 @@ namespace Meticumedia
                 CancelScan();
             }
 
+            // Reset check selection
+            chkMoveCopy.Text = lastRunScan == ScanType.TvMissing ? "Found" : "Move/Copy";
+            chkRenameDelete.Text = lastRunScan == ScanType.Directory ? "Delete" : "Organization";
+            chkMoveCopy.CheckState = lvResults.GetCheckState(new OrgAction[] { OrgAction.Copy, OrgAction.Move });
+            chkRenameDelete.CheckState = lvResults.GetCheckState(new OrgAction[] { lastRunScan == ScanType.Directory ? OrgAction.Delete : OrgAction.Rename });
         }
 
         /// <summary>
@@ -1196,15 +1241,21 @@ namespace Meticumedia
         /// Displays scan results in listview
         /// </summary>
         private void DisplayResults(bool updating = false)
-        {   
+        {
+            lvResults.ItemChecked -= new ItemCheckedEventHandler(lvResults_ItemChecked);
+
+            lvResults.UpdateDisplay();
+            lvResults_ItemChecked(null, null);
+
+            lvResults.ItemChecked += new ItemCheckedEventHandler(lvResults_ItemChecked);
             // Update selection
-            OrgItem selItem = null;
-            int selIndex = -1;
-            if (lvResults.SelectedIndices.Count > 0)
-            {
-                selItem = lvResults.DisplayedListItems[0].OrgItem;
-                selIndex = lvResults.SelectedIndices[0];
-            }
+            //OrgItem selItem = null;
+            //int selIndex = -1;
+            //if (lvResults.SelectedIndices.Count > 0)
+            //{
+            //    selItem = lvResults.DisplayedListItems[0].OrgItem;
+            //    selIndex = lvResults.SelectedIndices[0];
+            //}
             
             //// Filter and sort items for display
             //if (!updating)
@@ -1232,11 +1283,7 @@ namespace Meticumedia
             //    lvResults_SelectedIndexChanged(null, new ItemCheckedEventArgs(lvResults.Items[0]));
             //}
             
-            // Reset check selection
-            chkMoveCopy.Text = lastRunScan == ScanType.TvMissing ? "Found" : "Move/Copy";
-            chkRenameDelete.Text = lastRunScan == ScanType.Directory ? "Delete" : "Organization";
-            chkMoveCopy.CheckState = lvResults.GetCheckState(new OrgAction[] { OrgAction.Copy, OrgAction.Move });
-            chkRenameDelete.CheckState = lvResults.GetCheckState(new OrgAction[] { lastRunScan == ScanType.Directory ? OrgAction.Delete : OrgAction.Rename });
+            
         }
 
         /// <summary>

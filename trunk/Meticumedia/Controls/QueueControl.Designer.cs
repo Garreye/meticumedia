@@ -177,7 +177,9 @@ namespace Meticumedia
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
+            this.lvQueue.ColumnSort = Meticumedia.OrgColumnType.Source_Folder;
             this.lvQueue.FullRowSelect = true;
+            this.lvQueue.HideSelection = false;
             this.lvQueue.Location = new System.Drawing.Point(6, 71);
             this.lvQueue.Name = "lvQueue";
             this.lvQueue.Size = new System.Drawing.Size(665, 470);

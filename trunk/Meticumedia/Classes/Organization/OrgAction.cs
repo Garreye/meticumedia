@@ -12,6 +12,6 @@ namespace Meticumedia
     /// <summary>
     /// All possible organization actions that can be performed.
     /// </summary>
-    public enum OrgAction { None = 0,  AlreadyExists = 1, Move = 2, Copy = 4, Rename = 8, Delete = 16, Queued = 32, NoRootFolder = 64, TBD = 128, Processing = 256, All = 511 };
+    public enum OrgAction { Empty = 0, None = 1,  AlreadyExists = 2, Move = 4, Copy = 8, Rename = 16, Delete = 32, Queued = 64, NoRootFolder = 128, TBD = 256, Processing = 512, All = 1023 };
 
 }

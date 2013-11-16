@@ -77,7 +77,7 @@ namespace Meticumedia
             this.chkDelFilter.TabIndex = 25;
             this.chkDelFilter.Text = "Delete";
             this.chkDelFilter.UseVisualStyleBackColor = true;
-            this.chkDelFilter.CheckedChanged += new System.EventHandler(this.chkDelFilter_CheckedChanged);
+            this.chkDelFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // chkMoveCopyFilter
             // 
@@ -90,7 +90,7 @@ namespace Meticumedia
             this.chkMoveCopyFilter.TabIndex = 24;
             this.chkMoveCopyFilter.Text = "Move/Copy";
             this.chkMoveCopyFilter.UseVisualStyleBackColor = true;
-            this.chkMoveCopyFilter.CheckedChanged += new System.EventHandler(this.chkMoveCopyFilter_CheckedChanged);
+            this.chkMoveCopyFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // label1
             // 
@@ -112,7 +112,7 @@ namespace Meticumedia
             this.chkRenameFilter.TabIndex = 26;
             this.chkRenameFilter.Text = "Rename";
             this.chkRenameFilter.UseVisualStyleBackColor = true;
-            this.chkRenameFilter.CheckedChanged += new System.EventHandler(this.chkRenameFilter_CheckedChanged);
+            this.chkRenameFilter.CheckedChanged += new System.EventHandler(this.chkFilter_CheckedChanged);
             // 
             // lvLog
             // 
@@ -123,6 +123,7 @@ namespace Meticumedia
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
+            this.lvLog.ColumnSort = Meticumedia.OrgColumnType.Source_Folder;
             this.lvLog.FullRowSelect = true;
             this.lvLog.Location = new System.Drawing.Point(6, 32);
             this.lvLog.Name = "lvLog";
@@ -130,7 +131,6 @@ namespace Meticumedia
             this.lvLog.TabIndex = 12;
             this.lvLog.UseCompatibleStateImageBehavior = false;
             this.lvLog.View = System.Windows.Forms.View.Details;
-            this.lvLog.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lvLog_ColumnClick);
             // 
             // columnHeader1
             // 
