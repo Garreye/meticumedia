@@ -9,7 +9,7 @@ using System.Net;
 using System.Text;
 using System.Xml;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class for accesing TVRage online TV database and related functions.
@@ -199,9 +199,6 @@ namespace Meticumedia
                                     string seasonNoStr = seasonNode.Attributes["no"].Value;
                                     int seasonNo;
                                     int.TryParse(seasonNoStr, out seasonNo);
-                                    if (!show.Seasons.Contains(seasonNo))
-                                        show.Seasons.Add(new TvSeason(seasonNo));
-                                    TvSeason season = show.Seasons[seasonNo];
 
                                     foreach (XmlNode epNode in seasonNode.ChildNodes)
                                     {
@@ -243,7 +240,7 @@ namespace Meticumedia
                                             }
                                         }
                                         else
-                                            season.Episodes.Add(ep);
+                                            show.Episodes.Add(ep);
                                     }
                                 }
 

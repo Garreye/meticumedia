@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Collections.ObjectModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Television show class.
@@ -25,20 +25,17 @@ namespace Meticumedia
         /// </summary>
         public TvDataBaseSelection Database { get { return (TvDataBaseSelection)DatabaseSelection; } }
 
-        /// <summary>
-        /// Episodes of show, indexed by season
-        /// </summary>
-        public TvSeasonCollection Seasons
-        {
-            get { return this.seasons; }
+        public ObservableCollection<TvEpisode> Episodes
+            {
+                get { return this.episodes; }
             set
             {
-                this.seasons = value;
-                OnPropertyChanged("Seasons");
+                this.episodes = value;
+                OnPropertyChanged("Episodes");
             }
         }
 
-        private TvSeasonCollection seasons = new TvSeasonCollection();
+        private ObservableCollection<TvEpisode> episodes = new ObservableCollection<TvEpisode>();
 
         /// <summary>
         /// Whether to check for missing episodes during scan
@@ -89,6 +86,18 @@ namespace Meticumedia
 
         private ObservableCollection<string> alternativeNameMatches = new ObservableCollection<string>();
 
+        public List<int> Seasons
+        {
+            get
+            {
+                List<int> seasons = new List<int>();
+                foreach (TvEpisode ep in this.Episodes)
+                    if (!seasons.Contains(ep.Season))
+                        seasons.Add(ep.Season);
+                return seasons;
+            }
+        }
+
         /// <summary>
         /// Use DVD episode ordering
         /// </summary>
@@ -128,35 +137,14 @@ namespace Meticumedia
         /// Default constructor.
         /// </summary>
         public TvShow()
+            : base()
         {
-            this.Seasons = new TvSeasonCollection();
-            this.Name = string.Empty;
-            this.Id = 0;
-            this.Date = new DateTime();
-            this.Path = string.Empty;
-            this.RootFolder = string.Empty;
             ContentRootFolder defaultFolder;
             if (Settings.GetDefaultTvFolder(out defaultFolder))
                 this.RootFolder = defaultFolder.FullPath;
-            this.Overview = string.Empty;
-            this.DoRenaming = true;
-            this.DoMissingCheck = true;
-            this.IncludeInSchedule = true;
-            this.AlternativeNameMatches = new ObservableCollection<string>();
-            this.DatabaseSelection = (int)Settings.DefaultTvDatabase;
 
-            this.seasons.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(seasons_CollectionChanged);
+            this.episodes.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(episodes_CollectionChanged);
             this.alternativeNameMatches.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(alternativeNameMatches_CollectionChanged);
-        }
-
-        void alternativeNameMatches_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            OnPropertyChanged("AlternativeNameMatches");
-        }
-
-        void seasons_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            OnPropertyChanged("Seasons");
         }
 
         /// <summary>
@@ -177,6 +165,21 @@ namespace Meticumedia
             : this()
         {
             base.Clone(content);
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void alternativeNameMatches_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("AlternativeNameMatches");
+        }
+
+        private void episodes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("Episodes");
+            OnPropertyChanged("Seasons");
         }
 
         #endregion
@@ -207,14 +210,12 @@ namespace Meticumedia
             this.Found = show.Found;
             this.IncludeInSchedule = show.IncludeInSchedule;
             this.Genres = show.Genres;
-            this.Seasons = show.Seasons;
             this.Id = show.Id;
             this.Date = show.Date;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
-            foreach (TvSeason season in this.Seasons)
-                foreach (TvEpisode episode in season.Episodes)
-                    episode.Show = show.Name;
+            foreach (TvEpisode episode in this.Episodes)
+                episode.Show = show.Name;
             this.AlternativeNameMatches = new ObservableCollection<string>();
             foreach (string altName in show.AlternativeNameMatches)
                 this.AlternativeNameMatches.Add(altName);
@@ -226,9 +227,8 @@ namespace Meticumedia
         public override void UpdateMissing()
         {
             // Mark all as missing - TODO: check file path and check that file still exists, if so don't mark as missing!
-            foreach (TvSeason season in Seasons)
-                foreach (TvEpisode ep in season.Episodes)
-                    ep.Missing = TvEpisode.MissingStatus.Missing;
+            foreach (TvEpisode ep in this.Episodes)
+                ep.Missing = TvEpisode.MissingStatus.Missing;
 
             // Search through TV show directory
             if (Directory.Exists(this.Path))
@@ -298,10 +298,9 @@ namespace Meticumedia
         public List<TvEpisode> GetMissingEpisodes(bool includeIgnored)
         {
             List<TvEpisode> list = new List<TvEpisode>();
-            foreach (TvSeason season in Seasons)
-                foreach (TvEpisode ep in season.Episodes)
-                    if (ep.Missing == TvEpisode.MissingStatus.Missing && ep.Aired && (!ep.Ignored || includeIgnored))
-                        list.Add(ep);
+            foreach (TvEpisode ep in this.Episodes)
+                if (ep.Missing == TvEpisode.MissingStatus.Missing && ep.Aired && (!ep.Ignored || includeIgnored))
+                    list.Add(ep);
             return list;
         }
 
@@ -315,13 +314,12 @@ namespace Meticumedia
         public bool FindEpisode(int seasonNumber, int episodeNumber, bool databaseNum, out TvEpisode episode)
         {
             episode = null;
-            foreach (TvSeason season in Seasons)
-                foreach (TvEpisode ep in season.Episodes)
-                    if (ep.Season == seasonNumber && ((ep.Number == episodeNumber && !databaseNum) || (ep.DatabaseNumber == episodeNumber && databaseNum)))
-                    {
-                        episode = ep;
-                        return true;
-                    }
+            foreach (TvEpisode ep in this.Episodes)
+                if (ep.Season == seasonNumber && ((ep.Number == episodeNumber && !databaseNum) || (ep.DatabaseNumber == episodeNumber && databaseNum)))
+                {
+                    episode = ep;
+                    return true;
+                }
             return false;
         }
 
@@ -346,7 +344,7 @@ namespace Meticumedia
         public string BuildFilePath(TvEpisode episode1, TvEpisode episode2, string path)
         {
             // New season created to prevent exception if episode doesn't fall into a valid season
-            return this.Path + "\\" + (new TvSeason(episode1.Season)).ToString() + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
+            return this.Path + "\\" + episode1.GetSeasonName() + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
         }
 
         /// <summary>
@@ -375,7 +373,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Seasons, DoMissing, IncludeInSchedule, AlternativeNameMatches, DvdEpisodeOrder };
+        private enum XmlElements { Seasons, Episodes, DoMissing, IncludeInSchedule, AlternativeNameMatches, DvdEpisodeOrder };
 
         /// <summary>
         /// Saves instance to XML file.
@@ -395,12 +393,16 @@ namespace Meticumedia
                 switch (element)
                 {
                     case XmlElements.Seasons:
+                        // Deprecated
+                        break;
+                    case XmlElements.Episodes:
                         xw.WriteStartElement(element.ToString());
-                        foreach (TvSeason season in this.Seasons)
-                            season.Save(xw);
+                        foreach (TvEpisode episode in this.Episodes)
+                            episode.Save(xw);
                         xw.WriteEndElement();
                         break;
 
+                        break;
                     case XmlElements.DoMissing:
                         value = this.DoMissingCheck.ToString();
                         break;
@@ -452,13 +454,31 @@ namespace Meticumedia
                 string value = propNode.InnerText;
                 switch (element)
                 {
-                    case XmlElements.Seasons:
-                        this.Seasons = new TvSeasonCollection();
+                    case XmlElements.Seasons: // Support for older versions
                         foreach (XmlNode seasNode in propNode.ChildNodes)
                         {
-                            TvSeason season = new TvSeason();
-                            if (season.Load(seasNode))
-                                this.Seasons.Add(season);
+                            foreach (XmlNode seasPropNode in seasNode.ChildNodes)
+                            {
+                                if(seasPropNode.Name == "Episodes")
+                                {
+                                    this.Episodes = new ObservableCollection<TvEpisode>();
+                                    foreach(XmlNode epNode in seasPropNode.ChildNodes)
+                                    {
+                                        TvEpisode episode = new TvEpisode();
+                                        episode.Load(epNode);
+                                        Episodes.Add(episode);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case XmlElements.Episodes:
+                        this.Episodes = new ObservableCollection<TvEpisode>();
+                        foreach(XmlNode epNode in propNode.ChildNodes)
+                        {
+                            TvEpisode episode = new TvEpisode();
+                            episode.Load(epNode);
+                            Episodes.Add(episode);
                         }
                         break;
                     case XmlElements.DoMissing:

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Defines filter that can be applied to TV episodes.
@@ -151,9 +151,8 @@ namespace Meticumedia
             filters.Add(new TvEpisodeFilter(FilterType.Unaired, 0));
 
             if (seasons)
-                foreach (TvSeason season in show.Seasons)
-                    if (!season.Ignored || displayIgnored)
-                        filters.Add(new TvEpisodeFilter(FilterType.Season, season.Number));
+                foreach (int season in show.Seasons)
+                    filters.Add(new TvEpisodeFilter(FilterType.Season, season));
 
             return filters;
         }

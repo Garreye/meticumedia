@@ -58,7 +58,36 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\Settings\RootFolderControl.xaml.cs">
+      <DependentUpon>RootFolderControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\ScanFoldersControl.xaml.cs">
+      <DependentUpon>ScanFoldersControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\FileNameControl.xaml.cs">
+      <DependentUpon>FileNameControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\BoolInverterConverter.cs" />
+    <Compile Include="Helpers\DefaultColorConverter.cs" />
+    <Compile Include="Windows\SelectionWindow.xaml.cs">
+      <DependentUpon>SelectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\SettingsWindow.xaml.cs">
+      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="Controls\Content\TvShowsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\RootFolderControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\ScanFoldersControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\FileNameControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -231,12 +260,6 @@
     <Compile Include="Classes\Tv\TvScheduleType.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\Tv\TvSeason.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Classes\Tv\TvSeasonCollection.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Classes\Tv\TvShow.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -250,6 +273,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\SelectionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\SettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -283,18 +314,16 @@
     <Resource Include="meticumedia-icon-small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="wordsEn.txt">
+    <None Include="wordsEn.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="license.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Windows\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

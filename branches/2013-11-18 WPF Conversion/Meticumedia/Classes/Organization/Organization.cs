@@ -10,8 +10,9 @@ using System.IO;
 using System.Xml;
 using System.ComponentModel;
 using System.Threading;
+using Meticumedia.Classes;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Contains data and methods related to organization on a very high level.

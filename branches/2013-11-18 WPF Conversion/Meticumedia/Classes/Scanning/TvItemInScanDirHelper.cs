@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.ComponentModel;
 using System.Threading;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Helper for performing all organizational scans.
@@ -68,7 +68,7 @@ namespace Meticumedia
             if (dirScanSearch)
             {
                 DirectoryScan scan = new DirectoryScan(true);
-                scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true, true);
+                scan.RunScan(Settings.ScanDirectories.ToList(), new List<OrgItem>(), true, true, true);
                 Items = scan.Items;
             }
 

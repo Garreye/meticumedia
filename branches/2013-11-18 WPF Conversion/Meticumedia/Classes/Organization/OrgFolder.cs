@@ -10,46 +10,126 @@ using System.Xml.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 using System.Reflection;
+using System.ComponentModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Organization folder, aka "scan folder". Used for scanning for new files that need to be organized (e.g. download folder)
     /// </summary>
-    public class OrgFolder
+    public class OrgFolder : INotifyPropertyChanged
     {
         #region Properties
         
         /// <summary>
         /// Path to the folder
         /// </summary>
-        public string FolderPath { get; set; }
+        public string FolderPath
+        {
+            get
+            {
+                return folderPath;
+            }
+            set
+            {
+                folderPath = value;
+                OnPropertyChanged("FolderPath");
+            }
+        }
+
+        private string folderPath = string.Empty;
 
         /// <summary>
         /// Whether file will be copied instead of moved from the folder
         /// </summary>
-        public bool CopyFrom { get; set; }
+        public bool CopyFrom
+        {
+            get
+            {
+                return copyFrom;
+            }
+            set
+            {
+                copyFrom = value;
+                OnPropertyChanged("CopyFrom");
+            }
+        }
+
+        private bool copyFrom = false;
 
         /// <summary>
         /// Whether the software should do recursive file searches in the folder
         /// </summary>
-        public bool Recursive { get; set; }
+        public bool Recursive
+        {
+            get
+            {
+                return recursive;
+            }
+            set
+            {
+                recursive = value;
+                OnPropertyChanged("Recursive");
+            }
+        }
+
+        private bool recursive = true;
 
         /// <summary>
         /// Whether the file are allowed to be set to be deleted when organizing the folder
         /// </summary>
-        public bool AllowDeleting { get; set; }
+        public bool AllowDeleting
+        {
+            get
+            {
+                return allowDeleting;
+            }
+            set
+            {
+                allowDeleting = value;
+                OnPropertyChanged("AllowDeleting");
+            }
+        }
+
+        private bool allowDeleting = true;
 
         /// <summary>
         /// Whether to automatically delete empty sub-fodlers during processing
         /// </summary>
-        public bool AutomaticallyDeleteEmptyFolders { get; set; }
+        public bool AutomaticallyDeleteEmptyFolders
+        {
+            get
+            {
+                return automaticallyDeleteEmptyFolders;
+            }
+            set
+            {
+                automaticallyDeleteEmptyFolders = value;
+                OnPropertyChanged("AutomaticallyDeleteEmptyFolders");
+            }
+        }
+
+        private bool automaticallyDeleteEmptyFolders = true;
 
         /// <summary>
         /// List of files to ignore during scan. Intended for use with directories that are copied from, 
         /// so that once a file has been copied to content folder it is skipped during scanning in future
         /// </summary>
-        private List<string> IgnoreFiles { get; set; }
+        private List<string> ignoreFiles = new List<string>();
+
+        #endregion
+
+        #region Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
         #endregion
 
@@ -70,7 +150,7 @@ namespace Meticumedia
             this.Recursive = recursive;
             this.AllowDeleting = allowDeleting;
             this.AutomaticallyDeleteEmptyFolders = checkForEmptyFolder;
-            this.IgnoreFiles = new List<string>();
+            this.ignoreFiles = new List<string>();
         }
 
         /// <summary>
@@ -80,11 +160,6 @@ namespace Meticumedia
         public OrgFolder(string path)
         {
             this.FolderPath = path;
-            this.CopyFrom = false;
-            this.Recursive = true;
-            this.AllowDeleting = true;
-            this.AutomaticallyDeleteEmptyFolders = true;
-            this.IgnoreFiles = new List<string>();
         }
 
         /// <summary>
@@ -92,12 +167,6 @@ namespace Meticumedia
         /// </summary>
         public OrgFolder()
         {
-            this.FolderPath = string.Empty;
-            this.CopyFrom = false;
-            this.Recursive = true;
-            this.AllowDeleting = true;
-            this.AutomaticallyDeleteEmptyFolders = true;
-            this.IgnoreFiles = new List<string>();
         }
 
         /// <summary>
@@ -110,9 +179,9 @@ namespace Meticumedia
             this.Recursive = folder.Recursive;
             this.AllowDeleting = folder.AllowDeleting;
             this.AutomaticallyDeleteEmptyFolders = folder.AutomaticallyDeleteEmptyFolders;
-            this.IgnoreFiles = new List<string>();
-            foreach (string ignrFile in folder.IgnoreFiles)
-                this.IgnoreFiles.Add(ignrFile);
+            this.ignoreFiles = new List<string>();
+            foreach (string ignrFile in folder.ignoreFiles)
+                this.ignoreFiles.Add(ignrFile);
         }
 
         #endregion
@@ -126,7 +195,7 @@ namespace Meticumedia
         public void AddIgnoreFile(string path)
         {
             // Add relative path
-            IgnoreFiles.Add(path.Remove(0, this.FolderPath.Length + 1));
+            ignoreFiles.Add(path.Remove(0, this.FolderPath.Length + 1));
         }
 
         /// <summary>
@@ -136,9 +205,9 @@ namespace Meticumedia
         public bool RemoveIgnoreFile(string path)
         {
             string relPath = path.Remove(0, this.FolderPath.Length + 1);
-            if (IgnoreFiles.Contains(relPath))
+            if (ignoreFiles.Contains(relPath))
             {
-                IgnoreFiles.Remove(relPath);
+                ignoreFiles.Remove(relPath);
                 return true;
             }
             return false;
@@ -151,7 +220,7 @@ namespace Meticumedia
         /// <returns></returns>
         public bool IsIgnored(string path)
         {
-            return IgnoreFiles.Contains(path.Remove(0, this.FolderPath.Length + 1));
+            return ignoreFiles.Contains(path.Remove(0, this.FolderPath.Length + 1));
         }
 
         #endregion
@@ -204,7 +273,7 @@ namespace Meticumedia
                         break;
                     case XmlElements.IgnoreFiles:
                         xw.WriteStartElement(element.ToString());
-                        foreach (string path in this.IgnoreFiles)
+                        foreach (string path in this.ignoreFiles)
                             xw.WriteElementString(IGNORE_XML, path);
                         xw.WriteEndElement();
                         break;
@@ -261,9 +330,9 @@ namespace Meticumedia
                         this.AutomaticallyDeleteEmptyFolders = checkForEmptyFolder;
                         break;
                     case XmlElements.IgnoreFiles:
-                        this.IgnoreFiles = new List<string>();
+                        this.ignoreFiles = new List<string>();
                         foreach (XmlNode ignoreNode in propNode.ChildNodes)
-                            IgnoreFiles.Add(ignoreNode.InnerText);
+                            ignoreFiles.Add(ignoreNode.InnerText);
                         break;
                 }
             }

@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia.Classes.Organization
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Arguments to pass for during progress change of orginzation process thread

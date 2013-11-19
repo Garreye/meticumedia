@@ -13,7 +13,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// List of content with added properties.

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.Specialized;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Collection of genres

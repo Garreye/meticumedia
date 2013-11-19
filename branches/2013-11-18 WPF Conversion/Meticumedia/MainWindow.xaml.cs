@@ -11,6 +11,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Meticumedia.Windows;
+using Meticumedia.Classes;
 
 namespace Meticumedia
 {
@@ -22,6 +24,19 @@ namespace Meticumedia
         public MainWindow()
         {
             InitializeComponent();
+
+            // Load shows and settings from XML
+            Settings.Load();
+            Organization.Load();
+
+            // Init word helper
+            WordHelper.Initialize();
+        }
+
+        private void menuSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsWindow settingsWindow = new SettingsWindow();
+            settingsWindow.Show();
         }
     }
 }

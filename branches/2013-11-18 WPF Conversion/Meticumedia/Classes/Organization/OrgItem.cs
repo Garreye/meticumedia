@@ -13,7 +13,7 @@ using System.Xml;
 using Ookii.Dialogs.Wpf;
 using System.Windows;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// An organization item. Stores information about a single organization of a path and handles the action related to organization.

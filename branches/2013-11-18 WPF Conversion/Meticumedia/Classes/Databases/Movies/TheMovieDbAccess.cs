@@ -13,7 +13,7 @@ using System.Xml;
 using System.Threading;
 using System.Net;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Helper class for accessing TheMovieDb online movie database.

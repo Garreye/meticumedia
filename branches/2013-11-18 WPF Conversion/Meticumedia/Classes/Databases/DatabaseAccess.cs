@@ -10,7 +10,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     public abstract class DatabaseAccess
     {

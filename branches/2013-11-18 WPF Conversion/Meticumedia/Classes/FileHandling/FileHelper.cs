@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Static helper class with methods for aiding in actions related to files.

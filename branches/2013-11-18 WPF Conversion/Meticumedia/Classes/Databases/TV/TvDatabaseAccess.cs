@@ -10,14 +10,13 @@ using System.Net;
 using System.Text;
 using System.Xml;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Base class for TV database accessors (e.g. TheTvDb or TVRage)
     /// </summary>
     public class TvDatabaseAccess : DatabaseAccess
     {
-
         /// <summary>
         /// Gets season/episode information from database.
         /// </summary>
@@ -34,14 +33,12 @@ namespace Meticumedia
                 {
 
                     // Remove episodes that are no longer in the TvDb
-                    for (int j = show.Seasons.HighestSeason; j >= show.Seasons.LowestSeason; j--)
-                        if(j >= 0)
-                            for (int k = show.Seasons[j].Episodes.Count - 1; k >= 0; k--)
-                            {
-                                TvEpisode ep = show.Seasons[j].Episodes[k];
-                                if (!ep.InDatabase && !ep.UserDefined && !ep.PreventDatabaseUpdates)
-                                    show.Seasons[j].Episodes.Remove(ep);
-                            }
+                    for (int k = show.Episodes.Count - 1; k >= 0; k--)
+                    {
+                        TvEpisode ep = show.Episodes[k];
+                        if (!ep.InDatabase && !ep.UserDefined && !ep.PreventDatabaseUpdates)
+                            show.Episodes.Remove(ep);
+                    }
 
                     // Update missing episodes for show
                     show.UpdateMissing();

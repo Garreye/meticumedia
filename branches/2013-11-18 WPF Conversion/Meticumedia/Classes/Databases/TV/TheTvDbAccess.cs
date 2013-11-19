@@ -14,7 +14,7 @@ using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Ionic.Zip;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class for accesing TheTvDb online TV database and related functions.
@@ -373,9 +373,6 @@ namespace Meticumedia
 
                         if (ep.Number > -1 && season > -1)
                         {
-                            if (!show.Seasons.Contains(season))
-                                show.Seasons.Add(new TvSeason(season));
-
                             // If episode already exists just update it, else add it
                             TvEpisode existingMatch;
                             if (show.FindEpisode(ep.Season, ep.DatabaseNumber, true, out existingMatch))
@@ -386,7 +383,7 @@ namespace Meticumedia
                                 existingMatch.InDatabase = true;
                             }
                             else
-                                show.Seasons[season].Episodes.Add(ep);
+                                show.Episodes.Add(ep);
                         }
                     }
                 }

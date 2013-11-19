@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     public class GuiSettings
     {

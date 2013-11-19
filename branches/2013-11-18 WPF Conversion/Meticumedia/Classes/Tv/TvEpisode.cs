@@ -12,7 +12,7 @@ using System.Diagnostics;
 using System.Windows.Media;
 using Ookii.Dialogs.Wpf;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// An episode of a TV show.
@@ -386,6 +386,14 @@ namespace Meticumedia
         {
             string epInfo = this.Show + " s" + this.Season.ToString("00") + "e" + this.Number.ToString("00");
             return FileHelper.SimplifyFileName(epInfo);
+        }
+
+        public string GetSeasonName()
+        {
+            if (this.Number == 0)
+                return "Specials";
+            else
+                return "Season " + this.Number;
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Represents a single content item (i.e. a movie or TV show) that is associated with a single directory on user's computer
@@ -50,7 +50,7 @@ namespace Meticumedia
             }
         }
 
-        private int databaseSelection = 0;
+        private int databaseSelection = (int)Settings.DefaultTvDatabase;
 
         /// <summary>
         /// Name of the content
@@ -176,7 +176,7 @@ namespace Meticumedia
             }
         }
 
-        private bool found = false;
+        private bool found = true;
 
         /// <summary>
         /// Path to root content folder this belongs to
@@ -254,7 +254,7 @@ namespace Meticumedia
             }
         }
 
-        private bool doRenaming = false;
+        private bool doRenaming = true;
 
         /// <summary>
         /// Date/time when content was last updated from database
@@ -286,15 +286,7 @@ namespace Meticumedia
             this.RootFolder = string.Empty;
             this.DatabaseName = string.Empty;
             this.Date = new DateTime();
-            this.DoRenaming = true;
-            this.Path = string.Empty;
-            this.Found = true;
-            this.Id = 0;
-            this.Name = string.Empty;
-            this.Overview = string.Empty;
-            this.Watched = false;
             this.Genres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
-            this.LastUpdated = new DateTime(1, 1, 1);
             this.Genres.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Genres_CollectionChanged);
         }
 

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Helper class for attempting to split string with no whitespace into words.
