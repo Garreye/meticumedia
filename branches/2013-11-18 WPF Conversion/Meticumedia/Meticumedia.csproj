@@ -58,6 +58,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\Settings\FileTypesGroup.cs" />
+    <Compile Include="Controls\Settings\FileTypesControl.xaml.cs">
+      <DependentUpon>FileTypesControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Settings\RootFolderControl.xaml.cs">
       <DependentUpon>RootFolderControl.xaml</DependentUpon>
     </Compile>
@@ -76,6 +80,10 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Controls\Content\TvShowsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\FileTypesControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

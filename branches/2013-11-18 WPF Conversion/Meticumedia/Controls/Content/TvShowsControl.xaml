@@ -80,7 +80,7 @@
             <GridSplitter Background="DarkGray"  ResizeDirection="Rows" Grid.Row="2" Grid.ColumnSpan="2" 
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                   ResizeBehavior="PreviousAndNext" Padding="10" />
-            <Button Grid.Row="3" Grid.Column="0" Content="Add" Click="btnAdd_Click" Padding="10" Height="Auto" Margin="10" />
+            <Button Grid.Row="3" Grid.Column="0" Content="Name" Click="btnAdd_Click" Padding="10" Height="Auto" Margin="10" />
             <Button Grid.Row="3" Grid.Column="1" Content="Mod" Click="btnMod_Click" Padding="10" Height="Auto" Margin="10" />
         </Grid>
 
@@ -113,7 +113,7 @@
             <GridSplitter Background="DarkGray"  ResizeDirection="Rows" Grid.Row="2" Grid.ColumnSpan="2" 
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                   ResizeBehavior="PreviousAndNext" Padding="10" />
-            <Button Grid.Row="3" Grid.Column="0" Content="Add" Click="btnAdd_Click" Padding="10" Height="Auto" Margin="10" />
+            <Button Grid.Row="3" Grid.Column="0" Content="Name" Click="btnAdd_Click" Padding="10" Height="Auto" Margin="10" />
             <Button Grid.Row="3" Grid.Column="1" Content="Mod" Click="btnMod_Click" Padding="10" Height="Auto" Margin="10" />
         </Grid>
     </Grid>

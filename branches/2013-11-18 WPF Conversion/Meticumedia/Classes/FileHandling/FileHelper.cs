@@ -37,7 +37,7 @@ namespace Meticumedia.Classes
                 return FileCategory.Ignored;            
 
             // Check against each type
-            foreach (string ext in Settings.VideoFileTypes)
+            foreach (string ext in Settings.VideoFileTypes.Types)
                 if (extenstion == ext.ToLower())
                 {
                     // Check if sample!
@@ -49,11 +49,11 @@ namespace Meticumedia.Classes
                     else
                         return FileCategory.NonTvVideo;
                 }
-            foreach (string ext in Settings.DeleteFileTypes)
+            foreach (string ext in Settings.DeleteFileTypes.Types)
                 if (extenstion == ext.ToLower())
                     return FileCategory.Trash;
 
-            foreach (string ext in Settings.IgnoreFileTypes)
+            foreach (string ext in Settings.IgnoreFileTypes.Types)
                 if (extenstion == ext.ToLower())
                     return FileCategory.Ignored;
 

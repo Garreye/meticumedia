@@ -27,6 +27,7 @@ namespace Meticumedia.Windows
             cntrlTvFolder.LoadSettings(ContentType.TvShow);
             cntrlTvFileName.LoadSettings(ContentType.TvShow);
             cntrlMovieFileName.LoadSettings(ContentType.Movie);
+            cntrlFileTypes.LoadSettings();
         }
 
         #region Event Handlers
@@ -38,6 +39,7 @@ namespace Meticumedia.Windows
             cntrlTvFolder.SaveSettings();
             cntrlTvFileName.SaveSettings();
             cntrlMovieFileName.SaveSettings();
+            cntrlFileTypes.SaveSettings();
             Settings.Save();
             this.Close();
         }

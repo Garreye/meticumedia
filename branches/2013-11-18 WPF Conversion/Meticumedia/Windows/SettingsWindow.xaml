@@ -29,7 +29,7 @@
                 <cntrls:FileNameControl x:Name="cntrlMovieFileName" />
             </TabItem>
             <TabItem Header="File Types" Name="tiFileTypes">
-                <Grid />
+                <cntrls:FileTypesControl x:Name="cntrlFileTypes"/>
             </TabItem>
         </TabControl>
         

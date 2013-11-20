@@ -36,12 +36,12 @@
                             </Grid.ColumnDefinitions>
                 
                             <TextBlock Text="Season Header" Grid.Row="0" Grid.Column="0" Margin="5" />
-                            <TextBox Text="{Binding Path=EpisodeFormat.SeasonHeader}" Grid.Row="0" Grid.Column="1" Margin="5" Width="50" />
+                                <TextBox Text="{Binding Path=EpisodeFormat.SeasonHeader, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Margin="5" Width="50" />
                             <CheckBox  IsChecked="{Binding Path=EpisodeFormat.SeasonFirst}" Content="Season First" Grid.Row="0" Grid.Column="2" Margin="5" />
                             <CheckBox IsChecked="{Binding Path=EpisodeFormat.ForceSeasonDoubleDigits}" Content="Force Season Double Digits" Grid.Row="0" Grid.Column="3" Margin="5" />
                 
                             <TextBlock Text="Episode Header" Grid.Row="1" Grid.Column="0" Margin="5"/>
-                            <TextBox Text="{Binding Path=EpisodeFormat.EpisodeHeader}" Grid.Row="1" Grid.Column="1" Margin="5" Width="50" />
+                            <TextBox Text="{Binding Path=EpisodeFormat.EpisodeHeader, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Margin="5" Width="50" />
                             <CheckBox IsChecked="{Binding Path=EpisodeFormat.HeaderPerEpisode}" Content="Header Per Episode" Grid.Row="1" Grid.Column="2" Margin="5" />
                             <CheckBox IsChecked="{Binding Path=EpisodeFormat.ForceEpisodeDoubleDigits}" Content="Force Episode Double Digits" Grid.Row="1" Grid.Column="3" Margin="5" />
                         </Grid>

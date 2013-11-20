@@ -96,6 +96,8 @@ namespace Meticumedia.Classes
                 format.Add(new FileNamePortion(FileWordType.EpisodeName, string.Empty, string.Empty, FileNamePortion.CaseOptionType.None));
             }
 
+            foreach (FileNamePortion fnp in format)
+                fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
             this.format.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(format_CollectionChanged);
             this.episodeFormat.PropertyChanged += new PropertyChangedEventHandler(episodeFormat_PropertyChanged);
         }
@@ -106,6 +108,16 @@ namespace Meticumedia.Classes
         }
 
         void format_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("Format");
+
+            foreach (FileNamePortion fnp in e.NewItems)
+            {
+                fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
+            }
+        }
+
+        void fnp_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             OnPropertyChanged("Format");
         }
@@ -120,6 +132,11 @@ namespace Meticumedia.Classes
             foreach (FileNamePortion portion in format.Format)
                 this.Format.Add(new FileNamePortion(portion));
             this.EpisodeFormat = new TvEpisodeFormat(format.EpisodeFormat);
+
+            foreach (FileNamePortion fnp in this.format)
+                fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
+            this.format.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(format_CollectionChanged);
+            this.episodeFormat.PropertyChanged += new PropertyChangedEventHandler(episodeFormat_PropertyChanged);
         }
 
         #endregion
@@ -147,7 +164,7 @@ namespace Meticumedia.Classes
             if (Directory.Exists(folderPath)) // Check in case path was empty
             {
                 string[] dirFiles = Directory.GetFiles(folderPath);
-                List<string> diffFiles = dirFiles.ToList().FindAll(f => Path.GetFileName(f) != Path.GetFileName(fileName) && Settings.VideoFileTypes.Contains(Path.GetExtension(f)));
+                List<string> diffFiles = dirFiles.ToList().FindAll(f => Path.GetFileName(f) != Path.GetFileName(fileName) && Settings.VideoFileTypes.Types.Contains(Path.GetExtension(f)));
 
                 // Get differentiating part of string for other files with similar name
                 foreach (string diffFile in diffFiles)
