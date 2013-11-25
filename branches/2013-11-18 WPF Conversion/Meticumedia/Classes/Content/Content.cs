@@ -122,6 +122,17 @@ namespace Meticumedia.Classes
             }
         }
 
+        public string OverviewConcise
+        {
+            get
+            {
+                if (overview.Length < 110)
+                    return overview;
+                else
+                    return overview.Substring(0, 107) + "...";
+            }
+        }
+
         private string overview = string.Empty;
         
         /// <summary>

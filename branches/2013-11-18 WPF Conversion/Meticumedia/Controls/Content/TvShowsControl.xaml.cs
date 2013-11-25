@@ -24,7 +24,39 @@ namespace Meticumedia.Controls
         public ContentControl()
         {
             InitializeComponent();
-            lbShows.ItemsSource = Organization.Shows;
+            Organization.Shows.LoadComplete += new EventHandler(Shows_LoadComplete);
+
+            
+        }
+
+        private ObservableCollection<TvShow> shows;
+
+        private void Shows_LoadComplete(object sender, EventArgs e)
+        {
+            shows = new ObservableCollection<TvShow>();
+            lock (Organization.Shows.ContentLock)
+            {
+                foreach (Content show in Organization.Shows)
+                    shows.Add((TvShow)show);
+            }
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                lbShows.ItemsSource = shows;
+            });
+            Organization.Shows.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Shows_CollectionChanged);
+        }
+
+        void Shows_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                if (e.OldItems != null)
+                    foreach (Content remItem in e.OldItems)
+                        shows.Remove((TvShow)remItem);
+                if (e.NewItems != null)
+                    foreach (Content addItem in e.NewItems)
+                        shows.Add((TvShow)addItem);
+            });
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
