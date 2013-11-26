@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using Meticumedia.Classes;
+using System.ComponentModel;
 
 namespace Meticumedia.Controls
 {
@@ -21,16 +22,41 @@ namespace Meticumedia.Controls
     /// </summary>
     public partial class ContentControl : UserControl
     {
+        #region Constructor
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public ContentControl()
         {
             InitializeComponent();
+            
             Organization.Shows.LoadComplete += new EventHandler(Shows_LoadComplete);
 
-            
         }
 
+        #endregion
+
+        #region Variables
+
+        /// <summary>
+        /// Item source for shows listbox
+        /// </summary>
         private ObservableCollection<TvShow> shows;
 
+
+        /// <summary>
+        /// Item source for episode listbox
+        /// </summary>
+        private ObservableCollection<TvEpisode> episodes = new ObservableCollection<TvEpisode>();
+
+        #endregion
+
+        #region Event Handlers
+
+        /// <summary>
+        /// Loading complete of shows load them into shows listbox
+        /// </summary>
         private void Shows_LoadComplete(object sender, EventArgs e)
         {
             shows = new ObservableCollection<TvShow>();
@@ -46,7 +72,10 @@ namespace Meticumedia.Controls
             Organization.Shows.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Shows_CollectionChanged);
         }
 
-        void Shows_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        /// <summary>
+        /// Changes to shows collection are reflected in item source for shows listbox
+        /// </summary>
+        private void Shows_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             App.Current.Dispatcher.Invoke((Action)delegate
             {
@@ -59,18 +88,25 @@ namespace Meticumedia.Controls
             });
         }
 
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Selected show has it's episodes loaded
+        /// </summary>
+        private void lbShows_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Organization.Shows.Add(new TvShow("Test Show " + Organization.Shows.Count, 102 + Organization.Shows.Count, 2013, "C:/Content/Show " + Organization.Shows.Count, "C:/content"));
-            Organization.Shows[Organization.Shows.Count - 1].Genres.Add("new genre");
-            Organization.Shows[Organization.Shows.Count - 1].Overview = "Blah Blah Blasjdlk fjaldnfkj adhflajdfla jdlfjad;lfjal kd;jfla;";
+            if (lbShows.SelectedItem != null)
+            {
+                episodes.Clear();
+                foreach (TvEpisode ep in ((TvShow)lbShows.SelectedItem).Episodes)
+                    episodes.Add(ep);
+                lbEpisodes.ItemsSource = episodes;
+
+                ICollectionView view = CollectionViewSource.GetDefaultView(episodes);
+                view.GroupDescriptions.Clear();
+                view.GroupDescriptions.Add(new PropertyGroupDescription("SeasonName"));
+            }
+
         }
 
-        private void btnMod_Click(object sender, RoutedEventArgs e)
-        {
-            Organization.Shows[Organization.Shows.Count - 1].Name = "Mod Show " + (Organization.Shows.Count - 1);
-            TvShow show = ((TvShow)Organization.Shows[Organization.Shows.Count - 1]);
-            show.Episodes.Add(new TvEpisode("Name", show.Name, show.Episodes.Count+1, show.Episodes.Count + 1, "2013/01/01", "Episdoe overview blah blaj"));
-        }
+        #endregion
     }
 }

@@ -344,7 +344,7 @@ namespace Meticumedia.Classes
         public string BuildFilePath(TvEpisode episode1, TvEpisode episode2, string path)
         {
             // New season created to prevent exception if episode doesn't fall into a valid season
-            return this.Path + "\\" + episode1.GetSeasonName() + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
+            return this.Path + "\\" + episode1.SeasonName + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
         }
 
         /// <summary>
@@ -401,8 +401,6 @@ namespace Meticumedia.Classes
                             episode.Save(xw);
                         xw.WriteEndElement();
                         break;
-
-                        break;
                     case XmlElements.DoMissing:
                         value = this.DoMissingCheck.ToString();
                         break;
@@ -455,13 +453,14 @@ namespace Meticumedia.Classes
                 switch (element)
                 {
                     case XmlElements.Seasons: // Support for older versions
+                        this.Episodes = new ObservableCollection<TvEpisode>();
                         foreach (XmlNode seasNode in propNode.ChildNodes)
                         {
                             foreach (XmlNode seasPropNode in seasNode.ChildNodes)
                             {
                                 if(seasPropNode.Name == "Episodes")
                                 {
-                                    this.Episodes = new ObservableCollection<TvEpisode>();
+                                    
                                     foreach(XmlNode epNode in seasPropNode.ChildNodes)
                                     {
                                         TvEpisode episode = new TvEpisode();

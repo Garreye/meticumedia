@@ -4,118 +4,169 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="353" d:DesignWidth="968">    
-    <Grid Name="grdRoot">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="450"/>
-            <ColumnDefinition Width="3"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+             d:DesignHeight="353" d:DesignWidth="968"> 
+    <UserControl.Resources>
+        <DataTemplate x:Key="showItemExpandedTemplate" >
+            <Border BorderThickness="1" BorderBrush="Black">
+                <Grid Margin="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"  />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-        
-        <Grid Name="grdShows" Grid.Column="0">
+                    <TextBlock Text="{Binding Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" FontSize="16" FontWeight="Bold" Padding="1" />
+                    <!--<Image Grid.Row="1" Grid.RowSpan="7" Height="100" Width="100" />-->
+
+                    <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal">
+                        <TextBlock Text="Overview: " FontWeight="Bold" Padding="1"  />
+                        <TextBlock Text="{Binding OverviewConcise}" Padding="1" Height="35" Width="300" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Horizontal">
+                        <TextBlock Text="Directory: " FontWeight="Bold" Padding="1" />
+                        <TextBlock Text="{Binding Path}" Padding="1" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal">
+                        <TextBlock Text="Year: " FontWeight="Bold" Padding="1" />
+                        <TextBlock Text="{Binding Date.Year}" Padding="1" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal">
+                        <TextBlock Text="Seasons: " FontWeight="Bold" Padding="1" />
+                        <TextBlock Text="{Binding Seasons.Count}" Padding="1" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="6" Orientation="Horizontal">
+                        <TextBlock Text="Genres: " FontWeight="Bold" Padding="1" />
+                        <TextBlock Text="{Binding Genres.GenresString}" Padding="1" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="0" Grid.Row="7" Orientation="Horizontal">
+                        <TextBlock Text="Database: " FontWeight="Bold" Padding="1" />
+                        <TextBlock Text="{Binding Database}" Padding="1" />
+                        <TextBlock Text=" - ID " Padding="1" />
+                        <TextBlock Text="{Binding Id}" Padding="1" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="showItemTemplate" >
+                <TextBlock Text="{Binding Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" FontSize="16" FontWeight="Bold" Margin="3" />
+        </DataTemplate>
+
+        <Style TargetType="{x:Type ListBoxItem}" x:Key="showStyle">
+            <Setter Property="ContentTemplate" Value="{StaticResource showItemTemplate}" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="ContentTemplate" Value="{StaticResource showItemExpandedTemplate}" /> 
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <DataTemplate x:Key="episodeItemExpandedTemplate">
+            <Grid Margin="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock Text="Episode " Margin="1"/>
+                    <TextBlock Text="{Binding Number}" Margin="1"/>
+                    <TextBlock Text=": " Margin="1"/>
+                    <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                    <TextBlock Text="Overview: " Margin="1"/>
+                    <TextBlock Text="{Binding Overview}" Margin="1"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="episodeItemTemplate">
+                <Grid Margin="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock Text="Episode " Margin="1" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Number}" Margin="1" FontWeight="Bold" />
+                    <TextBlock Text=": " Margin="1" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                </StackPanel>
+                <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" MaxHeight="18"/>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    <Grid Name="grdRoot">        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="5" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-            <TextBlock Text="1" FontSize="16" FontWeight="Bold" />
-            <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" Name="lbShows" DataContext="{Binding}" HorizontalContentAlignment="Stretch">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderThickness="1" BorderBrush="Black" Margin="5" >
-                            <Grid Margin="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"  />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Text="{Binding Name}" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" FontSize="16" FontWeight="Bold" Padding="1" />
-                                <!--<Image Grid.Row="1" Grid.RowSpan="7" Height="100" Width="100" />-->
-
-                                <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Horizontal">
-                                    <TextBlock Text="Overview: " FontWeight="Bold" Padding="1"  />
-                                    <TextBlock Text="{Binding OverviewConcise}" Padding="1" Height="35" Width="300" TextWrapping="Wrap"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Horizontal">
-                                    <TextBlock Text="Directory: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Path}" Padding="1" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal">
-                                    <TextBlock Text="Year: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Date.Year}" Padding="1" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal">
-                                    <TextBlock Text="Seasons: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Seasons.Count}" Padding="1" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="6" Orientation="Horizontal">
-                                    <TextBlock Text="Genres: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Genres.GenresString}" Padding="1" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="7" Orientation="Horizontal">
-                                    <TextBlock Text="Database: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Database}" Padding="1" />
-                                    <TextBlock Text=" - ID " Padding="1" />
-                                    <TextBlock Text="{Binding Id}" Padding="1" />
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <GridSplitter Background="DarkGray"  ResizeDirection="Rows" Grid.Row="2" Grid.ColumnSpan="2" 
-                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                  ResizeBehavior="PreviousAndNext" Padding="10" />
-            <Button Grid.Row="3" Grid.Column="0" Content="Add" Click="btnAdd_Click" Padding="10" Height="Auto" Margin="10" />
-            <Button Grid.Row="3" Grid.Column="1" Content="Mod" Click="btnMod_Click" Padding="10" Height="Auto" Margin="10" />
-        </Grid>
-
-        <GridSplitter Background="DarkGray"  ResizeDirection="Columns" Grid.Column="1"
-                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                  ResizeBehavior="PreviousAndNext" Padding="10" />
-
-        <Grid Name="grdEpisodes" Grid.Column="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="5" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <ProgressBar Grid.Row="0" Height="25" Margin="5"/>
+        <Grid Name="Display" Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="450"/>
+                <ColumnDefinition Width="3"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="2" FontSize="16" FontWeight="Bold" />
-            <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" Name="lbEpisodes" DataContext="{Binding}" >
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Margin="1">
-                            
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <GridSplitter Background="DarkGray"  ResizeDirection="Rows" Grid.Row="2" Grid.ColumnSpan="2" 
+
+            <Grid Name="grdShows" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Shows" FontSize="16" FontWeight="Bold" />
+                <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" Name="lbShows" ItemsSource="{Binding}" ItemContainerStyle="{StaticResource showStyle}"  HorizontalContentAlignment="Stretch" SelectionChanged="lbShows_SelectionChanged">
+                </ListBox>
+            </Grid>
+
+            <GridSplitter Background="DarkGray"  ResizeDirection="Columns" Grid.Column="1"
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                   ResizeBehavior="PreviousAndNext" Padding="10" />
-            <Button Grid.Row="3" Grid.Column="0" Content="Add" Click="btnAdd_Click" Padding="10" Height="Auto" Margin="10" />
-            <Button Grid.Row="3" Grid.Column="1" Content="Mod" Click="btnMod_Click" Padding="10" Height="Auto" Margin="10" />
+
+            <Grid Name="grdEpisodes" Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Episodes" FontSize="16" FontWeight="Bold" />
+                <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" Name="lbEpisodes" ItemTemplate="{StaticResource episodeItemTemplate}" HorizontalContentAlignment="Stretch">
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="GroupItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                <StackPanel>
+                                                    <TextBlock FontWeight="Bold" Foreground="Blue" FontSize="16" Text="{Binding Path=Name}"/>
+                                                    <ItemsPresenter/>
+                                                </StackPanel>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
+                </ListBox>
+            </Grid>
         </Grid>
+       
     </Grid>
 </UserControl>

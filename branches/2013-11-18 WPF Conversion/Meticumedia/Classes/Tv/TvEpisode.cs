@@ -139,6 +139,20 @@ namespace Meticumedia.Classes
         public int Season { get; set; }
 
         /// <summary>
+        /// Name of seardon the episode belongs to
+        /// </summary>
+        public string SeasonName
+        {
+            get
+            {
+                if (this.Season == 0)
+                    return "Specials";
+                else
+                    return "Season " + this.Season;
+            }
+        }
+
+        /// <summary>
         /// The episode's number within the season
         /// </summary>
         public int Number 
@@ -388,14 +402,6 @@ namespace Meticumedia.Classes
             return FileHelper.SimplifyFileName(epInfo);
         }
 
-        public string GetSeasonName()
-        {
-            if (this.Number == 0)
-                return "Specials";
-            else
-                return "Season " + this.Number;
-        }
-
         /// <summary>
         /// Open file dialog so user can locate episode in file directory.
         /// </summary>
@@ -570,7 +576,7 @@ namespace Meticumedia.Classes
             if (obj is TvEpisode)
             {
                 TvEpisode t2 = (TvEpisode)obj;
-                return this.Number.CompareTo(t2.Number);
+                return (this.Season * 1000 + this.Number).CompareTo(t2.Season * 1000 + t2.Number);
             }
             else
                 throw new ArgumentException("Object is not a TvShow.");
