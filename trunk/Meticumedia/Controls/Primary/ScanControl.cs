@@ -165,7 +165,9 @@ namespace Meticumedia
         {
             this.Invoke((MethodInvoker)delegate
             {
+                lvResults.ItemChecked -= new ItemCheckedEventHandler(lvResults_ItemChecked);
                 lvResults.SetOrgItems(e.Items);
+                lvResults.ItemChecked += new ItemCheckedEventHandler(lvResults_ItemChecked);
                 DisplayResults();
             });
         }
@@ -1017,8 +1019,11 @@ namespace Meticumedia
 
             this.Invoke((MethodInvoker)delegate
             {
+                lvResults.ItemChecked -= new ItemCheckedEventHandler(lvResults_ItemChecked);
                 if (scanType != ScanType.Directory)
                     lvResults.SetOrgItems(scanResults);
+                lvResults_ItemChecked(null, null);
+                lvResults.ItemChecked += new ItemCheckedEventHandler(lvResults_ItemChecked);
             });
         }
 
@@ -1242,8 +1247,7 @@ namespace Meticumedia
         {
             lvResults.ItemChecked -= new ItemCheckedEventHandler(lvResults_ItemChecked);
 
-            lvResults.UpdateDisplay();
-            lvResults_ItemChecked(null, null);
+            lvResults.UpdateDisplay(5);
 
             lvResults.ItemChecked += new ItemCheckedEventHandler(lvResults_ItemChecked);
             // Update selection

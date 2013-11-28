@@ -35,7 +35,7 @@ namespace Meticumedia
 
                     // Remove episodes that are no longer in the TvDb
                     for (int j = show.Seasons.HighestSeason; j >= show.Seasons.LowestSeason; j--)
-                        if(j >= 0)
+                        if (j >= 0 && show.Seasons[j] != null)
                             for (int k = show.Seasons[j].Episodes.Count - 1; k >= 0; k--)
                             {
                                 TvEpisode ep = show.Seasons[j].Episodes[k];

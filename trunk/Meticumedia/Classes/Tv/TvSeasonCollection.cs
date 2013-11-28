@@ -48,7 +48,10 @@ namespace Meticumedia
                         index = i;
                         break;
                     }
-                return innerList[index];
+                if (index >= 0)
+                    return innerList[index];
+                else
+                    return null;
             }
             set
             {

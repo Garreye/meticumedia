@@ -134,6 +134,7 @@
     <Compile Include="Classes\Tv\TvEpisode.cs" />
     <Compile Include="Classes\Content\ContentCollection.cs" />
     <Compile Include="Classes\Tv\TvShowSearch.cs" />
+    <Compile Include="Controls\Common\ItemsToQueueArgs.cs" />
     <Compile Include="Controls\Content\ContentListView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -170,7 +171,6 @@
     <Compile Include="Controls\Primary\EpisodesControl.Designer.cs">
       <DependentUpon>EpisodesControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Common\ItemsToQueueArgs.cs" />
     <Compile Include="Controls\Common\LegendBoxControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -106,8 +106,15 @@ namespace Meticumedia
 
         #region Display
 
-        public void UpdateDisplay()
+        private DateTime lastUpdate = new DateTime();
+
+        public void UpdateDisplay(int updateLimte = 0)
         {
+            if ((DateTime.Now - lastUpdate).TotalSeconds <= updateLimte)
+                return;
+
+            lastUpdate = DateTime.Now;
+            
             int addCount = 0;
             for (int i = 0; i < orgListItems.Count; i++)
             {
