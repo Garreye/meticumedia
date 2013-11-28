@@ -3,9 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:helpers="clr-namespace:Meticumedia.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="353" d:DesignWidth="968"> 
     <UserControl.Resources>
+        <helpers:StringToHeightConverter x:Key="stringToHeightConverter" />
+        
+
         <DataTemplate x:Key="showItemExpandedTemplate" >
             <Border BorderThickness="1" BorderBrush="Black">
                 <Grid Margin="3">
@@ -77,10 +81,10 @@
 
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
-                    <TextBlock Text="Episode " Margin="1"/>
-                    <TextBlock Text="{Binding Number}" Margin="1"/>
+                    <TextBlock Text="Episode " Margin="1" />
+                    <TextBlock Text="{Binding Number}" Margin="1" />
                     <TextBlock Text=": " Margin="1"/>
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Name}" FontWeight="Bold" Foreground="{Binding StatusColor}" />
                     <TextBlock Text="Overview: " Margin="1"/>
                     <TextBlock Text="{Binding Overview}" Margin="1"/>
                 </StackPanel>
@@ -97,11 +101,24 @@
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
                     <TextBlock Text="Episode " Margin="1" FontWeight="Bold" />
-                    <TextBlock Text="{Binding Number}" Margin="1" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Number}" Margin="1" FontWeight="Bold"/>
                     <TextBlock Text=": " Margin="1" FontWeight="Bold" />
                     <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                    <TextBlock Text="{Binding AirDateString}" FontWeight="Bold"/>
+                    <TextBlock Text=" " Margin="1" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Status}" FontWeight="Bold" Foreground="{Binding StatusColor}"/>
                 </StackPanel>
-                <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" MaxHeight="18"/>
+                <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" >
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
@@ -154,7 +171,7 @@
                                         <Setter.Value>
                                             <ControlTemplate TargetType="{x:Type GroupItem}">
                                                 <StackPanel>
-                                                    <TextBlock FontWeight="Bold" Foreground="Blue" FontSize="16" Text="{Binding Path=Name}"/>
+                                                    <TextBlock FontWeight="Bold" Foreground="Blue" FontSize="16" Text="{Binding Name}"/>
                                                     <ItemsPresenter/>
                                                 </StackPanel>
                                             </ControlTemplate>

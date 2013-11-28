@@ -334,7 +334,7 @@ namespace Meticumedia.Classes
                     }
                     else if (node.Name == "Episode")
                     {
-                        TvEpisode ep = new TvEpisode(show.Name);
+                        TvEpisode ep = new TvEpisode(show);
                         int season = -1;
 
                         XmlNodeList subNodes = node.ChildNodes;

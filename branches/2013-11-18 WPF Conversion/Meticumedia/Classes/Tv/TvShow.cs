@@ -124,13 +124,24 @@ namespace Meticumedia.Classes
         /// <param name="id">TheTvDb ID for the show</param>
         /// <param name="directory">Directory where episode for the show are contained</param>
         public TvShow(string name, int id, int year, string directory, string contentFolder)
-            : this()
+            : this(name)
         {
-            this.Name = name;
             this.Id = id;
             this.Date = new DateTime(year > 0 ? year : 1, 1, 1);
             this.Path = directory;
             this.RootFolder = contentFolder;
+        }
+
+        /// <summary>
+        /// Constructor with known name
+        /// </summary>
+        /// <param name="name">Name of the show</param>
+        /// <param name="id">TheTvDb ID for the show</param>
+        /// <param name="directory">Directory where episode for the show are contained</param>
+        public TvShow(string name)
+            : this()
+        {
+            this.Name = name;
         }
 
         /// <summary>
@@ -198,7 +209,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Clones another instance of class 
         /// </summary>
-        /// <param name="show">Show to clon</param>
+        /// <param name="show">Show to clone</param>
         public void Clone(TvShow show)
         {
             this.DatabaseSelection = show.DatabaseSelection;
@@ -214,8 +225,13 @@ namespace Meticumedia.Classes
             this.Date = show.Date;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
-            foreach (TvEpisode episode in this.Episodes)
-                episode.Show = show.Name;
+            this.Episodes.Clear();
+            foreach (TvEpisode episode in show.Episodes)
+            {
+                TvEpisode copyEp = new TvEpisode(episode);
+                this.Episodes.Add(copyEp);
+                copyEp.Show = this;
+            }
             this.AlternativeNameMatches = new ObservableCollection<string>();
             foreach (string altName in show.AlternativeNameMatches)
                 this.AlternativeNameMatches.Add(altName);
@@ -228,7 +244,7 @@ namespace Meticumedia.Classes
         {
             // Mark all as missing - TODO: check file path and check that file still exists, if so don't mark as missing!
             foreach (TvEpisode ep in this.Episodes)
-                ep.Missing = TvEpisode.MissingStatus.Missing;
+                ep.Missing = MissingStatus.Missing;
 
             // Search through TV show directory
             if (Directory.Exists(this.Path))
@@ -243,12 +259,12 @@ namespace Meticumedia.Classes
 
                 foreach (TvEpisode ep in eps)
                 {
-                    if (ep.Show == this.Name)
+                    if (ep.Show.Name == this.Name)
                     {
                         TvEpisode matchEp;
                         if (this.FindEpisode(ep.Season, ep.Number, false, out matchEp))
-                            if (matchEp.Missing == TvEpisode.MissingStatus.Missing)
-                                matchEp.Missing = TvEpisode.MissingStatus.InScanDirectory;
+                            if (matchEp.Missing == MissingStatus.Missing)
+                                matchEp.Missing = MissingStatus.InScanDirectory;
                     }
                 }
             }
@@ -271,8 +287,8 @@ namespace Meticumedia.Classes
                     bool matched1 = FindEpisode(season, episode1, false, out ep1);
                     bool matched2 = episode2 != -1 && FindEpisode(season, episode2, false, out ep2);
 
-                    if (matched1) ep1.Missing = TvEpisode.MissingStatus.Located;
-                    if (matched2) ep2.Missing = TvEpisode.MissingStatus.Located;
+                    if (matched1) ep1.Missing = MissingStatus.Located;
+                    if (matched2) ep2.Missing = MissingStatus.Located;
 
                     // Update file info
                     if (matched1 && matched2)
@@ -299,7 +315,7 @@ namespace Meticumedia.Classes
         {
             List<TvEpisode> list = new List<TvEpisode>();
             foreach (TvEpisode ep in this.Episodes)
-                if (ep.Missing == TvEpisode.MissingStatus.Missing && ep.Aired && (!ep.Ignored || includeIgnored))
+                if (ep.Missing == MissingStatus.Missing && ep.Aired && (!ep.Ignored || includeIgnored))
                     list.Add(ep);
             return list;
         }
@@ -463,7 +479,7 @@ namespace Meticumedia.Classes
                                     
                                     foreach(XmlNode epNode in seasPropNode.ChildNodes)
                                     {
-                                        TvEpisode episode = new TvEpisode();
+                                        TvEpisode episode = new TvEpisode(this);
                                         episode.Load(epNode);
                                         Episodes.Add(episode);
                                     }
@@ -475,7 +491,7 @@ namespace Meticumedia.Classes
                         this.Episodes = new ObservableCollection<TvEpisode>();
                         foreach(XmlNode epNode in propNode.ChildNodes)
                         {
-                            TvEpisode episode = new TvEpisode();
+                            TvEpisode episode = new TvEpisode(this);
                             episode.Load(epNode);
                             Episodes.Add(episode);
                         }

@@ -60,7 +60,7 @@ namespace Meticumedia.Classes
                     bool found = false;
 
                     // Rename check
-                    if (ep.Missing == TvEpisode.MissingStatus.Located)
+                    if (ep.Missing == MissingStatus.Located)
                     {
                         if (shows[i].DoRenaming)
                         {

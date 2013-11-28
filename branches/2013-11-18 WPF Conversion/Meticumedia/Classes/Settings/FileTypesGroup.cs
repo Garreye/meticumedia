@@ -11,7 +11,7 @@ namespace Meticumedia.Classes
     {
         #region Events
 
-        public new event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string name)
         {

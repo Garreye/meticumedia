@@ -348,7 +348,7 @@ namespace Meticumedia.Classes
                                 OrgAction action = orgPath.Copy ? OrgAction.Copy : OrgAction.Move;
 
                                 // If item episode already exists set action to duplicate
-                                if (episode1.Missing == TvEpisode.MissingStatus.Located)
+                                if (episode1.Missing == MissingStatus.Located)
                                 {
                                     if (episode1.Ignored)
                                     {

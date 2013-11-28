@@ -280,7 +280,7 @@ namespace Meticumedia.Classes
                         value = movieName;
                         break;
                     case FileWordType.ShowName:
-                        value = episode1.Show;
+                        value = episode1.Show.Name;
                         break;
                     case FileWordType.EpisodeName:
                         value = BuildEpisodeName(episode1, episode2);

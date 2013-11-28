@@ -62,11 +62,11 @@ namespace Meticumedia.Classes
                 case FilterType.All:
                     return true;
                 case FilterType.Missing:
-                    if (ep.Missing == TvEpisode.MissingStatus.Missing && ep.Aired)
+                    if (ep.Missing == MissingStatus.Missing && ep.Aired)
                         return true;
                     break;
                 case FilterType.InScanDir:
-                     if (ep.Missing == TvEpisode.MissingStatus.InScanDirectory)
+                     if (ep.Missing == MissingStatus.InScanDirectory)
                         return true;
                     break;
                 case FilterType.Season:

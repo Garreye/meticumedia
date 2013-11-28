@@ -62,6 +62,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\Settings\FileTypesGroup.cs" />
+    <Compile Include="Classes\Tv\MissingStatus.cs" />
     <Compile Include="Controls\Settings\FileTypesControl.xaml.cs">
       <DependentUpon>FileTypesControl.xaml</DependentUpon>
     </Compile>
@@ -76,6 +77,9 @@
     </Compile>
     <Compile Include="Helpers\BoolInverterConverter.cs" />
     <Compile Include="Helpers\DefaultColorConverter.cs" />
+    <Compile Include="Helpers\StringToHeightConverter.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Windows\SelectionWindow.xaml.cs">
       <DependentUpon>SelectionWindow.xaml</DependentUpon>
     </Compile>

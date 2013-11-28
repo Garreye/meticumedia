@@ -71,8 +71,8 @@ namespace Meticumedia.Controls
                     txtFilePreview2.Text = System.IO.Path.GetFileNameWithoutExtension(this.fileNameFormat.BuildMovieFileName(movie, "The Matrix.avi"));
                     break;
                 case ContentType.TvShow:
-                    txtFilePreview1.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("Charity Drive", "Arrested Development", 1, 5, "", ""), null, string.Empty);
-                    txtFilePreview2.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("The Finale (Part 1)", "Seinfeld", 9, 23, "", ""), new TvEpisode("The Finale (Part 2)", "Seinfeld", 9, 24, "", ""), string.Empty);
+                    txtFilePreview1.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("Charity Drive", new TvShow("Arrested Development"), 1, 5, "", ""), null, string.Empty);
+                    txtFilePreview2.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("The Finale (Part 1)", new TvShow("Seinfeld"), 9, 23, "", ""), new TvEpisode("The Finale (Part 2)", new TvShow("Seinfeld"), 9, 24, "", ""), string.Empty);
                     break;
             }
         }

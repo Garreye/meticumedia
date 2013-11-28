@@ -68,7 +68,7 @@ namespace Meticumedia.Classes
             }
         }
 
-        private string name;
+        private string name = string.Empty;
 
         /// <summary>
         /// Name of the content from online database (stored so user can change name without losing name in database)

@@ -69,11 +69,11 @@ namespace Meticumedia.Classes
                     bool found = false;
 
                     // Check if episode is missing
-                    if (ep.Missing == TvEpisode.MissingStatus.Missing || ep.Missing == TvEpisode.MissingStatus.InScanDirectory)
+                    if (ep.Missing == MissingStatus.Missing || ep.Missing == MissingStatus.InScanDirectory)
                     {
                         // Check directory item for episode
                         foreach (OrgItem item in directoryItems)
-                            if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && item.TvEpisode != null && item.TvEpisode.Show == show.Name)
+                            if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && item.TvEpisode != null && item.TvEpisode.Show.Name == show.Name)
                             {
                                 // Only add item for first part of multi-part file
                                 if (ep.Equals(item.TvEpisode))

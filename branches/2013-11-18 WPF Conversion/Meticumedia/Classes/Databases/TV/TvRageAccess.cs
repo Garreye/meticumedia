@@ -202,7 +202,7 @@ namespace Meticumedia.Classes
 
                                     foreach (XmlNode epNode in seasonNode.ChildNodes)
                                     {
-                                        TvEpisode ep = new TvEpisode(show.Name);
+                                        TvEpisode ep = new TvEpisode(show);
                                         ep.Season = seasonNo;
                                         foreach (XmlNode epPropNode in epNode.ChildNodes)
                                             switch (epPropNode.Name.ToLower())
@@ -236,7 +236,6 @@ namespace Meticumedia.Classes
                                                 existingMatch.AirDate = ep.AirDate;
                                                 existingMatch.Overview = ep.Overview;
                                                 existingMatch.InDatabase = true;
-                                                existingMatch.UserDefined = false;
                                             }
                                         }
                                         else
