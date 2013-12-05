@@ -38,5 +38,10 @@ namespace Meticumedia
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.Show();
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

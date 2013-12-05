@@ -68,12 +68,7 @@ namespace Meticumedia.Controls
             Button button = sender as Button;
             FileTypesGroup collection = (FileTypesGroup)button.DataContext;
 
-            if (string.IsNullOrEmpty(collection.NextItem) || collection.NextItem[0] != '.')
-            {
-                MessageBox.Show("Extension must start with '.'");
-                return;
-            }
-            else if (collection.Types.Contains(collection.NextItem))
+            if (collection.Types.Contains(collection.NextItem))
             {
                 MessageBox.Show("Extension already added.");
                 return;

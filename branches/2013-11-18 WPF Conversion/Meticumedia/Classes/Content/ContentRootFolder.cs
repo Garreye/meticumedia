@@ -130,6 +130,10 @@ namespace Meticumedia.Classes
 
         private ContentType contentType;
 
+        public int Id { get; private set; }
+
+        private static int idCnt = 0;
+
         #endregion
 
         #region Events
@@ -169,6 +173,7 @@ namespace Meticumedia.Classes
         {
             this.ContentType = type;
             childFolders.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(childFolders_CollectionChanged);
+            this.Id = idCnt++;
         }
 
         void childFolders_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -201,6 +206,7 @@ namespace Meticumedia.Classes
             this.ChildFolders = new ObservableCollection<ContentRootFolder>();
             foreach (ContentRootFolder subFolder in folder.ChildFolders)
                 this.ChildFolders.Add(new ContentRootFolder(subFolder));
+            this.Id = folder.Id;
         }
 
         #endregion

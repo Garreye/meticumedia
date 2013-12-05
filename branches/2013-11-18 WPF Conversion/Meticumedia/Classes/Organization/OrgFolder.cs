@@ -117,6 +117,10 @@ namespace Meticumedia.Classes
         /// </summary>
         private List<string> ignoreFiles = new List<string>();
 
+        public int Id { get; private set; }
+
+        private static int idCnt = 0;
+
         #endregion
 
         #region Events
@@ -144,8 +148,8 @@ namespace Meticumedia.Classes
         /// <param name="allowDeleting">sets whether software is allowed to delete file from folder</param>
         /// <param name="checkForEmptyFolder">sets whether software checks if the folder is empty</param>
         public OrgFolder(string path, bool copyFrom, bool recursive, bool allowDeleting, bool checkForEmptyFolder)
+            : this(path)
         {
-            this.FolderPath = path;
             this.CopyFrom = copyFrom;
             this.Recursive = recursive;
             this.AllowDeleting = allowDeleting;
@@ -158,6 +162,7 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="path"></param>
         public OrgFolder(string path)
+            : this()
         {
             this.FolderPath = path;
         }
@@ -167,6 +172,7 @@ namespace Meticumedia.Classes
         /// </summary>
         public OrgFolder()
         {
+            this.Id = idCnt++;
         }
 
         /// <summary>
@@ -174,14 +180,25 @@ namespace Meticumedia.Classes
         /// </summary>
         public OrgFolder(OrgFolder folder)
         {
-            this.FolderPath = folder.FolderPath;
-            this.CopyFrom = folder.CopyFrom;
-            this.Recursive = folder.Recursive;
-            this.AllowDeleting = folder.AllowDeleting;
+            Clone(folder);
+        }
+
+        public void Clone(OrgFolder folder)
+        {
+            if (this.FolderPath != folder.FolderPath)
+                this.FolderPath = folder.FolderPath;
+            if (this.CopyFrom != folder.CopyFrom)
+                this.CopyFrom = folder.CopyFrom;
+            if (this.Recursive != folder.Recursive)
+                this.Recursive = folder.Recursive;
+            if (this.AllowDeleting != folder.AllowDeleting)
+                this.AllowDeleting = folder.AllowDeleting;
             this.AutomaticallyDeleteEmptyFolders = folder.AutomaticallyDeleteEmptyFolders;
-            this.ignoreFiles = new List<string>();
+            this.ignoreFiles.Clear();
             foreach (string ignrFile in folder.ignoreFiles)
                 this.ignoreFiles.Add(ignrFile);
+            if (this.Id != folder.Id)
+                this.Id = folder.Id;
         }
 
         #endregion

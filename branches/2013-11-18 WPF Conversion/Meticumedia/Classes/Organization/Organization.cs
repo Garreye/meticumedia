@@ -113,6 +113,10 @@ namespace Meticumedia.Classes
             string basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             basePath = Path.Combine(basePath, "Meticumedia");
 
+#if DEBUG
+            basePath = Path.Combine(basePath, "DEBUG");
+#endif
+
             if (createIfNeeded && !Directory.Exists(basePath))
                 Directory.CreateDirectory(basePath);
 

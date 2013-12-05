@@ -177,6 +177,9 @@ namespace Meticumedia.Controls
         /// <returns></returns>
         private string[] GetFolderSubDirectories(ContentRootFolder folder)
         {
+            if (!System.IO.Directory.Exists(folder.FullPath))
+                return new string[0];
+
             string[] subDirs = Directory.GetDirectories(folder.FullPath);
             for (int i = 0; i < subDirs.Length; i++)
             {

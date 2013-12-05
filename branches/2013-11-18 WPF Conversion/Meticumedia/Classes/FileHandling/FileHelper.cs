@@ -38,7 +38,11 @@ namespace Meticumedia.Classes
 
             // Check against each type
             foreach (string ext in Settings.VideoFileTypes.Types)
-                if (extenstion == ext.ToLower())
+            {
+                Regex extRe = new Regex(@"\." + ext + "$");
+                Match extMatch = extRe.Match(extenstion);
+
+                if (extMatch.Success)
                 {
                     // Check if sample!
                     if (file.Path.ToLower().Contains("sample"))
@@ -49,13 +53,22 @@ namespace Meticumedia.Classes
                     else
                         return FileCategory.NonTvVideo;
                 }
+            }
             foreach (string ext in Settings.DeleteFileTypes.Types)
-                if (extenstion == ext.ToLower())
+            {
+                Regex extRe = new Regex(@"\." + ext + "$");
+                Match extMatch = extRe.Match(extenstion);
+                if (extMatch.Success)
                     return FileCategory.Trash;
+            }
 
             foreach (string ext in Settings.IgnoreFileTypes.Types)
-                if (extenstion == ext.ToLower())
+            {
+                Regex extRe = new Regex(@"\." + ext + "$");
+                Match extMatch = extRe.Match(extenstion);
+                if (extMatch.Success)
                     return FileCategory.Ignored;
+            }
 
             return FileCategory.Unknown;
         }

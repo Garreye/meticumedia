@@ -15,6 +15,7 @@ using Ookii.Dialogs.Wpf;
 using System.IO;
 using System.Collections.ObjectModel;
 using Meticumedia.Classes;
+using System.Collections.Specialized;
 
 namespace Meticumedia.Controls
 {
@@ -23,14 +24,20 @@ namespace Meticumedia.Controls
     /// </summary>
     public partial class ScanFoldersControl : UserControl
     {
+        #region Constructor
+
         public ScanFoldersControl()
         {
             InitializeComponent();
         }
 
+        #endregion
+
         #region Variables
 
         private ObservableCollection<OrgFolder> folders = new ObservableCollection<OrgFolder>();
+
+        private List<NotifyCollectionChangedEventArgs> collectionChanges = new List<NotifyCollectionChangedEventArgs>();
 
         #endregion
 
@@ -40,15 +47,24 @@ namespace Meticumedia.Controls
         {
             folders = new ObservableCollection<OrgFolder>();
             foreach (OrgFolder flder in Meticumedia.Classes.Settings.ScanDirectories)
-                folders.Add(new OrgFolder(flder));
+            {
+                OrgFolder addFldr = new OrgFolder(flder);
+                folders.Add(addFldr);
+            }
+            folders.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(folders_CollectionChanged);
             lbScanFolders.ItemsSource = folders;
         }
 
-        public void SaveSettings()
+        private void folders_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            collectionChanges.Add(e);
+        }
+
+        public void SaveSettings()
+        {           
             Meticumedia.Classes.Settings.ScanDirectories.Clear();
             foreach (OrgFolder fldr in folders)
-                Meticumedia.Classes.Settings.ScanDirectories.Add(fldr);
+               Meticumedia.Classes.Settings.ScanDirectories.Add(fldr);
         }
 
         #endregion
@@ -93,9 +109,5 @@ namespace Meticumedia.Controls
         }
 
         #endregion
-
-
-
-
     }
 }

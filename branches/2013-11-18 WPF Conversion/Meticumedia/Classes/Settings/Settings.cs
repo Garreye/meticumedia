@@ -9,6 +9,7 @@ using System.Text;
 using System.IO;
 using System.Xml;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Meticumedia.Classes
 {
@@ -17,6 +18,21 @@ namespace Meticumedia.Classes
     /// </summary>
     public static class Settings
     {
+
+        #region Events
+
+        public static event EventHandler SettingsModified;
+
+        private static void OnSettingsModified()
+        {
+            if (SettingsModified != null)
+            {
+                SettingsModified(null, new EventArgs());
+            }
+        }
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -82,18 +98,18 @@ namespace Meticumedia.Classes
         /// </summary>
         private static string[] DefaultVideoFileTypes = new string[]
         {
-            ".avi",
-            ".wmv",
-            ".mkv",
-            ".mpg",
-            ".mpeg",
-            ".mp4",
-            ".m4v",
-            ".rmvb",
-            ".divx",
-            ".iso",
-            ".dts",
-            ".ts"
+            "avi",
+            "wmv",
+            "mkv",
+            "mpg",
+            "mpeg",
+            "mp4",
+            "m4v",
+            "rmvb",
+            "divx",
+            "iso",
+            "dts",
+            "ts"
         };
 
         /// <summary>
@@ -101,26 +117,28 @@ namespace Meticumedia.Classes
         /// </summary>
         private static string[] DefaultDeleteFileTypes = new string[]
         {
-            ".log",
-            ".nzb",
-            ".db",
-            ".ini",
-            ".nfo",
-            ".sfv",
-            ".srr",
-            ".jpg",
-            ".bmp",
-            ".gif",
-            ".torrent",
-            ".rar",
-            ".zip",
-            ".url",
-            ".htm",
-            ".htm1",
-            ".srt",
-            ".png",
-            ".txt",
-            ".srs"
+            "log",
+            "nzb",
+            "db",
+            "ini",
+            "nfo",
+            "sfv",
+            "srr",
+            "jpg",
+            "bmp",
+            "gif",
+            "torrent",
+            "rar",
+            "zip",
+            "url",
+            "htm",
+            "htm1",
+            "srt",
+            "png",
+            "txt",
+            "srs",
+            "par2",
+            @"r\d+"
         };
 
 
@@ -129,8 +147,8 @@ namespace Meticumedia.Classes
         /// </summary>
         private static string[] DefaultIgnoreFileTypes = new string[]
         {
-            ".mp3",
-            ".flac"
+            "mp3",
+            "flac"
         };
 
         #endregion
@@ -341,6 +359,7 @@ namespace Meticumedia.Classes
 
                 xw.WriteEndElement();
             }
+            OnSettingsModified();
         }
 
         /// <summary>
@@ -436,6 +455,7 @@ namespace Meticumedia.Classes
                 }
 
             }
+            OnSettingsModified();
         }
 
         #endregion

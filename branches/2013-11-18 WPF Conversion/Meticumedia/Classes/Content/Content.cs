@@ -608,7 +608,7 @@ namespace Meticumedia.Classes
                         this.Date = date;
                         break;
                     case XmlElements.Overview:
-                        this.Overview = value;
+                        this.Overview = value.Trim();
                         break;
                     case XmlElements.Genres:
                         this.Genres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);

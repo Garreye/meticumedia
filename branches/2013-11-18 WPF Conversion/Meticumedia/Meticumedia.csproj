@@ -55,6 +55,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>..\Libraries\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -63,6 +66,10 @@
     </ApplicationDefinition>
     <Compile Include="Classes\Settings\FileTypesGroup.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
+    <Compile Include="Controls\Content\ContentControl.xaml.cs">
+      <DependentUpon>ContentControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Controls\Settings\FileTypesControl.xaml.cs">
       <DependentUpon>FileTypesControl.xaml</DependentUpon>
     </Compile>
@@ -86,6 +93,10 @@
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\Content\ContentControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Content\TvShowsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

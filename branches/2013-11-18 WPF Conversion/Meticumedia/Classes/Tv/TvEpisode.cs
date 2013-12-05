@@ -277,6 +277,7 @@ namespace Meticumedia.Classes
                 OnPropertyChanged("Aired");
                 OnPropertyChanged("AirDateString");
                 OnPropertyChanged("Status");
+                OnPropertyChanged("StatusColor");
             }
         }
 
@@ -321,6 +322,8 @@ namespace Meticumedia.Classes
             {
                 ignored = value;
                 OnPropertyChanged("Ignored");
+                OnPropertyChanged("Status");
+                OnPropertyChanged("StatusColor");
             }
         }
 
@@ -340,6 +343,7 @@ namespace Meticumedia.Classes
                 missing = value;
                 OnPropertyChanged("Missing");
                 OnPropertyChanged("Status");
+                OnPropertyChanged("StatusColor");
             }
         }
 
@@ -443,7 +447,7 @@ namespace Meticumedia.Classes
                 else if (this.Missing == MissingStatus.Missing)
                     return "LightCoral";
                 else if (this.Missing == MissingStatus.InScanDirectory)
-                    return "LightGreen";
+                    return "MediumSeaGreen";
                 else if (this.Watched)
                     return "LightSlateGray";
                 else
@@ -720,7 +724,7 @@ namespace Meticumedia.Classes
             TvEpisode ep = (TvEpisode)obj;
 
             // Compare is on season and episode number only (show name may not be set yet)
-            return ep.Season == this.Season && ep.Number == this.Number;
+            return ep.Season == this.Season && ep.Number == this.Number && ep.Name == this.Name;
         }
 
         /// <summary>
@@ -746,7 +750,11 @@ namespace Meticumedia.Classes
             if (obj is TvEpisode)
             {
                 TvEpisode t2 = (TvEpisode)obj;
-                return (this.Season * 1000 + this.Number).CompareTo(t2.Season * 1000 + t2.Number);
+
+                if (this.Season == t2.Season && this.Number == t2.Number)
+                    return this.Name.CompareTo(t2.Name);
+                else
+                    return (this.Season * 1000 + this.Number).CompareTo(t2.Season * 1000 + t2.Number);
             }
             else
                 throw new ArgumentException("Object is not a TvShow.");
@@ -912,6 +920,8 @@ namespace Meticumedia.Classes
                     case XmlElements.DatabaseNumber:
                         int dbNumber;
                         int.TryParse(value, out dbNumber);
+                        if (dbNumber < 0)
+                            dbNumber = 0;
                         this.DatabaseNumber = dbNumber;
                         break;
                     case XmlElements.DatabaseDvdNumber:

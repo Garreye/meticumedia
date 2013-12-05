@@ -20,30 +20,22 @@ namespace Meticumedia.Controls
     /// <summary>
     /// Interaction logic for ContentControl.xaml
     /// </summary>
-    public partial class ContentControl : UserControl
+    public partial class TvShowsControl : UserControl
     {
         #region Constructor
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        public ContentControl()
+        public TvShowsControl()
         {
             InitializeComponent();
-            
-            Organization.Shows.LoadComplete += new EventHandler(Shows_LoadComplete);
-
+            gbSelShow.Visibility = System.Windows.Visibility.Hidden;
         }
 
         #endregion
 
         #region Variables
-
-        /// <summary>
-        /// Item source for shows listbox
-        /// </summary>
-        private ObservableCollection<TvShow> shows;
-
 
         /// <summary>
         /// Item source for episode listbox
@@ -54,57 +46,43 @@ namespace Meticumedia.Controls
 
         #region Event Handlers
 
-        /// <summary>
-        /// Loading complete of shows load them into shows listbox
-        /// </summary>
-        private void Shows_LoadComplete(object sender, EventArgs e)
+        private void cntrlShows_SelectionChanged(object sender, ContentControl.SelectionChangedArgs e)
         {
-            shows = new ObservableCollection<TvShow>();
-            lock (Organization.Shows.ContentLock)
+            if (e.Selections.Count > 0)
             {
-                foreach (Content show in Organization.Shows)
-                    shows.Add((TvShow)show);
-            }
-            App.Current.Dispatcher.Invoke((Action)delegate
-            {
-                lbShows.ItemsSource = shows;
-            });
-            Organization.Shows.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Shows_CollectionChanged);
-        }
-
-        /// <summary>
-        /// Changes to shows collection are reflected in item source for shows listbox
-        /// </summary>
-        private void Shows_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            App.Current.Dispatcher.Invoke((Action)delegate
-            {
-                if (e.OldItems != null)
-                    foreach (Content remItem in e.OldItems)
-                        shows.Remove((TvShow)remItem);
-                if (e.NewItems != null)
-                    foreach (Content addItem in e.NewItems)
-                        shows.Add((TvShow)addItem);
-            });
-        }
-
-        /// <summary>
-        /// Selected show has it's episodes loaded
-        /// </summary>
-        private void lbShows_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (lbShows.SelectedItem != null)
-            {
+                TvShow show = (TvShow)e.Selections[0];
+                
                 episodes.Clear();
-                foreach (TvEpisode ep in ((TvShow)lbShows.SelectedItem).Episodes)
+                foreach (TvEpisode ep in show.Episodes)
                     episodes.Add(ep);
                 lbEpisodes.ItemsSource = episodes;
 
                 ICollectionView view = CollectionViewSource.GetDefaultView(episodes);
                 view.GroupDescriptions.Clear();
                 view.GroupDescriptions.Add(new PropertyGroupDescription("SeasonName"));
-            }
 
+                ctntSelShow.DataContext = show;
+
+                gbSelShow.Visibility = System.Windows.Visibility.Visible;
+
+                // Buil episode filters
+                cmbEpFilter.Items.Clear();
+                List<TvEpisodeFilter> epFilters = TvEpisodeFilter.BuildFilters(show, chkDisplayIgnoredEps.IsChecked.Value, true);
+                foreach (TvEpisodeFilter filter in epFilters)
+                    cmbEpFilter.Items.Add(filter);
+                cmbEpFilter.SelectedIndex = 0;
+            }
+            else
+                gbSelShow.Visibility = System.Windows.Visibility.Hidden;
+        }
+
+
+        /// <summary>
+        /// Overview width is limited by control it is in
+        /// </summary>
+        private void spOverview_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            tbOverview.MaxWidth = ctntSelShow.ActualWidth - 20;
         }
 
         #endregion

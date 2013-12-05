@@ -888,8 +888,8 @@ namespace Meticumedia.Classes
 
                 // Pause here if needed to make queue not go crazy with refreshes
                 int time = (int)(DateTime.Now - startTime).TotalMilliseconds;
-                if (time < 100)
-                    Thread.Sleep(100 - time);
+                if (time < 25)
+                    Thread.Sleep(25 - time);
 
                 // Check if sucessful
                 if (this.ActionSucess)
