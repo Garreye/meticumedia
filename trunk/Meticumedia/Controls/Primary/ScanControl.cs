@@ -168,7 +168,7 @@ namespace Meticumedia
                 lvResults.ItemChecked -= new ItemCheckedEventHandler(lvResults_ItemChecked);
                 lvResults.SetOrgItems(e.Items);
                 lvResults.ItemChecked += new ItemCheckedEventHandler(lvResults_ItemChecked);
-                DisplayResults();
+                DisplayResults(true, false, true);
             });
         }
 
@@ -238,6 +238,8 @@ namespace Meticumedia
             if (allAlreadyExists)
                 contextMenu.MenuItems.Add("Set action to replace existing", new EventHandler(HandleReplace));
 
+            contextMenu.MenuItems.Add("Set action to Delete", new EventHandler(HandleDelete));
+
             contextMenu.MenuItems.Add("Add Checked to Queue", new EventHandler(HandleQueue));
             if (lastRunScan == ScanType.Directory)
             {
@@ -281,7 +283,8 @@ namespace Meticumedia
         private void HandleReplace(object sender, EventArgs e)
         {
             // Change action for each selected item
-            foreach (OrgListItem selItem in lvResults.SelectedItems)
+            List<OrgListItem> selItems = lvResults.GetSelectedListItems();
+            foreach (OrgListItem selItem in selItems)
             {
                 OrgItem currItem = selItem.OrgItem;
 
@@ -302,7 +305,26 @@ namespace Meticumedia
             }
 
             // Update display
-            DisplayResults(true);
+            DisplayResults(false, false, false);
+
+        }
+
+        private void HandleDelete(object sender, EventArgs e)
+        {
+            // Change action for each selected item
+            List<OrgListItem> selItems = lvResults.GetSelectedListItems();
+            foreach (OrgListItem selItem in selItems)
+            {
+                OrgItem currItem = selItem.OrgItem;
+
+                // Check that action is already exists
+                currItem.Replace = true;
+                currItem.Action = OrgAction.Delete;
+                currItem.Check = CheckState.Checked;
+            }
+
+            // Update display
+            DisplayResults(false, false, false);
 
         }
 
@@ -313,7 +335,8 @@ namespace Meticumedia
         {
             string destinationFolder = ((MenuItem)sender).Text;
 
-            foreach (OrgListItem selItem in lvResults.SelectedItems)
+            List<OrgListItem> selItems = lvResults.GetSelectedListItems();
+            foreach (OrgListItem selItem in selItems)
             {
                 OrgItem currItem = selItem.OrgItem;
 
@@ -325,7 +348,7 @@ namespace Meticumedia
             }
 
             // Update display
-            DisplayResults(true);
+            DisplayResults(false, false, false);
         }
 
         /// <summary>
@@ -346,7 +369,8 @@ namespace Meticumedia
                 return;
 
             // Get selected items
-            foreach (OrgListItem selItem in lvResults.SelectedItems)
+            List<OrgListItem> selItems = lvResults.GetSelectedListItems();
+            foreach (OrgListItem selItem in selItems)
             {
                 OrgItem selectedResult = selItem.OrgItem;
 
@@ -360,7 +384,7 @@ namespace Meticumedia
                 selectedResult.Check = CheckState.Unchecked;
             }
             Settings.Save();
-            DisplayResults();
+            DisplayResults(false, false, false);
         }
 
         /// <summary>
@@ -373,7 +397,8 @@ namespace Meticumedia
                 return;
 
             // Get selected items
-            foreach (OrgListItem selItem in lvResults.SelectedItems)
+            List<OrgListItem> selItems = lvResults.GetSelectedListItems();
+            foreach (OrgListItem selItem in selItems)
             {
                 OrgItem selectedResult = selItem.OrgItem;
 
@@ -383,7 +408,7 @@ namespace Meticumedia
                             selectedResult.Category = FileCategory.Unknown;
             }
             Settings.Save();
-            DisplayResults();
+            DisplayResults(false, false, false);
         }
 
         /// <summary>
@@ -411,7 +436,7 @@ namespace Meticumedia
             if (selectedResult.TvEpisode.UserLocate(false, false, out items))
             {
                 selectedResult.UpdateInfo(items[0]);
-                DisplayResults();
+                DisplayResults(false, false, false);
             }
         }
 
@@ -426,7 +451,8 @@ namespace Meticumedia
 
             // Get selected shows
             List<TvShow> showsToBeSet = new List<TvShow>();
-            foreach (OrgListItem selItem in lvResults.SelectedItems)
+            List<OrgListItem> selItems = lvResults.GetSelectedListItems();
+            foreach (OrgListItem selItem in selItems)
             {
                 OrgItem selectedResult = selItem.OrgItem;
                 if (selectedResult.TvEpisode == null)
@@ -454,7 +480,7 @@ namespace Meticumedia
             }
 
             Organization.Shows.Save();
-            DisplayResults();
+            DisplayResults(true, true, false);
         }
 
         /// <summary>
@@ -467,7 +493,8 @@ namespace Meticumedia
                 return;
 
             // Get selected item
-            foreach (OrgListItem selItem in lvResults.SelectedItems)
+            List<OrgListItem> selItems = lvResults.GetSelectedListItems();
+            foreach (OrgListItem selItem in selItems)
             {
                 OrgItem selectedResult = selItem.OrgItem;
                 if (selectedResult.TvEpisode == null)
@@ -478,7 +505,7 @@ namespace Meticumedia
 
             }
             Organization.Shows.Save();
-            DisplayResults();
+            DisplayResults(false, false, false);
         }
 
         /// <summary>
@@ -526,7 +553,7 @@ namespace Meticumedia
             } 
 
             Organization.Shows.Save();
-            DisplayResults();
+            DisplayResults(false, false, false);
         }
 
         #endregion
@@ -589,6 +616,7 @@ namespace Meticumedia
                     break;
             }
             lvResults.SetColumns(colSetup);
+            lvResults.ColumnSortEnable = false;
 
             // Run scan
             ScanRunEnables(false);
@@ -749,7 +777,7 @@ namespace Meticumedia
                 }
 
 
-                DisplayResults();
+                DisplayResults(false, false, false);
             }
         }
 
@@ -819,7 +847,7 @@ namespace Meticumedia
             OnItemsToQueue(itemsToQueue);
 
             // Refresh Results
-            DisplayResults();
+            DisplayResults(true, true, false);
         }
 
         /// <summary>
@@ -871,7 +899,7 @@ namespace Meticumedia
             if (chkIgnoreCatFilter.Checked)
                 lvResults.CategoryFilter |= FileCategory.Ignored;
 
-            DisplayResults();
+            DisplayResults(true, true, false);
         }
 
         private void cmbScanType_SelectedIndexChanged(object sender, EventArgs e)
@@ -1058,7 +1086,7 @@ namespace Meticumedia
                     pbScanProgress.Value = 100;
                 else
                     pbScanProgress.Value = e.ProgressPercentage;
-                DisplayResults(true);
+                DisplayResults(true, false, true);
             });
         }
 
@@ -1067,6 +1095,8 @@ namespace Meticumedia
         /// </summary>
         private void scanWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            lvResults.ColumnSortEnable = false;
+            
             // If last scan was cancelled run new scan
             if (rescanRequired)
             {
@@ -1086,7 +1116,7 @@ namespace Meticumedia
                            lvResults.RemoveItemAt(i);
                    }
                    scanRunning = false;
-                   DisplayResults();
+                   DisplayResults(true, true, false);
                    ScanRunEnables(true);
                    pbScanProgress.Value = 0;
                    pbScanProgress.Message = string.Empty;
@@ -1103,7 +1133,8 @@ namespace Meticumedia
                     Application.DoEvents(); // TODO: is this needed? Seems hacky!
                     scanRunning = false;
 
-                    DisplayResults();
+                    DisplayResults(true, true, false);
+                    lvResults_ItemChecked(null, null);
                     ScanRunEnables(true);
                 });
             }
@@ -1243,49 +1274,18 @@ namespace Meticumedia
         /// <summary>
         /// Displays scan results in listview
         /// </summary>
-        private void DisplayResults(bool updating = false)
+        private void DisplayResults(bool noCheckEvents, bool forceSingleCheckEvent, bool limitUpdate)
         {
-            lvResults.ItemChecked -= new ItemCheckedEventHandler(lvResults_ItemChecked);
+            if (noCheckEvents)
+                lvResults.ItemChecked -= new ItemCheckedEventHandler(lvResults_ItemChecked);
 
-            lvResults.UpdateDisplay(5);
+            lvResults.UpdateDisplay(limitUpdate ? 2 : 0);
 
-            lvResults.ItemChecked += new ItemCheckedEventHandler(lvResults_ItemChecked);
-            // Update selection
-            //OrgItem selItem = null;
-            //int selIndex = -1;
-            //if (lvResults.SelectedIndices.Count > 0)
-            //{
-            //    selItem = lvResults.DisplayedListItems[0].OrgItem;
-            //    selIndex = lvResults.SelectedIndices[0];
-            //}
-            
-            //// Filter and sort items for display
-            //if (!updating)
-            //    //lock (displayItems)
-            //    {
-            //        displayItems = FilterResults(scanResults);
-            //        OrgItem.AscendingSort = sortAcending;
-            //        OrgItem.Sort(displayItems, sortType);
-            //    }
+            if (forceSingleCheckEvent)
+                lvResults_ItemChecked(null, null);
 
-            //// De-register listview events
-            //lvResults.SelectedIndexChanged -= new System.EventHandler(this.lvResults_SelectedIndexChanged);
-            //lvResults.ItemChecked -= new System.Windows.Forms.ItemCheckedEventHandler(this.lvResults_ItemChecked);
-
-            //lock (displayItems)
-            //    OrgItemListHelper.DisplayOrgItemInList(displayItems, lvResults, scanColumns, new int[1] { -1 }, updating);
-            
-            //// Re-register listview events
-            //lvResults.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lvResults_ItemChecked);
-            //lvResults.SelectedIndexChanged += new System.EventHandler(this.lvResults_SelectedIndexChanged);
-
-            //if (lvResults.Items.Count > 0)
-            //{
-            //    lvResults_ItemChecked(null, new ItemCheckedEventArgs(lvResults.Items[0]));
-            //    lvResults_SelectedIndexChanged(null, new ItemCheckedEventArgs(lvResults.Items[0]));
-            //}
-            
-            
+            if (noCheckEvents)
+                lvResults.ItemChecked += new ItemCheckedEventHandler(lvResults_ItemChecked);       
         }
 
         /// <summary>

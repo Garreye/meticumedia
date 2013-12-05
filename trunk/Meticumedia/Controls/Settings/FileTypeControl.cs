@@ -78,13 +78,6 @@ namespace Meticumedia
         {
             string newType = txtNewType.Text;
 
-            // First char must be dot
-            if (newType[0] != '.')
-            {
-                MessageBox.Show("Extension must start with '.'");
-                return;
-            }
-
             lvTypes.Items.Add(newType);
         }
 

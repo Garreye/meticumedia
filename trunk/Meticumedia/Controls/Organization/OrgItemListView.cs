@@ -44,6 +44,8 @@ namespace Meticumedia
 
         #region Properties
 
+        public bool ColumnSortEnable { get; set; }
+
         public OrgColumnType ColumnSort
         {
             get { return sortType; }
@@ -78,32 +80,6 @@ namespace Meticumedia
 
         #endregion
 
-        #region Event Handlers
-
-        private void OrgItemListView_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
-            // Find the column type to sort by
-            sortType = 0;
-            foreach (OrgColumnType colType in Enum.GetValues(typeof(OrgColumnType)))
-                if (orgColumns.ContainsKey(colType) && orgColumns[colType].Header.Index == e.Column)
-                {
-                    sortType = colType;
-                    break;
-                }
-
-            // Set order
-            if (lastClickedColumn == 0 || lastClickedColumn != sortType)
-                sortAcending = true;
-            else
-                sortAcending = !sortAcending;
-            lastClickedColumn = sortType;
-
-            // Sort items and re-display
-            SortItems();
-        }
-
-        #endregion
-
         #region Display
 
         private DateTime lastUpdate = new DateTime();
@@ -114,38 +90,40 @@ namespace Meticumedia
                 return;
 
             lastUpdate = DateTime.Now;
-            
-            int addCount = 0;
-            for (int i = 0; i < orgListItems.Count; i++)
+            lock (ItemsLock)
             {
-                bool sel = orgListItems[i].Displayed && orgListItems[i].ListItem.Selected;
-                orgListItems[i].UpdateListViewItem(orgColumns);
-                
-                // Apply filter
-                if (!Filter(orgListItems[i]))
+                int addCount = 0;
+                for (int i = 0; i < orgListItems.Count; i++)
                 {
-                    orgListItems[i].Displayed = false;
-                    if (this.Items.Contains(orgListItems[i].ListItem))
+                    bool sel = orgListItems[i].Displayed && orgListItems[i].ListItem.Selected;
+                    orgListItems[i].UpdateListViewItem(orgColumns);
+
+                    // Apply filter
+                    if (!Filter(orgListItems[i]))
+                    {
+                        orgListItems[i].Displayed = false;
+                        if (this.Items.Contains(orgListItems[i].ListItem))
+                            this.Items.Remove(orgListItems[i].ListItem);
+
+                        continue;
+                    }
+
+                    orgListItems[i].Displayed = true;
+
+                    if (!this.Items.Contains(orgListItems[i].ListItem))
+                    {
+                        this.Items.Insert(addCount, orgListItems[i].ListItem);
+                    }
+                    else if (orgListItems[i].ListItem.Index != addCount)
+                    {
                         this.Items.Remove(orgListItems[i].ListItem);
+                        this.Items.Insert(addCount, orgListItems[i].ListItem);
 
-                    continue;
+                    }
+                    if (sel)
+                        this.Items[addCount].Selected = true;
+                    addCount++;
                 }
-
-                orgListItems[i].Displayed = true;
-
-                if (!this.Items.Contains(orgListItems[i].ListItem))
-                {
-                    this.Items.Insert(addCount, orgListItems[i].ListItem);
-                }
-                else if (orgListItems[i].ListItem.Index != addCount)
-                {
-                    this.Items.Remove(orgListItems[i].ListItem);
-                    this.Items.Insert(addCount, orgListItems[i].ListItem);
-
-                }
-                if (sel)
-                    this.Items[addCount].Selected = true;
-                addCount++;
             }
         }
 
@@ -313,19 +291,25 @@ namespace Meticumedia
 
         #region Add/Remove Items Methods
 
+        private object ItemsLock = new object();
+
         public void AddItem(OrgItem item)
         {
-            OrgListItem oli = new OrgListItem(item, this.orgColumns);
-            AddItem(oli);
+
+                OrgListItem oli = new OrgListItem(item, this.orgColumns);
+                AddItem(oli);
         }
 
         public void AddItem(OrgListItem item)
         {
-            this.orgListItems.Add(item);
-            if (Filter(item))
+            lock (ItemsLock)
             {
-                item.Displayed = true;
-                this.Items.Add(item.ListItem);
+                this.orgListItems.Add(item);
+                if (Filter(item))
+                {
+                    item.Displayed = true;
+                    this.Items.Add(item.ListItem);
+                }
             }
         }
 
@@ -337,11 +321,14 @@ namespace Meticumedia
 
         public void InsertItem(int index, OrgListItem item)
         {
-            this.orgListItems.Insert(index, item);
-            if (Filter(item))
+            lock (ItemsLock)
             {
-                item.Displayed = true;
-                this.Items.Insert(index, item.ListItem);
+                this.orgListItems.Insert(index, item);
+                if (Filter(item))
+                {
+                    item.Displayed = true;
+                    this.Items.Insert(index, item.ListItem);
+                }
             }
         }
 
@@ -367,20 +354,25 @@ namespace Meticumedia
 
         public void RemoveItemAt(int index)
         {
-            if (this.Items.Contains(orgListItems[index].ListItem))
-                this.Items.Remove(orgListItems[index].ListItem);
-            this.orgListItems[index].OrgItem.CancelAction();
-            this.orgListItems.RemoveAt(index); 
+            lock (ItemsLock)
+            {
+                if (this.Items.Contains(orgListItems[index].ListItem))
+                    this.Items.Remove(orgListItems[index].ListItem);
+                this.orgListItems[index].OrgItem.CancelAction();
+                this.orgListItems.RemoveAt(index);
+            }
         }
 
         public void SortItems()
         {
-            SortItems(sortType, sortAcending);
+            lock (ItemsLock)
+                SortItems(sortType, sortAcending);
         }
 
         public void SortItems(OrgColumnType type, bool ascending)
         {
-            OrgListItem.Sort(orgListItems, type, ascending);
+            lock (ItemsLock)
+                OrgListItem.Sort(orgListItems, type, ascending);
             UpdateDisplay();
         }
 
@@ -507,6 +499,31 @@ namespace Meticumedia
                     orgColumns.Add(type, new OrgItemColumn(type, columnOrder++));
                     this.Columns.Add(orgColumns[type].Header);
                 }
+        }
+
+        private void OrgItemListView_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            if (!this.ColumnSortEnable)
+                return;
+            
+            // Find the column type to sort by
+            sortType = 0;
+            foreach (OrgColumnType colType in Enum.GetValues(typeof(OrgColumnType)))
+                if (orgColumns.ContainsKey(colType) && orgColumns[colType].Header.Index == e.Column)
+                {
+                    sortType = colType;
+                    break;
+                }
+
+            // Set order
+            if (lastClickedColumn == 0 || lastClickedColumn != sortType)
+                sortAcending = true;
+            else
+                sortAcending = !sortAcending;
+            lastClickedColumn = sortType;
+
+            // Sort items and re-display
+            SortItems();
         }
 
         #endregion

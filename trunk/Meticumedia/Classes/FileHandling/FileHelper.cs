@@ -34,11 +34,15 @@ namespace Meticumedia
             
             // Check if ignored
             if (file.OrgFolder != null && file.OrgFolder.IsIgnored(file.Path))
-                return FileCategory.Ignored;            
+                return FileCategory.Ignored;
 
             // Check against each type
             foreach (string ext in Settings.VideoFileTypes)
-                if (extenstion == ext.ToLower())
+            {
+                Regex extRe = new Regex(@"\." + ext + "$");
+                Match extMatch = extRe.Match(extenstion);
+
+                if (extMatch.Success)
                 {
                     // Check if sample!
                     if (file.Path.ToLower().Contains("sample"))
@@ -49,13 +53,22 @@ namespace Meticumedia
                     else
                         return FileCategory.NonTvVideo;
                 }
+            }
             foreach (string ext in Settings.DeleteFileTypes)
-                if (extenstion == ext.ToLower())
+            {
+                Regex extRe = new Regex(@"\." + ext + "$");
+                Match extMatch = extRe.Match(extenstion);
+                if (extMatch.Success)
                     return FileCategory.Trash;
+            }
 
             foreach (string ext in Settings.IgnoreFileTypes)
-                if (extenstion == ext.ToLower())
+            {
+                Regex extRe = new Regex(@"\." + ext + "$");
+                Match extMatch = extRe.Match(extenstion);
+                if (extMatch.Success)
                     return FileCategory.Ignored;
+            }
 
             return FileCategory.Unknown;
         }

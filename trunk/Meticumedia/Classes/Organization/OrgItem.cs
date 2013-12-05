@@ -830,6 +830,8 @@ namespace Meticumedia
             if (!actionStarted)
                 OnProgressChange(0);
 
+            
+
             // Set running property
             this.actionRunning = true;
             this.ActionSucess = true;
@@ -887,8 +889,8 @@ namespace Meticumedia
 
                 // Pause here if needed to make queue not go crazy with refreshes
                 int time = (int)(DateTime.Now - startTime).TotalMilliseconds;
-                if (time < 100)
-                    Thread.Sleep(100 - time);
+                if (time < 25)
+                    Thread.Sleep(25 - time);
 
                 // Check if sucessful
                 if (this.ActionSucess)
@@ -911,6 +913,8 @@ namespace Meticumedia
             // Clear action running
             actionRunning = false;
         }
+
+        
 
         /// <summary>
         /// Delete all empty directories from scan folder item belongs to if it is enabled

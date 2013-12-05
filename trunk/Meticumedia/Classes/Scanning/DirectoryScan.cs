@@ -299,7 +299,7 @@ namespace Meticumedia
                                 }
 
 
-                                if (m.Length > longestMatch && m.Length >= matchWordCnt)
+                                if (m.Value.Trim().Length > longestMatch && m.Length >= matchWordCnt)
                                 {
                                     longestMatch = m.Length;
                                     bestMatch = match.Key;

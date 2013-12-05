@@ -81,18 +81,18 @@ namespace Meticumedia
         /// </summary>
         private static string[] DefaultVideoFileTypes = new string[]
         {
-            ".avi",
-            ".wmv",
-            ".mkv",
-            ".mpg",
-            ".mpeg",
-            ".mp4",
-            ".m4v",
-            ".rmvb",
-            ".divx",
-            ".iso",
-            ".dts",
-            ".ts"
+            "avi",
+            "wmv",
+            "mkv",
+            "mpg",
+            "mpeg",
+            "mp4",
+            "m4v",
+            "rmvb",
+            "divx",
+            "iso",
+            "dts",
+            "ts"
         };
 
         /// <summary>
@@ -100,26 +100,28 @@ namespace Meticumedia
         /// </summary>
         private static string[] DefaultDeleteFileTypes = new string[]
         {
-            ".log",
-            ".nzb",
-            ".db",
-            ".ini",
-            ".nfo",
-            ".sfv",
-            ".srr",
-            ".jpg",
-            ".bmp",
-            ".gif",
-            ".torrent",
-            ".rar",
-            ".zip",
-            ".url",
-            ".htm",
-            ".htm1",
-            ".srt",
-            ".png",
-            ".txt",
-            ".srs"
+            "log",
+            "nzb",
+            "db",
+            "ini",
+            "nfo",
+            "sfv",
+            "srr",
+            "jpg",
+            "bmp",
+            "gif",
+            "torrent",
+            "rar",
+            "zip",
+            "url",
+            "htm",
+            "htm1",
+            "srt",
+            "png",
+            "txt",
+            "srs",
+            "par2",
+            @"r\d+"
         };
 
 
@@ -128,8 +130,8 @@ namespace Meticumedia
         /// </summary>
         private static string[] DefaultIgnoreFileTypes = new string[]
         {
-            ".mp3",
-            ".flac"
+            "mp3",
+            "flac"
         };
 
         #endregion
