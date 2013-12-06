@@ -31,6 +31,8 @@ namespace Meticumedia.Controls
         {
             InitializeComponent();
             gbSelShow.Visibility = System.Windows.Visibility.Hidden;
+            Organization.Shows.LoadProgressChange += new EventHandler<System.ComponentModel.ProgressChangedEventArgs>(Shows_LoadProgressChange);
+            Organization.Shows.LoadComplete += new EventHandler(Shows_LoadComplete);
         }
 
         #endregion
@@ -76,13 +78,45 @@ namespace Meticumedia.Controls
                 gbSelShow.Visibility = System.Windows.Visibility.Hidden;
         }
 
-
         /// <summary>
         /// Overview width is limited by control it is in
         /// </summary>
         private void spOverview_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             tbOverview.MaxWidth = ctntSelShow.ActualWidth - 20;
+        }
+
+        /// <summary>
+        /// Updates progress bar percent and message
+        /// </summary>
+        /// <param name="percent"></param>
+        /// <param name="msg"></param>
+        private void UpdateProgress(int percent, string msg, bool hide)
+        {
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                tbPbText.Text = msg;
+                pbUpdating.Value = percent;
+
+                if (hide)
+                    grdProgress.Visibility = System.Windows.Visibility.Collapsed;
+                else
+                    grdProgress.Visibility = System.Windows.Visibility.Visible;
+
+            });
+        }
+
+        /// <summary>
+        /// Load progress shown in bar
+        /// </summary>
+        void Shows_LoadProgressChange(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            UpdateProgress(e.ProgressPercentage, "Loading Shows" + (string)e.UserState, false);
+        }
+
+        void Shows_LoadComplete(object sender, EventArgs e)
+        {
+            UpdateProgress(100, "Loading complete!", true);
         }
 
         #endregion

@@ -51,6 +51,6 @@
                 <TextBox x:Name="txtNameFilter" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" />
             </Grid>
 
-            <ListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" Name="lbShows" ItemTemplate="{StaticResource showItemTemplate}" SelectionChanged="lbShows_SelectionChanged" />
+            <ListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" Name="lbContent" ItemTemplate="{StaticResource showItemTemplate}" SelectionChanged="lbShows_SelectionChanged" />
         </Grid>
 </UserControl>

@@ -18,7 +18,6 @@ namespace Meticumedia.Classes
     /// </summary>
     public static class Settings
     {
-
         #region Events
 
         public static event EventHandler SettingsModified;
@@ -63,17 +62,17 @@ namespace Meticumedia.Classes
         /// <summary>
         /// File types to match to video files
         /// </summary>
-        public static FileTypesGroup VideoFileTypes;
+        public static FileTypesGroup VideoFileTypes = new FileTypesGroup();
 
         /// <summary>
         /// File types to delete during scan
         /// </summary>
-        public static FileTypesGroup DeleteFileTypes;
+        public static FileTypesGroup DeleteFileTypes = new FileTypesGroup();
 
         // <summary>
         /// File types to ignored during scan
         /// </summary>
-        public static FileTypesGroup IgnoreFileTypes;
+        public static FileTypesGroup IgnoreFileTypes = new FileTypesGroup();
 
         public static GuiSettings GuiControl = new GuiSettings();
 
@@ -263,6 +262,11 @@ namespace Meticumedia.Classes
             return false;
         }
 
+        /// <summary>
+        /// Get all root folder for given content type
+        /// </summary>
+        /// <param name="type">Content type of root folders to get</param>
+        /// <returns></returns>
         public static List<ContentRootFolder> GetAllRootFolders(ContentType type)
         {
             List<ContentRootFolder> allRootFolders;
@@ -281,6 +285,16 @@ namespace Meticumedia.Classes
             return allRootFolders;
         }
 
+        /// <summary>
+        /// Update root folders
+        /// </summary>
+        /// <param name="type"></param>
+        public static void UpdateRootFolders(ContentType type)
+        {
+            // Update each selected movie folder
+            List<ContentRootFolder> rootFolders = Settings.GetAllRootFolders(type);
+            Organization.UpdateRootFolderContents(rootFolders, false);
+        }
 
         #endregion
 

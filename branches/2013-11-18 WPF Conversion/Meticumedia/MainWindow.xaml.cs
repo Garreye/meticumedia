@@ -25,12 +25,16 @@ namespace Meticumedia
         {
             InitializeComponent();
 
-            // Load shows and settings from XML
+            // Load organization and settings from XML
             Settings.Load();
             Organization.Load();
 
             // Init word helper
             WordHelper.Initialize();
+
+            // Update TV and movie folder
+            Settings.UpdateRootFolders(ContentType.TvShow);
+            Settings.UpdateRootFolders(ContentType.Movie);
         }
 
         private void menuSettings_Click(object sender, RoutedEventArgs e)

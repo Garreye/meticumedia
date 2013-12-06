@@ -368,7 +368,7 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="folders">Root folders to update from</param>
         /// <param name="fastUpdate">Whether to do fast update (skips episodes updating for TV shows)</param> 
-        public static void UpdateContentsFromRootFolders(List<ContentRootFolder> folders, bool fastUpdate)
+        private static void UpdateContentsFromRootFolders(List<ContentRootFolder> folders, bool fastUpdate)
         {
             // Check that there's root folders to update
             if (folders.Count == 0)
@@ -400,6 +400,24 @@ namespace Meticumedia.Classes
 
             // Clear cancel flag
             SetUpdateCancel(contentType, false);            
+        }
+
+        public static void UpdateRootFolderContents(List<ContentRootFolder> folders, bool fastUpdate)
+        {
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+
+            object[] args = new object[] { folders, fastUpdate};
+            worker.RunWorkerAsync(args);
+        }
+
+        static void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            object[] args = (object[])e.Argument;
+            List<ContentRootFolder> folders = (List<ContentRootFolder>)args[0];
+            bool fastUpdate = (bool)args[1];
+
+            UpdateContentsFromRootFolders(folders, fastUpdate);
         }
 
         #endregion

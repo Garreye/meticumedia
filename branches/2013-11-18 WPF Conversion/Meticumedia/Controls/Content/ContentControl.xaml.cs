@@ -100,9 +100,21 @@ namespace Meticumedia.Controls
         public ContentControl()
         {
             InitializeComponent();
-
-            Organization.Shows.LoadComplete += new EventHandler(Shows_LoadComplete);
+            this.Loaded += new RoutedEventHandler(ContentControl_Loaded);
             Settings.SettingsModified += new EventHandler(Settings_SettingsModified);
+        }
+
+        void ContentControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            switch (this.ContentType)
+            {
+                case ContentType.Movie:
+                    Organization.Movies.LoadComplete += new EventHandler(Content_LoadComplete);
+                    break;
+                case ContentType.TvShow:
+                    Organization.Shows.LoadComplete += new EventHandler(Content_LoadComplete);
+                    break;
+            }
         }
 
         #endregion
@@ -142,22 +154,24 @@ namespace Meticumedia.Controls
         /// <summary>
         /// Loading complete of shows load them into shows listbox
         /// </summary>
-        private void Shows_LoadComplete(object sender, EventArgs e)
+        private void Content_LoadComplete(object sender, EventArgs e)
         {
+            ContentCollection contentCollection = (ContentCollection)sender;
+            if (contentCollection.ContentType != this.ContentType)
+                return;
+            
             contents = new ObservableCollection<Content>();
-            lock (Organization.Shows.ContentLock)
+            lock (contentCollection.ContentLock)
             {
-                foreach (Content show in Organization.Shows)
-                    contents.Add(show);
+                foreach (Content cntnt in contentCollection)
+                    contents.Add(cntnt);
             }
             App.Current.Dispatcher.Invoke((Action)delegate
             {
-                lbShows.ItemsSource = contents;
+                lbContent.ItemsSource = contents;
                 UpdateGenresComboBox();
             });
-            Organization.Shows.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Shows_CollectionChanged);
-
-            
+            contentCollection.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Shows_CollectionChanged);
         }
 
         /// <summary>
@@ -206,7 +220,7 @@ namespace Meticumedia.Controls
         private void lbShows_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             List<Content> selections = new List<Content>();
-            foreach (object obj in lbShows.SelectedItems)
+            foreach (object obj in lbContent.SelectedItems)
                 selections.Add((Content)obj);
             OnSelectionChanged(selections);
         }
@@ -294,9 +308,5 @@ namespace Meticumedia.Controls
         }
 
         #endregion
-
-
-
-
     }
 }
