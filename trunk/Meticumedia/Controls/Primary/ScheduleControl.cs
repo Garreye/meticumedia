@@ -38,7 +38,7 @@ namespace Meticumedia
             // Remove overview column
             lvResults.Columns.Remove(colOverview);
 
-            // Buil episode filters
+            // Build episode filters
             cmbEpFilter.Items.Clear();
             List<TvEpisodeFilter> epFilters = TvEpisodeFilter.BuildFilters(null, false, false);
             foreach (TvEpisodeFilter filter in epFilters)

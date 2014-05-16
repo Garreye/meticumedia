@@ -469,7 +469,7 @@ namespace Meticumedia.Classes
                 switch (element)
                 {
                     case XmlElements.Seasons: // Support for older versions
-                        this.Episodes = new ObservableCollection<TvEpisode>();
+                        this.Episodes.Clear();
                         foreach (XmlNode seasNode in propNode.ChildNodes)
                         {
                             foreach (XmlNode seasPropNode in seasNode.ChildNodes)
@@ -488,7 +488,7 @@ namespace Meticumedia.Classes
                         }
                         break;
                     case XmlElements.Episodes:
-                        this.Episodes = new ObservableCollection<TvEpisode>();
+                        this.Episodes.Clear();
                         foreach(XmlNode epNode in propNode.ChildNodes)
                         {
                             TvEpisode episode = new TvEpisode(this);

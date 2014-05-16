@@ -243,22 +243,6 @@ namespace Meticumedia
                 //Console.WriteLine(contentCollection.ToString() + " lock get");
                 foreach (Content content in contentCollection)
                 {
-                    // Apply genre filter
-                    bool genreMatch = false;
-                    if (content.Genres != null && !genreMatch)
-                        foreach (string contentGenre in content.Genres)
-                            if (genre.Contains(contentGenre))
-                            {
-                                genreMatch = true;
-                                break;
-                            }
-
-                    // Apply year filter
-                    bool yearMatch = !yearFilter || (content.Date.Year >= minYear && content.Date.Year <= maxYear);
-
-                    // Apply text filter
-                    bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.Name.ToLower().Contains(nameFilter.ToLower());
-
                     // Check if movie is in the folder
                     if (ContainsContent(content, recursive) && ApplyContentFilter(content, genreEnable, genre, yearFilter, minYear, maxYear, nameFilter))
                         contents.Add(content);

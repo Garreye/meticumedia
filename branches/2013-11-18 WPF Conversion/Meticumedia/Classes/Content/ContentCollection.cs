@@ -16,7 +16,7 @@ using System.Collections.Specialized;
 namespace Meticumedia.Classes
 {
     /// <summary>
-    /// List of content with added properties.
+    /// List of content with added properties. (Iheriting list to have sorting methods)
     /// </summary>
     public class ContentCollection : List<Content>, INotifyCollectionChanged
     {

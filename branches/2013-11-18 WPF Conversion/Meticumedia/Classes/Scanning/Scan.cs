@@ -79,7 +79,7 @@ namespace Meticumedia.Classes
         /// </summary>
         public void OnItemsInitialized(ScanProcess process, List<OrgItem> items)
         {
-            if (ProgressChange != null)
+            if (ItemsInitialized != null)
                 ItemsInitialized(process, new ItemsInitializedArgs(items));
         }
 

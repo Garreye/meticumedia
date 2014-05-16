@@ -32,6 +32,14 @@ namespace Meticumedia.Classes
 
         #endregion
 
+        #region Constants
+
+        public static readonly int UNKNOWN_ID = -1;
+
+        public static readonly int USER_DEFINED_ID = 0;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -53,6 +61,20 @@ namespace Meticumedia.Classes
         private int databaseSelection = (int)Settings.DefaultTvDatabase;
 
         /// <summary>
+        /// Display name of the content
+        /// </summary>
+        public string DisplayName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(name))
+                    return "Unknown";
+                else
+                    return name;
+            }
+        }
+
+        /// <summary>
         /// Name of the content
         /// </summary>
         public string Name
@@ -65,6 +87,8 @@ namespace Meticumedia.Classes
             {
                 name = value;
                 OnPropertyChanged("Name");
+                OnPropertyChanged("DisplayName");
+                OnPropertyChanged("StatusColor");
             }
         }
 
@@ -220,10 +244,11 @@ namespace Meticumedia.Classes
             {
                 id = value;
                 OnPropertyChanged("Id");
+                OnPropertyChanged("StatusColor");
             }
         }
 
-        private int id = 0;
+        private int id = UNKNOWN_ID;
 
         /// <summary>
         /// Indication of whether content has been watched by user
@@ -284,6 +309,26 @@ namespace Meticumedia.Classes
         }
 
         private DateTime lastUpdate = new DateTime();
+
+        /// <summary>
+        /// Gets background color to use for episode based on whether
+        /// it's ignored, aired or missing.
+        /// </summary>
+        /// <returns>Color to use for background</returns>
+        public string StatusColor
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(name))
+                    return "LightCoral";
+                else if (this.id == UNKNOWN_ID)
+                    return "LightCoral";
+                else if (this.id == USER_DEFINED_ID)
+                    return "MediumSeaGreen";
+                else
+                    return "Black";
+            }
+        }
 
         #endregion
 

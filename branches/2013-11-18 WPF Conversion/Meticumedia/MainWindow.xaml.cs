@@ -23,29 +23,23 @@ namespace Meticumedia
     {
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();     
+        }
 
+        void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Init word helper
+            WordHelper.Initialize();
+            
             // Load organization and settings from XML
             Settings.Load();
             Organization.Load();
-
-            // Init word helper
-            WordHelper.Initialize();
-
-            // Update TV and movie folder
-            Settings.UpdateRootFolders(ContentType.TvShow);
-            Settings.UpdateRootFolders(ContentType.Movie);
         }
 
         private void menuSettings_Click(object sender, RoutedEventArgs e)
         {
             SettingsWindow settingsWindow = new SettingsWindow();
             settingsWindow.Show();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

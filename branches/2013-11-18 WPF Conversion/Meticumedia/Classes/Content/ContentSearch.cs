@@ -412,7 +412,7 @@ namespace Meticumedia.Classes
         /// <param name="year">Year to match to content</param>
         /// <param name="result">resulting match found from search</param>
         /// <returns>whether match was successful</returns>
-        private bool DoMatch(string search, string folderPath, string rootFolder, int year,  ContentSearchMod baseMods, out List<SearchResult> matches)
+        private bool DoMatch(string search, string folderPath, string rootFolder, int year, ContentSearchMod baseMods, out List<SearchResult> matches)
         {
             // Search for content
             List<Content> searchResults = PerformSearch(search, false);
@@ -421,86 +421,87 @@ namespace Meticumedia.Classes
             matches = new List<SearchResult>();
 
             // Go through results
-            foreach (Content searchResult in searchResults)
-            {
-                SearchResult result = new SearchResult();
-                result.Mods = baseMods;
-
-                // Verify year in result matches year from folder (if any)
-                if (year != -1 && Math.Abs(year - searchResult.Date.Year) > 3)
-                    continue;
-
-                // Check if search string match results string
-                string simplifiedSearch = FileHelper.SimplifyFileName(search);
-                string dbContentName = FileHelper.SimplifyFileName(searchResult.Name);
-
-                bool theAddedToMatch;
-                bool singleLetterDiff;
-
-                // Try basic match
-                bool match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
-                result.MatchedString = simplifiedSearch;
-
-                // Try match with year removed
-                if (!match)
+            if (searchResults != null)
+                foreach (Content searchResult in searchResults)
                 {
-                    simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, false);
-                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, false);
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
+                    SearchResult result = new SearchResult();
+                    result.Mods = baseMods;
+
+                    // Verify year in result matches year from folder (if any)
+                    if (year != -1 && Math.Abs(year - searchResult.Date.Year) > 3)
+                        continue;
+
+                    // Check if search string match results string
+                    string simplifiedSearch = FileHelper.SimplifyFileName(search);
+                    string dbContentName = FileHelper.SimplifyFileName(searchResult.Name);
+
+                    bool theAddedToMatch;
+                    bool singleLetterDiff;
+
+                    // Try basic match
+                    bool match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                     result.MatchedString = simplifiedSearch;
+
+                    // Try match with year removed
+                    if (!match)
+                    {
+                        simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, false);
+                        dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, false);
+                        match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
+                        result.MatchedString = simplifiedSearch;
+                    }
+
+                    // Try match with country removed
+                    if (!match)
+                    {
+                        simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, true);
+                        dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, true);
+                        match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
+                        if (match)
+                            result.Mods |= ContentSearchMod.WordsRemoved;
+                        result.MatchedString = simplifiedSearch;
+                    }
+
+                    // Try match with spaces removed
+                    if (!match)
+                    {
+                        string dirNoSpc = simplifiedSearch.Replace(" ", "");
+                        string nameNoSpc = dbContentName.Replace(" ", "");
+                        match = FileHelper.CompareStrings(dirNoSpc, nameNoSpc, out theAddedToMatch, out singleLetterDiff);
+                        result.MatchedString = simplifiedSearch;
+                        if (match)
+                            result.Mods |= ContentSearchMod.SpaceRemoved;
+                    }
+
+                    // Try match with year added to content name
+                    if (!match)
+                    {
+                        simplifiedSearch = FileHelper.SimplifyFileName(search);
+                        dbContentName = FileHelper.SimplifyFileName(searchResult.Name + " " + searchResult.Date.Year.ToString());
+                        match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
+                        result.MatchedString = simplifiedSearch;
+                    }
+
+                    // No match, next result!
+                    if (!match)
+                        continue;
+
+                    if (theAddedToMatch)
+                        result.Mods |= ContentSearchMod.TheAdded;
+                    if (singleLetterDiff)
+                        result.Mods |= ContentSearchMod.SingleLetterAdded;
+
+                    // Set results folder/path
+                    result.Content = searchResult;
+                    result.Content.RootFolder = rootFolder;
+                    if (string.IsNullOrEmpty(folderPath))
+                        result.Content.Path = result.Content.BuildFolderPath();
+                    else
+                        result.Content.Path = folderPath;
+
+                    // Save results
+                    matches.Add(result);
                 }
-
-                // Try match with country removed
-                if (!match)
-                {
-                    simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, true);
-                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, true);
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
-                    if (match)
-                        result.Mods |= ContentSearchMod.WordsRemoved;
-                    result.MatchedString = simplifiedSearch;
-                }
-
-                // Try match with spaces removed
-                if (!match)
-                {
-                    string dirNoSpc = simplifiedSearch.Replace(" ", "");
-                    string nameNoSpc = dbContentName.Replace(" ", "");
-                    match = FileHelper.CompareStrings(dirNoSpc, nameNoSpc, out theAddedToMatch, out singleLetterDiff);
-                    result.MatchedString = simplifiedSearch;
-                    if(match)
-                        result.Mods |= ContentSearchMod.SpaceRemoved;
-                }
-
-                // Try match with year added to content name
-                if(!match)
-                {
-                    simplifiedSearch = FileHelper.SimplifyFileName(search);
-                    dbContentName = FileHelper.SimplifyFileName(searchResult.Name + " " + searchResult.Date.Year.ToString());
-                    match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
-                    result.MatchedString = simplifiedSearch;
-                }
-
-                // No match, next result!
-                if(!match)
-                    continue;
-
-                if (theAddedToMatch)
-                    result.Mods |= ContentSearchMod.TheAdded;
-                if (singleLetterDiff)
-                    result.Mods |= ContentSearchMod.SingleLetterAdded;
-
-                // Set results folder/path
-                result.Content = searchResult;
-                result.Content.RootFolder = rootFolder;
-                if (string.IsNullOrEmpty(folderPath))
-                    result.Content.Path = result.Content.BuildFolderPath();
-                else
-                    result.Content.Path = folderPath;                 
-
-                // Save results
-                matches.Add(result);
-            }
 
             return matches.Count > 0;
         }

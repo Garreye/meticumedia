@@ -18,114 +18,373 @@ namespace Meticumedia.Classes
     /// <summary>
     /// An organization item. Stores information about a single organization of a path and handles the action related to organization.
     /// </summary>
-    public class OrgItem
+    public class OrgItem : INotifyPropertyChanged
     {
-        #region Properties
+        #region Events
 
-        /// <summary>
-        /// The status of the item for a TV rename/missing check
-        /// </summary>
-        public OrgStatus Status { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// The action to be performed on the file
-        /// </summary>
-        public OrgAction Action { get; set; }
+        private void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
-        /// <summary>
-        /// Replacing of destination files has been confirmed by user
-        /// </summary>
-        public bool Replace { get; set; }
+        #endregion
 
-        /// <summary>
-        /// Notes to be displayed to user about item
-        /// </summary>
-        public string Notes { get; set; }
-
-        /// <summary>
-        /// Path of the source file
-        /// </summary>
-        public string SourcePath { get; set; }
-
-        /// <summary>
-        /// Path where the source file will be sent to for a copy/move action.
-        /// </summary>
-        public string DestinationPath { get; set; }
-
-        /// <summary>
-        /// TV epsiode that the file is associated with.
-        /// </summary>
-        public TvEpisode TvEpisode { get; set; }
-
-        /// <summary>
-        /// 2nd TV episode that the file is assocatied with. Used for multi-episode files only.
-        /// </summary>
-        public TvEpisode TvEpisode2 { get; set; }
-
-        /// <summary>
-        /// Movie that file is associated with.
-        /// </summary>
-        public Movie Movie { get; set; }
-
-        /// <summary>
-        /// Tv Show
-        /// </summary>
-        public TvShow Show { get; set; }
-
-        /// <summary>
-        /// Flag indicating TV episode(s) associated with item are for a newly found show.
-        /// </summary>
-        public TvShow NewShow { get; set; }
-
-        /// <summary>
-        /// Scan Directory where source comes from
-        /// </summary>
-        public OrgFolder ScanDirectory { get; set; }
-
-        /// <summary>
-        /// The file categarization.
-        /// </summary>
-        public FileCategory Category { get; set; }
-
-        /// <summary>
-        /// The state of the check for the item in the list of item to be organized (scan).
-        /// </summary>
-        public bool Check { get; set; }
-
-        /// <summary>
-        /// Action progress percentage.
-        /// </summary>
-        public int Progress { get; set; }
-
-        /// <summary>
-        /// Item paused
-        /// </summary>
-        public OrgQueueStatus QueueStatus { get; set; }
+        #region Static Properties
 
         /// <summary>
         /// Global pause for all items.
         /// </summary>
         public static bool QueuePaused { get; set; }
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// The status of the item for a TV rename/missing check
+        /// </summary>
+        public OrgStatus Status
+        {
+            get
+            {
+                return status;
+            }
+            set
+            {
+                status = value;
+                OnPropertyChanged("Status");
+            }
+        }
+        private OrgStatus status = OrgStatus.Missing;
+
+        /// <summary>
+        /// The action to be performed on the file
+        /// </summary>
+        public OrgAction Action
+            {
+            get
+            {
+                return action;
+            }
+            set
+            {
+                action = value;
+                OnPropertyChanged("Action");
+            }
+        }
+        private OrgAction action = OrgAction.None;
+
+        /// <summary>
+        /// Replacing of destination files has been confirmed by user
+        /// </summary>
+        public bool Replace
+            {
+            get
+            {
+                return replace;
+            }
+            set
+            {
+                replace = value;
+                OnPropertyChanged("Replace");
+            }
+        }
+        private bool replace = false;
+
+        /// <summary>
+        /// Notes to be displayed to user about item
+        /// </summary>
+        public string Notes
+            {
+            get
+            {
+                return notes;
+            }
+            set
+            {
+                notes = value;
+                OnPropertyChanged("Notes");
+            }
+        }
+        private string notes = string.Empty;
+
+        /// <summary>
+        /// Path of the source file
+        /// </summary>
+        public string SourcePath
+        {
+            get
+            {
+                return sourcePath;
+            }
+            set
+            {
+                sourcePath = value;
+                OnPropertyChanged("SourcePath");
+            }
+        }
+        public string sourcePath = string.Empty;
+
+        /// <summary>
+        /// Path where the source file will be sent to for a copy/move action.
+        /// </summary>
+        public string DestinationPath
+        {
+            get
+            {
+                return destinationPath;
+            }
+            set
+            {
+                destinationPath = value;
+                OnPropertyChanged("DestinationPath");
+            }
+        }
+        private string destinationPath = string.Empty;
+
+        /// <summary>
+        /// TV epsiode that the file is associated with.
+        /// </summary>
+        public TvEpisode TvEpisode
+            {
+            get
+            {
+                return tvEpisode;
+            }
+            set
+            {
+                tvEpisode = value;
+                OnPropertyChanged("TvEpisode");
+            }
+        }
+        private TvEpisode tvEpisode;
+
+        /// <summary>
+        /// 2nd TV episode that the file is assocatied with. Used for multi-episode files only.
+        /// </summary>
+        public TvEpisode TvEpisode2
+        {
+            get
+            {
+                return tvEpisode2;
+            }
+            set
+            {
+                tvEpisode2 = value;
+                OnPropertyChanged("TvEpisode2");
+            }
+        }
+        private TvEpisode tvEpisode2;
+
+        /// <summary>
+        /// Movie that file is associated with.
+        /// </summary>
+        public Movie Movie
+            {
+            get
+            {
+                return movie;
+            }
+            set
+            {
+                movie = value;
+                OnPropertyChanged("Movie");
+            }
+        }
+        private Movie movie;
+
+        /// <summary>
+        /// Tv Show
+        /// </summary>
+        public TvShow Show
+        {
+            get
+            {
+                return show;
+            }
+            set
+            {
+                show = value;
+                OnPropertyChanged("Show");
+            }
+        }
+        private TvShow show;
+
+        /// <summary>
+        /// Flag indicating TV episode(s) associated with item are for a newly found show.
+        /// </summary>
+        public TvShow NewShow
+            {
+            get
+            {
+                return newShow;
+            }
+            set
+            {
+                newShow = value;
+                OnPropertyChanged("NewShow");
+            }
+        }
+        private TvShow newShow;
+
+        /// <summary>
+        /// Scan Directory where source comes from
+        /// </summary>
+        public OrgFolder ScanDirectory
+            {
+            get
+            {
+                return scanDirectory;
+            }
+            set
+            {
+                scanDirectory = value;
+                OnPropertyChanged("ScanDirectory");
+            }
+        }
+        private OrgFolder scanDirectory;
+
+        /// <summary>
+        /// The file categarization.
+        /// </summary>
+        public FileCategory Category
+            {
+            get
+            {
+                return category;
+            }
+            set
+            {
+                category = value;
+                OnPropertyChanged("Category");
+            }
+        }
+        private FileCategory category;
+
+        /// <summary>
+        /// The state of the check for the item in the list of item to be organized (scan).
+        /// </summary>
+        public bool Check
+        {
+            get
+            {
+                return check;
+            }
+            set
+            {
+                check = value;
+                OnPropertyChanged("Check");
+            }
+        }
+        private bool check;
+
+        /// <summary>
+        /// Action progress percentage.
+        /// </summary>
+        public int Progress
+        {
+            get
+            {
+                return progress;
+            }
+            set
+            {
+                progress = value;
+                OnPropertyChanged("Progress");
+            }
+        }
+        private int progress;
+
+        /// <summary>
+        /// Item paused
+        /// </summary>
+        public OrgQueueStatus QueueStatus
+            {
+            get
+            {
+                return queueStatus;
+            }
+            set
+            {
+                queueStatus = value;
+                OnPropertyChanged("QueueStatus");
+            }
+        }
+        private OrgQueueStatus queueStatus = OrgQueueStatus.Enabled;
+
+
         /// <summary>
         /// State of whether the action has been completed or not. Used for queuing.
         /// </summary>
-        public bool ActionComplete { get; set; }
+        public bool ActionComplete
+            {
+            get
+            {
+                return actionComplete;
+            }
+            set
+            {
+                actionComplete = value;
+                OnPropertyChanged("ActionComplete");
+            }
+        }
+        private bool actionComplete = false;
 
         /// <summary>
         /// State of whether the action was finished due to completing action or cancellation (user chose not to override destination).
         /// </summary>
-        public bool ActionSucess { get; set; }
+        public bool ActionSucess
+            {
+            get
+            {
+                return actionSucess;
+            }
+            set
+            {
+                actionSucess = value;
+                OnPropertyChanged("ActionSucess");
+            }
+        }
+        private bool actionSucess = false;
 
         /// <summary>
         /// Date/time when the action was performed. Only valid is ActionComplete is true.
         /// </summary>
-        public DateTime ActionTime { get; set; }
+        public DateTime ActionTime
+            {
+            get
+            {
+                return actionTime;
+            }
+            set
+            {
+                actionTime = value;
+                OnPropertyChanged("ActionTime");
+            }
+        }
+        private DateTime actionTime;
 
         /// <summary>
         /// Item number in scan. To be processed in same order as scanned to prevent conflicts.
         /// </summary>
-        public int Number { get; set; }
+        public int Number
+        {
+            get
+            {
+                return number;
+            }
+            set
+            {
+                number = value;
+                OnPropertyChanged("Number");
+            }
+        }
+        private int number = -1;
 
         #endregion
 

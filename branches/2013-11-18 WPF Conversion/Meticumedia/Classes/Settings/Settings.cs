@@ -77,8 +77,8 @@ namespace Meticumedia.Classes
         public static GuiSettings GuiControl = new GuiSettings();
 
 #if DEBUG
-        public static int NumProcessingThreads = 10;
-        public static int NumSimultaneousSearches = 5;
+        public static int NumProcessingThreads = 1;
+        public static int NumSimultaneousSearches = 1;
 #else
         public static int NumProcessingThreads = 10;
         public static int NumSimultaneousSearches = 5;
@@ -283,17 +283,6 @@ namespace Meticumedia.Classes
                     throw new Exception("Unknown content type");
             }
             return allRootFolders;
-        }
-
-        /// <summary>
-        /// Update root folders
-        /// </summary>
-        /// <param name="type"></param>
-        public static void UpdateRootFolders(ContentType type)
-        {
-            // Update each selected movie folder
-            List<ContentRootFolder> rootFolders = Settings.GetAllRootFolders(type);
-            Organization.UpdateRootFolderContents(rootFolders, false);
         }
 
         #endregion

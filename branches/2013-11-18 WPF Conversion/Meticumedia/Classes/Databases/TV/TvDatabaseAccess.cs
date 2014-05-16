@@ -24,7 +24,7 @@ namespace Meticumedia.Classes
         public void FullUpdate(TvShow show)
         {
             // Check for invalid ID
-            if (show.Id == 0)
+            if (show.Id <= 0)
                 return;
 
             // Try multiple times - databases requests tend to fail randomly

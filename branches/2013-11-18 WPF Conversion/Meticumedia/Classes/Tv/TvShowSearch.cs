@@ -37,9 +37,17 @@ namespace Meticumedia.Classes
         protected override List<string> GetModifiedSearches(string baseSearch)
         {
             List<string> baseSearches = new List<string>();
-            baseSearches.Add(FileHelper.TrimFromEpisodeInfo(baseSearch));
-            baseSearches.Add(FileHelper.RemoveEpisodeInfo(baseSearch));
+
+            // Add trimmed search bases first, so they have priority (typically more likely to match to database)
+            string trimSearch = FileHelper.TrimFromEpisodeInfo(baseSearch);
+            if (trimSearch != baseSearch)
+                baseSearches.Add(trimSearch);
+
+            string trimSearch2 = FileHelper.RemoveEpisodeInfo(baseSearch);
+            if (trimSearch != baseSearch && trimSearch2 != trimSearch)
+                baseSearches.Add(trimSearch);
             baseSearches.Add(baseSearch);
+
             return baseSearches;
         }
 

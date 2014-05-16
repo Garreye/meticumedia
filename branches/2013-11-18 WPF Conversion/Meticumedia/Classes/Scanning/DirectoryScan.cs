@@ -228,6 +228,7 @@ namespace Meticumedia.Classes
 
             // Check if file is in the queue
             bool alreadyQueued = false;
+            if(itemsInQueue != null)
             for (int i = 0; i < itemsInQueue.Count; i++)
                 if (itemsInQueue[i].SourcePath == orgPath.Path)
                 {

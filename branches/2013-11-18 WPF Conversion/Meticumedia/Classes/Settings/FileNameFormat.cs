@@ -111,10 +111,11 @@ namespace Meticumedia.Classes
         {
             OnPropertyChanged("Format");
 
-            foreach (FileNamePortion fnp in e.NewItems)
-            {
-                fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
-            }
+            if(e.NewItems != null)
+                foreach (FileNamePortion fnp in e.NewItems)
+                {
+                    fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
+                }
         }
 
         void fnp_PropertyChanged(object sender, PropertyChangedEventArgs e)

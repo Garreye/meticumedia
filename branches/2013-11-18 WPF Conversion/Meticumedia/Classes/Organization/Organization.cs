@@ -181,16 +181,26 @@ namespace Meticumedia.Classes
         private static void LoadShowsAsync()
         {
             BackgroundWorker tvLoadWorker = new BackgroundWorker();
-            tvLoadWorker.DoWork += new DoWorkEventHandler(LoadShows);
+            tvLoadWorker.DoWork += new DoWorkEventHandler(tvLoadWorker_DoWork);
+            tvLoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(tvLoadWorker_RunWorkerCompleted);
             tvLoadWorker.RunWorkerAsync();
         }
 
         /// <summary>
         /// Load shows from XML work.
         /// </summary>
-        private static void LoadShows(object sender, DoWorkEventArgs e)
+        private static void tvLoadWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             Shows.Load();
+        }
+
+        /// <summary>
+        /// On loading complete, update show folders
+        /// </summary>
+        private static void tvLoadWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // Update TV folder
+            UpdateRootFolders(ContentType.TvShow);
         }
 
         /// <summary>
@@ -199,16 +209,25 @@ namespace Meticumedia.Classes
         private static void LoadMoviesAsync()
         {
             BackgroundWorker movieLoadWorker = new BackgroundWorker();
-            movieLoadWorker.DoWork += new DoWorkEventHandler(LoadMovies);
+            movieLoadWorker.DoWork += new DoWorkEventHandler(movieLoadWorker_DoWork);
+            movieLoadWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(movieLoadWorker_RunWorkerCompleted);
             movieLoadWorker.RunWorkerAsync();
         }
 
         /// <summary>
         /// Movie loading work
         /// </summary>
-        private static void LoadMovies(object sender, DoWorkEventArgs e)
+        static void movieLoadWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             Movies.Load();
+        }
+
+        /// <summary>
+        /// On loading complete, update movie folders
+        /// </summary>
+        static void movieLoadWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            UpdateRootFolders(ContentType.Movie);            
         }
 
         /// <summary>
@@ -376,7 +395,6 @@ namespace Meticumedia.Classes
 
             // Get content type
             ContentType contentType = folders[0].ContentType;
-            
 
             // Update each folder in list
             foreach (ContentRootFolder folder in folders)
@@ -402,13 +420,30 @@ namespace Meticumedia.Classes
             SetUpdateCancel(contentType, false);            
         }
 
+        /// <summary>
+        /// Update root folders
+        /// </summary>
+        /// <param name="type"></param>
+        public static void UpdateRootFolders(ContentType type)
+        {
+            // Update each selected movie folder
+            List<ContentRootFolder> rootFolders = Settings.GetAllRootFolders(type);
+            Organization.UpdateRootFolderContents(rootFolders, false);
+        }
+
         public static void UpdateRootFolderContents(List<ContentRootFolder> folders, bool fastUpdate)
         {
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
 
             object[] args = new object[] { folders, fastUpdate};
             worker.RunWorkerAsync(args);
+        }
+
+        static void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Save();
         }
 
         static void worker_DoWork(object sender, DoWorkEventArgs e)

@@ -418,6 +418,31 @@ namespace Meticumedia.Classes
             return false;
         }
 
+        /// <summary>
+        /// Get root folder that matches path string, recursive search
+        /// </summary>
+        /// <param name="path">Path to match to</param>
+        /// <param name="baseFolder">Current root folder being searches</param>
+        /// <param name="matchedFolder">Resulting matched root folder</param>
+        /// <returns>Whether match was found</returns>
+        public static bool GetMatchingRootFolder(string path, ContentRootFolder baseFolder, out ContentRootFolder matchedFolder)
+        {
+            if (path == baseFolder.FullPath)
+            {
+                matchedFolder = baseFolder;
+                return true;
+            }
+            else
+                foreach (ContentRootFolder child in baseFolder.ChildFolders)
+                {
+                    if (GetMatchingRootFolder(path, child, out matchedFolder))
+                        return true;
+                }
+
+            matchedFolder = null;
+            return false;
+        }
+
         #endregion
 
         #region Updating
@@ -477,7 +502,7 @@ namespace Meticumedia.Classes
 
             // Set progress to completed
             progressMsg = "Update of '" + this.FullPath + "' complete!";
-            OnUpdateProgressChange(this, false, 0, progressMsg);
+            OnUpdateProgressChange(this, false, 100, progressMsg);
 
             // Return whether update was completed without cancelation
             return !cancel;
@@ -516,7 +541,7 @@ namespace Meticumedia.Classes
             Content newContent = null;
             int index = 0;
             for (int j = 0; j < content.Count; j++)
-                if (orgPath.Path == content[j].Path)
+                if (Path.Equals(orgPath.Path, content[j].Path))
                 {
                     contentExists = true;
                     content[j].Found = true;

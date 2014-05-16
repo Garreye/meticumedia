@@ -61,7 +61,7 @@ namespace Meticumedia
         public static GuiSettings GuiControl = new GuiSettings();
 
 #if DEBUG
-        public static int NumProcessingThreads = 5;
+        public static int NumProcessingThreads = 10;
         public static int NumSimultaneousSearches = 5;
 #else
         public static int NumProcessingThreads = 10;

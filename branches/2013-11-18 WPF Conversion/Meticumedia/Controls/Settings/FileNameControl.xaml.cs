@@ -64,14 +64,18 @@ namespace Meticumedia.Controls
                 case ContentType.Movie:
                     Movie movie = new Movie("Donnie Darko");
                     movie.Date = new DateTime(2001, 1, 1);
+                    tbExample1.Text = "Example 1: 'Donnie Darko', 720p, bluray rip - x264, 5.1 audio - english, extended cut, file part 1";
                     txtFilePreview1.Text = System.IO.Path.GetFileNameWithoutExtension(this.fileNameFormat.BuildMovieFileName(movie, "Donnie Darko 720p blurayrip x264 5.1 en extended cut cd1.avi"));
 
                     movie = new Movie("The Matrix");
                     movie.Date = new DateTime(1999, 1, 1);
+                    tbExample2.Text = "Example 2: 'The Matrix', video/audio information unknown, no parts";
                     txtFilePreview2.Text = System.IO.Path.GetFileNameWithoutExtension(this.fileNameFormat.BuildMovieFileName(movie, "The Matrix.avi"));
                     break;
                 case ContentType.TvShow:
+                    tbExample1.Text = "Example 1: Single Episode: Episode 5 of season 1 of the show 'Arrested Development'";;
                     txtFilePreview1.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("Charity Drive", new TvShow("Arrested Development"), 1, 5, "", ""), null, string.Empty);
+                    tbExample2.Text = "Example 2: Double Episode: Episode 23 and 24 of season 9 of the show 'Seinfeld'";
                     txtFilePreview2.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("The Finale (Part 1)", new TvShow("Seinfeld"), 9, 23, "", ""), new TvEpisode("The Finale (Part 2)", new TvShow("Seinfeld"), 9, 24, "", ""), string.Empty);
                     break;
             }

@@ -1,13 +1,13 @@
 ﻿<Window x:Class="Meticumedia.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="meticumedia" Height="587" Width="1188" xmlns:my="clr-namespace:Meticumedia.Controls" Loaded="Window_Loaded">
+        Title="meticumedia" Height="587" Width="1188" xmlns:my="clr-namespace:Meticumedia.Controls" Loaded="MainWindow_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" Height="23" Name="menu1" AllowDrop="True">
+        <Menu Height="23" Name="menu1" AllowDrop="True">
             <MenuItem Header="File">
                 <MenuItem Header="Exit" />
             </MenuItem>
@@ -20,20 +20,18 @@
             </MenuItem>
         </Menu>
         
-        <TabControl Grid.Row="1" Name="tabControl1" Margin="4,8,-4,-8">
+        <TabControl Grid.Row="1" Name="tabControl1" Margin="3">
             <TabItem Header="TV Shows" Name="tiShows">
-                <Grid>
-                    <my:TvShowsControl Margin="8" x:Name="contentControl1" />
-                </Grid>
+                <my:ContentControl ContentType="TvShow" />
             </TabItem>
             <TabItem Header="TV Schedule" Name="tiSchedule">
-                <Grid />
+                <my:ScheduleControl />
             </TabItem>
             <TabItem Header="Movies" Name="tiMovies">
-                <Grid />
+                <my:ContentControl ContentType="Movie" />
             </TabItem>
             <TabItem Header="Scan" Name="tiScan">
-                <Grid />
+                <my:ScanControl />
             </TabItem>
             <TabItem Header="Queue" Name="tiQueue">
                 <Grid />
@@ -42,7 +40,5 @@
                 <Grid />
             </TabItem>
         </TabControl>
-        
-        
     </Grid>
 </Window>

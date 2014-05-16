@@ -4,6 +4,7 @@
 // --------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -12,5 +13,12 @@ namespace Meticumedia.Classes
     /// <summary>
     /// Types of content that can be found in content folders
     /// </summary>
-    public enum ContentType { Movie, TvShow }
+    public enum ContentType 
+    {
+        [Description("Movie")]
+        Movie,
+
+        [Description("TV Show")]
+        TvShow 
+    }
 }

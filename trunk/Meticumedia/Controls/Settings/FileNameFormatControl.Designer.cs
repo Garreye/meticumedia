@@ -33,6 +33,12 @@ namespace Meticumedia
         private void InitializeComponent()
         {
             this.dgvNameFormat = new System.Windows.Forms.DataGridView();
+            this.colHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colType = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.colFooter = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colWhitespace = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCase = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.colValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbFormat = new System.Windows.Forms.GroupBox();
             this.gbEpFormat = new System.Windows.Forms.GroupBox();
             this.chkSeasonDoubleDigits = new System.Windows.Forms.CheckBox();
@@ -50,12 +56,6 @@ namespace Meticumedia
             this.txtFilePreview1 = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.lblExample1 = new System.Windows.Forms.Label();
-            this.colHeader = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colType = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.colFooter = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWhitespace = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCase = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.colValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvNameFormat)).BeginInit();
             this.gbFormat.SuspendLayout();
             this.gbEpFormat.SuspendLayout();
@@ -83,6 +83,45 @@ namespace Meticumedia
             this.dgvNameFormat.TabIndex = 0;
             this.dgvNameFormat.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvNameFormat_CellValueChanged);
             this.dgvNameFormat.RowEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvNameFormat_CellValueChanged);
+            // 
+            // colHeader
+            // 
+            this.colHeader.FillWeight = 10F;
+            this.colHeader.HeaderText = "Header";
+            this.colHeader.Name = "colHeader";
+            this.colHeader.Width = 50;
+            // 
+            // colType
+            // 
+            this.colType.HeaderText = "Type";
+            this.colType.Name = "colType";
+            this.colType.Width = 150;
+            // 
+            // colFooter
+            // 
+            this.colFooter.FillWeight = 10F;
+            this.colFooter.HeaderText = "Footer";
+            this.colFooter.Name = "colFooter";
+            this.colFooter.Width = 50;
+            // 
+            // colWhitespace
+            // 
+            this.colWhitespace.HeaderText = "Whitespace";
+            this.colWhitespace.Name = "colWhitespace";
+            this.colWhitespace.Width = 70;
+            // 
+            // colCase
+            // 
+            this.colCase.HeaderText = "Case  Option";
+            this.colCase.Name = "colCase";
+            this.colCase.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colCase.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            // 
+            // colValue
+            // 
+            this.colValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colValue.HeaderText = "Custom String Entry";
+            this.colValue.Name = "colValue";
             // 
             // gbFormat
             // 
@@ -267,45 +306,6 @@ namespace Meticumedia
             this.lblExample1.TabIndex = 9;
             this.lblExample1.Text = "Example 1 - Single Episode: Episode 5 of season 1 of the show \'Arrested Developme" +
     "nt\'.";
-            // 
-            // colHeader
-            // 
-            this.colHeader.FillWeight = 10F;
-            this.colHeader.HeaderText = "Header";
-            this.colHeader.Name = "colHeader";
-            this.colHeader.Width = 50;
-            // 
-            // colType
-            // 
-            this.colType.HeaderText = "Type";
-            this.colType.Name = "colType";
-            this.colType.Width = 150;
-            // 
-            // colFooter
-            // 
-            this.colFooter.FillWeight = 10F;
-            this.colFooter.HeaderText = "Footer";
-            this.colFooter.Name = "colFooter";
-            this.colFooter.Width = 50;
-            // 
-            // colWhitespace
-            // 
-            this.colWhitespace.HeaderText = "Whitespace";
-            this.colWhitespace.Name = "colWhitespace";
-            this.colWhitespace.Width = 70;
-            // 
-            // colCase
-            // 
-            this.colCase.HeaderText = "Case  Option";
-            this.colCase.Name = "colCase";
-            this.colCase.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colCase.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            // 
-            // colValue
-            // 
-            this.colValue.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colValue.HeaderText = "Custom String Entry";
-            this.colValue.Name = "colValue";
             // 
             // FileNameFormatControl
             // 
