@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -12,27 +11,21 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Meticumedia.Classes;
 
 namespace Meticumedia.Controls
 {
     /// <summary>
-    /// Interaction logic for ScanControl.xaml
+    /// Interaction logic for QueueControl.xaml
     /// </summary>
-    public partial class ScanControl : UserControl
+    public partial class QueueControl : UserControl
     {
-        private ScanControlViewModel viewModel;
+        private QueueControlViewModel viewModel;
         
-        #region Constructor
-
-        public ScanControl()
+        public QueueControl()
         {
             InitializeComponent();
-            viewModel = new ScanControlViewModel(dgResults);
+            viewModel = new QueueControlViewModel();
             this.DataContext = viewModel;
         }
-
-        #endregion
-
     }
 }

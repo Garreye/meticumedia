@@ -234,7 +234,7 @@ namespace Meticumedia.Classes
                 {
                     OrgItem newItem = new OrgItem(itemsInQueue[i]);
                     newItem.Action = OrgAction.Queued;
-                    newItem.Check = true; //System.Windows.Forms.CheckState.Unchecked;
+                    newItem.Enable = true;
                     UpdateResult(newItem, pathNum, procNumber);
                     alreadyQueued = true;
                     break;
@@ -366,9 +366,9 @@ namespace Meticumedia.Classes
                                 if (destination.StartsWith(NO_TV_FOLDER))
                                     newItem.Action = OrgAction.NoRootFolder;
                                 if (newItem.Action == OrgAction.AlreadyExists || newItem.Action == OrgAction.NoRootFolder)
-                                    newItem.Check = true; //System.Windows.Forms.CheckState.Unchecked;
+                                    newItem.Enable = false;
                                 else
-                                    newItem.Check = true; //System.Windows.Forms.CheckState.Checked;
+                                    newItem.Enable = true;
                                 UpdateResult(newItem, pathNum, procNumber);
                                 matched = true;
                             }
@@ -392,7 +392,7 @@ namespace Meticumedia.Classes
                     break;
 
                 // Movie item
-                case FileCategory.NonTvVideo:    
+                case FileCategory.MovieVideo:    
                     // Create action
                     OrgItem item;
                     CreateMovieAction(orgPath, out item, fast);
@@ -489,7 +489,7 @@ namespace Meticumedia.Classes
         private bool CreateMovieAction(OrgPath file, out OrgItem item, bool fast)
         {
             // Initialize item
-            item = new OrgItem(OrgAction.None, file.Path, FileCategory.NonTvVideo, file.OrgFolder);
+            item = new OrgItem(OrgAction.None, file.Path, FileCategory.MovieVideo, file.OrgFolder);
 
             // Check if sample!
             if (file.Path.ToLower().Contains("sample"))
@@ -527,9 +527,9 @@ namespace Meticumedia.Classes
                 searchResult.Path = searchResult.BuildFolderPath();
                 item.Movie = searchResult;
                 if (item.Action == OrgAction.AlreadyExists || item.Action == OrgAction.NoRootFolder)
-                    item.Check = false; //System.Windows.Forms.CheckState.Unchecked;
+                    item.Enable = false;
                 else
-                    item.Check = true; //System.Windows.Forms.CheckState.Checked;
+                    item.Enable = true;
                 return true;
             }
 
@@ -548,7 +548,7 @@ namespace Meticumedia.Classes
             if (file.AllowDelete)
             {
                 newItem = new OrgItem(OrgAction.Delete, file.Path, fileCat, file.OrgFolder);
-                newItem.Check = true; //System.Windows.Forms.CheckState.Checked;
+                newItem.Enable = true;
                 UpdateResult(newItem, pathNum, procNum);
             }
             else

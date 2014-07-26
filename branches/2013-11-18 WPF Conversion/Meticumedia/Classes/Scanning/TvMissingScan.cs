@@ -79,7 +79,7 @@ namespace Meticumedia.Classes
                                 if (ep.Equals(item.TvEpisode))
                                 {
                                     OrgItem newItem = new OrgItem(OrgStatus.Found, item.Action, item.SourcePath, item.DestinationPath, ep, item.TvEpisode2, FileCategory.TvVideo, item.ScanDirectory);
-                                    newItem.Check = true; // System.Windows.Forms.CheckState.Checked;
+                                    newItem.Enable = true;
                                     newItem.Number = number++;
                                     newItem.Show = show;
                                     if (!shows[i].IncludeInScan)

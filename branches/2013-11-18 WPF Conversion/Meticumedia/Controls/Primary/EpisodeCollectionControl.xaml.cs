@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,27 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Meticumedia.Classes;
 
 namespace Meticumedia.Controls
 {
     /// <summary>
-    /// Interaction logic for ScanControl.xaml
+    /// Interaction logic for EpisodesControl.xaml
     /// </summary>
-    public partial class ScanControl : UserControl
+    public partial class EpisodeCollectionControl : UserControl
     {
-        private ScanControlViewModel viewModel;
-        
-        #region Constructor
-
-        public ScanControl()
+        public EpisodeCollectionControl()
         {
             InitializeComponent();
-            viewModel = new ScanControlViewModel(dgResults);
-            this.DataContext = viewModel;
         }
-
-        #endregion
-
     }
 }

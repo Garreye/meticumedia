@@ -177,7 +177,7 @@ namespace Meticumedia.Classes
                 FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
 
                 // Check that video file (tv is okay, may match incorrectly)
-                if (fileCat != FileCategory.NonTvVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
+                if (fileCat != FileCategory.MovieVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
                     continue;
 
 
@@ -218,7 +218,7 @@ namespace Meticumedia.Classes
                     item.DestinationPath = searchResult.BuildFilePath(files[i].Path);
                     searchResult.Path = searchResult.BuildFolderPath();
                     item.Movie = searchResult;
-                    item.Check = true;// System.Windows.Forms.CheckState.Checked;
+                    item.Enable = true;
                 }
                 scanResults.Add(item);
             }
@@ -241,7 +241,7 @@ namespace Meticumedia.Classes
 
 
                 // Check that video file (tv is okay, may match incorrectly)
-                if (fileCat != FileCategory.NonTvVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
+                if (fileCat != FileCategory.MovieVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
                     continue;
 
                 // Check that movie is valide
@@ -273,14 +273,14 @@ namespace Meticumedia.Classes
                 if (newPath != files[i].Path && !File.Exists(newPath))
                 {
                     // Add rename to results
-                    OrgItem item = new OrgItem(OrgAction.Rename, files[i].Path, FileCategory.NonTvVideo, files[i].OrgFolder);
+                    OrgItem item = new OrgItem(OrgAction.Rename, files[i].Path, FileCategory.MovieVideo, files[i].OrgFolder);
                     item.Number = number++;
                     if (Path.GetDirectoryName(newPath) != Path.GetDirectoryName(files[i].Path))
                         item.Action = OrgAction.Move;
 
                     item.DestinationPath = newPath;
                     item.Movie = movie;
-                    item.Check = true; // System.Windows.Forms.CheckState.Checked;
+                    item.Enable = true;
                     scanResults.Add(item);
                 }
             }
@@ -291,7 +291,7 @@ namespace Meticumedia.Classes
                 if (!string.IsNullOrEmpty(movie.Name) && movie.Path != movie.BuildFolderPath())
                 {
                     OrgItem item = new OrgItem(OrgAction.Rename, movie.Path, FileCategory.Folder, movie, movie.BuildFolderPath(), null);
-                    item.Check = true; //System.Windows.Forms.CheckState.Checked;
+                    item.Enable = true;
                     item.Number = number++;
                     scanResults.Add(item);
                 }

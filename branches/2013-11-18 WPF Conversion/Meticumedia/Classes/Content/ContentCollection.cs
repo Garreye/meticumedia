@@ -269,7 +269,7 @@ namespace Meticumedia.Classes
                         this.LastUpdate = loadContent.LastUpdate;
                         this.Clear();
                         foreach (Content content in loadContent)
-                            base.Add(content);
+                            Add(content);
                     }
                     //Console.WriteLine(this.ToString() + " release load");
                 }
@@ -346,7 +346,7 @@ namespace Meticumedia.Classes
             {
                 for (int i = this.Count - 1; i >= 0; i--)
                     if (!this[i].Found && this[i].RootFolder.StartsWith(rootFolder.FullPath))
-                        base.RemoveAt(i);
+                        RemoveAt(i);
             }
         }
 

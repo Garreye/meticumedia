@@ -19,6 +19,8 @@ namespace Meticumedia.Classes
     /// </summary>
     public class OrgFolder : INotifyPropertyChanged
     {
+        public static readonly OrgFolder AllFolders = new OrgFolder("All Folders");
+        
         #region Properties
         
         /// <summary>
@@ -358,5 +360,10 @@ namespace Meticumedia.Classes
         }
 
         #endregion
+
+        public override string ToString()
+        {
+            return this.FolderPath;
+        }
     }
 }

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Meticumedia</RootNamespace>
     <AssemblyName>Meticumedia</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -40,6 +40,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -49,6 +50,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>meticumedia-icon-small.ico</ApplicationIcon>
@@ -79,18 +81,42 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\Organization\OrgItemCollection.cs" />
     <Compile Include="Classes\Settings\FileTypesGroup.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
+    <Compile Include="Classes\Tv\TvGroupingType.cs" />
+    <Compile Include="Controls\Primary\ContentCollectionControlViewModel.cs" />
     <Compile Include="Controls\Primary\ContentControl.xaml.cs">
       <DependentUpon>ContentControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\ContentControlViewModel.cs" />
+    <Compile Include="Controls\Primary\EpisodeCollectionControl.xaml.cs">
+      <DependentUpon>EpisodeCollectionControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\EpisodeCollectionControlViewModel.cs" />
+    <Compile Include="Controls\Primary\MovieCollectionControl.cs" />
+    <Compile Include="Controls\Primary\QueueControl.xaml.cs">
+      <DependentUpon>QueueControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\QueueControlViewModel.cs" />
+    <Compile Include="Controls\Primary\ScheduleControlViewModel.cs" />
+    <Compile Include="Controls\Primary\TvCollectionControl.cs" />
+    <Compile Include="WPF\BindableMultiSelectDataGrid.cs" />
+    <Compile Include="WPF\Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="WPF\ProgressViewModel.cs" />
+    <Compile Include="WPF\RelayCommand.cs" />
+    <Compile Include="Controls\Primary\ContentCollectionControl.xaml.cs">
+      <DependentUpon>ContentCollectionControl.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\Primary\ScanControl.xaml.cs">
       <DependentUpon>ScanControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Primary\ScanControlViewModel.cs" />
     <Compile Include="Controls\Primary\ScheduleControl.xaml.cs">
       <DependentUpon>ScheduleControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WPF\ViewModel.cs" />
     <Compile Include="Controls\Settings\FileTypesControl.xaml.cs">
       <DependentUpon>FileTypesControl.xaml</DependentUpon>
     </Compile>
@@ -103,10 +129,11 @@
     <Compile Include="Controls\Settings\FileNameControl.xaml.cs">
       <DependentUpon>FileNameControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\BoolInverterConverter.cs" />
-    <Compile Include="Helpers\DefaultColorConverter.cs" />
-    <Compile Include="Helpers\EnumDescriptionConverter.cs" />
-    <Compile Include="Helpers\StringToHeightConverter.cs">
+    <Compile Include="WPF\Converters\BoolInverterConverter.cs" />
+    <Compile Include="WPF\Converters\OrgActionConverters.cs" />
+    <Compile Include="WPF\Converters\DefaultColorConverter.cs" />
+    <Compile Include="WPF\Converters\EnumDescriptionConverter.cs" />
+    <Compile Include="WPF\Converters\StringToHeightConverter.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Windows\SelectionWindow.xaml.cs">
@@ -115,7 +142,19 @@
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\Primary\ContentCollectionControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Primary\ContentControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\EpisodeCollectionControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\QueueControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:helpers="clr-namespace:Meticumedia.Helpers"
+             xmlns:wpfr="clr-namespace:Meticumedia.WPF"
              xmlns:classes="clr-namespace:Meticumedia.Classes"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="900">
@@ -15,7 +15,7 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
-        <helpers:EnumDescriptionConverter x:Key="enumDescConv" />
+        <wpfr:EnumDescriptionConverter x:Key="enumDescConv" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -41,7 +41,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Perform" Margin="3" VerticalAlignment="Center" />
-                    <ComboBox Grid.Column="1" x:Name="cmbScanType" ItemsSource="{Binding Source={StaticResource ScanTypeEnum}}" Margin="3" SelectionChanged="cmbScanType_SelectionChanged"  >
+                    <ComboBox Grid.Column="1" x:Name="cmbScanType" ItemsSource="{Binding Source={StaticResource ScanTypeEnum}}" SelectedItem="{Binding RunType}" Margin="3" >
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={StaticResource enumDescConv}}"/>
@@ -49,7 +49,7 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                     <TextBlock Grid.Column="2" Text="on" Margin="3" VerticalAlignment="Center" />
-                    <ComboBox Grid.Column="3" x:Name="cmbScanSelection" Margin="3" />
+                    <ComboBox Grid.Column="3" x:Name="cmbScanSelection" Margin="3" ItemsSource="{Binding RunSelections}" SelectedItem="{Binding SelectedRunSelection}" />
                     <CheckBox Grid.Column="4" Content="Fast Scan" x:Name="chkFastScan" Margin="3" VerticalAlignment="Center" >
                         <CheckBox.ToolTip>
                             <TextBlock Text="Skips all items that require database searching." />
@@ -64,11 +64,11 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid Grid.Column="0" Margin="3">
-                        <ProgressBar Name="pbUpdating" />
-                        <TextBlock x:Name="tbPbText" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <ProgressBar Name="pbUpdating" Value="{Binding Progress}"/>
+                        <TextBlock x:Name="tbPbText" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding ProgressMessage}" />
                     </Grid>
 
-                    <Button Grid.Column="1" x:Name="btnRun" Content="Run" Padding="40,5" Margin="3" Click="btnRun_Click" />
+                    <Button Grid.Column="1" x:Name="btnRun" Content="Run" Padding="40,5" Margin="3" Command="{Binding RunCommand}" />
                 </Grid>
             </Grid>
         </GroupBox>
@@ -89,28 +89,37 @@
 
                     <GroupBox Grid.Column="0" Header="Action Filter">
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <CheckBox Content="None" x:Name="chkNoneFilter" Margin="3,0,3,3" Height="17" VerticalAlignment="Bottom" />
-                            <CheckBox Content="Move/Copy" x:Name="chkMoveCopyFilter" Margin="3" />
-                            <CheckBox Content="Rename" x:Name="chkRenameFilter" Margin="3" />
-                            <CheckBox Content="Delete" x:Name="chkDelFilter" Margin="3" />
-                            <CheckBox Content="Queued" x:Name="chkQueueFilter" Margin="3" />
+                            <CheckBox Content="None" x:Name="chkNoneFilter" Margin="3" IsChecked="{Binding NoneActionFilter}" />
+                            <CheckBox Content="Move/Copy" x:Name="chkMoveCopyFilter" Margin="3" IsChecked="{Binding MoveCopyActionFilter}" />
+                            <CheckBox Content="Rename" x:Name="chkRenameFilter" Margin="3" IsChecked="{Binding RenameActionFilter}" />
+                            <CheckBox Content="Delete" x:Name="chkDelFilter" Margin="3" IsChecked="{Binding DeleteActionFilter}" />
+                            <CheckBox Content="Queued" x:Name="chkQueueFilter" Margin="3" IsChecked="{Binding QueuedActionFilter}" />
+                            <CheckBox Content="TBD" x:Name="chkTbdFilter" Margin="3" IsChecked="{Binding TbdActionFilter}" />
                         </StackPanel>
                     </GroupBox>
 
                     <GroupBox Grid.Column="1" Header="Category Filter">
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <CheckBox Content="TV Video" x:Name="chkTvCatFilter" Margin="3" />
-                            <CheckBox Content="Movie Video" x:Name="chkNonTvCatFilter" Margin="3" />
-                            <CheckBox Content="Custom" x:Name="chkCustomCatFilter" Margin="3" />
-                            <CheckBox Content="Trash" x:Name="chkTrashCatFilter" Margin="3" />
-                            <CheckBox Content="Unknown" x:Name="chkUnknownCatFilter" Margin="3" />
-                            <CheckBox Content="Folder" x:Name="chkFolderCatFilter" Margin="3" />
-                            <CheckBox Content="Ignored" x:Name="chkIgnoreCatFilter" Margin="3" />
+                            <CheckBox Content="TV Video" x:Name="chkTvCatFilter" Margin="3" IsChecked="{Binding TvVideoCategoryFilter}" />
+                            <CheckBox Content="Movie Video" x:Name="chkNonTvCatFilter" Margin="3" IsChecked="{Binding MovieVideoCategoryFilter}"/>
+                            <CheckBox Content="Custom" x:Name="chkCustomCatFilter" Margin="3" IsChecked="{Binding CustomCategoryFilter}"/>
+                            <CheckBox Content="Trash" x:Name="chkTrashCatFilter" Margin="3" IsChecked="{Binding TrashCategoryFilter}"/>
+                            <CheckBox Content="Unknown" x:Name="chkUnknownCatFilter" Margin="3" IsChecked="{Binding UnknownCategoryFilter}"/>
+                            <CheckBox Content="Folder" x:Name="chkFolderCatFilter" Margin="3" IsChecked="{Binding FolderCategoryFilter}"/>
+                            <CheckBox Content="Ignored" x:Name="chkIgnoreCatFilter" Margin="3" IsChecked="{Binding IgnoredCategoryFilter}" />
                         </StackPanel>
                     </GroupBox>
                 </Grid>
 
-                <ListBox Grid.Row="1" Margin="2" x:Name="lbResults">
+                <DataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding ScanResultsCollection}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" >
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Foreground" Value="{Binding ActionColor}"/>
+                        </Style>
+                    </DataGrid.RowStyle>
+                </DataGrid>
+
+                <!--<ListBox Grid.Row="1" Margin="2" x:Name="lbResults">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="1" BorderBrush="Black" Margin="5">
@@ -129,7 +138,7 @@
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
-                </ListBox>
+                </ListBox>-->
 
                 <Grid Grid.Row="2" Margin="2">
                     <Grid.ColumnDefinitions>
@@ -140,10 +149,10 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Check Control:" Margin="3" VerticalAlignment="Center" />
-                    <CheckBox Grid.Column="1" Content="Move/Copy" Margin="3" VerticalAlignment="Center" />
-                    <CheckBox Grid.Column="2" Content="Delete" Margin="3" VerticalAlignment="Center" />
+                    <CheckBox Grid.Column="1" Content="Move/Copy" Margin="3" VerticalAlignment="Center" IsChecked="{Binding MoveCopyEnables}" />
+                    <CheckBox Grid.Column="2" Content="Delete" Margin="3" VerticalAlignment="Center" IsChecked="{Binding DeleteEnables}" />
 
-                    <Button Grid.Column="3" Margin="3" Content="Add Checked to Queue" Padding="20,3" />
+                    <Button Grid.Column="3" Margin="3" Content="Add Checked to Queue" Padding="20,3" Command="{Binding QueueItemsCommand}" />
                 </Grid>
             </Grid>
         </GroupBox>

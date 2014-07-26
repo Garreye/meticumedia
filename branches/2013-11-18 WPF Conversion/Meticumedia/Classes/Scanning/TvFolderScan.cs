@@ -59,7 +59,7 @@ namespace Meticumedia.Classes
                     if (show.Path != builtFolder)
                     {
                         OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, show.Path, builtFolder, new TvEpisode("", show, -1, -1, "", ""), null, FileCategory.Folder, null);
-                        newItem.Check = true; // System.Windows.Forms.CheckState.Checked;
+                        newItem.Enable = true;
                         newItem.Number = number++;
                         newItem.Show = show;
                         results.Add(newItem);

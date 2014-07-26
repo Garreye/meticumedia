@@ -4,6 +4,7 @@
 // --------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -12,5 +13,33 @@ namespace Meticumedia.Classes
     /// <summary>
     /// Categories of useful file types
     /// </summary>
-    public enum FileCategory { Empty = 0, Unknown = 1, Ignored = 2, TvVideo = 4, NonTvVideo = 8, Trash = 16, Custom = 32, Folder = 64, All = 127 };
+    public enum FileCategory 
+    {
+        [Description("Uncategorized")]
+        Empty = 0,
+
+        [Description("Unknown")]
+        Unknown = 1,
+
+        [Description("Ignored")]
+        Ignored = 2,
+
+        [Description("TV Video")]
+        TvVideo = 4,
+
+        [Description("Movie Video")]
+        MovieVideo = 8,
+
+        [Description("Trash")]
+        Trash = 16,
+
+        [Description("Custom")]
+        Custom = 32,
+
+        [Description("Folder")]
+        Folder = 64,
+
+        [Description("Mutiple categories")]
+        All = 127 
+    };
 }

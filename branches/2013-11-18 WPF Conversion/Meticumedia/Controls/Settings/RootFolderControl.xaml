@@ -4,12 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:classes="clr-namespace:Meticumedia.Classes"
-             xmlns:helpers="clr-namespace:Meticumedia.Helpers"
+             xmlns:wpfr="clr-namespace:Meticumedia.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="364" d:DesignWidth="607">
     <UserControl.Resources>
-        <helpers:BoolInverterConverter x:Key="boolInverter" />
-        <helpers:DefaultColorConverter x:Key="defaultColorConverted" />
+        <wpfr:BoolInverterConverter x:Key="boolInverter" />
+        <wpfr:DefaultColorConverter x:Key="defaultColorConverted" />
     </UserControl.Resources>
 
     <Grid>

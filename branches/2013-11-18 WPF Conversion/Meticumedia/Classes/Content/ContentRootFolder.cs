@@ -18,6 +18,9 @@ namespace Meticumedia.Classes
     /// </summary>
     public class ContentRootFolder : INotifyPropertyChanged
     {
+        public static readonly ContentRootFolder AllTvFolders = new ContentRootFolder(ContentType.TvShow, "All TV Folders", "All TV Folders");
+        public static readonly ContentRootFolder AllMoviesFolders = new ContentRootFolder(ContentType.Movie, "All Movie Folders", "All Movie Folders");
+        
         #region Properties
 
         /// <summary>

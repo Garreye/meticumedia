@@ -51,7 +51,7 @@ namespace Meticumedia.Classes
                     if (IsTvEpisode(file.Path))
                         return FileCategory.TvVideo;
                     else
-                        return FileCategory.NonTvVideo;
+                        return FileCategory.MovieVideo;
                 }
             }
             foreach (string ext in Settings.DeleteFileTypes.Types)

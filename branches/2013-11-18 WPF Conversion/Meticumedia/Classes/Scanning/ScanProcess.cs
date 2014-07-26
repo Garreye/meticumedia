@@ -17,15 +17,15 @@ namespace Meticumedia.Classes
     {
         [Description("Collecting Files to be Analyzed")]
         FileCollect,
-        [Description("Checking Scan Folders")]
+        [Description("Processing Scan Folders")]
         Directory,
-        [Description("Checking Shows for Missing Episodes")]
+        [Description("Processing Shows for Missing Episodes")]
         TvMissing,
-        [Description("Checking Shows for Episode That Need to be Renamed")]
+        [Description("Processing Shows for Episode That Need to be Renamed")]
         TvRename,
-        [Description("Scanning TV Show Root Folders")]
+        [Description("Processing TV Show Root Folders")]
         TvFolder,
-        [Description("Scanning Movie Root Folders")]
+        [Description("Processing Movie Root Folders")]
         Movie 
     };
 }

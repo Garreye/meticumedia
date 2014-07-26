@@ -92,7 +92,7 @@ namespace Meticumedia.Classes
                             if (ep.File.FilePath != builtPath)
                             {
                                 OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, ep.File.FilePath, builtPath, ep, ep2, FileCategory.TvVideo, null);
-                                newItem.Check = true; // System.Windows.Forms.CheckState.Checked;
+                                newItem.Enable = true;
                                 if (!shows[i].IncludeInScan)
                                     newItem.Category = FileCategory.Ignored;
                                 newItem.Number = number++;

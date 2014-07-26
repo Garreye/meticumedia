@@ -12,6 +12,7 @@ using System.Threading;
 using System.Xml;
 using Ookii.Dialogs.Wpf;
 using System.Windows;
+using System.Windows.Media;
 
 namespace Meticumedia.Classes
 {
@@ -75,9 +76,19 @@ namespace Meticumedia.Classes
             {
                 action = value;
                 OnPropertyChanged("Action");
+                OnPropertyChanged("ActionColor");
+                OnPropertyChanged("CanEnable");
             }
         }
         private OrgAction action = OrgAction.None;
+
+        public SolidColorBrush ActionColor
+        {
+            get
+            {
+                return new SolidColorBrush(GetActionColor(action));
+            }
+        }
 
         /// <summary>
         /// Replacing of destination files has been confirmed by user
@@ -126,9 +137,33 @@ namespace Meticumedia.Classes
             {
                 sourcePath = value;
                 OnPropertyChanged("SourcePath");
+                OnPropertyChanged("SourcePathFileName");
+                OnPropertyChanged("SourcePathDirectory");
             }
         }
         public string sourcePath = string.Empty;
+
+        /// <summary>
+        /// File name of source file
+        /// </summary>
+        public string SourcePathFileName
+        {
+            get
+            {
+                return string.IsNullOrEmpty(sourcePath) ? "" : Path.GetFileName(sourcePath);
+            }
+        }
+
+        /// <summary>
+        /// Directory of source file
+        /// </summary>
+        public string SourcePathDirectory
+        {
+            get
+            {
+                return string.IsNullOrEmpty(sourcePath) ? "" : Path.GetDirectoryName(sourcePath);
+            }
+        }
 
         /// <summary>
         /// Path where the source file will be sent to for a copy/move action.
@@ -143,9 +178,33 @@ namespace Meticumedia.Classes
             {
                 destinationPath = value;
                 OnPropertyChanged("DestinationPath");
+                OnPropertyChanged("DestinationPathFileName");
+                OnPropertyChanged("DestinationPathDirectory");
             }
         }
         private string destinationPath = string.Empty;
+
+        /// <summary>
+        /// File name of destination file
+        /// </summary>
+        public string DestinationPathFileName
+        {
+            get
+            {
+                return string.IsNullOrEmpty(destinationPath) ? "" : Path.GetFileName(destinationPath);
+            }
+        }
+
+        /// <summary>
+        /// Directory of destination file
+        /// </summary>
+        public string DestinationPathDirectory
+        {
+            get
+            {
+                return string.IsNullOrEmpty(destinationPath) ? "" : Path.GetDirectoryName(destinationPath);
+            }
+        }
 
         /// <summary>
         /// TV epsiode that the file is associated with.
@@ -267,21 +326,38 @@ namespace Meticumedia.Classes
         private FileCategory category;
 
         /// <summary>
-        /// The state of the check for the item in the list of item to be organized (scan).
+        /// Enable for the item in the list of item to be organized.
         /// </summary>
-        public bool Check
+        public bool Enable
         {
             get
             {
-                return check;
+                return enable;
             }
             set
             {
-                check = value;
-                OnPropertyChanged("Check");
+                enable = value;
+                OnPropertyChanged("Enable");
             }
         }
-        private bool check;
+        private bool enable;
+
+        public bool CanEnable
+        {
+            get
+            {
+                switch (this.Action)
+                {
+                    case OrgAction.Move:
+                    case OrgAction.Copy:
+                    case OrgAction.Rename:
+                    case OrgAction.Delete:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
 
         /// <summary>
         /// Action progress percentage.
@@ -296,6 +372,7 @@ namespace Meticumedia.Classes
             {
                 progress = value;
                 OnPropertyChanged("Progress");
+                OnPropertyChanged("QueueStatusString");
             }
         }
         private int progress;
@@ -313,10 +390,44 @@ namespace Meticumedia.Classes
             {
                 queueStatus = value;
                 OnPropertyChanged("QueueStatus");
+                OnPropertyChanged("QueueStatusString");
             }
         }
         private OrgQueueStatus queueStatus = OrgQueueStatus.Enabled;
 
+        public string QueueStatusString
+        {
+            get
+            {
+                string status = string.Empty;
+                switch (this.QueueStatus)
+                {
+                    case OrgQueueStatus.Enabled:
+
+                        if (this.Progress > 0)
+                            status =  this.Progress.ToString() + "%";
+                        else
+                            status = "Queued";
+                        break;
+                    case OrgQueueStatus.Paused:
+                        status = "Paused";
+                        if (this.Progress > 0)
+                            status += " - " + this.Progress.ToString() + "%";
+                        break;
+                    case OrgQueueStatus.Failed:
+                        status = "Failed";
+                        break;
+                    case OrgQueueStatus.Completed:
+                        status = "Completed";
+                        break;
+                    case OrgQueueStatus.Cancelled:
+                        status = "Cancelled";
+                        break;
+                }
+
+                return status;
+            }
+        }
 
         /// <summary>
         /// State of whether the action has been completed or not. Used for queuing.
@@ -427,7 +538,7 @@ namespace Meticumedia.Classes
             this.TvEpisode = episode;
             this.Category = category;
             this.TvEpisode2 = episode2;
-            this.Check = false; // CheckState.Indeterminate;
+            this.Enable = false;
             this.ScanDirectory = scanDir;
             this.NewShow = newShow;
             this.Replace = false;
@@ -472,7 +583,7 @@ namespace Meticumedia.Classes
             this.TvEpisode = episode;
             this.TvEpisode2 = episode2;
             this.Category = category;
-            this.Check = false;// CheckState.Indeterminate;
+            this.Enable = false;
             this.ScanDirectory = scanDir;
             this.NewShow = null;
             this.Replace = false;
@@ -497,7 +608,7 @@ namespace Meticumedia.Classes
                 this.DestinationPath = string.Empty;
             this.TvEpisode = null;
             this.Category = category;
-            this.Check = false;// CheckState.Indeterminate;
+            this.Enable = false;
             this.ScanDirectory = scanDir;
             this.NewShow = null;
             this.Replace = false;
@@ -524,7 +635,7 @@ namespace Meticumedia.Classes
             this.DestinationPath = destination;
             this.TvEpisode = null;
             this.Category = category;
-            this.Check = false;// CheckState.Indeterminate;
+            this.Enable = false;
             this.NewShow = null;
             this.Replace = false;
             this.Number = 0;
@@ -562,7 +673,7 @@ namespace Meticumedia.Classes
             this.TvEpisode = item.TvEpisode;
             this.TvEpisode2 = item.TvEpisode2;
             this.Category = item.Category;
-            this.Check = item.Check;
+            this.Enable = item.Enable;
             this.Movie = item.Movie;
             this.ScanDirectory = item.ScanDirectory;
             this.NewShow = item.NewShow;
@@ -1486,6 +1597,40 @@ namespace Meticumedia.Classes
 
                 // Delete incomplete destination file
                 File.Delete(this.DestinationPath);
+            }
+        }
+
+        #endregion
+
+        #region Colors
+
+        private static Color GetActionColor(OrgAction action)
+        {            
+            switch (action)
+            {
+                case OrgAction.Empty:
+                    return Colors.LightGray;
+                case OrgAction.None:
+                    return Colors.Gray;
+                case OrgAction.AlreadyExists:
+                    return Colors.Gray;
+                case OrgAction.Move:
+                case OrgAction.Copy:
+                    return Colors.DarkGreen;
+                case OrgAction.Rename:
+                    return Colors.Green;
+                case OrgAction.Delete:
+                    return Colors.Red;
+                case OrgAction.Queued:
+                    return Colors.Goldenrod;
+                case OrgAction.NoRootFolder:
+                    return Colors.Black;
+                case OrgAction.TBD:
+                    return Colors.LightGray;
+                case OrgAction.Processing:
+                    return Colors.DarkOrange;
+                default:
+                    return Colors.Black;
             }
         }
 

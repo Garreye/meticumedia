@@ -114,7 +114,7 @@ namespace Meticumedia.Classes
             basePath = Path.Combine(basePath, "Meticumedia");
 
 #if DEBUG
-            basePath = Path.Combine(basePath, "DEBUG");
+            basePath = Path.Combine(basePath, "WPFDEBUG");
 #endif
 
             if (createIfNeeded && !Directory.Exists(basePath))

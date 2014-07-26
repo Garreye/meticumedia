@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Data;
 
-namespace Meticumedia.Helpers
+namespace Meticumedia.WPF
 {
     public class EnumDescriptionConverter : IValueConverter
     {

@@ -18,6 +18,8 @@ namespace Meticumedia.Classes
     /// </summary>
     public class TvShow : Content
     {
+        public static readonly TvShow AllShows = new TvShow("All shows");
+        
         #region Properties
 
         /// <summary>

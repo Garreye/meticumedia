@@ -3,214 +3,69 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:helpers="clr-namespace:Meticumedia.Helpers"
-             mc:Ignorable="d" d:DesignHeight="353" d:DesignWidth="968">
+             xmlns:wpfr="clr-namespace:Meticumedia.WPF"
+             xmlns:cntrls="clr-namespace:Meticumedia.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="400">
     <UserControl.Resources>
-        <DataTemplate x:Key="showItemTemplate" >
-            <WrapPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="1">
-                <TextBlock Text="{Binding DisplayName}" FontSize="16" FontWeight="Bold" Foreground="{Binding StatusColor}" />
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text=" (" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Path}" Padding="1" VerticalAlignment="Center"/>
-                    <TextBlock Text=")" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                </StackPanel>
-            </WrapPanel>
-        </DataTemplate>
-
-        <helpers:StringToHeightConverter x:Key="stringToHeightConverter" />
-
-        <DataTemplate x:Key="episodeItemTemplate" >
-            <Grid Margin="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-
-                <StackPanel Grid.Row="0" Orientation="Horizontal">
-                    <TextBlock Text="Episode " Margin="1" FontWeight="Bold" />
-                    <TextBlock Text="{Binding Number}" Margin="1" FontWeight="Bold"/>
-                    <TextBlock Text=": " Margin="1" FontWeight="Bold" />
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold" />
-                    <TextBlock Text="{Binding AirDateString}" FontWeight="Bold"/>
-                    <TextBlock Text=" " Margin="1" FontWeight="Bold" />
-                    <TextBlock Text="{Binding Status}" FontWeight="Bold" Foreground="{Binding StatusColor}"/>
-                </StackPanel>
-                <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" >
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                                <Trigger Property="Text" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </Grid>
-        </DataTemplate>
+        <wpfr:NullToVisibilityConverter x:Key="nullToVisConverter" />
     </UserControl.Resources>
-    <Grid>
+    
+    <Grid Name="grdEpisodes" Grid.Column="2">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" x:Name="grdProgress">
-            <ProgressBar  Height="25" Margin="5" Name="pbUpdating" />
-            <TextBlock x:Name="tbPbText" HorizontalAlignment="Center" VerticalAlignment="Center" />
-        </Grid>
 
-        <Grid Name="Display" Grid.Row="1">
+        <Grid Margin="3" Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="450"/>
-                <ColumnDefinition Width="3"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="17*" />
+                <ColumnDefinition Width="54*"/>
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"  />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <WrapPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="1">
+                <TextBlock Text="{Binding Content.DisplayName}" FontSize="16" FontWeight="Bold" Foreground="{Binding Content.StatusColor}" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text=" (" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Content.Path}" Padding="1" VerticalAlignment="Center"/>
+                    <TextBlock Text=")" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button Content="Edit" Height="25" Margin="5,0" Padding="20,0"/>
+            </WrapPanel>
+            <!--<Image Grid.Row="1" Grid.RowSpan="7" Height="100" Width="100" />-->
 
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
+            <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,48">
+                <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Horizontal" Margin="3">
+                    <TextBlock Text="Year: " FontWeight="Bold" Padding="1" />
+                    <TextBlock Text="{Binding Content.Date.Year}" Padding="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal" Margin="3">
+                    <TextBlock Text="Seasons: " FontWeight="Bold" Padding="1" />
+                    <TextBlock Text="{Binding Content.Seasons.Count}" Padding="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="3">
+                    <TextBlock Text="Genres: " FontWeight="Bold" Padding="1" />
+                    <TextBlock Text="{Binding Content.Genres.GenresString}" Padding="1" />
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="6" Orientation="Horizontal" Margin="3">
+                    <TextBlock Text="Database: " FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Content.Database}" Padding="1" VerticalAlignment="Center" />
+                    <TextBlock Text=" - ID " Padding="1" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Content.Id}" Padding="1" VerticalAlignment="Center" />
+                </StackPanel>
+            </WrapPanel>
 
-                    <TextBlock Text="Root Folder" Grid.Column="0" Grid.Row="0" Margin="5" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="cmbRootFolder" Grid.Column="1" Grid.Row="0" Margin="5" SelectionChanged="cmbRootFolder_SelectionChanged" />
-                    <TextBlock Text="View" Grid.Column="2" Grid.Row="0" Margin="5" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="cmbRootFilter" Grid.Column="3" Grid.Row="0" Margin="5" SelectionChanged="cmbRootFolderView_SelectionChanged" />
-
-                    <TextBlock Text="Genre" Grid.Column="0" Grid.Row="1" Margin="5" VerticalAlignment="Center"/>
-                    <ComboBox x:Name="cmbGenre" Grid.Column="1" Grid.Row="1" Margin="5" SelectionChanged="cmbGenre_SelectionChanged" />
-
-                    <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Orientation="Horizontal" Margin="5,0,0,0" >
-                        <CheckBox Content="Year" x:Name="chkYear" VerticalAlignment="Center" Margin="5,0" Click="chkYear_Click" />
-                        <xctk:IntegerUpDown x:Name="numYearStart" Value="1990" Width="50" IsEnabled="False" />
-                        <TextBlock Text="to" VerticalAlignment="Center" Margin="5,0" />
-                        <xctk:IntegerUpDown x:Name="numYearStop" Value="2014" Width="50" IsEnabled="False" />
-                    </StackPanel>
-
-                    <TextBlock Text="Name" Grid.Column="0" Grid.Row="2" Margin="5" VerticalAlignment="Center"/>
-                    <TextBox x:Name="txtNameFilter" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" TextChanged="txtNameFilter_TextChanged" />
-                </Grid>
-
-                <ListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" x:Name="lbContent" ItemTemplate="{StaticResource showItemTemplate}" SelectionChanged="lbShows_SelectionChanged" />
-            </Grid>
-
-            <GridSplitter Background="DarkGray"  ResizeDirection="Columns" Grid.Column="1"
-                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                  ResizeBehavior="PreviousAndNext" Padding="10" />
-
-            <GroupBox Grid.Column="2" Header="Selected Item" x:Name="gbSelItem">
-                <Grid Name="grdEpisodes" Grid.Column="2">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <ContentControl x:Name="ctntSelItem">
-                        <Grid Margin="3">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"  />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-
-                            <WrapPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="1">
-                                <TextBlock Text="{Binding DisplayName}" FontSize="16" FontWeight="Bold" Foreground="{Binding StatusColor}" />
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text=" (" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding Path}" Padding="1" VerticalAlignment="Center"/>
-                                    <TextBlock Text=")" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                                </StackPanel>
-                                <Button Content="Edit" Height="25" Margin="5,0" Padding="20,0"/>
-                            </WrapPanel>
-                            <!--<Image Grid.Row="1" Grid.RowSpan="7" Height="100" Width="100" />-->
-
-                            <WrapPanel Grid.Row="1">
-                                <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Horizontal" Margin="3">
-                                    <TextBlock Text="Year: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Date.Year}" Padding="1" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal" Margin="3">
-                                    <TextBlock Text="Seasons: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Seasons.Count}" Padding="1" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="3">
-                                    <TextBlock Text="Genres: " FontWeight="Bold" Padding="1" />
-                                    <TextBlock Text="{Binding Genres.GenresString}" Padding="1" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="0" Grid.Row="6" Orientation="Horizontal" Margin="3">
-                                    <TextBlock Text="Database: " FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding Database}" Padding="1" VerticalAlignment="Center" />
-                                    <TextBlock Text=" - ID " Padding="1" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding Id}" Padding="1" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </WrapPanel>
-
-                            <TextBlock Grid.Row="2" Name='tbOverview' Text="{Binding Overview}" Padding="1" TextWrapping="Wrap" MaxHeight="190" />
-                        </Grid>
-                    </ContentControl>
-
-                    <GroupBox x:Name="gbEpisodes" Header="Episodes" Grid.Row="1" >
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Row="0">
-                                <TextBlock Text="Filter" Grid.Row="1" Margin="5" VerticalAlignment="Center" />
-                                <ComboBox x:Name="cmbEpFilter" Grid.Row="1" Grid.Column="1" Width="250" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                                <CheckBox Content="Display Ignored" x:Name="chkDisplayIgnoredEps" Grid.Column="2" VerticalAlignment="Center" Margin="5" />
-                            </StackPanel>
-
-                            <ListBox Grid.Row="1" Margin="8" Name="lbEpisodes" ItemTemplate="{StaticResource episodeItemTemplate}" >
-                                <ListBox.GroupStyle>
-                                    <GroupStyle>
-                                        <GroupStyle.ContainerStyle>
-                                            <Style TargetType="GroupItem">
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="{x:Type GroupItem}">
-                                                            <StackPanel>
-                                                                <TextBlock FontWeight="Bold" Foreground="Blue" FontSize="16" Text="{Binding Name}"/>
-                                                                <ItemsPresenter/>
-                                                            </StackPanel>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </GroupStyle.ContainerStyle>
-                                    </GroupStyle>
-                                </ListBox.GroupStyle>
-                            </ListBox>
-                        </Grid>
-                    </GroupBox>
-
-
-                </Grid>
-            </GroupBox>
-
+            <TextBlock Grid.Row="1" Name='tbOverview' Text="{Binding Content.Overview}" Padding="1" TextWrapping="Wrap" MaxHeight="190" Grid.ColumnSpan="2" Margin="0,24,0,30" />
         </Grid>
 
+        <GroupBox x:Name="gbEpisodes" Header="Episodes" Grid.Row="1" Visibility="{Binding EpisodesModel, Converter={StaticResource nullToVisConverter}}" >
+            <cntrls:EpisodeCollectionControl DataContext="{Binding  EpisodesModel}" />
+        </GroupBox>
     </Grid>
 </UserControl>

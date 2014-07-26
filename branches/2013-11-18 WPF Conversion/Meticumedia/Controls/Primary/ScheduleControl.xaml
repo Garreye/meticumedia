@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:cntrls="clr-namespace:Meticumedia.Controls"
              xmlns:mm="clr-namespace:Meticumedia.Classes"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="700">
@@ -66,43 +67,17 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <ComboBox Grid.Column="0" x:Name="cmbType" MinWidth="100" Margin="3" ItemsSource="{Binding Source={StaticResource TvScheduleTypeEnum}}" SelectionChanged="cmbType_SelectionChanged" SelectedIndex="1" />
+                <ComboBox Grid.Column="0" x:Name="cmbType" Margin="3" ItemsSource="{Binding Source={StaticResource TvScheduleTypeEnum}}" SelectedItem="{Binding ScheduleType}" />
                 <TextBlock Grid.Column="1" Text="episodes for" Margin="3" VerticalAlignment="Center"  />
-                <ComboBox Grid.Column="2" x:Name="cmbShows" MinWidth="100" Margin="3" />
+                <ComboBox Grid.Column="2" ItemsSource="{Binding Shows}" SelectedItem="{Binding SelectedShow}" Margin="3" />
                 <TextBlock Grid.Column="3" Text="from last" x:Name="tbFrom" Margin="3" VerticalAlignment="Center"  />
-                <xctk:IntegerUpDown Grid.Column="4" x:Name="numDays" Margin="3" Value="14" />
+                <xctk:IntegerUpDown Grid.Column="4" x:Name="numDays" Margin="3" Value="{Binding Days}" />
                 <TextBlock Grid.Column="5" Text="days" Margin="3" VerticalAlignment="Center" />
             </Grid>
         </GroupBox>
 
         <GroupBox Grid.Row="1" Header="Results">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="0" Text="Filter" Margin="3" VerticalAlignment="Center" />
-                    <ComboBox Grid.Column="1" x:Name="cmbFilter" MinWidth="200" Margin="3" />
-                    <TextBlock Grid.Column="2" Text="Group By" Margin="3" VerticalAlignment="Center" />
-                    <ComboBox Grid.Column="3" x:Name="cmbGroup" MinWidth="200" Margin="3" />
-                    <CheckBox Grid.Column="5" Content="Display Overview (Spoiler Alert!)" Margin="3" VerticalAlignment="Center" />
-                    
-                </Grid>
-
-                <ListBox x:Name="lbEpisodes" Grid.Row="1" ItemTemplate="{StaticResource episodeItemTemplate}" />
-
-            </Grid>
+            <cntrls:EpisodeCollectionControl DataContext="{Binding  EpisodesModel}" />
         </GroupBox>
 
     </Grid>

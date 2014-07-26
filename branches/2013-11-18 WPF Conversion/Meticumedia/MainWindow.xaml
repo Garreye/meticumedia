@@ -1,7 +1,8 @@
 ﻿<Window x:Class="Meticumedia.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="meticumedia" Height="587" Width="1188" xmlns:my="clr-namespace:Meticumedia.Controls" Loaded="MainWindow_Loaded">
+        xmlns:cntrls="clr-namespace:Meticumedia.Controls"
+        Title="meticumedia" Height="587" Width="1188" Loaded="MainWindow_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -22,19 +23,19 @@
         
         <TabControl Grid.Row="1" Name="tabControl1" Margin="3">
             <TabItem Header="TV Shows" Name="tiShows">
-                <my:ContentControl ContentType="TvShow" />
+                <cntrls:TvCollectionControl />
             </TabItem>
             <TabItem Header="TV Schedule" Name="tiSchedule">
-                <my:ScheduleControl />
+                <cntrls:ScheduleControl />
             </TabItem>
             <TabItem Header="Movies" Name="tiMovies">
-                <my:ContentControl ContentType="Movie" />
+                <cntrls:MovieCollectionControl />
             </TabItem>
             <TabItem Header="Scan" Name="tiScan">
-                <my:ScanControl />
+                <cntrls:ScanControl />
             </TabItem>
             <TabItem Header="Queue" Name="tiQueue">
-                <Grid />
+                <cntrls:QueueControl />
             </TabItem>
             <TabItem Header="Log" Name="tiLog">
                 <Grid />
