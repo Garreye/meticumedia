@@ -984,7 +984,7 @@ namespace Meticumedia.Classes
                 if (y == null)
                     sortResult = 1;
                 else
-                    sortResult = Path.GetDirectoryName(x.Movie.Name).CompareTo(Path.GetDirectoryName(y.Movie.Name));
+                    sortResult = Path.GetDirectoryName(x.Movie.DatabaseName).CompareTo(Path.GetDirectoryName(y.Movie.DatabaseName));
             }
 
             if (sortResult == 0)

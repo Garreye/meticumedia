@@ -100,6 +100,12 @@ namespace Meticumedia.Classes
             this.AccessLock = new object();
         }
 
+        public GenreCollection(GenreCollection toClone) : this(toClone.genreType)
+        {
+            foreach (string genre in toClone)
+                this.Add(genre);
+        }
+
         #endregion
 
         #region Methods

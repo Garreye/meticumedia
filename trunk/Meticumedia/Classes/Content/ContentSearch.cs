@@ -420,6 +420,9 @@ namespace Meticumedia
             // Initialize resutls
             matches = new List<SearchResult>();
 
+            if (searchResults == null)
+                return false;
+
             // Go through results
             foreach (Content searchResult in searchResults)
             {

@@ -201,7 +201,7 @@ namespace Meticumedia.Classes
             }
             
             // Build file name
-            string buildName = BuildFileName(movie.Name, movie.Date, simpleResult, differentiator);
+            string buildName = BuildFileName(movie.DatabaseName, movie.DatabaseYear, simpleResult, differentiator);
             
             // Remove unsafe file characters and add extension
             return FileHelper.GetSafeFileName(buildName) + fileExt;
@@ -238,9 +238,9 @@ namespace Meticumedia.Classes
         /// <param name="simplifyResults">File name simplifying results</param>
         /// <param name="differentiator">String that differentiates file from other similar files in same directory</param>
         /// <returns>Resulting formatted file name string</returns>
-        private string BuildFileName(string movieName, DateTime date, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
+        private string BuildFileName(string movieName, int year, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
         {
-            return BuildFileName(movieName, null, null, date, simplifyResults, differentiator);
+            return BuildFileName(movieName, null, null, year, simplifyResults, differentiator);
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace Meticumedia.Classes
         /// <returns>Resulting formatted file name string</returns>
         private string BuildFileName(TvEpisode episode1, TvEpisode episode2, FileHelper.SimplifyStringResults simplifyResults)
         {
-            return BuildFileName(string.Empty, episode1, episode2, new DateTime(), simplifyResults, string.Empty);
+            return BuildFileName(string.Empty, episode1, episode2, 1, simplifyResults, string.Empty);
         }
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace Meticumedia.Classes
         /// <param name="simplifyResults">File name simplifying results</param>
         /// <param name="differentiator"></param>
         /// <returns></returns>
-        private string BuildFileName(string movieName, TvEpisode episode1, TvEpisode episode2, DateTime date, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
+        private string BuildFileName(string movieName, TvEpisode episode1, TvEpisode episode2, int year, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
         {
             // Init file name
             string fileName = string.Empty;
@@ -281,7 +281,7 @@ namespace Meticumedia.Classes
                         value = movieName;
                         break;
                     case FileWordType.ShowName:
-                        value = episode1.Show.Name;
+                        value = episode1.Show.DatabaseName;
                         break;
                     case FileWordType.EpisodeName:
                         value = BuildEpisodeName(episode1, episode2);
@@ -290,7 +290,7 @@ namespace Meticumedia.Classes
                         value = EpisodeFormat.BuildEpisodeString(episode1, episode2);
                         break;
                     case FileWordType.Year:
-                        value = date.Year.ToString();
+                        value = year.ToString();
                         break;
                     case FileWordType.FilePart:
                         if (!GetFileWord(simplifyResults, portion.Type, out value))

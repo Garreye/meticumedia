@@ -212,7 +212,7 @@ namespace Meticumedia.Classes
                 // Add closest match item
                 OrgItem item = new OrgItem(OrgAction.None, files[i].Path, fileCat, files[i].OrgFolder);
                 item.Number = number++;
-                if (searchSucess && !string.IsNullOrEmpty(searchResult.Name))
+                if (searchSucess && !string.IsNullOrEmpty(searchResult.DatabaseName))
                 {
                     item.Action = OrgAction.Move;
                     item.DestinationPath = searchResult.BuildFilePath(files[i].Path);
@@ -246,7 +246,7 @@ namespace Meticumedia.Classes
 
                 // Check that movie is valide
                 Movie movie = (Movie)files[i].Content;
-                if (movie == null || string.IsNullOrEmpty(movie.Name))
+                if (movie == null || string.IsNullOrEmpty(movie.DatabaseName))
                     continue;
 
                 // Check that file is not already in the queue
@@ -288,7 +288,7 @@ namespace Meticumedia.Classes
             // Check if any movie folders need to be renamed!
             foreach (Movie movie in Organization.GetContentFromRootFolders(folders))
             {
-                if (!string.IsNullOrEmpty(movie.Name) && movie.Path != movie.BuildFolderPath())
+                if (!string.IsNullOrEmpty(movie.DatabaseName) && movie.Path != movie.BuildFolderPath())
                 {
                     OrgItem item = new OrgItem(OrgAction.Rename, movie.Path, FileCategory.Folder, movie, movie.BuildFolderPath(), null);
                     item.Enable = true;

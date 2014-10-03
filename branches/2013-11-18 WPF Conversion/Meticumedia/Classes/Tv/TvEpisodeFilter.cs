@@ -19,7 +19,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Type of filters that can be applies to episodes.
         /// </summary>
-        public enum FilterType { All, Missing, InScanDir, Unaired, Season };
+        public enum FilterType { All, Regular, Missing, Located, InScanDir, Unaired, Season };
 
         /// <summary>
         /// The type of episode filter being used.
@@ -70,6 +70,14 @@ namespace Meticumedia.Classes
             {
                 case FilterType.All:
                     return true;
+                case FilterType.Regular:
+                    if (ep.Season > 0)
+                        return true;
+                    break;
+                case FilterType.Located:
+                    if (ep.Missing != MissingStatus.Missing)
+                        return true;
+                    break;
                 case FilterType.Missing:
                     if (ep.Missing == MissingStatus.Missing && ep.Aired)
                         return true;
@@ -105,8 +113,14 @@ namespace Meticumedia.Classes
                 case FilterType.All:
                     filterString = "All Episodes";
                     break;
+                case FilterType.Regular:
+                    filterString = "All Regular Season Episodes";
+                    break;
                 case FilterType.Missing:
                     filterString = "Missing Episodes";
+                    break;
+                case FilterType.Located:
+                    filterString = "Located Episodes";
                     break;
                 case FilterType.InScanDir:
                     filterString = "Episodes in Scan Directory";
@@ -165,10 +179,12 @@ namespace Meticumedia.Classes
         {
             List<TvEpisodeFilter> filters = new List<TvEpisodeFilter>();
 
+            filters.Add(new TvEpisodeFilter(FilterType.Regular, 0));
             filters.Add(new TvEpisodeFilter(FilterType.All, 0));
             if (seasons)
                 filters.Add(new TvEpisodeFilter(FilterType.All, 0, true));
             filters.Add(new TvEpisodeFilter(FilterType.Missing, 0));
+            filters.Add(new TvEpisodeFilter(FilterType.Located, 0));
             filters.Add(new TvEpisodeFilter(FilterType.InScanDir, 0));
             filters.Add(new TvEpisodeFilter(FilterType.Unaired, 0));
 

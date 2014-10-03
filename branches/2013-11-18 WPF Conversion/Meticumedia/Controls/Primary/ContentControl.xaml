@@ -28,22 +28,37 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+            
+            <Grid Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <Grid Grid.Column="0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-            <WrapPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="1">
-                <TextBlock Text="{Binding Content.DisplayName}" FontSize="16" FontWeight="Bold" Foreground="{Binding Content.StatusColor}" />
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text=" (" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Content.Path}" Padding="1" VerticalAlignment="Center"/>
-                    <TextBlock Text=")" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                </StackPanel>
-                <Button Content="Edit" Height="25" Margin="5,0" Padding="20,0"/>
-            </WrapPanel>
+                    <TextBlock Grid.Column="0" Text="{Binding Content.DisplayName}" FontSize="16" FontWeight="Bold" Foreground="{Binding Content.StatusColor}" />
+                    <TextBlock Grid.Column="1" Text=" (" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding Content.Path}" Padding="1" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="3" Text=")" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
+                </Grid>
+
+                <Button Grid.Column="1" Content="Edit" Height="25" Margin="5,0" Padding="20,0" Command="{Binding EditCommand}"/>
+            </Grid>
+                
             <!--<Image Grid.Row="1" Grid.RowSpan="7" Height="100" Width="100" />-->
 
             <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,48">
                 <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Horizontal" Margin="3">
                     <TextBlock Text="Year: " FontWeight="Bold" Padding="1" />
-                    <TextBlock Text="{Binding Content.Date.Year}" Padding="1" />
+                    <TextBlock Text="{Binding Content.DisplayYear}" Padding="1" />
                 </StackPanel>
                 <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal" Margin="3">
                     <TextBlock Text="Seasons: " FontWeight="Bold" Padding="1" />

@@ -63,12 +63,12 @@ namespace Meticumedia.Controls
             {
                 case ContentType.Movie:
                     Movie movie = new Movie("Donnie Darko");
-                    movie.Date = new DateTime(2001, 1, 1);
+                    movie.DatabaseYear = 2001;
                     tbExample1.Text = "Example 1: 'Donnie Darko', 720p, bluray rip - x264, 5.1 audio - english, extended cut, file part 1";
                     txtFilePreview1.Text = System.IO.Path.GetFileNameWithoutExtension(this.fileNameFormat.BuildMovieFileName(movie, "Donnie Darko 720p blurayrip x264 5.1 en extended cut cd1.avi"));
 
                     movie = new Movie("The Matrix");
-                    movie.Date = new DateTime(1999, 1, 1);
+                    movie.DatabaseYear = 1999;
                     tbExample2.Text = "Example 2: 'The Matrix', video/audio information unknown, no parts";
                     txtFilePreview2.Text = System.IO.Path.GetFileNameWithoutExtension(this.fileNameFormat.BuildMovieFileName(movie, "The Matrix.avi"));
                     break;

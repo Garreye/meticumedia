@@ -113,24 +113,24 @@ namespace Meticumedia.Classes
                         baseMovie.Id = id2;
                         break;
                     case "title":
-                        baseMovie.Name = resultPropNode.Value;
+                        baseMovie.DatabaseName = resultPropNode.Value;
                         break;
                     case "original_title":
-                        if (string.IsNullOrEmpty(baseMovie.Name))
-                            baseMovie.Name = resultPropNode.Value;
+                        if (string.IsNullOrEmpty(baseMovie.DatabaseName))
+                            baseMovie.DatabaseName = resultPropNode.Value;
                         break;
                     case "release_date":
                         DateTime date;
                         DateTime.TryParse(resultPropNode.Value, out date);
-                        baseMovie.Date = date;
+                        baseMovie.DatabaseYear = date.Year;
                         break;
                     case "genres":
-                        baseMovie.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
+                        baseMovie.DatabaseGenres = new GenreCollection(GenreCollection.CollectionType.Movie);
                         foreach (JsonNode genreNode in resultPropNode.ChildNodes)
                         {
                             foreach (JsonNode genrePropNode in genreNode.ChildNodes)
                                 if (genrePropNode.Name == "name")
-                                    baseMovie.Genres.Add(genrePropNode.Value);
+                                    baseMovie.DatabaseGenres.Add(genrePropNode.Value);
                         }
                         break;
                     case "overview":

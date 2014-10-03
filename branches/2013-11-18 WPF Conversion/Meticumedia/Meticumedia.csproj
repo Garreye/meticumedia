@@ -85,6 +85,10 @@
     <Compile Include="Classes\Settings\FileTypesGroup.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
     <Compile Include="Classes\Tv\TvGroupingType.cs" />
+    <Compile Include="Controls\Editors\ContentEditorControl.xaml.cs">
+      <DependentUpon>ContentEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Editors\ContentEditorControlViewModel.cs" />
     <Compile Include="Controls\Primary\ContentCollectionControlViewModel.cs" />
     <Compile Include="Controls\Primary\ContentControl.xaml.cs">
       <DependentUpon>ContentControl.xaml</DependentUpon>
@@ -101,6 +105,10 @@
     <Compile Include="Controls\Primary\QueueControlViewModel.cs" />
     <Compile Include="Controls\Primary\ScheduleControlViewModel.cs" />
     <Compile Include="Controls\Primary\TvCollectionControl.cs" />
+    <Compile Include="Windows\ContentEditorWindowViewModel.cs" />
+    <Compile Include="Windows\ContentEditorWindow.xaml.cs">
+      <DependentUpon>ContentEditorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WPF\BindableMultiSelectDataGrid.cs" />
     <Compile Include="WPF\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="WPF\ProgressViewModel.cs" />
@@ -142,6 +150,10 @@
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\Editors\ContentEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Primary\ContentCollectionControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -233,7 +245,7 @@
     <Compile Include="Classes\Databases\TV\TvRageAccess.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\EnumExtensions.cs" />
+    <Compile Include="Controls\Primary\EnumExtensions.cs" />
     <Compile Include="Classes\FileHandling\FileCategory.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -361,6 +373,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\ContentEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\SelectionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

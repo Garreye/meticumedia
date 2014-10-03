@@ -158,7 +158,7 @@ namespace Meticumedia.Classes
                             }
 
                         }
-                return !string.IsNullOrWhiteSpace(results.Name);
+                return !string.IsNullOrWhiteSpace(results.DatabaseName);
             }
 
             public void SetSearchMatches(int index, List<SearchResult> matches)
@@ -428,12 +428,12 @@ namespace Meticumedia.Classes
                     result.Mods = baseMods;
 
                     // Verify year in result matches year from folder (if any)
-                    if (year != -1 && Math.Abs(year - searchResult.Date.Year) > 3)
+                    if (year != -1 && Math.Abs(year - searchResult.DatabaseYear) > 3)
                         continue;
 
                     // Check if search string match results string
                     string simplifiedSearch = FileHelper.SimplifyFileName(search);
-                    string dbContentName = FileHelper.SimplifyFileName(searchResult.Name);
+                    string dbContentName = FileHelper.SimplifyFileName(searchResult.DatabaseName);
 
                     bool theAddedToMatch;
                     bool singleLetterDiff;
@@ -446,7 +446,7 @@ namespace Meticumedia.Classes
                     if (!match)
                     {
                         simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, false);
-                        dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, false);
+                        dbContentName = FileHelper.SimplifyFileName(searchResult.DatabaseName, true, true, false);
                         match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                         result.MatchedString = simplifiedSearch;
                     }
@@ -455,7 +455,7 @@ namespace Meticumedia.Classes
                     if (!match)
                     {
                         simplifiedSearch = FileHelper.SimplifyFileName(search, true, true, true);
-                        dbContentName = FileHelper.SimplifyFileName(searchResult.Name, true, true, true);
+                        dbContentName = FileHelper.SimplifyFileName(searchResult.DatabaseName, true, true, true);
                         match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                         if (match)
                             result.Mods |= ContentSearchMod.WordsRemoved;
@@ -477,7 +477,7 @@ namespace Meticumedia.Classes
                     if (!match)
                     {
                         simplifiedSearch = FileHelper.SimplifyFileName(search);
-                        dbContentName = FileHelper.SimplifyFileName(searchResult.Name + " " + searchResult.Date.Year.ToString());
+                        dbContentName = FileHelper.SimplifyFileName(searchResult.DatabaseName + " " + searchResult.DatabaseYear.ToString());
                         match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                         result.MatchedString = simplifiedSearch;
                     }

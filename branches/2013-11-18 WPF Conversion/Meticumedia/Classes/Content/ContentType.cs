@@ -19,6 +19,9 @@ namespace Meticumedia.Classes
         Movie,
 
         [Description("TV Show")]
-        TvShow 
+        TvShow,
+
+        [Description("Undefined")]
+        Undefined
     }
 }

@@ -52,7 +52,7 @@ namespace Meticumedia.Classes
                 if (cancelRequested)
                     break;
 
-                OnProgressChange(ScanProcess.TvMissing, shows[i].Name, (int)Math.Round((double)i / (shows.Count) * 30) + 70);
+                OnProgressChange(ScanProcess.TvMissing, shows[i].DatabaseName, (int)Math.Round((double)i / (shows.Count) * 30) + 70);
 
                 // Go through missing episodes
                 foreach (TvEpisode ep in show.Episodes)
@@ -73,7 +73,7 @@ namespace Meticumedia.Classes
                     {
                         // Check directory item for episode
                         foreach (OrgItem item in directoryItems)
-                            if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && item.TvEpisode != null && item.TvEpisode.Show.Name == show.Name)
+                            if ((item.Action == OrgAction.Move || item.Action == OrgAction.Copy) && item.TvEpisode != null && item.TvEpisode.Show.DatabaseName == show.DatabaseName)
                             {
                                 // Only add item for first part of multi-part file
                                 if (ep.Equals(item.TvEpisode))

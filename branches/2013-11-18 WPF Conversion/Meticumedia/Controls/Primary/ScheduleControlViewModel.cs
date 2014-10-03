@@ -166,7 +166,7 @@ namespace Meticumedia.Controls
             for (int i = 0; i < Organization.Shows.Count; i++)
             {
                 // Add valid items
-                if (!string.IsNullOrEmpty(Organization.Shows[i].Name) && ((TvShow)Organization.Shows[i]).IncludeInSchedule && Organization.Shows[i].Id != 0)
+                if (!string.IsNullOrEmpty(Organization.Shows[i].DatabaseName) && ((TvShow)Organization.Shows[i]).IncludeInSchedule && Organization.Shows[i].Id != 0)
                     this.Shows.Add((TvShow)Organization.Shows[i]);
             }
 

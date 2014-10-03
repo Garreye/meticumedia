@@ -471,8 +471,8 @@ namespace Meticumedia.Controls
             // Apply genre filter
             string genre = this.SelectedGenreFilter;
             bool genreMatch = string.IsNullOrEmpty(genre) || genre.StartsWith("All");
-            if (content.Genres != null && !genreMatch)
-                foreach (string contentGenre in content.Genres)
+            if (content.DatabaseGenres != null && !genreMatch)
+                foreach (string contentGenre in content.DatabaseGenres)
                     if (genre.Contains(contentGenre))
                     {
                         genreMatch = true;
@@ -480,10 +480,10 @@ namespace Meticumedia.Controls
                     }
 
             // Apply year filter
-            bool yearMatch = !this.YearFilterEnable || (content.Date.Year >= this.YearFilterStart && content.Date.Year <= this.YearFilterStop);
+            bool yearMatch = !this.YearFilterEnable || (content.DatabaseYear >= this.YearFilterStart && content.DatabaseYear <= this.YearFilterStop);
 
             // Apply text filter
-            bool nameMatch = string.IsNullOrEmpty(this.NameFilter) || content.Name.ToLower().Contains(this.NameFilter.ToLower());
+            bool nameMatch = string.IsNullOrEmpty(this.NameFilter) || content.DatabaseName.ToLower().Contains(this.NameFilter.ToLower());
 
             // Get root folders
             bool recursive;

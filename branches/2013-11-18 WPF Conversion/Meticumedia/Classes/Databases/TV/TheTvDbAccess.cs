@@ -243,11 +243,11 @@ namespace Meticumedia.Classes
                     switch (subNode.Name.ToLower())
                     {
                         case "seriesname":
-                            searchResult.Name = subNode.InnerText;
+                            searchResult.DatabaseName = subNode.InnerText;
                             char[] invalidChars = { '\\', '/', ':', '*', '?', '<', '>', '|' };
                             foreach (char c in invalidChars)
-                                if (searchResult.Name.Contains(c))
-                                    searchResult.Name = searchResult.Name.Replace(c.ToString(), " ");
+                                if (searchResult.DatabaseName.Contains(c))
+                                    searchResult.DatabaseName = searchResult.DatabaseName.Replace(c.ToString(), " ");
                             break;
                         case "seriesid":
                             int id;
@@ -260,7 +260,7 @@ namespace Meticumedia.Classes
                         case "firstaired":
                             DateTime airDate;
                             DateTime.TryParse(subNode.InnerText, out airDate);
-                            searchResult.Date = airDate;
+                            searchResult.DatabaseYear = airDate.Year;
                             break;
                     }
 
@@ -326,8 +326,8 @@ namespace Meticumedia.Classes
                                 case "Genre":
                                     string[] genres = subNode.InnerText.Split('|');
                                     foreach(string genre in genres)
-                                        if(!string.IsNullOrWhiteSpace(genre) && !show.Genres.Contains(genre))
-                                            show.Genres.Add(genre);
+                                        if(!string.IsNullOrWhiteSpace(genre) && !show.DatabaseGenres.Contains(genre))
+                                            show.DatabaseGenres.Add(genre);
                                     break;
                             }
                         }

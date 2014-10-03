@@ -71,6 +71,9 @@ namespace Meticumedia.Controls
 
         protected void UpdateProgressSafe(int progress, string msg, bool visible = true)
         {
+            if (App.Current == null)
+                return;
+            
             if (App.Current.Dispatcher.CheckAccess())
                 UpdateProgress(progress, msg, visible);
             else

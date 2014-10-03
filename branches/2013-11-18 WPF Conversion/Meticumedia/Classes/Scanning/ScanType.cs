@@ -21,9 +21,9 @@ namespace Meticumedia.Classes
         TvMissing,
         [Description("TV Episode Rename Check")]
         TvRename,
-        [Description("TV Root Folder Check")]
+        [Description("TV Folder Organization")]
         TvFolder,
-        [Description("Movie Root Check")]
+        [Description("Movie Folder Organization")]
         MovieFolder 
     };
 }

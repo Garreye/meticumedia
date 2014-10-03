@@ -43,7 +43,7 @@ namespace Meticumedia.Classes
                 if (cancelRequested)
                     break;
 
-                OnProgressChange(ScanProcess.TvRename, shows[i].Name, (int)Math.Round((double)i / (shows.Count) * 30) + 70);
+                OnProgressChange(ScanProcess.TvRename, shows[i].DatabaseName, (int)Math.Round((double)i / (shows.Count) * 30) + 70);
 
                 // Go each show
                 foreach (TvEpisode ep in show.Episodes)

@@ -57,7 +57,8 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Whether to include show in scehdule.
         /// </summary>
-        public bool IncludeInSchedule{
+        public bool IncludeInSchedule
+        {
             get { return this.includeInSchedule; }
             set
             {
@@ -129,7 +130,7 @@ namespace Meticumedia.Classes
             : this(name)
         {
             this.Id = id;
-            this.Date = new DateTime(year > 0 ? year : 1, 1, 1);
+            this.DatabaseYear = year;
             this.Path = directory;
             this.RootFolder = contentFolder;
         }
@@ -143,7 +144,7 @@ namespace Meticumedia.Classes
         public TvShow(string name)
             : this()
         {
-            this.Name = name;
+            this.DatabaseName = name;
         }
 
         /// <summary>
@@ -152,6 +153,7 @@ namespace Meticumedia.Classes
         public TvShow()
             : base()
         {
+            this.ContentType = Classes.ContentType.TvShow;
             ContentRootFolder defaultFolder;
             if (Settings.GetDefaultTvFolder(out defaultFolder))
                 this.RootFolder = defaultFolder.FullPath;
@@ -205,7 +207,7 @@ namespace Meticumedia.Classes
         /// <returns>string for instance</returns>
         public override string ToString()
         {
-            return this.Name == string.Empty ? "UNKNOWN" : this.Name;
+            return this.DatabaseName == string.Empty ? "UNKNOWN" : this.DatabaseName;
         }
 
         /// <summary>
@@ -214,17 +216,8 @@ namespace Meticumedia.Classes
         /// <param name="show">Show to clone</param>
         public void Clone(TvShow show)
         {
-            this.DatabaseSelection = show.DatabaseSelection;
-            this.Name = show.Name;
-            this.RootFolder = show.RootFolder;
-            this.Overview = show.Overview;
-            this.DoRenaming = show.DoRenaming;
-            this.Path = show.Path;
-            this.Found = show.Found;
+            base.Clone(show);
             this.IncludeInSchedule = show.IncludeInSchedule;
-            this.Genres = show.Genres;
-            this.Id = show.Id;
-            this.Date = show.Date;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
             this.Episodes.Clear();
@@ -261,7 +254,7 @@ namespace Meticumedia.Classes
 
                 foreach (TvEpisode ep in eps)
                 {
-                    if (ep.Show.Name == this.Name)
+                    if (ep.Show.DatabaseName == this.DatabaseName)
                     {
                         TvEpisode matchEp;
                         if (this.FindEpisode(ep.Season, ep.Number, false, out matchEp))
@@ -282,7 +275,7 @@ namespace Meticumedia.Classes
             foreach (string file in files)
             {
                 int season, episode1, episode2;
-                if (FileHelper.GetEpisodeInfo(file, this.Name, out season, out episode1, out episode2))
+                if (FileHelper.GetEpisodeInfo(file, this.DatabaseName, out season, out episode1, out episode2))
                 {
                     // Mark episodes as not missing
                     TvEpisode ep1 = null, ep2 = null;

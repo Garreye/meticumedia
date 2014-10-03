@@ -33,20 +33,17 @@
             <CheckBox Content="Display Overview (Spoiler Alert!)" Grid.Column="4" VerticalAlignment="Center" Margin="3" IsChecked="{Binding DisplayOverview}" />
         </Grid>
 
-        <ListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" >
+
+        <ListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" VirtualizingPanel.IsVirtualizing="True" >
             <ListBox.Resources>
                 <RelativeSource x:Key="parent" AncestorType="{x:Type cntrls:EpisodeCollectionControl}" />
             </ListBox.Resources>
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-
-                        <VirtualizingStackPanel Grid.Row="0" Orientation="Horizontal">
-                            <TextBlock Text="{Binding Show.Name}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" />
+                    <VirtualizingStackPanel Orientation="Vertical">
+                        <VirtualizingStackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Show.DisplayName}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" />
+                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" />
                             <TextBlock Text=" " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" />
                             <TextBlock Text="Season " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" />
                             <TextBlock Text="{Binding Season}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" />
@@ -59,7 +56,7 @@
                             <TextBlock Text=" " Margin="0,1" FontWeight="Bold" />
                             <TextBlock Text="{Binding Status}" Margin="0,1"  FontWeight="Bold" Foreground="{Binding StatusColor}"/>
                         </VirtualizingStackPanel>
-                        <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" Visibility="{Binding Path=DataContext.DisplayOverview, RelativeSource={StaticResource parent}}" >
+                        <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" Visibility="{Binding Path=DataContext.DisplayOverview, RelativeSource={StaticResource parent}}" >-->
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Style.Triggers>
@@ -70,7 +67,7 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-                    </Grid>
+                    </VirtualizingStackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
             <ListBox.GroupStyle>
@@ -80,14 +77,10 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="{x:Type GroupItem}">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <TextBlock Grid.Row="0" FontWeight="Bold" Foreground="Blue" FontSize="16" Text="{Binding Name}"/>
+                                        <VirtualizingStackPanel Orientation="Vertical">
+                                            <TextBlock FontWeight="Bold" Foreground="Blue" FontSize="16" Text="{Binding Name}"/>
                                             <ItemsPresenter Grid.Row="2"/>
-                                        </Grid>
+                                        </VirtualizingStackPanel>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>

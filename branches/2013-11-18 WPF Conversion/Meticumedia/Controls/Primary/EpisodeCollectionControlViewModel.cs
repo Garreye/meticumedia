@@ -108,7 +108,7 @@ namespace Meticumedia.Controls
 
         public EpisodeCollectionControlViewModel(ObservableCollection<TvEpisode> episodes, TvShow show = null )
         {
-            List<TvEpisodeFilter> filters = TvEpisodeFilter.BuildFilters(show, false);
+            List<TvEpisodeFilter> filters = TvEpisodeFilter.BuildFilters(show, show != null);
             this.EpisodeFilters = new ObservableCollection<TvEpisodeFilter>();
             foreach (TvEpisodeFilter filter in filters)
                 this.EpisodeFilters.Add(filter);
@@ -120,17 +120,18 @@ namespace Meticumedia.Controls
             this.EpisodesCollectionView = episodesViewSource.View;
             this.EpisodesCollectionView.Filter = new Predicate<object>(FilterEpisode);
 
+            // TODO: this make loading the control slow as fuck
             // Set properties to trigger live updating
-            ICollectionViewLiveShaping liveCollection = this.EpisodesCollectionView as ICollectionViewLiveShaping;
-            liveCollection.LiveFilteringProperties.Add("Genres");
-            liveCollection.LiveFilteringProperties.Add("Date");
-            liveCollection.LiveFilteringProperties.Add("RootFolder");
-            liveCollection.LiveFilteringProperties.Add("Name");
-            liveCollection.IsLiveFiltering = true;
-            liveCollection.LiveGroupingProperties.Add("Missing");
-            liveCollection.LiveGroupingProperties.Add("Season");
-            liveCollection.LiveGroupingProperties.Add("Show");
-            liveCollection.IsLiveGrouping = true;
+            //ICollectionViewLiveShaping liveCollection = this.EpisodesCollectionView as ICollectionViewLiveShaping;
+            //liveCollection.LiveFilteringProperties.Add("Genres");
+            //liveCollection.LiveFilteringProperties.Add("Date");
+            //liveCollection.LiveFilteringProperties.Add("RootFolder");
+            //liveCollection.LiveFilteringProperties.Add("Name");
+            //liveCollection.IsLiveFiltering = true;
+            //liveCollection.LiveGroupingProperties.Add("Missing");
+            //liveCollection.LiveGroupingProperties.Add("Season");
+            //liveCollection.LiveGroupingProperties.Add("Show");
+            //liveCollection.IsLiveGrouping = true;
 
             this.Groupings = new ObservableCollection<TvGroupingType>();
             this.Groupings.Add(TvGroupingType.None);
@@ -142,7 +143,7 @@ namespace Meticumedia.Controls
 
             if (show == null)
             {
-                this.SelectedGrouping = TvGroupingType.None;
+                this.SelectedGrouping = TvGroupingType.Show;
                 this.DisplayShowName = Visibility.Visible;
             }
             else

@@ -322,7 +322,7 @@ namespace Meticumedia.Classes
 
                         // Perform search for matching TV show
                         matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, out bestMatch);
-                        bestMatch.RootFolder = Path.Combine(path, bestMatch.Name);
+                        bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
                         TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
 
                         // Save show in temporary shows list (in case there are more files that may match to it during scan)
@@ -337,7 +337,7 @@ namespace Meticumedia.Classes
                     {
                         // Try to get episode information from file
                         int seasonNum, episodeNum1, episodeNum2;
-                        if (FileHelper.GetEpisodeInfo(orgPath.Path, bestMatch.Name, out seasonNum, out episodeNum1, out episodeNum2))
+                        if (FileHelper.GetEpisodeInfo(orgPath.Path, bestMatch.DatabaseName, out seasonNum, out episodeNum1, out episodeNum2))
                         {
                             // Try to get the episode from the show
                             TvEpisode episode1, episode2 = null;

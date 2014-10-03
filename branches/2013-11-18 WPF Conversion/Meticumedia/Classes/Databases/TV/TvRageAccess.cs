@@ -126,7 +126,7 @@ namespace Meticumedia.Classes
                 {
                     case "showname":
                     case "name":
-                        show.Name = subNode.InnerText;
+                        show.DatabaseName = subNode.InnerText;
                         break;
                     case "showid":
                         int id;
@@ -137,13 +137,12 @@ namespace Meticumedia.Classes
                         int year;
                         int.TryParse(subNode.InnerText, out year);
                         if (year == 0) year = 1;
-                        DateTime airDate = new DateTime(year, 1, 1);
-                        show.Date = airDate;
+                        show.DatabaseYear = year;
                         break;
                     case "genres":
-                        show.Genres = new GenreCollection(GenreCollection.CollectionType.Tv);
+                        show.DatabaseGenres = new GenreCollection(GenreCollection.CollectionType.Tv);
                         foreach (XmlNode genreNode in subNode.ChildNodes)
-                            show.Genres.Add(genreNode.InnerText);
+                            show.DatabaseGenres.Add(genreNode.InnerText);
                         break;
                     case "summary":
                         show.Overview = subNode.InnerText.Replace('\n', ' ');

@@ -6,7 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using Meticumedia.Classes;
+using Meticumedia.Windows;
+using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
 {
@@ -63,6 +66,31 @@ namespace Meticumedia.Controls
 
         #endregion
 
+        #region Commands
+
+        private ICommand editCommand;
+        public ICommand EditCommand
+        {
+            get
+            {
+                if (editCommand == null)
+                {
+                    editCommand = new RelayCommand(
+                        param => this.EditContent(),
+                        param => this.CanDoEditCommand()
+                    );
+                }
+                return editCommand;
+            }
+        }
+
+        private bool CanDoEditCommand()
+        {
+            return true;
+        }
+
+        #endregion
+
         #region Constructor
 
         public ContentControlViewModel(Content content)
@@ -74,6 +102,34 @@ namespace Meticumedia.Controls
                 TvShow show = this.Content as TvShow;
                 this.EpisodesModel = new EpisodeCollectionControlViewModel(show.Episodes, show);
             }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Open content editor window
+        /// </summary>
+        private void EditContent()
+        {
+            ContentEditorWindow cew = new ContentEditorWindow(this.Content);
+            cew.ShowDialog();
+
+            if (cew.Results != null)
+            {
+                if (this.Content is Movie)
+                {
+                    (this.Content as Movie).Clone(cew.Results as Movie);
+                    Organization.Movies.Save();
+                }
+                else
+                {
+                    (this.Content as TvShow).Clone(cew.Results as TvShow);
+                    Organization.Shows.Save();
+                }
+            }
+
         }
 
         #endregion

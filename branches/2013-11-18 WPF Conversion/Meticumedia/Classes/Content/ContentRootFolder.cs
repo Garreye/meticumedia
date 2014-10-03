@@ -306,13 +306,13 @@ namespace Meticumedia.Classes
             {
                 case ContentType.Movie:
                     foreach (Content content in Organization.Movies)
-                        foreach (string genre in content.Genres)
+                        foreach (string genre in content.DatabaseGenres)
                             if (!genres.Contains(genre))
                                 genres.Add(genre);
                     break;
                 case ContentType.TvShow:
                     foreach (Content content in Organization.Shows)
-                        foreach (string genre in content.Genres)
+                        foreach (string genre in content.DatabaseGenres)
                             if (!genres.Contains(genre))
                                 genres.Add(genre);
                     break;
@@ -342,8 +342,8 @@ namespace Meticumedia.Classes
                 {
                     // Apply genre filter
                     bool genreMatch = false;
-                    if (content.Genres != null && !genreMatch)
-                        foreach (string contentGenre in content.Genres)
+                    if (content.DatabaseGenres != null && !genreMatch)
+                        foreach (string contentGenre in content.DatabaseGenres)
                             if (genre.Contains(contentGenre))
                             {
                                 genreMatch = true;
@@ -351,10 +351,10 @@ namespace Meticumedia.Classes
                             }
 
                     // Apply year filter
-                    bool yearMatch = !yearFilter || (content.Date.Year >= minYear && content.Date.Year <= maxYear);
+                    bool yearMatch = !yearFilter || (content.DatabaseYear >= minYear && content.DatabaseYear <= maxYear);
 
                     // Apply text filter
-                    bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.Name.ToLower().Contains(nameFilter.ToLower());
+                    bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.DatabaseName.ToLower().Contains(nameFilter.ToLower());
 
                     // Check if movie is in the folder
                     if (ContainsContent(content, recursive) && ApplyContentFilter(content, genreEnable, genre, yearFilter, minYear, maxYear, nameFilter))
@@ -378,8 +378,8 @@ namespace Meticumedia.Classes
         {
             // Apply genre filter
             bool genreMatch = !genreEnable;
-            if (content.Genres != null && !genreMatch)
-                foreach (string contentGenre in content.Genres)
+            if (content.DatabaseGenres != null && !genreMatch)
+                foreach (string contentGenre in content.DatabaseGenres)
                     if (genre.Contains(contentGenre))
                     {
                         genreMatch = true;
@@ -387,10 +387,10 @@ namespace Meticumedia.Classes
                     }
 
             // Apply year filter
-            bool yearMatch = !yearFilter || (content.Date.Year >= minYear && content.Date.Year <= maxYear);
+            bool yearMatch = !yearFilter || (content.DatabaseYear >= minYear && content.DatabaseYear <= maxYear);
 
             // Apply text filter
-            bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.Name.ToLower().Contains(nameFilter.ToLower());
+            bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.DatabaseName.ToLower().Contains(nameFilter.ToLower());
 
             bool test = genreMatch && yearMatch && nameMatch;
             if (!test)
@@ -548,7 +548,7 @@ namespace Meticumedia.Classes
                 {
                     contentExists = true;
                     content[j].Found = true;
-                    if (!string.IsNullOrEmpty(content[j].Name))
+                    if (!string.IsNullOrEmpty(content[j].DatabaseName))
                         contentComplete = true;
                     newContent = content[j];
                     index = j;

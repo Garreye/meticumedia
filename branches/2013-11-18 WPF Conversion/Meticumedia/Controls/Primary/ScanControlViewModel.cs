@@ -602,7 +602,11 @@ namespace Meticumedia.Controls
             try
             {
                 if (App.Current.Dispatcher.CheckAccess())
+                {
+                    grid.CancelEdit();
                     this.ScanResultsCollection.Refresh();
+
+                }
                 else
                     App.Current.Dispatcher.Invoke((Action)delegate
                     {

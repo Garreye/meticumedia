@@ -631,7 +631,7 @@ namespace Meticumedia.Classes
             
             // Try to get episode information from file
             int fileEpSeason, fileEpNumber1, fileEpNumber2;
-            bool fileInfoFound = FileHelper.GetEpisodeInfo(ofd.FileName, this.Show.Name, out fileEpSeason, out fileEpNumber1, out fileEpNumber2);
+            bool fileInfoFound = FileHelper.GetEpisodeInfo(ofd.FileName, this.Show.DatabaseName, out fileEpSeason, out fileEpNumber1, out fileEpNumber2);
 
             // Assign episodes
             TvEpisode ep1 = this;

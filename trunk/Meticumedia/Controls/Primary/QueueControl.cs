@@ -21,31 +21,6 @@ namespace Meticumedia
     /// </summary>
     public partial class QueueControl : UserControl
     {
-        #region Commands
-
-        private ICommand runCommand;
-        public ICommand RunCommand
-        {
-            get
-            {
-                if (runCommand == null)
-                {
-                    runCommand = new RelayCommand(
-                        param => this.Run(),
-                        param => this.CanDoRunCommand()
-                    );
-                }
-                return runCommand;
-            }
-        }
-
-        private bool CanDoRunCommand()
-        {
-            return true;
-        }
-
-        #endregion
-
         #region Variables
 
         /// <summary>

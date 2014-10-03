@@ -147,7 +147,8 @@ namespace Meticumedia.Classes
         private static string[] DefaultIgnoreFileTypes = new string[]
         {
             "mp3",
-            "flac"
+            "flac",
+            "m3u"
         };
 
         #endregion
@@ -311,8 +312,10 @@ namespace Meticumedia.Classes
         {
             string path = Path.Combine(Organization.GetBasePath(true), ROOT_XML + ".xml");
 
-            using (XmlWriter xw = XmlWriter.Create(path))
+            using (XmlTextWriter xw = new XmlTextWriter(path, Encoding.ASCII))
             {
+                xw.Formatting = Formatting.Indented;
+
                 // Start season element
                 xw.WriteStartElement(ROOT_XML);
 

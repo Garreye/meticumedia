@@ -41,6 +41,7 @@ namespace Meticumedia.Classes
         /// </summary>
         public Movie() : base()
         {
+            this.ContentType = Classes.ContentType.Movie;
         }
 
         /// <summary>
@@ -49,13 +50,13 @@ namespace Meticumedia.Classes
         /// <param name="name"></param>
         public Movie(string name) : this()
         {
-            this.Name = name;
+            this.DatabaseName = name;
         }
 
         public Movie(string name, int id, int year, string directory, string contentFolder) : this(name)
         {
             this.Id = id;
-            this.Date = new DateTime(year > 0 ? year : 1, 1, 1);
+            this.DatabaseYear = year;
             this.Path = directory;
             this.RootFolder = contentFolder;
         }
@@ -90,17 +91,7 @@ namespace Meticumedia.Classes
         /// <param name="movie"></param>
         public void Clone(Movie movie)
         {
-            this.Name = movie.Name;
-            this.DatabaseName = movie.DatabaseName;
-            this.Overview = movie.Overview;
-            this.Date = movie.Date;
-            this.Found = movie.Found;
-            this.Id = movie.Id;
-            this.DatabaseSelection = movie.DatabaseSelection;
-            this.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
-            if (movie.Genres != null)
-                foreach (string genre in movie.Genres)
-                    this.Genres.Add(genre);
+            base.Clone(movie);
         }
 
         /// <summary>
@@ -109,7 +100,7 @@ namespace Meticumedia.Classes
         /// <returns></returns>
         public override string ToString()
         {
-            return this.Name == string.Empty ? Unknown : this.Name;
+            return this.DatabaseName == string.Empty ? Unknown : this.DatabaseName;
         }
 
         /// <summary>
@@ -145,7 +136,7 @@ namespace Meticumedia.Classes
                     this.RootFolder = defaultContent.FullPath;
             }
 
-            return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.Name + " (" + this.Date.Year.ToString() + ")"));
+            return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.DatabaseName + " (" + this.DatabaseYear.ToString() + ")"));
         }
 
         /// <summary>

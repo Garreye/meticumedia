@@ -312,8 +312,10 @@ namespace Meticumedia.Classes
                 //Console.WriteLine(this.ToString() + " lock save");
                 lock (XmlLock)
                 {
-                    using (XmlWriter xw = XmlWriter.Create(tempPath))
+                    using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
                     {
+                        xw.Formatting = Formatting.Indented;
+                        
                         xw.WriteStartElement(XML_ROOT);
                         xw.WriteElementString("LastUpdate", this.LastUpdate);
 
@@ -358,7 +360,7 @@ namespace Meticumedia.Classes
         {
             List<Content> includeShow = new List<Content>();
             for (int i = 0; i < this.Count; i++)
-                if (this[i].IncludeInScan && !string.IsNullOrEmpty(this[i].Name))
+                if (this[i].IncludeInScan && !string.IsNullOrEmpty(this[i].DatabaseName))
                 {
                     if (updateMissing)
                         this[i].UpdateMissing();

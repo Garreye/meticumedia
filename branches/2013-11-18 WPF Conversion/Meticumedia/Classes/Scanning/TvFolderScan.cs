@@ -55,7 +55,7 @@ namespace Meticumedia.Classes
                     if (show.RootFolder != tvFolder.FullPath)
                         continue;
 
-                    string builtFolder = Path.Combine(show.RootFolder, FileHelper.GetSafeFileName(show.Name));
+                    string builtFolder = Path.Combine(show.RootFolder, FileHelper.GetSafeFileName(show.DatabaseName));
                     if (show.Path != builtFolder)
                     {
                         OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, show.Path, builtFolder, new TvEpisode("", show, -1, -1, "", ""), null, FileCategory.Folder, null);

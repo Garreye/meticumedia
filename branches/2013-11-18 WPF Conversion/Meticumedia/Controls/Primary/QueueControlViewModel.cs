@@ -355,7 +355,6 @@ namespace Meticumedia.Controls
             // Register to queuing event
             ScanControlViewModel.ItemsToQueue += HandleItemsToQueue;
             ContentCollectionControlViewModel.ItemsToQueue += HandleItemsToQueue;
-            ContentCollectionControlViewModel.ItemsToQueue += HandleItemsToQueue;
             //LogControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
 
         }       
@@ -831,6 +830,5 @@ namespace Meticumedia.Controls
         }
 
         #endregion
-
     }
 }
