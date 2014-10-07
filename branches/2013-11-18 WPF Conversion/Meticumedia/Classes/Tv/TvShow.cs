@@ -169,7 +169,7 @@ namespace Meticumedia.Classes
         public TvShow(TvShow show)
             : this()
         {
-            Clone(show);
+            Clone(show, true);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Meticumedia.Classes
         public TvShow(Content content)
             : this()
         {
-            base.Clone(content);
+            base.Clone(content, true);
         }
 
         #endregion
@@ -214,9 +214,9 @@ namespace Meticumedia.Classes
         /// Clones another instance of class 
         /// </summary>
         /// <param name="show">Show to clone</param>
-        public void Clone(TvShow show)
+        public void Clone(TvShow show, bool replacePath)
         {
-            base.Clone(show);
+            base.Clone(show, replacePath);
             this.IncludeInSchedule = show.IncludeInSchedule;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
@@ -365,6 +365,40 @@ namespace Meticumedia.Classes
         {
             TvDatabaseHelper.FullShowSeasonsUpdate(this);
             this.LastUpdated = DateTime.Now;
+        }
+
+        #endregion
+
+        #region Equals
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TvShow))
+                return false;
+
+            if (!base.Equals(obj))
+                return false;
+
+            TvShow show = obj as TvShow;
+
+            if (this.IncludeInSchedule != show.IncludeInSchedule ||
+                this.DoMissingCheck != show.DoMissingCheck ||
+                this.DvdEpisodeOrder != show.DvdEpisodeOrder||
+                this.Episodes.Count != show.Episodes.Count ||
+                this.AlternativeNameMatches.Count != show.AlternativeNameMatches.Count)
+            {
+                return false;
+            }
+
+            for(int i=0;i<this.Episodes.Count;i++)
+                if(!this.Episodes[i].Equals(show.Episodes[i]))
+                    return false;
+
+            for(int i=0;i<this.AlternativeNameMatches.Count;i++)
+                if(!this.AlternativeNameMatches[i].Equals(show.AlternativeNameMatches[i]))
+                    return false;
+
+            return true;
         }
 
         #endregion

@@ -7,10 +7,6 @@
         xmlns:mm="clr-namespace:Meticumedia.Classes"
         xmlns:cntrls="clr-namespace:Meticumedia.Controls"
         Title="ContentEditorWindow" Height="650" Width="400">
-    <Window.Resources>
-        <wpfr:BoolInverterConverter x:Key="bollInvConverter" />
-    </Window.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

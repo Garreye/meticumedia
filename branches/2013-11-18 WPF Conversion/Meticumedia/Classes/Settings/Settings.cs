@@ -20,8 +20,14 @@ namespace Meticumedia.Classes
     {
         #region Events
 
+        /// <summary>
+        /// Setting has been modified.
+        /// </summary>
         public static event EventHandler SettingsModified;
 
+        /// <summary>
+        /// Triggers SettingsModified event.
+        /// </summary>
         private static void OnSettingsModified()
         {
             if (SettingsModified != null)
@@ -74,6 +80,9 @@ namespace Meticumedia.Classes
         /// </summary>
         public static FileTypesGroup IgnoreFileTypes = new FileTypesGroup();
 
+        /// <summary>
+        /// Persistent setting for options in UI.
+        /// </summary>
         public static GuiSettings GuiControl = new GuiSettings();
 
 #if DEBUG
@@ -84,8 +93,14 @@ namespace Meticumedia.Classes
         public static int NumSimultaneousSearches = 5;
 #endif
 
+        /// <summary>
+        /// Default database to use for matching to TV shows.
+        /// </summary>
         public static TvDataBaseSelection DefaultTvDatabase = TvDataBaseSelection.TheTvDb;
 
+        /// <summary>
+        /// Default database to use for matching to movies.
+        /// </summary>
         public static MovieDatabaseSelection DefaultMovieDatabase = MovieDatabaseSelection.TheMovieDb;
 
         #endregion

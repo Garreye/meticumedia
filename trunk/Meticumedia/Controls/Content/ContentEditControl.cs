@@ -382,6 +382,11 @@ namespace Meticumedia
 
         #endregion
 
+        private void cntrlSearch_Load(object sender, EventArgs e)
+        {
+
+        }
+
 
     }
 }

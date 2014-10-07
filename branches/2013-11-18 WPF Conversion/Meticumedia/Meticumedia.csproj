@@ -109,7 +109,13 @@
     <Compile Include="Windows\ContentEditorWindow.xaml.cs">
       <DependentUpon>ContentEditorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\OrgItemEditorWindow.xaml.cs">
+      <DependentUpon>OrgItemEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\OrgItemEditorWindowViewModel.cs" />
     <Compile Include="WPF\BindableMultiSelectDataGrid.cs" />
+    <Compile Include="WPF\Converters\EnumBooleanConverter.cs" />
+    <Compile Include="WPF\Converters\EnumVisibilityConverter.cs" />
     <Compile Include="WPF\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="WPF\ProgressViewModel.cs" />
     <Compile Include="WPF\RelayCommand.cs" />
@@ -374,6 +380,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Windows\ContentEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\OrgItemEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

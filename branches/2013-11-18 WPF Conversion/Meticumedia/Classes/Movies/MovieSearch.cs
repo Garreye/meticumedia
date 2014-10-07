@@ -14,6 +14,12 @@ namespace Meticumedia.Classes
     /// </summary>
     public class MovieSearch : ContentSearch
     {
+
+        public MovieSearch()
+        {
+            this.ContentType = Classes.ContentType.Movie;
+        }
+
         /// <summary>
         /// Performs search for movie in database
         /// </summary>

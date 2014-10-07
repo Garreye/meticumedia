@@ -44,7 +44,7 @@ namespace Meticumedia.Classes
         public static List<OrgItem> Items = new List<OrgItem>();
 
         /// <summary>
-        /// TV item in scan directories is updated every 2 minutes
+        /// TV item in scan directories is updated periodically
         /// </summary>
         private static System.Timers.Timer updateTimer = new System.Timers.Timer(500);
 

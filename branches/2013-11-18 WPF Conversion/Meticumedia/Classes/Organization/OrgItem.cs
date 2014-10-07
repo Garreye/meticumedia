@@ -241,6 +241,23 @@ namespace Meticumedia.Classes
         private TvEpisode tvEpisode2;
 
         /// <summary>
+        /// Whether item is for multiple TV episodes
+        /// </summary>
+        public bool MultiEpisode
+        {
+            get
+            {
+                return multiEpisode;
+            }
+            set
+            {
+                multiEpisode = value;
+                OnPropertyChanged("MultiEpisode");
+            }
+        }
+        private bool multiEpisode = false;
+
+        /// <summary>
         /// Movie that file is associated with.
         /// </summary>
         public Movie Movie

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,8 +15,10 @@ using Meticumedia.WPF;
 namespace Meticumedia.Controls
 {
     public class ContentEditorControlViewModel : ViewModel
-    {
+    {        
         #region Properties
+
+        public Content OriginalContent { get; set; }
 
         /// <summary>
         /// Content being editied
@@ -146,6 +149,47 @@ namespace Meticumedia.Controls
         }
         private int selectedSearchDatabaseIndex;
 
+        public string SearchStatus
+        {
+            get
+            {
+                return searchStatus;
+            }
+            set
+            {
+                searchStatus = value;
+                OnPropertyChanged(this, "SearchStatus");
+            }
+        }
+        private string searchStatus = string.Empty;
+
+        public Visibility SearchResultsVisibility
+        {
+            get
+            {
+                return searchResultsVisibility;
+            }
+            set
+            {
+                searchResultsVisibility = value;
+                OnPropertyChanged(this, "SearchResultsVisibility");
+            }
+        }
+        private Visibility searchResultsVisibility = Visibility.Collapsed;
+
+        public Visibility SearchStatusVisibility
+        {
+            get
+            {
+                return searchStatusVisibility;
+            }
+            set
+            {
+                searchStatusVisibility = value;
+                OnPropertyChanged(this, "SearchStatusVisibility");
+            }
+        }
+        private Visibility searchStatusVisibility = Visibility.Visible;
 
         /// <summary>
         /// 
@@ -163,6 +207,8 @@ namespace Meticumedia.Controls
             }
         }
         private string searchString;
+
+        
 
         /// <summary>
         /// Results from database search
@@ -201,6 +247,17 @@ namespace Meticumedia.Controls
                 return this.Content is TvShow;
             }
         }
+
+        #endregion
+
+        #region Variables
+
+        private BackgroundWorker searchWorker;
+
+        /// <summary>
+        /// Timer for updating search results status.
+        /// </summary>
+        private static System.Timers.Timer searchUpdateTimer;
 
         #endregion
 
@@ -311,6 +368,21 @@ namespace Meticumedia.Controls
             }
         }
 
+        private ICommand cancelModifyDatabaseIdCommand;
+        public ICommand CancelModifyDatabaseIdCommand
+        {
+            get
+            {
+                if (cancelModifyDatabaseIdCommand == null)
+                {
+                    cancelModifyDatabaseIdCommand = new RelayCommand(
+                        param => this.CancelModifyDatabaseId()
+                    );
+                }
+                return cancelModifyDatabaseIdCommand;
+            }
+        }
+
         private ICommand applyDatabaseIdCommand;
         public ICommand ApplyDatabaseIdCommand
         {
@@ -370,26 +442,51 @@ namespace Meticumedia.Controls
         public ContentEditorControlViewModel(Content content)
         {
             this.ResultsOk = false;
-            
-            if (content is Movie)
-                this.Content = new Movie(content as Movie);
-            else
-                this.Content = new TvShow(content as TvShow);
 
-            this.Databases = new ObservableCollection<string>();
-            if (this.Content is Movie)
+            // Store content object
+            OriginalContent = content;
+
+            // Clone content to allow it to be edited, but cancelled
+            switch (content.ContentType)
             {
-                foreach (MovieDatabaseSelection selection in Enum.GetValues(typeof(MovieDatabaseSelection)))
-                    this.Databases.Add(selection.Description());
+                case ContentType.Movie:
+                    this.Content = new Movie(content as Movie);
+                    break;
+                case ContentType.TvShow:
+                    this.Content = new TvShow(content as TvShow);
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
             }
-            else
+            
+            // Get databases for content type
+            this.Databases = new ObservableCollection<string>();
+            switch (this.Content.ContentType)
             {
-                foreach (TvDataBaseSelection selection in Enum.GetValues(typeof(TvDataBaseSelection)))
-                    this.Databases.Add(selection.Description());
+                case ContentType.Movie:
+                    foreach (MovieDatabaseSelection selection in Enum.GetValues(typeof(MovieDatabaseSelection)))
+                        this.Databases.Add(selection.Description());
+                    this.SelectedSearchDatabaseIndex = (int)Settings.DefaultMovieDatabase;
+                    break;
+                case ContentType.TvShow:
+                    foreach (TvDataBaseSelection selection in Enum.GetValues(typeof(TvDataBaseSelection)))
+                        this.Databases.Add(selection.Description());
+                    this.SelectedSearchDatabaseIndex = (int)Settings.DefaultTvDatabase;
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
             }
 
             this.SearchResults = new ObservableCollection<Content>();
             this.SearchString = System.IO.Path.GetFileName(content.Path);
+
+            searchWorker = new BackgroundWorker();
+            searchWorker.WorkerSupportsCancellation = true;
+            searchWorker.DoWork += searchWorker_DoWork;
+            searchWorker.RunWorkerCompleted += searchWorker_RunWorkerCompleted;
+
+            searchUpdateTimer = new System.Timers.Timer(500);
+            searchUpdateTimer.Elapsed += searchUpdateTimer_Elapsed;
         }
 
         #endregion
@@ -491,19 +588,24 @@ namespace Meticumedia.Controls
             this.DatabaseSearchVisibility = Visibility.Visible;
         }
 
+        private void CancelModifyDatabaseId()
+        {
+            this.DatabaseSearchVisibility = Visibility.Collapsed;
+            this.DatabaseStatusVisibility = Visibility.Visible;
+        }
+
         private void ApplyDatabaseId()
         {
             switch (this.Content.ContentType)
             {
                 case ContentType.Movie:
-                    ((Movie)this.Content).Clone((Movie)this.SelectedSearchContent);
+                    ((Movie)this.Content).Clone((Movie)this.SelectedSearchContent, false);
                     break;
                 case ContentType.TvShow:
-                    ((TvShow)this.Content).Clone((TvShow)this.SelectedSearchContent);
+                    ((TvShow)this.Content).Clone((TvShow)this.SelectedSearchContent, false);
                     break;
             }
             this.Content.UpdateInfoFromDatabase();
-            this.Content.Path = this.content.BuildFolderPath();
 
             this.DatabaseSearchVisibility = Visibility.Collapsed;
             this.DatabaseStatusVisibility = Visibility.Visible;
@@ -511,8 +613,44 @@ namespace Meticumedia.Controls
 
         private void DatabaseSearch()
         {
-            // Do search
-            this.SearchResults.Clear();
+            this.SearchStatusVisibility = Visibility.Visible;
+            this.SearchResultsVisibility = Visibility.Collapsed;
+            searchUpdateTimer.Enabled = true;
+            searchWorker.RunWorkerAsync();
+        }
+
+        private void SimplifySearchString()
+        {
+        }
+        
+        #endregion
+
+        #region Search Event Handlers
+
+        void searchUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                if (this.SearchStatus.Length == 0 || this.SearchStatus.Length > 16)
+                    this.SearchStatus = "Searching";
+                else
+                    this.SearchStatus += ".";
+            });
+        }
+
+        void searchWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            searchUpdateTimer.Enabled = false;
+            this.SearchStatusVisibility = Visibility.Collapsed;
+            this.SearchResultsVisibility = Visibility.Visible;
+        }
+
+        void searchWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {            
+                this.SearchResults.Clear();
+            });
             List<Content> results;
             switch (this.Content.ContentType)
             {
@@ -527,14 +665,14 @@ namespace Meticumedia.Controls
                 default:
                     throw new Exception("Unknown content type");
             }
-            foreach (Content result in results)
-                this.SearchResults.Add(result);
+            if (results != null)
+                App.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    foreach (Content result in results)
+                        this.SearchResults.Add(result);
+                });
         }
 
-        private void SimplifySearchString()
-        {
-        }
-        
         #endregion
     }
 }
