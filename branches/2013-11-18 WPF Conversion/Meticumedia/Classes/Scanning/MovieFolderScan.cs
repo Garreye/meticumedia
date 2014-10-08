@@ -174,12 +174,11 @@ namespace Meticumedia.Classes
                 OnProgressChange(ScanProcess.Movie, files[i].Path, (int)Math.Round((double)i / files.Count * 70));
 
                 // Categorize the file
-                FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
+                FileCategory fileCat = FileHelper.CategorizeFile(files[i], files[i].Path);
 
                 // Check that video file (tv is okay, may match incorrectly)
                 if (fileCat != FileCategory.MovieVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
                     continue;
-
 
                 // Check that file is not already in the queue
                 bool alreadyQueued = false;
@@ -237,8 +236,7 @@ namespace Meticumedia.Classes
                 OnProgressChange(ScanProcess.Movie, files[i].Path, (int)Math.Round((double)i / files.Count * 20) + 70);
 
                 // Categorize the file
-                FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
-
+                FileCategory fileCat = FileHelper.CategorizeFile(files[i], files[i].Path);
 
                 // Check that video file (tv is okay, may match incorrectly)
                 if (fileCat != FileCategory.MovieVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)

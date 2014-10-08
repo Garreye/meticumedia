@@ -735,6 +735,11 @@ namespace Meticumedia.Classes
         {
             return base.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return this.Show.DisplayName + " season " + this.Season + " episode " + this.Number;
+        }
         
         #endregion
 

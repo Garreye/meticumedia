@@ -204,42 +204,19 @@ namespace Meticumedia.Classes
             bool fast = (bool)args[2];
             int procNumber = (int)scanNumber;
 
-            // Get simple file name
-            string simpleFile = FileHelper.BasicSimplify(Path.GetFileNameWithoutExtension(orgPath.Path), false);
-
-            // Categorize the file
-            FileCategory fileCat = FileHelper.CategorizeFile(orgPath);
-
-            // Check tv
-            if (tvOnlyCheck && fileCat != FileCategory.TvVideo)
-                return;
-
-            // Check for cancellation
-            if (scanCanceled || procNumber < scanNumber)
-                return;
-
-            // Update progress
-            lock (directoryScanLock)
-            {
-                this.Items[pathNum].Action = OrgAction.Processing;
-                this.Items[pathNum].Category = fileCat;
-            }
-            ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
-
             // Check if file is in the queue
             bool alreadyQueued = false;
-            if(itemsInQueue != null)
-            for (int i = 0; i < itemsInQueue.Count; i++)
-                if (itemsInQueue[i].SourcePath == orgPath.Path)
-                {
-                    OrgItem newItem = new OrgItem(itemsInQueue[i]);
-                    newItem.Action = OrgAction.Queued;
-                    newItem.Enable = true;
-                    UpdateResult(newItem, pathNum, procNumber);
-                    alreadyQueued = true;
-                    break;
-                }
-
+            if (itemsInQueue != null)
+                for (int i = 0; i < itemsInQueue.Count; i++)
+                    if (itemsInQueue[i].SourcePath == orgPath.Path)
+                    {
+                        OrgItem newItem = new OrgItem(itemsInQueue[i]);
+                        newItem.Action = OrgAction.Queued;
+                        newItem.Enable = true;
+                        UpdateResult(newItem, pathNum, procNumber);
+                        alreadyQueued = true;
+                        break;
+                    }
             // If item is already in the queue, skip it
             if (alreadyQueued)
             {
@@ -247,180 +224,234 @@ namespace Meticumedia.Classes
                 return;
             }
 
-            // Set whether item is for new show
-            TvShow newShow = null;
+            // Setup match to filename and folder name (if it's in a folder inside of downloads)
+            string[] pathSplit = orgPath.Path.Replace(orgPath.OrgFolder.FolderPath, "").Split('\\');
+            List<string> possibleMatchPaths = new List<string>();
+            possibleMatchPaths.Add(pathSplit.Last());
+            if (pathSplit.Length > 2)
+                possibleMatchPaths.Add(pathSplit[pathSplit.Length - 2] + Path.GetExtension(orgPath.Path));
 
-            // Try to match file to existing show
-            Dictionary<TvShow, MatchCollection> matches = new Dictionary<TvShow, MatchCollection>();
-            for (int j = 0; j < Organization.Shows.Count; j++)
+            // Categorize the file
+            FileCategory fileCat = FileHelper.CategorizeFile(orgPath, orgPath.Path);
+
+            bool matchMade = false;
+            foreach (string matchString in possibleMatchPaths)
             {
-                MatchCollection match = Organization.Shows[j].MatchFileToContent(orgPath.Path);
-                if (match != null && match.Count > 0)
-                    matches.Add((TvShow)Organization.Shows[j], match);
-            }
+                // Get simple file name
+                string simpleFile = FileHelper.BasicSimplify(Path.GetFileNameWithoutExtension(matchString), false);
 
-            // Try to match to temporary show
-            lock (directoryScanLock)
-                foreach (TvShow show in temporaryShows)
+                // Categorize current match string
+                FileCategory matchFileCat = FileHelper.CategorizeFile(orgPath, matchString);
+
+                // Check tv
+                if (tvOnlyCheck && matchFileCat != FileCategory.TvVideo)
+                    continue;
+
+                // Check for cancellation
+                if (scanCanceled || procNumber < scanNumber)
+                    return;
+
+                // Update progress
+                lock (directoryScanLock)
                 {
-                    MatchCollection match = show.MatchFileToContent(orgPath.Path);
-                    newShow = show;
+                    this.Items[pathNum].Action = OrgAction.Processing;
+                    //this.Items[pathNum].Category = fileCat;  TODO: move this to later
+                }
+                ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
+
+                // Set whether item is for new show
+                TvShow newShow = null;
+
+                // Try to match file to existing show
+                Dictionary<TvShow, MatchCollection> matches = new Dictionary<TvShow, MatchCollection>();
+                for (int j = 0; j < Organization.Shows.Count; j++)
+                {
+                    MatchCollection match = Organization.Shows[j].MatchFileToContent(matchString);
                     if (match != null && match.Count > 0)
-                        matches.Add(show, match);
+                        matches.Add((TvShow)Organization.Shows[j], match);
                 }
 
-            // Check for cancellation
-            if (scanCanceled || procNumber < scanNumber)
-                return;
-
-            // Add appropriate action based on file category
-            switch (fileCat)
-            {
-                // TV item
-                case FileCategory.TvVideo:
-                    bool matched = false;
-
-                    TvShow bestMatch = null;
-                    bool matchSucess = false;
-                    if (matches.Count > 0)
+                // Try to match to temporary show
+                lock (directoryScanLock)
+                    foreach (TvShow show in temporaryShows)
                     {
-                        // Find best match, based on length
-                        int longestMatch = 2; // minimum of 3 letters must match (acronym)
-                        foreach (KeyValuePair<TvShow, MatchCollection> match in matches)
-                            foreach (Match m in match.Value)
-                            {
-                                // Check that match is not part of a word
-                                int matchWordCnt = 0;
-                                for (int l = m.Index; l < simpleFile.Length; l++)
-                                {
-                                    if (simpleFile[l] == ' ')
-                                        break;
-                                    else
-                                        ++matchWordCnt;
-                                }
-
-
-                                if (m.Value.Trim().Length > longestMatch && m.Length >= matchWordCnt)
-                                {
-                                    longestMatch = m.Length;
-                                    bestMatch = match.Key;
-                                }
-                            }
+                        MatchCollection match = show.MatchFileToContent(matchString);
+                        newShow = show;
+                        if (match != null && match.Count > 0)
+                            matches.Add(show, match);
                     }
 
-                    // Episode not matched to a TV show, search database!
-                    if (bestMatch == null && !skipMatching)
-                    {
-                        // Setup search string
-                        string showFile = Path.GetFileNameWithoutExtension(orgPath.Path);
+                // Check for cancellation
+                if (scanCanceled || procNumber < scanNumber)
+                    return;
 
-                        // Setup path for resulting content
-                        ContentRootFolder defaultTvFolder;
-                        string path = NO_TV_FOLDER;
-                        if (Settings.GetDefaultTvFolder(out defaultTvFolder))
-                            path = defaultTvFolder.FullPath;
+                // Add appropriate action based on file category
+                switch (matchFileCat)
+                {
+                    // TV item
+                    case FileCategory.TvVideo:
 
-                        // Perform search for matching TV show
-                        matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, out bestMatch);
-                        bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
-                        TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
-
-                        // Save show in temporary shows list (in case there are more files that may match to it during scan)
-                        lock (directoryScanLock)
-                            if (!temporaryShows.Contains(bestMatch))
-                                temporaryShows.Add(bestMatch);
-                        newShow = bestMatch;
-                    }
-
-                    // Episode has been matched to a TV show
-                    if (bestMatch != null)
-                    {
-                        // Try to get episode information from file
-                        int seasonNum, episodeNum1, episodeNum2;
-                        if (FileHelper.GetEpisodeInfo(orgPath.Path, bestMatch.DatabaseName, out seasonNum, out episodeNum1, out episodeNum2))
+                        TvShow bestMatch = null;
+                        bool matchSucess = false;
+                        if (matches.Count > 0)
                         {
-                            // Try to get the episode from the show
-                            TvEpisode episode1, episode2 = null;
-                            if (bestMatch.FindEpisode(seasonNum, episodeNum1, false, out episode1))
-                            {
-                                if (episodeNum2 != -1)
-                                    bestMatch.FindEpisode(seasonNum, episodeNum2, false, out episode2);
-
-                                OrgAction action = orgPath.Copy ? OrgAction.Copy : OrgAction.Move;
-
-                                // If item episode already exists set action to duplicate
-                                if (episode1.Missing == MissingStatus.Located)
+                            // Find best match, based on length
+                            int longestMatch = 2; // minimum of 3 letters must match (acronym)
+                            foreach (KeyValuePair<TvShow, MatchCollection> match in matches)
+                                foreach (Match m in match.Value)
                                 {
-                                    if (episode1.Ignored)
+                                    // Check that match is not part of a word
+                                    int matchWordCnt = 0;
+                                    for (int l = m.Index; l < simpleFile.Length; l++)
                                     {
-                                        ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
-                                        return;
+                                        if (simpleFile[l] == ' ')
+                                            break;
+                                        else
+                                            ++matchWordCnt;
                                     }
 
-                                    action = OrgAction.AlreadyExists;
-                                }
 
-                                // Build action and add it to results
-                                string destination = bestMatch.BuildFilePath(episode1, episode2, Path.GetExtension(orgPath.Path));
-                                OrgItem newItem = new OrgItem(action, orgPath.Path, destination, episode1, episode2, fileCat, orgPath.OrgFolder, newShow);
-                                if (destination.StartsWith(NO_TV_FOLDER))
-                                    newItem.Action = OrgAction.NoRootFolder;
-                                if (newItem.Action == OrgAction.AlreadyExists || newItem.Action == OrgAction.NoRootFolder)
-                                    newItem.Enable = false;
-                                else
-                                    newItem.Enable = true;
-                                UpdateResult(newItem, pathNum, procNumber);
-                                matched = true;
+                                    if (m.Value.Trim().Length > longestMatch && m.Length >= matchWordCnt)
+                                    {
+                                        longestMatch = m.Length;
+                                        bestMatch = match.Key;
+                                    }
+                                }
+                        }
+
+                        // Episode not matched to a TV show, search database!
+                        if (bestMatch == null && !skipMatching)
+                        {
+                            // Setup search string
+                            string showFile = Path.GetFileNameWithoutExtension(matchString);
+
+                            // Setup path for resulting content
+                            ContentRootFolder defaultTvFolder;
+                            string path = NO_TV_FOLDER;
+                            if (Settings.GetDefaultTvFolder(out defaultTvFolder))
+                                path = defaultTvFolder.FullPath;
+
+                            // Perform search for matching TV show
+                            matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, out bestMatch);
+                            bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
+                            TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
+
+                            // Save show in temporary shows list (in case there are more files that may match to it during scan)
+                            lock (directoryScanLock)
+                                if (!temporaryShows.Contains(bestMatch))
+                                    temporaryShows.Add(bestMatch);
+                            newShow = bestMatch;
+                        }
+
+                        // Episode has been matched to a TV show
+                        if (bestMatch != null)
+                        {
+                            // Try to get episode information from file
+                            int seasonNum, episodeNum1, episodeNum2;
+                            if (FileHelper.GetEpisodeInfo(matchString, bestMatch.DatabaseName, out seasonNum, out episodeNum1, out episodeNum2))
+                            {
+                                // Try to get the episode from the show
+                                TvEpisode episode1, episode2 = null;
+                                if (bestMatch.FindEpisode(seasonNum, episodeNum1, false, out episode1))
+                                {
+                                    if (episodeNum2 != -1)
+                                        bestMatch.FindEpisode(seasonNum, episodeNum2, false, out episode2);
+
+                                    OrgAction action = orgPath.Copy ? OrgAction.Copy : OrgAction.Move;
+
+                                    // If item episode already exists set action to duplicate
+                                    if (episode1.Missing == MissingStatus.Located)
+                                    {
+                                        if (episode1.Ignored)
+                                        {
+                                            ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
+                                            return;
+                                        }
+
+                                        action = OrgAction.AlreadyExists;
+                                    }
+
+                                    // Build action and add it to results
+                                    string destination = bestMatch.BuildFilePath(episode1, episode2, Path.GetExtension(orgPath.Path));
+                                    OrgItem newItem = new OrgItem(action, orgPath.Path, destination, episode1, episode2, fileCat, orgPath.OrgFolder, newShow);
+                                    if (destination.StartsWith(NO_TV_FOLDER))
+                                        newItem.Action = OrgAction.NoRootFolder;
+                                    if (newItem.Action == OrgAction.AlreadyExists || newItem.Action == OrgAction.NoRootFolder)
+                                        newItem.Enable = false;
+                                    else
+                                        newItem.Enable = true;
+                                    newItem.Category = matchFileCat;
+                                    UpdateResult(newItem, pathNum, procNumber);
+                                    matchMade = true;
+                                }
                             }
                         }
-                    }
 
-                    // No match to TV show
-                    if (!matched && !tvOnlyCheck && !fast)
-                    {
-                        // Try to match to a movie
-                        OrgItem movieItem;
-                        if (CreateMovieAction(orgPath, out movieItem, fast))
-                            UpdateResult(movieItem, pathNum, procNumber);
-                        else
+                        // No match to TV show
+                        if (!matchMade && !tvOnlyCheck && !fast)
                         {
-                            OrgItem newItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
-                            UpdateResult(newItem, pathNum, procNumber);
+                            // Try to match to a movie
+                            OrgItem movieItem;
+                            if (CreateMovieAction(orgPath, matchString, out movieItem, fast))
+                            {
+                                UpdateResult(movieItem, pathNum, procNumber);
+                                matchMade = true;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                // Movie item
-                case FileCategory.MovieVideo:    
-                    // Create action
-                    OrgItem item;
-                    CreateMovieAction(orgPath, out item, fast);
+                    // Movie item
+                    case FileCategory.MovieVideo:
+                        // Create action
+                        OrgItem item;
+                        CreateMovieAction(orgPath, matchString, out item, fast);
 
-                    // If delete action created (for sample file)
-                    if (item.Action == OrgAction.Delete)
-                        SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
-                    else
-                        UpdateResult(item, pathNum, procNumber);
-                    break;
+                        // If delete action created (for sample file)
+                        if (item.Action == OrgAction.Delete)
+                        {
+                            SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
+                            matchMade = true;
+                        }
+                        else if (item.Action != OrgAction.None)
+                        {
+                            UpdateResult(item, pathNum, procNumber);
+                            matchMade = true;
+                        }
+                        break;
 
-                // Trash
-                case FileCategory.Trash:
-                    SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
-                    break;
-                // Ignore
-                case FileCategory.Ignored:
-                    UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder), pathNum, procNumber);
-                    break;
-                // Unknown
-                default:
-                    UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder), pathNum, procNumber);
+                    // Trash
+                    case FileCategory.Trash:
+                        SetDeleteAction(orgPath, matchFileCat, pathNum, procNumber);
+                        matchMade = true;
+                        break;
+                    // Ignore
+                    case FileCategory.Ignored:
+                        UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, matchFileCat, orgPath.OrgFolder), pathNum, procNumber);
+                        matchMade = true;
+                        break;
+                    // Unknown
+                    default:
+                        UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, matchFileCat, orgPath.OrgFolder), pathNum, procNumber);
+                        matchMade = true;
+                        break;
+                }
+
+                // Check for cancellation
+                if (scanCanceled || procNumber < scanNumber)
+                    return;
+
+                // Break loop if matched
+                if (matchMade)
                     break;
             }
 
-            // Check for cancellation
-            if (scanCanceled || procNumber < scanNumber)
-                return;
+            // If no match on anything set none action
+            if (!matchMade)
+            {
+                OrgItem newItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
+                UpdateResult(newItem, pathNum, procNumber);
+            }
 
             // Update progress
             ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
@@ -486,20 +517,20 @@ namespace Meticumedia.Classes
         /// <param name="file">The file to create movie action from</param>
         /// <param name="item">The resulting movie action</param>
         /// <returns>Whether the file was matched to a movie</returns>
-        private bool CreateMovieAction(OrgPath file, out OrgItem item, bool fast)
+        private bool CreateMovieAction(OrgPath file, string matchString, out OrgItem item, bool fast)
         {
             // Initialize item
             item = new OrgItem(OrgAction.None, file.Path, FileCategory.MovieVideo, file.OrgFolder);
 
             // Check if sample!
-            if (file.Path.ToLower().Contains("sample"))
+            if (matchString.ToLower().Contains("sample"))
             {
                 item.Action = OrgAction.Delete;
                 return false;
             }
 
             // Try to match file to movie
-            string search = Path.GetFileNameWithoutExtension(file.Path);
+            string search = Path.GetFileNameWithoutExtension(matchString);
 
             // Get root folder
             ContentRootFolder defaultMovieFolder;

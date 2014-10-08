@@ -26,8 +26,9 @@ namespace Meticumedia.Classes
         /// Categorize a file based on extension
         /// </summary>
         /// <param name="file">The file name string</param>
+        /// <param name="matchTo">String to match TV categorization to</param>
         /// <returns>The file category</returns>
-        public static FileCategory CategorizeFile(OrgPath file)
+        public static FileCategory CategorizeFile(OrgPath file, string matchTo)
         {
             // Get file extension
             string extenstion = Path.GetExtension(file.Path).ToLower();
@@ -45,10 +46,10 @@ namespace Meticumedia.Classes
                 if (extMatch.Success)
                 {
                     // Check if sample!
-                    if (file.Path.ToLower().Contains("sample"))
+                    if (matchTo.ToLower().Contains("sample"))
                         return FileCategory.Trash;
 
-                    if (IsTvEpisode(file.Path))
+                    if (IsTvEpisode(matchTo))
                         return FileCategory.TvVideo;
                     else
                         return FileCategory.MovieVideo;

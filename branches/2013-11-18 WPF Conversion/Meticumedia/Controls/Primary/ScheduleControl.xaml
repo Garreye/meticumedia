@@ -77,7 +77,7 @@
         </GroupBox>
 
         <GroupBox Grid.Row="1" Header="Results">
-            <cntrls:EpisodeCollectionControl DataContext="{Binding  EpisodesModel}" />
+            <cntrls:EpisodeCollectionControl DataContext="{Binding EpisodesModel}" />
         </GroupBox>
 
     </Grid>
