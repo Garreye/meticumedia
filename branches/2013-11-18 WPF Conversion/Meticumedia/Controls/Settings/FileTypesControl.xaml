@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="Meticumedia.Controls.FileTypesControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="393" d:DesignWidth="491">
+    <UserControl.Resources>
+        <DataTemplate x:Key="fileTypeView">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBox Text="{Binding NextItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Margin="5" />
+                <Button Content="+"  Width="20"  Grid.Row="0" Grid.Column="1" Margin="0,5,5,5" Click="AddTypeButton_Click" />
+                <Button Content="-"  Width="20" Grid.Row="0" Grid.Column="2" Margin="0,5,5,5" Click="RemTypeButton_Click" />
+                <ListBox ItemsSource="{Binding Types}" Grid.Row="1" Grid.ColumnSpan="3" Margin="3" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <GroupBox Header="Video File Types" Grid.Column="0">
+            <ContentControl Name="ctntVideoFiles" ContentTemplate="{StaticResource fileTypeView}"/>
+        </GroupBox>
+        <GroupBox Header="Delete File Types" Grid.Column="1">
+            <ContentControl Name="ctntDeleteFiles" ContentTemplate="{StaticResource fileTypeView}"/>
+        </GroupBox>
+        <GroupBox Header="Ignore File Types" Grid.Column="2">
+            <ContentControl Name="ctntIgnoreFiles" ContentTemplate="{StaticResource fileTypeView}"/>
+        </GroupBox>
+    </Grid>
+</UserControl>

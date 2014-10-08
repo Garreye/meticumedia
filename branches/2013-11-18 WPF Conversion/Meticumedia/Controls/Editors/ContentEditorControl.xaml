@@ -1,0 +1,210 @@
+﻿<UserControl x:Class="Meticumedia.Controls.ContentEditorControl"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:wpfr="clr-namespace:Meticumedia.WPF"
+        xmlns:mm="clr-namespace:Meticumedia.Classes"
+        mc:Ignorable="d" 
+        d:DesignHeight="500" d:DesignWidth="500">
+    <UserControl.Resources>
+        <wpfr:BoolInverterConverter x:Key="boolInvConverter" />
+        <BooleanToVisibilityConverter x:Key="boolVisConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0" Header="Database" Visibility="{Binding DatabaseStatusVisibility}">
+            <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="100" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Source" Margin="3" />
+                    <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Databases}" SelectedIndex="{Binding Content.DatabaseSelection}" IsEnabled="False" Margin="3"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="ID" Margin="3" />
+                    <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Content.Id}" IsEnabled="False" Margin="3,0,3,3" Height="20" VerticalAlignment="Bottom" />
+
+                    <!--<TextBlock Grid.Row="2" Grid.Column="0" Text="Name" Margin="3" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Content.DatabaseName}" IsEnabled="False" Margin="3" />
+
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Year" Margin="3" />
+                    <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Content.DatabaseYear}" IsEnabled="False" Margin="3" />-->
+
+                    <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Content="Modify" Margin="3" Command="{Binding ModifyDatabaseIdCommand}" />
+                </Grid>
+        </GroupBox>
+        
+        <GroupBox Grid.Row="1" Grid.RowSpan="2" Header="Database" Visibility="{Binding DatabaseSearchVisibility}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Database" Margin="3" VerticalAlignment="Center" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding Databases}" SelectedIndex="{Binding SelectedSearchDatabaseIndex}" Margin="3" />
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" Text="{Binding SearchString}" Margin="3" />
+                    <Button Grid.Column="1" Content="Search" Command="{Binding DatabaseSearchCommand}" Padding="5,0" Margin="3" />
+                    <Button Grid.Column="2" Content="Simplify" Command="{Binding SearchStringSimplifyCommand}" Padding="5,0" Margin="3" />
+                </Grid>
+
+                <DataGrid Grid.Row="2" ItemsSource="{Binding SearchResults}" SelectedItem="{Binding SelectedSearchContent}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
+                        <DataGridTextColumn Header="Year" Binding="{Binding DisplayYear}" />
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+                        <DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <Button Grid.Row="3" Content="Apply Selected ID" Command="{Binding ApplyDatabaseIdCommand}" />
+
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="1" Header=" Display" Visibility="{Binding DatabaseStatusVisibility}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="100" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" Margin="3" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Content.DisplayName}" IsEnabled="{Binding Content.UseDatabaseName, Converter={StaticResource boolInvConverter}}" Margin="3" />
+                    <!-- TODO: inversion on IsEnabled -->
+                    <CheckBox Grid.Row="0" Grid.Column="2" Content="Use Database" IsChecked="{Binding Content.UseDatabaseName}" Margin="3" VerticalAlignment="Center" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Year" Margin="3" />
+                    <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Content.DisplayYear}" IsEnabled="{Binding Content.UseDatabaseYear, Converter={StaticResource boolInvConverter}}" Margin="3" />
+                    <!-- TODO: inversion on IsEnabled -->
+                    <CheckBox Grid.Row="1" Grid.Column="2" Content="Use Database" IsChecked="{Binding Content.UseDatabaseYear}" Margin="3" VerticalAlignment="Center" />
+
+                </Grid>
+
+                <GroupBox Grid.Row="1" Header="Genres">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <CheckBox Grid.Column="0" Content="Use Database" IsChecked="{Binding Content.UseDatabaseGenres}" Margin="3" VerticalAlignment="Center" />
+
+                            <Button Grid.Column="2" Content="+" Width="30" Margin="3" Command="{Binding AddGenreCommand}" IsEnabled="{Binding Content.UseDatabaseGenres, Converter={StaticResource boolInvConverter}}"/>
+                            <Button Grid.Column="3" Content="-" Width="30" Margin="3" Command="{Binding RemoveGenreCommand}" IsEnabled="{Binding Content.UseDatabaseGenres, Converter={StaticResource boolInvConverter}}"/>
+                            <Button Grid.Column="4" Content="Clear" Padding="5,3" Margin="3" Command="{Binding ClearGenresCommand}" IsEnabled="{Binding Content.UseDatabaseGenres, Converter={StaticResource boolInvConverter}}"/>
+
+
+                        </Grid>
+
+                        <ListBox Grid.Row="1" ItemsSource="{Binding Content.DisplayGenres}" SelectedItem="{Binding SelectedGenre}" IsEnabled="{Binding Content.UseDatabaseGenres, Converter={StaticResource boolInvConverter}}" />
+
+                    </Grid>
+                </GroupBox>
+
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="2" Header="Organization" Visibility="{Binding DatabaseStatusVisibility}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <CheckBox Grid.Row="0" Content="Include in Folder Organization Scans (allows file renaming)" IsChecked="{Binding Content.DoRenaming}" Margin="3"  />
+                <CheckBox Grid.Row="1" Content="Include in Missing Epsidode Scans" IsChecked="{Binding TvShow.DoMissingCheck}" Margin="3" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}" />
+                <CheckBox Grid.Row="2" Content="Include in Schedule" IsChecked="{Binding TvShow.IncludeInSchedule}" Margin="3" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}" />
+                <CheckBox Grid.Row="3" Content="Use DVD Episode Order (if available)" IsChecked="{Binding TvShow.DvdEpisodeOrder}" Margin="3" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}" />
+
+                <GroupBox Grid.Row="4" Header="Alternate Show Names for Episode File Matching" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0" Text="{Binding AlternateNameEntry}" Margin="3" />
+                            <Button Grid.Column="1" Content="+" Width="30" Margin="3" Command="{Binding AddAltNameCommand}" />
+                            <Button Grid.Column="2" Content="-" Width="30" Margin="3" Command="{Binding RemoveAltNameCommand}" />
+                            <Button Grid.Column="3" Content="Clear" Padding="5,3" Margin="3" Command="{Binding ClearAltNamesCommand}" />
+                        </Grid>
+
+                        <ListBox Grid.Row="1" ItemsSource="{Binding TvShow.AlternativeNameMatches}" SelectedItem="{Binding SelectedAlternateName}" />
+
+                    </Grid>
+                </GroupBox>
+                
+            </Grid>
+        </GroupBox>
+    </Grid>
+</UserControl>

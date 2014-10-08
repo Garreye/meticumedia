@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticumedia", "Meticumedia\Meticumedia.csproj", "{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Debug|x86.ActiveCfg = Debug|x86
+		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Debug|x86.Build.0 = Debug|x86
+		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Release|x86.ActiveCfg = Release|x86
+		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

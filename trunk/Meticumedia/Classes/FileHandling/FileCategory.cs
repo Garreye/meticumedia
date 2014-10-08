@@ -1,0 +1,16 @@
+﻿// --------------------------------------------------------------------------------
+// Source code available at http://code.google.com/p/meticumedia/
+// This code is released under GPLv3 http://www.gnu.org/licenses/gpl.html
+// --------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Meticumedia
+{
+    /// <summary>
+    /// Categories of useful file types
+    /// </summary>
+    public enum FileCategory { Empty = 0, Unknown = 1, Ignored = 2, TvVideo = 4, NonTvVideo = 8, Trash = 16, Custom = 32, Folder = 64, All = 127 };
+}
