@@ -525,10 +525,10 @@ namespace Meticumedia.Classes
             this.Action = action;
             this.SourcePath = file;
             this.DestinationPath = destination;
-            this.TvEpisode = episode;
+            this.TvEpisode = new TvEpisode(episode);
             this.Category = category;
             if (episode2 != null)
-                this.TvEpisode2 = episode2;
+                this.TvEpisode2 = new TvEpisode(episode2);
             this.Enable = false;
             this.ScanDirectory = scanDir;
             this.Number = 0;
@@ -569,8 +569,8 @@ namespace Meticumedia.Classes
                 this.DestinationPath = FileHelper.DELETE_DIRECTORY;
             else
                 this.DestinationPath = string.Empty;
-            this.TvEpisode = episode;
-            this.TvEpisode2 = episode2;
+            this.TvEpisode = new TvEpisode(episode);
+            this.TvEpisode2 = new TvEpisode(episode2);
             this.Category = category;
             this.Enable = false;
             this.ScanDirectory = scanDir;
@@ -1575,6 +1575,34 @@ namespace Meticumedia.Classes
 
                 // Delete incomplete destination file
                 File.Delete(this.DestinationPath);
+            }
+        }
+
+        /// <summary>
+        /// Build destination path based on form
+        /// </summary>
+        /// <returns></returns>
+        public string BuildDestination()
+        {
+            // Build destination file based on category
+            switch (this.Category)
+            {
+                case FileCategory.Unknown:
+                case FileCategory.Ignored:
+                    return string.Empty;
+                case FileCategory.Custom:
+                    return this.DestinationPath;
+                case FileCategory.Trash:
+                    return FileHelper.DELETE_DIRECTORY;
+                case FileCategory.TvVideo:
+                    string fileName = this.TvEpisode.Show.BuildFilePath(this.TvEpisode, this.TvEpisode2, string.Empty);
+
+                    return fileName + Path.GetExtension(this.SourcePath);
+                case FileCategory.MovieVideo:
+                    // TODO: don't use default path if alread in movies folder!
+                    return this.Movie.BuildFilePath(this.SourcePath);
+                default:
+                    throw new Exception("Unknown file category!");
             }
         }
 

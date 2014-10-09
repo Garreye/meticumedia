@@ -18,8 +18,6 @@ namespace Meticumedia.Controls
     {        
         #region Properties
 
-        public Content OriginalContent { get; set; }
-
         /// <summary>
         /// Content being editied
         /// </summary>
@@ -439,24 +437,31 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public ContentEditorControlViewModel(Content content)
+        public ContentEditorControlViewModel(Content content, bool directEditing)
         {
             this.ResultsOk = false;
 
-            // Store content object
-            OriginalContent = content;
+            // Edit item directly or through clone
+            if (directEditing)
+                this.Content = content;
+            else
+                // Clone content to allow it to be edited, but cancelled
+                switch (content.ContentType)
+                {
+                    case ContentType.Movie:
+                        this.Content = new Movie(content as Movie);
+                        break;
+                    case ContentType.TvShow:
+                        this.Content = new TvShow(content as TvShow);
+                        break;
+                    default:
+                        throw new Exception("Unknown content type");
+                }
 
-            // Clone content to allow it to be edited, but cancelled
-            switch (content.ContentType)
+            if (this.Content.Id == Content.UNKNOWN_ID && string.IsNullOrEmpty(this.Content.UserName))
             {
-                case ContentType.Movie:
-                    this.Content = new Movie(content as Movie);
-                    break;
-                case ContentType.TvShow:
-                    this.Content = new TvShow(content as TvShow);
-                    break;
-                default:
-                    throw new Exception("Unknown content type");
+                this.DatabaseStatusVisibility = Visibility.Collapsed;
+                this.DatabaseSearchVisibility = Visibility.Visible;
             }
             
             // Get databases for content type

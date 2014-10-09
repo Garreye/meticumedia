@@ -114,7 +114,7 @@ namespace Meticumedia.Windows
         public ContentEditorWindowViewModel(Content content)
         {
             originalContent = content;            
-            controlViewModel = new ContentEditorControlViewModel(content);
+            controlViewModel = new ContentEditorControlViewModel(content, false);
             this.ResultsOk = false;
             this.Content.PropertyChanged += Content_PropertyChanged;
         }

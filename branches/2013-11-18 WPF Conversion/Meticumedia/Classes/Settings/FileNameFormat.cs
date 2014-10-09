@@ -201,7 +201,7 @@ namespace Meticumedia.Classes
             }
             
             // Build file name
-            string buildName = BuildFileName(movie.DatabaseName, movie.DatabaseYear, simpleResult, differentiator);
+            string buildName = BuildFileName(movie.DisplayName, movie.DisplayYear, simpleResult, differentiator);
             
             // Remove unsafe file characters and add extension
             return FileHelper.GetSafeFileName(buildName) + fileExt;
