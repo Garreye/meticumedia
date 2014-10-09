@@ -61,7 +61,6 @@ namespace Meticumedia.Classes
                         OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, show.Path, builtFolder, new TvEpisode("", show, -1, -1, "", ""), null, FileCategory.Folder, null);
                         newItem.Enable = true;
                         newItem.Number = number++;
-                        newItem.Show = show;
                         results.Add(newItem);
                     }
                 }

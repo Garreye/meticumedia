@@ -15,6 +15,11 @@ namespace Meticumedia.Classes
     /// </summary>
     public class TvShowSearch : ContentSearch
     {
+        public TvShowSearch()
+        {
+            this.ContentType = Classes.ContentType.TvShow;
+        }
+        
         /// <summary>
         /// Performs search for TV in database
         /// </summary>

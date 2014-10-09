@@ -124,7 +124,7 @@ namespace Meticumedia
             this.groupBox2.Controls.Add(this.btnAddGenre);
             this.groupBox2.Location = new System.Drawing.Point(8, 76);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(202, 137);
+            this.groupBox2.Size = new System.Drawing.Size(202, 0);
             this.groupBox2.TabIndex = 24;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Genres";
@@ -137,7 +137,7 @@ namespace Meticumedia
             this.lbGenres.FormattingEnabled = true;
             this.lbGenres.Location = new System.Drawing.Point(47, 19);
             this.lbGenres.Name = "lbGenres";
-            this.lbGenres.Size = new System.Drawing.Size(149, 108);
+            this.lbGenres.Size = new System.Drawing.Size(149, 4);
             this.lbGenres.TabIndex = 0;
             // 
             // label3
@@ -203,9 +203,9 @@ namespace Meticumedia
             this.gbProperties.Controls.Add(this.label2);
             this.gbProperties.Controls.Add(this.btnDbSearch);
             this.gbProperties.Controls.Add(this.txtName);
-            this.gbProperties.Location = new System.Drawing.Point(3, 3);
+            this.gbProperties.Location = new System.Drawing.Point(3, 258);
             this.gbProperties.Name = "gbProperties";
-            this.gbProperties.Size = new System.Drawing.Size(384, 269);
+            this.gbProperties.Size = new System.Drawing.Size(384, 14);
             this.gbProperties.TabIndex = 36;
             this.gbProperties.TabStop = false;
             this.gbProperties.Text = "Properties";
@@ -235,7 +235,7 @@ namespace Meticumedia
             this.splitContainer1.Panel2.Controls.Add(this.gbAltMatchNames);
             this.splitContainer1.Panel2.Controls.Add(this.chkDoMissing);
             this.splitContainer1.Panel2.Controls.Add(this.chkIncludeInSchedule);
-            this.splitContainer1.Size = new System.Drawing.Size(373, 216);
+            this.splitContainer1.Size = new System.Drawing.Size(373, 0);
             this.splitContainer1.SplitterDistance = 213;
             this.splitContainer1.TabIndex = 41;
             // 
@@ -293,7 +293,7 @@ namespace Meticumedia
             this.gbAltMatchNames.Controls.Add(this.btnAddMatch);
             this.gbAltMatchNames.Location = new System.Drawing.Point(3, 99);
             this.gbAltMatchNames.Name = "gbAltMatchNames";
-            this.gbAltMatchNames.Size = new System.Drawing.Size(150, 114);
+            this.gbAltMatchNames.Size = new System.Drawing.Size(150, 0);
             this.gbAltMatchNames.TabIndex = 40;
             this.gbAltMatchNames.TabStop = false;
             this.gbAltMatchNames.Text = "Alternative Match Names";
@@ -307,7 +307,7 @@ namespace Meticumedia
             this.lbAltNames.FormattingEnabled = true;
             this.lbAltNames.Location = new System.Drawing.Point(47, 19);
             this.lbAltNames.Name = "lbAltNames";
-            this.lbAltNames.Size = new System.Drawing.Size(97, 95);
+            this.lbAltNames.Size = new System.Drawing.Size(97, 4);
             this.lbAltNames.TabIndex = 0;
             // 
             // btnRemoveMatch
@@ -376,9 +376,10 @@ namespace Meticumedia
             this.cntrlSearch.DatabaseSelection = 0;
             this.cntrlSearch.Location = new System.Drawing.Point(6, 19);
             this.cntrlSearch.Name = "cntrlSearch";
-            this.cntrlSearch.Size = new System.Drawing.Size(359, 252);
+            this.cntrlSearch.Size = new System.Drawing.Size(359, 253);
             this.cntrlSearch.TabIndex = 33;
             this.cntrlSearch.SearchResultsSelected += new System.EventHandler<Meticumedia.SearchControl.SearchResultsSelectedArgs>(this.cntrlSearch_SearchResultsSelected);
+            this.cntrlSearch.Load += new System.EventHandler(this.cntrlSearch_Load);
             // 
             // ContentEditControl
             // 
