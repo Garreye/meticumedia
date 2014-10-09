@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -170,9 +171,129 @@ namespace Meticumedia.Controls
 
         private bool CanDoEditSelectedItemCommand()
         {
-            return this.SelectedResultItem != null;
+            return this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1;
         }
 
+        private ICommand setSelectedItemToDeleteCommand;
+        public ICommand SetSelectedItemToDeleteCommand
+        {
+            get
+            {
+                if (setSelectedItemToDeleteCommand == null)
+                {
+                    setSelectedItemToDeleteCommand = new RelayCommand(
+                        param => this.SetSelectedItemToDelete()
+                    );
+                }
+                return setSelectedItemToDeleteCommand;
+            }
+        }
+
+        private ICommand ignoreItemsCommand;
+        public ICommand IgnoreItemsCommand
+        {
+            get
+            {
+                if (ignoreItemsCommand == null)
+                {
+                    ignoreItemsCommand = new RelayCommand(
+                        param => this.IgnoreItems()
+                    );
+                }
+                return ignoreItemsCommand;
+            }
+        }
+
+        private ICommand unignoreItemsCommand;
+        public ICommand UnignoreItemsCommand
+        {
+            get
+            {
+                if (unignoreItemsCommand == null)
+                {
+                    unignoreItemsCommand = new RelayCommand(
+                        param => this.UnignoreItems()
+                    );
+                }
+                return unignoreItemsCommand;
+            }
+        }
+
+        private ICommand locateEpisodeCommand;
+        public ICommand LocateEpisodeCommand
+        {
+            get
+            {
+                if (locateEpisodeCommand == null)
+                {
+                    locateEpisodeCommand = new RelayCommand(
+                        param => this.LocateEpisode()
+                    );
+                }
+                return locateEpisodeCommand;
+            }
+        }
+
+        private ICommand ignoreEpisodeCommand;
+        public ICommand IgnoreEpisodeCommand
+        {
+            get
+            {
+                if (ignoreEpisodeCommand == null)
+                {
+                    ignoreEpisodeCommand = new RelayCommand(
+                        param => this.IgnoreEpisode()
+                    );
+                }
+                return ignoreEpisodeCommand;
+            }
+        }
+
+        private ICommand ignoreSeasonCommand;
+        public ICommand IgnoreSeasonCommand
+        {
+            get
+            {
+                if (ignoreSeasonCommand == null)
+                {
+                    ignoreSeasonCommand = new RelayCommand(
+                        param => this.IgnoreSeason()
+                    );
+                }
+                return ignoreSeasonCommand;
+            }
+        }
+
+        private ICommand ignoreShowCommand;
+        public ICommand IgnoreShowCommand
+        {
+            get
+            {
+                if (ignoreShowCommand == null)
+                {
+                    ignoreShowCommand = new RelayCommand(
+                        param => this.IgnoreShow()
+                    );
+                }
+                return ignoreShowCommand;
+            }
+        }
+
+        private ICommand setReplaceExistingCommand;
+        public ICommand SetReplaceExistingCommand
+        {
+            get
+            {
+                if (setReplaceExistingCommand == null)
+                {
+                    setReplaceExistingCommand = new RelayCommand(
+                        param => this.SetReplaceExisting()
+                    );
+                }
+                return setReplaceExistingCommand;
+            }
+        }
+        
         #endregion
 
         #region Properties
@@ -232,6 +353,38 @@ namespace Meticumedia.Controls
             get;
             private set;
         }
+
+        public bool MoveCopyEnables
+        {
+            get
+            {
+                return moveCopyEnables;
+            }
+            set
+            {
+                moveCopyEnables = value;
+                SetEnables(OrgAction.Move | OrgAction.Copy, value);
+                OnPropertyChanged(this, "MoveCopyEnables");
+            }
+        }
+        private bool moveCopyEnables = true;
+
+        public bool DeleteEnables
+        {
+            get
+            {
+                return deleteEnables;
+            }
+            set
+            {
+                deleteEnables = value;
+                SetEnables(OrgAction.Delete, value);
+                OnPropertyChanged(this, "DeleteEnables");
+            }
+        }
+        private bool deleteEnables = true;
+
+        public IList SelectedResultsItems { get; set; }
 
         public ICollectionView ScanResultsCollection { get; set; }
 
@@ -480,51 +633,110 @@ namespace Meticumedia.Controls
         }
         private FileCategory categoryFilter = FileCategory.All;
 
+        #endregion        
+
+        #region Context Menu Related
+
+        public ObservableCollection<MenuItem> MovieFolderItems { get; set; }
+
+        public Visibility SingleSelectionVisibility
+        {
+            get
+            {
+                return this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility AnySelectionVisibility
+        {
+            get
+            {
+                return this.SelectedResultsItems != null && this.SelectedResultsItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility DirectoryScanAnySelectedResultsVisibility
+        {
+            get
+            {
+                return this.lastRunScan == ScanType.Directory && this.SelectedResultsItems != null && this.SelectedResultsItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility TvMissingScanAnySelectedResultsVisibility
+        {
+            get
+            {
+                return this.lastRunScan == ScanType.TvMissing && this.SelectedResultsItems != null && this.SelectedResultsItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility TvMissingScanSingleSelectedResultsVisibility
+        {
+            get
+            {
+                return this.lastRunScan == ScanType.TvMissing && this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility AllMoviesSelectedResultsVisibility
+        {
+            get
+            {                
+                if (this.SelectedResultsItems == null || this.SelectedResultsItems.Count == 0)
+                    return Visibility.Collapsed;
+
+                foreach (object obj in this.SelectedResultsItems)
+                {
+                    OrgItem item = obj as OrgItem;
+                    if (item.Category != FileCategory.MovieVideo || (item.Action != OrgAction.Move && item.Action != OrgAction.Copy))
+                        return Visibility.Collapsed;
+                }
+
+                return Visibility.Visible;
+            }
+        }
+
+        public Visibility AllAlreadyExistSelectedResultsVisibility
+        {
+            get
+            {
+                if (this.SelectedResultsItems == null || this.SelectedResultsItems.Count == 0)
+                    return Visibility.Collapsed;
+
+                foreach (object obj in this.SelectedResultsItems)
+                {
+                    OrgItem item = obj as OrgItem;
+                    if (item.Action != OrgAction.AlreadyExists)
+                        return Visibility.Collapsed;
+                }
+
+                return Visibility.Visible;
+            }
+        }
+        
+        void grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            OnPropertyChanged(this, "SingleSelectionVisibility");
+            OnPropertyChanged(this, "AnySelectionVisibility");
+            OnPropertyChanged(this, "DirectoryScanAnySelectedResultsVisibility");
+            OnPropertyChanged(this, "TvMissingScanAnySelectedResultsVisibility");
+            OnPropertyChanged(this, "TvMissingScanSingleSelectedResultsVisibility");
+            OnPropertyChanged(this, "AllMoviesSelectedResultsVisibility");
+            OnPropertyChanged(this, "AllAlreadyExistSelectedResultsVisibility");
+
+            this.MovieFolderItems.Clear();
+            foreach (ContentRootFolder folder in Settings.MovieFolders)
+            {
+                MenuItem item = new MenuItem();
+                item.Header = folder.FullPath;
+                item.Command = new RelayCommand(param => this.SetMovieFolder(folder.FullPath));
+
+                this.MovieFolderItems.Add(item);
+            }
+        }
+
         #endregion
-
-        public bool MoveCopyEnables
-        {
-            get
-            {
-                return moveCopyEnables;
-            }
-            set
-            {
-                moveCopyEnables = value;
-                SetEnables(OrgAction.Move | OrgAction.Copy, value);
-                OnPropertyChanged(this, "MoveCopyEnables");
-            }
-        }
-        private bool moveCopyEnables = true;
-
-        public bool DeleteEnables
-        {
-            get
-            {
-                return deleteEnables;
-            }
-            set
-            {
-                deleteEnables = value;
-                SetEnables(OrgAction.Delete, value);
-                OnPropertyChanged(this, "DeleteEnables");
-            }
-        }
-        private bool deleteEnables = true;
-
-        public OrgItem SelectedResultItem
-        {
-            get
-            {
-                return selectedResultItem;
-            }
-            set
-            {
-                selectedResultItem = value;
-                OnPropertyChanged(this, "SelectedResultItem");
-            }
-        }
-        private OrgItem selectedResultItem;
 
         #endregion
 
@@ -533,7 +745,8 @@ namespace Meticumedia.Controls
         public ScanControlViewModel(DataGrid grid)
         {
             this.grid = grid;
-            
+            grid.SelectionChanged += grid_SelectionChanged;
+
             this.RunSelections = new ObservableCollection<object>();
             UpdateRunSelections();
 
@@ -573,8 +786,9 @@ namespace Meticumedia.Controls
                 scan.ProgressChange += scan_ProgressChange;
 
             QueueControlViewModel.QueueItemsChanged += QueueControlViewModel_QueueItemsChanged;
-        }
 
+            this.MovieFolderItems = new ObservableCollection<MenuItem>();
+        }
 
 
         #endregion
@@ -877,6 +1091,8 @@ namespace Meticumedia.Controls
 
         #endregion
 
+        #region Methods
+
         private void QueueItems()
         {
             List<OrgItem> toQueue = new List<OrgItem>();
@@ -904,12 +1120,52 @@ namespace Meticumedia.Controls
 
         private void EditSelectedItem()
         {
-            OrgItemEditorWindow editor = new OrgItemEditorWindow(this.SelectedResultItem);
+            OrgItem selItem = (this.SelectedResultsItems[0] as OrgItem);
+            OrgItemEditorWindow editor = new OrgItemEditorWindow(selItem);
             editor.ShowDialog();
 
             if (editor.Results != null)
-                this.SelectedResultItem.Clone(editor.Results);
+                selItem.Clone(editor.Results);
         }
+
+        private void SetSelectedItemToDelete()
+        {
+        }
+
+        private void IgnoreItems()
+        {
+        }
+
+        private void UnignoreItems()
+        {
+        }
+
+        private void LocateEpisode()
+        {
+        }
+
+        private void IgnoreEpisode()
+        {
+        }
+
+        private void IgnoreSeason()
+        {
+        }
+
+        private void IgnoreShow()
+        {
+        }
+
+        private void SetReplaceExisting()
+        {
+        }
+
+        private void SetMovieFolder(string path)
+        {
+
+        }
+
+        #endregion
 
         #region Columns
 
