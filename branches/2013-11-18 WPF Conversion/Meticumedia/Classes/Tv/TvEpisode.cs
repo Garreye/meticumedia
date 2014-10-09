@@ -571,7 +571,7 @@ namespace Meticumedia.Classes
         /// <param name="episode">Instance to clone</param>
         public TvEpisode(TvEpisode episode)
         {
-            this.UpdateInfo(episode);
+            this.Clone(episode);
         }
 
         #endregion
@@ -582,7 +582,7 @@ namespace Meticumedia.Classes
         /// Updates this instance with information from another instance
         /// </summary>
         /// <param name="episode"></param>
-        public void UpdateInfo(TvEpisode episode)
+        public void Clone(TvEpisode episode)
         {
             this.UserDefinedName = episode.UserDefinedName;
             this.DatabaseName = episode.DatabaseName;

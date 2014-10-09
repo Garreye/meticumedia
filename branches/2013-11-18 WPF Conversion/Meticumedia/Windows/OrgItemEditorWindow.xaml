@@ -6,10 +6,11 @@
         xmlns:wpfr="clr-namespace:Meticumedia.WPF"
         xmlns:mm="clr-namespace:Meticumedia.Classes"
         xmlns:cntrls="clr-namespace:Meticumedia.Controls"
-        Title="OrgItemEditorWindow" Height="450" Width="300">
+        Title="OrgItemEditorWindow" Height="550" Width="500">
     <Window.Resources>
         <wpfr:EnumBooleanConverter x:Key="enumBooleanConverter" />
         <wpfr:EnumVisibilityConverter x:Key="enumVisConverter" />
+        <wpfr:EnumInverseBooleanConverter x:Key="enumInvBooleanConverter" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -41,16 +42,16 @@
             </StackPanel>
         </GroupBox>
 
-        <GroupBox Grid.Row="2" Header="Category">
+        <GroupBox Grid.Row="2" Header="Category" IsEnabled="{Binding Path=Item.Action, Mode=OneWay, Converter={StaticResource enumInvBooleanConverter}, ConverterParameter=Delete}">
             <StackPanel Orientation="Horizontal">
-                <RadioButton Content="TV" Margin="3" IsChecked="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumBooleanConverter}, ConverterParameter=TvVideo}" />
-                <RadioButton Content="Movie" Margin="3" IsChecked="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumBooleanConverter}, ConverterParameter=MovieVideo}"  />
+                <RadioButton Content="TV"     Margin="3" IsChecked="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumBooleanConverter}, ConverterParameter=TvVideo}" />
+                <RadioButton Content="Movie"  Margin="3" IsChecked="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumBooleanConverter}, ConverterParameter=MovieVideo}"  />
                 <RadioButton Content="Custom" Margin="3" IsChecked="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Custom}"  />
-                <RadioButton Content="Trash" Margin="3" IsChecked="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Trash}"  />
+                <RadioButton Content="Trash"  Margin="3" IsChecked="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Trash}"  />
             </StackPanel>
         </GroupBox>
 
-        <GroupBox Grid.Row="3" Header="TV" Visibility="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumVisConverter}, ConverterParameter=TvVideo}">
+        <GroupBox Grid.Row="3" Header="TV" Visibility="{Binding Path=Item.Category, Mode=OneWay, Converter={StaticResource enumVisConverter}, ConverterParameter=TvVideo}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -69,18 +70,18 @@
                 <Button Grid.Row="0" Grid.Column="2" Content="New..." Margin="3" Padding="10,1" VerticalAlignment="Center" />
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Season" Margin="3" VerticalAlignment="Center" />
-                <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Item.TvEpisode.Season}" Width="50" HorizontalAlignment="Left" Margin="3" />
+                <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding SeasonNumber}" Width="50" HorizontalAlignment="Left" Margin="3" />
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Episode" Margin="3" VerticalAlignment="Center" />
-                <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Item.TvEpisode.DatabaseNumber}" Width="50" HorizontalAlignment="Left" Margin="3" />
+                <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Value="{Binding EpisodeNumber}" Width="50" HorizontalAlignment="Left" Margin="3" />
 
-                <CheckBox Grid.Row="3" Grid.Column="0" Content="Episdoe 2" Margin="3" VerticalAlignment="Center" />
-                <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Item.TvEpisode2.DatabaseNumber}" Width="50" HorizontalAlignment="Left" Margin="3" />
+                <CheckBox Grid.Row="3" Grid.Column="0" Content="Double Episode" Margin="3" VerticalAlignment="Center" IsChecked="{Binding Item.MultiEpisode}" />
+                <!--<xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Item.TvEpisode2.DatabaseNumber}" IsEnabled="{Binding Item.MultiEpisode}" Width="50" HorizontalAlignment="Left" Margin="3" />-->
 
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Row="3" Header="Movie" Visibility="{Binding Path=Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource enumVisConverter}, ConverterParameter=MovieVideo}">
+        <GroupBox Grid.Row="3" Header="Movie" Visibility="{Binding Path=Item.Category, Mode=OneWay, Converter={StaticResource enumVisConverter}, ConverterParameter=MovieVideo}">
             <cntrls:ContentEditorControl DataContext="{Binding MovieViewModel}" />
         </GroupBox>
 
@@ -92,7 +93,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Text="Destination" Margin="3" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding Item.DestinationPath}" />
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding Item.DestinationPath}" IsEnabled="{Binding Path=Item.Category, Mode=OneWay, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Custom}" />
             <Button Grid.Column="2" Margin="3" Content="..." Padding="10,2" />
         </Grid>
 
@@ -103,8 +104,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
-            <Button Grid.Column="1" Content="OK" Width="70" Margin="3" />
-            <Button Grid.Column="2" Content="Cancel" Width="70" Margin="3" />
+            <Button Grid.Column="1" Content="OK" Width="70" Margin="3" Command="{Binding OkCommand}" />
+            <Button Grid.Column="2" Content="Cancel" Width="70" Margin="3" Command="{Binding CancelCommand}" />
         </Grid>
     </Grid>
 </Window>

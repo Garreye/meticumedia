@@ -20,6 +20,17 @@ namespace Meticumedia.Windows
     /// </summary>
     public partial class OrgItemEditorWindow : Window
     {
+        public OrgItem Results
+        {
+            get
+            {
+                if (viewModel.ResultsOk)
+                    return viewModel.Item;
+                else
+                    return null;
+            }
+        }
+        
         private OrgItemEditorWindowViewModel viewModel;
         
         public OrgItemEditorWindow(OrgItem item)
@@ -27,6 +38,12 @@ namespace Meticumedia.Windows
             InitializeComponent();
             viewModel = new OrgItemEditorWindowViewModel(item);
             this.DataContext = viewModel;
+            viewModel.ResultsSet += viewModel_ResultsSet;
+        }
+
+        void viewModel_ResultsSet(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

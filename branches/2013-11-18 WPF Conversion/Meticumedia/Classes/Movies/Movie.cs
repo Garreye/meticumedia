@@ -134,7 +134,7 @@ namespace Meticumedia.Classes
                     this.RootFolder = defaultContent.FullPath;
             }
 
-            return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.DatabaseName + " (" + this.DatabaseYear.ToString() + ")"));
+            return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.DisplayName + " (" + this.DisplayYear.ToString() + ")"));
         }
 
         /// <summary>

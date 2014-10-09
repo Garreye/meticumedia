@@ -906,6 +906,9 @@ namespace Meticumedia.Controls
         {
             OrgItemEditorWindow editor = new OrgItemEditorWindow(this.SelectedResultItem);
             editor.ShowDialog();
+
+            if (editor.Results != null)
+                this.SelectedResultItem.Clone(editor.Results);
         }
 
         #region Columns

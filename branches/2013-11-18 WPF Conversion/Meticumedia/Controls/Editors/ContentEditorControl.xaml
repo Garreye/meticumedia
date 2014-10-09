@@ -18,7 +18,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <GroupBox Grid.Row="0" Header="Database" Visibility="{Binding DatabaseStatusVisibility}">
@@ -128,7 +128,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" Margin="3" />
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Content.DisplayName}" IsEnabled="{Binding Content.UseDatabaseName, Converter={StaticResource boolInvConverter}}" Margin="3" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Content.DisplayName, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding Content.UseDatabaseName, Converter={StaticResource boolInvConverter}}" Margin="3" />
                     <!-- TODO: inversion on IsEnabled -->
                     <CheckBox Grid.Row="0" Grid.Column="2" Content="Use Database" IsChecked="{Binding Content.UseDatabaseName}" Margin="3" VerticalAlignment="Center" />
 
@@ -179,7 +179,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <CheckBox Grid.Row="0" Content="Include in Folder Organization Scans (allows file renaming)" IsChecked="{Binding Content.DoRenaming}" Margin="3"  />
@@ -208,7 +208,7 @@
                             <Button Grid.Column="3" Content="Clear" Padding="5,3" Margin="3" Command="{Binding ClearAltNamesCommand}" />
                         </Grid>
 
-                        <ListBox Grid.Row="1" ItemsSource="{Binding TvShow.AlternativeNameMatches}" SelectedItem="{Binding SelectedAlternateName}" />
+                        <ListBox Grid.Row="1" ItemsSource="{Binding TvShow.AlternativeNameMatches}" SelectedItem="{Binding SelectedAlternateName}" MinHeight="20" />
 
                     </Grid>
                 </GroupBox>

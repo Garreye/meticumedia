@@ -210,7 +210,7 @@ namespace Meticumedia.Classes
                     else
                         epStr += this.EpisodeHeader + ep1.Number.ToString();
 
-                    if (ep2 != null)
+                    if (ep2 != null && ep2.Number > 0)
                     {
                         if (this.HeaderPerEpisode)
                             epStr += this.EpisodeHeader;

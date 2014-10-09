@@ -166,6 +166,7 @@ namespace Meticumedia.Classes
             {
                 databaseYear = value;
                 OnPropertyChanged("DatabaseYear");
+                OnPropertyChanged("DisplayYear");
             }
         }
         private int databaseYear = 1;
