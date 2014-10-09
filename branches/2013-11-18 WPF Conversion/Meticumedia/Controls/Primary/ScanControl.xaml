@@ -111,7 +111,7 @@
                     </GroupBox>
                 </Grid>
 
-                <DataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding ScanResultsCollection}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" >
+                <DataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding ScanResultsCollection}" SelectedItem="{Binding SelectedResultItem}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" wpfr:Commands.DataGridDoubleClickCommand="{Binding EditSelectedItemCommand}" >
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
                             <Setter Property="Foreground" Value="{Binding ActionColor}"/>

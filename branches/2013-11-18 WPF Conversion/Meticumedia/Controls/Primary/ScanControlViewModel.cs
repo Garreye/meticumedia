@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Meticumedia.Classes;
+using Meticumedia.Windows;
 using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
@@ -149,6 +150,27 @@ namespace Meticumedia.Controls
         private bool CanDoQueueItemsCommand()
         {
             return true;
+        }
+
+        private ICommand editSelectedItemCommand;
+        public ICommand EditSelectedItemCommand
+        {
+            get
+            {
+                if (editSelectedItemCommand == null)
+                {
+                    editSelectedItemCommand = new RelayCommand(
+                        param => this.EditSelectedItem(),
+                        param => this.CanDoEditSelectedItemCommand()
+                    );
+                }
+                return editSelectedItemCommand;
+            }
+        }
+
+        private bool CanDoEditSelectedItemCommand()
+        {
+            return this.SelectedResultItem != null;
         }
 
         #endregion
@@ -489,6 +511,20 @@ namespace Meticumedia.Controls
             }
         }
         private bool deleteEnables = true;
+
+        public OrgItem SelectedResultItem
+        {
+            get
+            {
+                return selectedResultItem;
+            }
+            set
+            {
+                selectedResultItem = value;
+                OnPropertyChanged(this, "SelectedResultItem");
+            }
+        }
+        private OrgItem selectedResultItem;
 
         #endregion
 
@@ -864,6 +900,12 @@ namespace Meticumedia.Controls
                     this.ScanResults[i].Enable = enable;
                 }
             RefreshResultsSafe(false);
+        }
+
+        private void EditSelectedItem()
+        {
+            OrgItemEditorWindow editor = new OrgItemEditorWindow(this.SelectedResultItem);
+            editor.ShowDialog();
         }
 
         #region Columns

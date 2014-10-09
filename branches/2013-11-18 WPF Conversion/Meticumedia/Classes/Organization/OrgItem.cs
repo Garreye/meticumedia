@@ -218,10 +218,17 @@ namespace Meticumedia.Classes
             set
             {
                 tvEpisode = value;
+                tvEpisode.PropertyChanged += tvEpisode_PropertyChanged;
                 OnPropertyChanged("TvEpisode");
             }
         }
         private TvEpisode tvEpisode;
+
+        void tvEpisode_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Show")
+                this.tvEpisode2.Show = this.tvEpisode.Show;
+        }
 
         /// <summary>
         /// 2nd TV episode that the file is assocatied with. Used for multi-episode files only.
@@ -273,40 +280,6 @@ namespace Meticumedia.Classes
             }
         }
         private Movie movie;
-
-        /// <summary>
-        /// Tv Show
-        /// </summary>
-        public TvShow Show
-        {
-            get
-            {
-                return show;
-            }
-            set
-            {
-                show = value;
-                OnPropertyChanged("Show");
-            }
-        }
-        private TvShow show;
-
-        /// <summary>
-        /// Flag indicating TV episode(s) associated with item are for a newly found show.
-        /// </summary>
-        public TvShow NewShow
-            {
-            get
-            {
-                return newShow;
-            }
-            set
-            {
-                newShow = value;
-                OnPropertyChanged("NewShow");
-            }
-        }
-        private TvShow newShow;
 
         /// <summary>
         /// Scan Directory where source comes from
@@ -546,19 +519,18 @@ namespace Meticumedia.Classes
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir, TvShow newShow)
+        public OrgItem(OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
+            : this()
         {
-            this.Status = OrgStatus.Found;
             this.Action = action;
             this.SourcePath = file;
             this.DestinationPath = destination;
             this.TvEpisode = episode;
             this.Category = category;
-            this.TvEpisode2 = episode2;
+            if (episode2 != null)
+                this.TvEpisode2 = episode2;
             this.Enable = false;
             this.ScanDirectory = scanDir;
-            this.NewShow = newShow;
-            this.Replace = false;
             this.Number = 0;
         }
 
@@ -573,7 +545,7 @@ namespace Meticumedia.Classes
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
         public OrgItem(OrgStatus status, OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
-            : this(action, file, destination, episode, episode2, category, scanDir, null)
+            : this(action, file, destination, episode, episode2, category, scanDir)
         {
             this.Status = status;
             this.Progress = 0;
@@ -587,7 +559,7 @@ namespace Meticumedia.Classes
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
+        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir) : this()
         {
             this.Status = status;
             this.Progress = 0;
@@ -602,8 +574,6 @@ namespace Meticumedia.Classes
             this.Category = category;
             this.Enable = false;
             this.ScanDirectory = scanDir;
-            this.NewShow = null;
-            this.Replace = false;
             this.Number = 0;
         }
 
@@ -614,8 +584,8 @@ namespace Meticumedia.Classes
         /// <param name="file">source path</param>
         /// <param name="category">file category</param>
         public OrgItem(OrgAction action, string file, FileCategory category, OrgFolder scanDir)
+            : this()
         {
-            this.Status = OrgStatus.Found;
             this.Progress = 0;
             this.Action = action;
             this.SourcePath = file;
@@ -623,12 +593,9 @@ namespace Meticumedia.Classes
                 this.DestinationPath = FileHelper.DELETE_DIRECTORY;
             else
                 this.DestinationPath = string.Empty;
-            this.TvEpisode = null;
             this.Category = category;
             this.Enable = false;
             this.ScanDirectory = scanDir;
-            this.NewShow = null;
-            this.Replace = false;
             this.Number = 0;
         }
 
@@ -641,20 +608,16 @@ namespace Meticumedia.Classes
         /// <param name="movie">Movie object related to file</param>
         /// <param name="destination">destination path</param>
         /// <param name="scanDir">path to content folder of movie</param>
-        public OrgItem(OrgAction action, string sourceFile, FileCategory category, Movie movie, string destination, OrgFolder scanDir)
+        public OrgItem(OrgAction action, string sourceFile, FileCategory category, Movie movie, string destination, OrgFolder scanDir) : this()
         {
-            this.Status = OrgStatus.Found;
             this.Progress = 0;
             this.Action = action;
             this.SourcePath = sourceFile;
             this.Movie = movie;
             this.ScanDirectory = scanDir;
             this.DestinationPath = destination;
-            this.TvEpisode = null;
             this.Category = category;
             this.Enable = false;
-            this.NewShow = null;
-            this.Replace = false;
             this.Number = 0;
         }
 
@@ -664,7 +627,7 @@ namespace Meticumedia.Classes
         /// <param name="item">item to be copied</param>
         public OrgItem(OrgItem item)
         {
-            UpdateInfo(item);
+            Clone(item);
         }
 
         /// <summary>
@@ -674,13 +637,16 @@ namespace Meticumedia.Classes
         {
             this.Status = OrgStatus.Found;
             this.Replace = false;
+            this.Movie = new Movie();
+            this.TvEpisode = new TvEpisode(new TvShow());
+            this.TvEpisode2 = new TvEpisode(new TvShow());
         }
 
         /// <summary>
         /// Update current update from another item's data
         /// </summary>
         /// <param name="item">item to be copied</param>
-        public void UpdateInfo(OrgItem item)
+        public void Clone(OrgItem item)
         {
             this.Status = item.Status;
             this.Progress = 0;
@@ -693,8 +659,6 @@ namespace Meticumedia.Classes
             this.Enable = item.Enable;
             this.Movie = item.Movie;
             this.ScanDirectory = item.ScanDirectory;
-            this.NewShow = item.NewShow;
-            this.Show = item.Show;
             this.Replace = item.Replace;
             this.Number = item.Number;
             this.QueueStatus = item.QueueStatus;
@@ -1235,13 +1199,10 @@ namespace Meticumedia.Classes
                         if (this.Category == FileCategory.Folder)
                         {
                             this.ActionComplete = CopyMoveFolder();
-
                             if (this.ActionComplete)
                             {
-                                if (this.Movie != null)
-                                    this.Movie.Path = this.DestinationPath;
-                                else if (this.Show != null)
-                                    this.Show.Path = this.DestinationPath;
+                                this.Movie.Path = this.DestinationPath;
+                                this.TvEpisode.Show.Path = this.DestinationPath;
                             }
                         }
                         else

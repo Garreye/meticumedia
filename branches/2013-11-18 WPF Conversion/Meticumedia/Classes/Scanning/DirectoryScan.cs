@@ -362,7 +362,7 @@ namespace Meticumedia.Classes
 
                                 // Build action and add it to results
                                 string destination = bestMatch.BuildFilePath(episode1, episode2, Path.GetExtension(orgPath.Path));
-                                OrgItem newItem = new OrgItem(action, orgPath.Path, destination, episode1, episode2, fileCat, orgPath.OrgFolder, newShow);
+                                OrgItem newItem = new OrgItem(action, orgPath.Path, destination, episode1, episode2, fileCat, orgPath.OrgFolder);
                                 if (destination.StartsWith(NO_TV_FOLDER))
                                     newItem.Action = OrgAction.NoRootFolder;
                                 if (newItem.Action == OrgAction.AlreadyExists || newItem.Action == OrgAction.NoRootFolder)
@@ -477,7 +477,7 @@ namespace Meticumedia.Classes
                 return;
 
             lock (directoryScanLock)
-                this.Items[pathNum].UpdateInfo(item);
+                this.Items[pathNum].Clone(item);
         }
 
         /// <summary>

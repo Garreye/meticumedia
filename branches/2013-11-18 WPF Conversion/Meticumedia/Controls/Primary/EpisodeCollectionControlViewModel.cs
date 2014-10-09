@@ -65,7 +65,6 @@ namespace Meticumedia.Controls
                 return this.SelectedGrouping == TvGroupingType.Season ? Visibility.Collapsed : Visibility.Visible;
             }
         }
-        private Visibility displaySeasonNumber = Visibility.Visible;
 
         public bool DisplayOverview
         {

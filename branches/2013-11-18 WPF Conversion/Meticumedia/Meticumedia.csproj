@@ -114,6 +114,7 @@
     </Compile>
     <Compile Include="Windows\OrgItemEditorWindowViewModel.cs" />
     <Compile Include="WPF\BindableMultiSelectDataGrid.cs" />
+    <Compile Include="WPF\Commands.cs" />
     <Compile Include="WPF\Converters\EnumBooleanConverter.cs" />
     <Compile Include="WPF\Converters\EnumVisibilityConverter.cs" />
     <Compile Include="WPF\Converters\NullToVisibilityConverter.cs" />

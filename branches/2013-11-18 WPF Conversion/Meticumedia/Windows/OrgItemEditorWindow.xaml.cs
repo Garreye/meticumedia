@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Meticumedia.Classes;
 
 namespace Meticumedia.Windows
 {
@@ -19,9 +20,13 @@ namespace Meticumedia.Windows
     /// </summary>
     public partial class OrgItemEditorWindow : Window
     {
-        public OrgItemEditorWindow()
+        private OrgItemEditorWindowViewModel viewModel;
+        
+        public OrgItemEditorWindow(OrgItem item)
         {
             InitializeComponent();
+            viewModel = new OrgItemEditorWindowViewModel(item);
+            this.DataContext = viewModel;
         }
     }
 }

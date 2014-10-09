@@ -65,17 +65,17 @@
                 </Grid.ColumnDefinitions>
                 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Show" Margin="3" VerticalAlignment="Center" />
-                <ComboBox Grid.Row="0" Grid.Column="1" Margin="3" ItemsSource="{Binding Shows}" SelectedItem="{Binding Item.Show}" />
+                <ComboBox Grid.Row="0" Grid.Column="1" Margin="3" ItemsSource="{Binding Shows}" SelectedItem="{Binding Item.TvEpisode.Show}" />
                 <Button Grid.Row="0" Grid.Column="2" Content="New..." Margin="3" Padding="10,1" VerticalAlignment="Center" />
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Season" Margin="3" VerticalAlignment="Center" />
                 <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Item.TvEpisode.Season}" Width="50" HorizontalAlignment="Left" Margin="3" />
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Episode" Margin="3" VerticalAlignment="Center" />
-                <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Item.TvEpisode.Number}" Width="50" HorizontalAlignment="Left" Margin="3" />
+                <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Item.TvEpisode.DatabaseNumber}" Width="50" HorizontalAlignment="Left" Margin="3" />
 
                 <CheckBox Grid.Row="3" Grid.Column="0" Content="Episdoe 2" Margin="3" VerticalAlignment="Center" />
-                <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Item.TvEpisode2.Number}" Width="50" HorizontalAlignment="Left" Margin="3" />
+                <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Item.TvEpisode2.DatabaseNumber}" Width="50" HorizontalAlignment="Left" Margin="3" />
 
             </Grid>
         </GroupBox>
