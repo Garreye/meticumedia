@@ -20,8 +20,16 @@ namespace Meticumedia.Classes
     {
         #region Events
 
+        /// <summary>
+        /// INotifyPropertyChanged interface event
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+
+        /// <summary>
+        /// Triggers PropertyChanged event.
+        /// </summary>
+        /// <param name="name">Name of the property that has changed value</param>
         protected void OnPropertyChanged(string name)
         {
             if (PropertyChanged != null)
@@ -34,12 +42,18 @@ namespace Meticumedia.Classes
 
         #region Constants
 
+        /// <summary>
+        /// Value used for Id property when it is not matched to database.
+        /// </summary>
         public static readonly int UNKNOWN_ID = -1;
 
         #endregion
 
         #region Properties
 
+        /// <summary>
+        /// Type of content.
+        /// </summary>
         public ContentType ContentType { get; protected set; }
 
         /// <summary>
@@ -478,7 +492,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Content()
+        protected Content()
         {
             this.ContentType = Classes.ContentType.Undefined;
             this.DatabaseGenres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
@@ -491,15 +505,19 @@ namespace Meticumedia.Classes
         /// Constructor for cloning instance
         /// </summary>
         /// <param name="content">Instance to clone</param>
-        public Content(Content content) : this()
+        protected Content(Content content)
+            : this()
         {
-            Clone(content);
+            Clone(content, true);
         }
 
         #endregion
 
         #region Methods
 
+        /// <summary>
+        /// Triggers property changed event on database genres collection change.
+        /// </summary>
         private void DatabaseGenres_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged("DatabaseGenres");
@@ -507,6 +525,9 @@ namespace Meticumedia.Classes
                 OnPropertyChanged("DisplayGenres");
         }
 
+        /// <summary>
+        /// Triggers property changed event on user genres collection change.
+        /// </summary>
         private void UserGenres_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged("UserGenres");
@@ -518,7 +539,8 @@ namespace Meticumedia.Classes
         /// Copies properties from another instance into this instance.
         /// </summary>
         /// <param name="content">Instance to copy properties from</param>
-        protected void Clone(Content content)
+        /// <param name="replacePath">Whether path related properties should be cloned or not</param>
+        protected void Clone(Content content, bool replacePath)
         {
             this.ContentType = content.ContentType;
             this.UserName = content.UserName;
@@ -534,13 +556,16 @@ namespace Meticumedia.Classes
             this.UserGenres = new GenreCollection(content.UserGenres);
             this.Found = content.Found;
 
-            if (!string.IsNullOrEmpty(content.RootFolder))
-                this.RootFolder = content.RootFolder;
+            if (replacePath)
+            {
+                if (!string.IsNullOrEmpty(content.RootFolder))
+                    this.RootFolder = content.RootFolder;
 
-            if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
-                this.Path = content.Path;
-            else
-                this.Path = this.BuildFolderPath();
+                if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
+                    this.Path = content.Path;
+                else
+                    this.Path = this.BuildFolderPath();
+            }
 
             this.Id = content.Id;
             this.Watched = content.Watched;
@@ -625,7 +650,7 @@ namespace Meticumedia.Classes
         ///     -The name without consonents (e.g. "BttlstrGlctc")
         /// "and"/"&" are set to optional for expression
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Regular expresion string for matching to content</returns>
         private string BuildNameRegularExpresionString(bool removeWhitespace, string showname)
         {
             // Initialize string
@@ -697,7 +722,7 @@ namespace Meticumedia.Classes
         public virtual void UpdateInfoFromDatabase()
         {
             throw new NotImplementedException();
-        }        
+        }
 
         #endregion
 
@@ -1129,6 +1154,64 @@ namespace Meticumedia.Classes
             }
 
             return SetSort(sortResult);
+        }
+
+        #endregion
+
+        #region Equals
+
+        /// <summary>
+        /// Check if two instance of content object are equal (all properties are equal).
+        /// </summary>
+        /// <param name="obj">Instance to compare to</param>
+        /// <returns>Whether obj instance is equal to this instance</returns>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Content))
+                return false;
+
+            Content contentObj = obj as Content;
+
+            if (this.ContentType != contentObj.ContentType)
+                return false;
+            if (this.UseDatabaseName != contentObj.UseDatabaseName)
+                return false;
+            if (!this.UseDatabaseName && this.UserName != contentObj.UserName)
+                return false;
+            if (this.UseDatabaseName && this.DatabaseName != contentObj.DatabaseName)
+                return false;
+            if (this.DatabaseSelection != contentObj.DatabaseSelection)
+                return false;
+            if (this.UseDatabaseYear != contentObj.UseDatabaseYear)
+                return false;
+            if (!this.UseDatabaseYear && this.UserYear != contentObj.UserYear)
+                return false;
+            if (this.UseDatabaseYear && this.DatabaseYear != contentObj.DatabaseYear)
+                return false;
+            if (this.Overview != contentObj.Overview)
+                return false;
+            if (this.Found != contentObj.Found)
+                return false;
+            if (this.RootFolder != contentObj.RootFolder)
+                return false;
+            if (this.Path != contentObj.Path)
+                return false;
+            if (this.Id != contentObj.Id)
+                return false;
+            if (this.Watched != contentObj.Watched)
+                return false;
+            if (this.DoRenaming != contentObj.DoRenaming)
+                return false;
+            if (!this.LastUpdated.Equals(contentObj.LastUpdated))
+                return false;
+            if (this.UseDatabaseGenres != contentObj.UseDatabaseGenres)
+                return false;
+            if (this.UseDatabaseGenres && !this.DatabaseGenres.Equals(contentObj.DatabaseGenres))
+                return false;
+            if (!this.UseDatabaseGenres && !this.UserGenres.Equals(contentObj.UserGenres))
+                return false;
+
+            return true;
         }
 
         #endregion

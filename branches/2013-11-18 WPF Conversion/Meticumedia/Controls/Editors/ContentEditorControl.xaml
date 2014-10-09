@@ -83,7 +83,7 @@
                     <Button Grid.Column="2" Content="Simplify" Command="{Binding SearchStringSimplifyCommand}" Padding="5,0" Margin="3" />
                 </Grid>
 
-                <DataGrid Grid.Row="2" ItemsSource="{Binding SearchResults}" SelectedItem="{Binding SelectedSearchContent}" AutoGenerateColumns="False">
+                <DataGrid Grid.Row="2" ItemsSource="{Binding SearchResults}" SelectedItem="{Binding SelectedSearchContent}" AutoGenerateColumns="False" Visibility="{Binding SearchResultsVisibility}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
                         <DataGridTextColumn Header="Year" Binding="{Binding DisplayYear}" />
@@ -92,12 +92,21 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <Button Grid.Row="3" Content="Apply Selected ID" Command="{Binding ApplyDatabaseIdCommand}" />
+                <TextBlock Grid.Row="2" Text="{Binding SearchStatus}" Visibility="{Binding SearchStatusVisibility}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
+                    <Button Grid.Column="0" Margin="3" Content="Use Selected ID" Command="{Binding ApplyDatabaseIdCommand}" />
+                    <Button Grid.Column="1" Margin="3" Content="Cancel" Command="{Binding CancelModifyDatabaseIdCommand}" />
+                </Grid>
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Row="1" Header=" Display" Visibility="{Binding DatabaseStatusVisibility}">
+        <GroupBox Grid.Row="1" Header=" Display"  Visibility="{Binding DatabaseStatusVisibility}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

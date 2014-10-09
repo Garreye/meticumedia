@@ -25,7 +25,6 @@ namespace Meticumedia.Windows
 
         #endregion
 
-
         #region Properties
 
         public ContentEditorControlViewModel ControlViewModel
@@ -42,7 +41,6 @@ namespace Meticumedia.Windows
         }
         private ContentEditorControlViewModel controlViewModel;
 
-        private Content content;
         public Content Content
         {
             get
@@ -80,7 +78,15 @@ namespace Meticumedia.Windows
 
         private bool CanDoOkCommand()
         {
-            return true;
+            switch (this.Content.ContentType)
+            {
+                case ContentType.Movie:
+                    return !(originalContent as Movie).Equals(this.Content as Movie);
+                case ContentType.TvShow:
+                    return !(originalContent as TvShow).Equals(this.Content as TvShow);
+                default:
+                    throw new Exception("Unknown content type");
+            }
         }
 
 
@@ -92,28 +98,30 @@ namespace Meticumedia.Windows
                 if (cancelCommand == null)
                 {
                     cancelCommand = new RelayCommand(
-                        param => this.CancelResults(),
-                        param => this.CanCancelCommand()
+                        param => this.CancelResults()
                     );
                 }
                 return cancelCommand;
             }
         }
 
-        private bool CanCancelCommand()
-        {
-            return true;
-        }
-
         #endregion
+
+        private Content originalContent;
 
         #region Constructor
 
         public ContentEditorWindowViewModel(Content content)
         {
+            originalContent = content;            
             controlViewModel = new ContentEditorControlViewModel(content);
-            
             this.ResultsOk = false;
+            this.Content.PropertyChanged += Content_PropertyChanged;
+        }
+
+        void Content_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(this, "OkCommand");
         }
 
         #endregion

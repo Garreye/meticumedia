@@ -96,7 +96,6 @@ namespace Meticumedia.Classes
                                 if (!shows[i].IncludeInScan)
                                     newItem.Category = FileCategory.Ignored;
                                 newItem.Number = number++;
-                                newItem.Show = show;
                                 missingCheckItem.Add(newItem);
                             }
                         }
@@ -113,7 +112,6 @@ namespace Meticumedia.Classes
                         if (!shows[i].IncludeInScan)
                             newItem.Category = FileCategory.Ignored;
                         newItem.Number = number++;
-                        newItem.Show = show;
                         missingCheckItem.Add(newItem);
                     }
                 }

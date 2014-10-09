@@ -67,9 +67,7 @@ namespace Meticumedia.Classes
         /// <param name="movie"></param>
         public Movie(Movie movie) : this()
         {
-            Clone(movie);
-            this.RootFolder = movie.RootFolder;
-            this.Path = movie.Path;
+            Clone(movie, true);
         }
 
         /// <summary>
@@ -78,7 +76,7 @@ namespace Meticumedia.Classes
         /// <param name="content"></param>
         public Movie(Content content) : this()
         {
-            base.Clone(content);
+            base.Clone(content, true);
         }
 
         #endregion
@@ -89,9 +87,9 @@ namespace Meticumedia.Classes
         /// Updates this movie with properties from another instance.
         /// </summary>
         /// <param name="movie"></param>
-        public void Clone(Movie movie)
+        public void Clone(Movie movie, bool replacePath)
         {
-            base.Clone(movie);
+            base.Clone(movie, replacePath);
         }
 
         /// <summary>

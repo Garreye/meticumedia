@@ -190,8 +190,23 @@ namespace Meticumedia.Classes
             OnCollectionReset();
         }
 
-        #endregion
+        public override bool Equals(object obj)
+        {
+            if (!(obj is GenreCollection))
+                return false;
 
-        
+            GenreCollection collObj = obj as GenreCollection;
+
+            if (this.Count != collObj.Count)
+                return false;
+
+            for (int i = 0; i < this.Count; i++)
+                if (this[i] != collObj[i])
+                    return false;
+
+            return true;
+        }
+
+        #endregion
     }
 }

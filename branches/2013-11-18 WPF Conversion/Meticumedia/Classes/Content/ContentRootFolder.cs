@@ -602,11 +602,11 @@ namespace Meticumedia.Classes
                 switch (this.ContentType)
                 {
                     case ContentType.TvShow:
-                        ((TvShow)newContent).Clone((TvShow)match);
+                        ((TvShow)newContent).Clone((TvShow)match, true);
                         ((TvShow)newContent).UpdateMissing();
                         break;
                     case ContentType.Movie:
-                        ((Movie)newContent).Clone((Movie)match);
+                        ((Movie)newContent).Clone((Movie)match, true);
                         break;
                     default:
                         throw new Exception("unknown content type");

@@ -17,6 +17,11 @@ namespace Meticumedia.Classes
     /// </summary>
     public abstract class ContentSearch
     {
+        /// <summary>
+        /// Type of content bein searched for
+        /// </summary>
+        public ContentType ContentType { get; set; }
+        
         #region Search Result Classe
 
         /// <summary>
@@ -79,6 +84,8 @@ namespace Meticumedia.Classes
 
             #region Properties
 
+            public ContentType ContentType { get; set; }
+
             /// <summary>
             /// Get number of searches started
             /// </summary>
@@ -121,11 +128,12 @@ namespace Meticumedia.Classes
             /// Constructor with number of threads search will contain
             /// </summary>
             /// <param name="numSearches"></param>
-            public MatchStatus(int numSearches)
+            public MatchStatus(int numSearches, ContentType contentType)
             {
                 this.matches = new List<SearchResult>[numSearches];
                 this.completes = new bool[numSearches];
                 this.starts = new bool[numSearches];
+                this.ContentType = contentType;
             }
 
             #endregion
@@ -143,7 +151,18 @@ namespace Meticumedia.Classes
             {
                 int lowestModsMatchStrLen = 0;
                 modsOnResultsSearch = ContentSearchMod.All;
-                results = new Content();
+
+                switch (this.ContentType)
+                {
+                    case ContentType.Movie:
+                        results = new Movie();
+                        break;
+                    case ContentType.TvShow:
+                        results = new TvShow();
+                        break;
+                    default:
+                        throw new Exception("Unknown content type");
+                }
 
                 // Use match with lowest amount of modification made to search string and longest length (I think this is the most likely to the content we actually want to match to)
                 for (int i = 0; i < this.matches.Length; i++)
@@ -184,6 +203,7 @@ namespace Meticumedia.Classes
         /// </summary>
         public ContentSearch()
         {
+            this.ContentType = Classes.ContentType.Undefined;
         }
 
         #endregion
@@ -231,7 +251,18 @@ namespace Meticumedia.Classes
         protected bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Content match)
         {
             // Create empty content
-            Content emptyContent = new Content();
+            Content emptyContent;
+            switch (this.ContentType)
+            {
+                case ContentType.Movie:
+                    emptyContent = new Movie();
+                    break;
+                case ContentType.TvShow:
+                    emptyContent = new TvShow();
+                    break;
+                default:
+                    throw new Exception("Unknown content type");
+            }
             emptyContent.Path = folderPath;
             emptyContent.RootFolder = rootFolder;
             emptyContent.Found = true;
@@ -291,7 +322,7 @@ namespace Meticumedia.Classes
             lock (searchLock)
             {
                 currSeachCnt = ++searchCount;
-                status = new MatchStatus(searches.Count);
+                status = new MatchStatus(searches.Count, this.ContentType);
                 searchStatus.Add(currSeachCnt, status);
             }
 
