@@ -111,34 +111,30 @@
                     </GroupBox>
                 </Grid>
 
-                <DataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding ScanResultsCollection}" SelectedItem="{Binding SelectedResultItem}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" wpfr:Commands.DataGridDoubleClickCommand="{Binding EditSelectedItemCommand}" >
+                <wpfr:BindableMultiSelectDataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding ScanResultsCollection}" SelectedItems="{Binding Path=SelectedResultsItems, Mode=OneWayToSource}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" wpfr:Commands.DataGridDoubleClickCommand="{Binding EditSelectedItemCommand}" >
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
                             <Setter Property="Foreground" Value="{Binding ActionColor}"/>
                         </Style>
                     </DataGrid.RowStyle>
-                </DataGrid>
 
-                <!--<ListBox Grid.Row="1" Margin="2" x:Name="lbResults">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Border BorderThickness="1" BorderBrush="Black" Margin="5">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Text="{Binding Status}" />
-                                    <TextBlock Grid.Row="1" Text="{Binding Action}" />
-                                    <TextBlock Grid.Row="2" Text="{Binding SourcePath}" />
-                                    <TextBlock Grid.Row="3" Text="{Binding DestinationPath}" />
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>-->
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Edit" Command="{Binding EditSelectedItemCommand}" Visibility="{Binding SingleSelectionVisibility}" />
+                            <MenuItem Header="Set Destination Movie Folder" Visibility="{Binding AllMoviesSelectedResultsVisibility}" ItemsSource="{Binding MovieFolderItems}" />
+                            <MenuItem Header="Set Action To Replace Existing" Command="{Binding SetReplaceExistingCommand}" Visibility="{Binding AllAlreadyExistSelectedResultsVisibility}" />
+                            <MenuItem Header="Set to Delete" Command="{Binding SetSelectedItemToDeleteCommand}" Visibility="{Binding AnySelectionVisibility}" />
+                            <MenuItem Header="Ignore Item(s)" Command="{Binding IgnoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
+                            <MenuItem Header="Unignore Items(s)" Command="{Binding UnignoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
+                            <MenuItem Header="Locate Episode" Command="{Binding LocateEpisodeCommand}" Visibility="{Binding TvMissingScanSingleSelectedResultsVisibility}" />
+                            <MenuItem Header="Ignore" Visibility="{Binding TvMissingScanAnySelectedResultsVisibility}">
+                                <MenuItem Header="Episode(s)" Command="{Binding IgnoreEpisodeCommand}" />
+                                <MenuItem Header="Season(s)" Command="{Binding IgnoreSeasonCommand}" />
+                                <MenuItem Header="Show ('Include in Scan' turned off)" Command="{Binding IgnoreShowCommand}" />
+                            </MenuItem>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </wpfr:BindableMultiSelectDataGrid>
 
                 <Grid Grid.Row="2" Margin="2">
                     <Grid.ColumnDefinitions>
