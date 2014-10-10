@@ -216,14 +216,14 @@ namespace Meticumedia.Classes
         /// <param name="rootFolder">Root folder content will belong to</param>
         /// <param name="path">Current path of content</param>
         /// <returns>Content from database that was matched, null if no match</returns>
-        protected bool PathMatch(string rootFolder, string path, bool fast, out Content match)
+        protected bool PathMatch(string rootFolder, string path, bool threaded, bool fast, out Content match)
         {
             // Get folder name from full path
             string[] dirs = path.Split('\\');
             string endDir = dirs[dirs.Length - 1];
 
             // Do match
-            return ContentMatch(endDir, rootFolder, path, fast, out match);
+            return ContentMatch(endDir, rootFolder, path, fast, threaded, out match);
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace Meticumedia.Classes
         /// <param name="rootFolder">The root folder the content will belong to</param>
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <returns>Match content item, null if no match</returns>
-        protected bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, out Content match)
+        protected bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, bool threaded, out Content match)
         {
             // Create empty content
             Content emptyContent;
@@ -283,7 +283,7 @@ namespace Meticumedia.Classes
             // Get list of search bases
             List<string> searchBases = GetModifiedSearches(search);
 
-            // Fast search - use bases
+            // Fast search: use first search base only
             if (fast)
             {
                 FileHelper.SimplifyStringResults result = FileHelper.BuildSimplifyResults(searchBases[0], false, false, FileHelper.OptionalSimplifyRemoves.YearAndFollowing, true, false, true, false);
@@ -351,11 +351,21 @@ namespace Meticumedia.Classes
                     continue;
                 }
 
-                // Add next search to thread pool
+                // Build search arguments
                 object[] args = { currSeachCnt, searchNum, searches[searchNum].SimplifiedString, folderPath, rootFolder, dirYear, searches[searchNum].Modifications };
-                ThreadPool.QueueUserWorkItem(new WaitCallback(SearchThread), args);
-                lock (searchLock)
-                    status.SetSearchStarted(searchNum);
+
+                // Threaded: add a search to thread pool
+                if (threaded)
+                {
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(SearchThread), args);
+                    lock (searchLock)
+                        status.SetSearchStarted(searchNum);
+                }
+                // Synchronized: call search method
+                else
+                {
+                    SearchThread(args);
+                }
 
                 searchNum++;
             }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using Meticumedia.Classes;
+using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
 {

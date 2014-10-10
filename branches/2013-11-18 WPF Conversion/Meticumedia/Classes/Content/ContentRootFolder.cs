@@ -579,12 +579,12 @@ namespace Meticumedia.Classes
             {
                 case ContentType.TvShow:
                     TvShow showMatch;
-                    matchSucess = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, out showMatch);
+                    matchSucess = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, true, out showMatch);
                     match = showMatch;
                     break;
                 case ContentType.Movie:
                     Movie movieMatch;
-                    matchSucess = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, out movieMatch);
+                    matchSucess = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, true, out movieMatch);
                     match = movieMatch;
                     break;
                 default:
