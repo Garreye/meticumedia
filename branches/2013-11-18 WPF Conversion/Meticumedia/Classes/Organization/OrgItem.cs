@@ -247,6 +247,8 @@ namespace Meticumedia.Classes
         }
         private TvEpisode tvEpisode2;
 
+        public bool IsNewShow { get; set; }
+
         /// <summary>
         /// Whether item is for multiple TV episodes
         /// </summary>
@@ -1750,5 +1752,6 @@ namespace Meticumedia.Classes
         }
 
         #endregion
+        
     }
 }

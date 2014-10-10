@@ -202,7 +202,7 @@ namespace Meticumedia.Classes
             bool tvOnlyCheck = (bool)args[0];
             bool skipMatching = (bool)args[1];
             bool fast = (bool)args[2];
-            int procNumber = (int)scanNumber;
+            int procNumber = (int)args[3];
 
             // Check if file is in the queue
             bool alreadyQueued = false;
@@ -219,22 +219,37 @@ namespace Meticumedia.Classes
                     }
             // If item is already in the queue, skip it
             if (alreadyQueued)
-            {
                 ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
-                return;
-            }
+            else
+            {
+                // Update progress
+                lock (directoryScanLock)
+                    this.Items[pathNum].Action = OrgAction.Processing;
+                ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
 
+                // Process path
+                OrgItem results = ProcessPath(orgPath, pathNum, totalPaths, updateNumber, tvOnlyCheck, skipMatching, fast, procNumber);
+
+                // Update results and progress
+                UpdateResult(results, pathNum, procNumber);
+                ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
+            }
+        }
+
+        public OrgItem ProcessPath(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool tvOnlyCheck, bool skipMatching, bool fast, int procNumber)
+        {
+            // Create default none item
+            FileCategory fileCat = FileHelper.CategorizeFile(orgPath, orgPath.Path);
+            OrgItem noneItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
+            
             // Setup match to filename and folder name (if it's in a folder inside of downloads)
             string[] pathSplit = orgPath.Path.Replace(orgPath.OrgFolder.FolderPath, "").Split('\\');
             List<string> possibleMatchPaths = new List<string>();
             possibleMatchPaths.Add(pathSplit.Last());
             if (pathSplit.Length > 2)
                 possibleMatchPaths.Add(pathSplit[pathSplit.Length - 2] + Path.GetExtension(orgPath.Path));
-
-            // Categorize the file
-            FileCategory fileCat = FileHelper.CategorizeFile(orgPath, orgPath.Path);
-
-            bool matchMade = false;
+            
+            // Try to match to each string
             foreach (string matchString in possibleMatchPaths)
             {
                 // Get simple file name
@@ -249,17 +264,10 @@ namespace Meticumedia.Classes
 
                 // Check for cancellation
                 if (scanCanceled || procNumber < scanNumber)
-                    return;
-
-                // Update progress
-                lock (directoryScanLock)
-                {
-                    this.Items[pathNum].Action = OrgAction.Processing;
-                }
-                ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
+                    return null;
 
                 // Set whether item is for new show
-                TvShow newShow = null;
+                bool newShow = false;
 
                 // Try to match file to existing show
                 Dictionary<TvShow, MatchCollection> matches = new Dictionary<TvShow, MatchCollection>();
@@ -275,14 +283,13 @@ namespace Meticumedia.Classes
                     foreach (TvShow show in temporaryShows)
                     {
                         MatchCollection match = show.MatchFileToContent(matchString);
-                        newShow = show;
                         if (match != null && match.Count > 0)
                             matches.Add(show, match);
                     }
 
                 // Check for cancellation
                 if (scanCanceled || procNumber < scanNumber)
-                    return;
+                    return null;
 
                 // Add appropriate action based on file category
                 switch (matchFileCat)
@@ -339,8 +346,10 @@ namespace Meticumedia.Classes
                             lock (directoryScanLock)
                                 if (!temporaryShows.Contains(bestMatch))
                                     temporaryShows.Add(bestMatch);
-                            newShow = bestMatch;
+                            newShow = true;
                         }
+                        else if (temporaryShows.Contains(bestMatch))
+                            newShow = true;
 
                         // Episode has been matched to a TV show
                         if (bestMatch != null)
@@ -360,15 +369,7 @@ namespace Meticumedia.Classes
 
                                     // If item episode already exists set action to duplicate
                                     if (episode1.Missing == MissingStatus.Located)
-                                    {
-                                        if (episode1.Ignored)
-                                        {
-                                            ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
-                                            return;
-                                        }
-
                                         action = OrgAction.AlreadyExists;
-                                    }
 
                                     // Build action and add it to results
                                     string destination = bestMatch.BuildFilePath(episode1, episode2, Path.GetExtension(orgPath.Path));
@@ -380,22 +381,19 @@ namespace Meticumedia.Classes
                                     else
                                         newItem.Enable = true;
                                     newItem.Category = matchFileCat;
-                                    UpdateResult(newItem, pathNum, procNumber);
-                                    matchMade = true;
+                                    newItem.IsNewShow = newShow; 
+                                    return newItem;
                                 }
                             }
                         }
 
                         // No match to TV show
-                        if (!matchMade && !tvOnlyCheck && !fast)
+                        if (!tvOnlyCheck && !fast)
                         {
                             // Try to match to a movie
                             OrgItem movieItem;
                             if (CreateMovieAction(orgPath, matchString, out movieItem, fast))
-                            {
-                                UpdateResult(movieItem, pathNum, procNumber);
-                                matchMade = true;
-                            }
+                                return movieItem;
                         }
 
                         break;
@@ -408,52 +406,29 @@ namespace Meticumedia.Classes
 
                         // If delete action created (for sample file)
                         if (item.Action == OrgAction.Delete)
-                        {
-                            SetDeleteAction(orgPath, fileCat, pathNum, procNumber);
-                            matchMade = true;
-                        }
+                            return BuildDeleteAction(orgPath, fileCat);
                         else if (item.Action != OrgAction.None)
-                        {
-                            UpdateResult(item, pathNum, procNumber);
-                            matchMade = true;
-                        }
+                            return item;
                         break;
 
                     // Trash
                     case FileCategory.Trash:
-                        SetDeleteAction(orgPath, matchFileCat, pathNum, procNumber);
-                        matchMade = true;
-                        break;
+                        return BuildDeleteAction(orgPath, matchFileCat);
                     // Ignore
                     case FileCategory.Ignored:
-                        UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, matchFileCat, orgPath.OrgFolder), pathNum, procNumber);
-                        matchMade = true;
-                        break;
+                        return new OrgItem(OrgAction.None, orgPath.Path, matchFileCat, orgPath.OrgFolder);
                     // Unknown
                     default:
-                        UpdateResult(new OrgItem(OrgAction.None, orgPath.Path, matchFileCat, orgPath.OrgFolder), pathNum, procNumber);
-                        matchMade = true;
-                        break;
+                        return new OrgItem(OrgAction.None, orgPath.Path, matchFileCat, orgPath.OrgFolder);
                 }
 
                 // Check for cancellation
                 if (scanCanceled || procNumber < scanNumber)
-                    return;
-
-                // Break loop if matched
-                if (matchMade)
-                    break;
+                    return noneItem;
             }
 
             // If no match on anything set none action
-            if (!matchMade)
-            {
-                OrgItem newItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
-                UpdateResult(newItem, pathNum, procNumber);
-            }
-
-            // Update progress
-            ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
+            return noneItem;
         }
 
         /// <summary>
@@ -572,20 +547,19 @@ namespace Meticumedia.Classes
         /// <param name="scanResults">The current scan action list to add action to.</param>
         /// <param name="file">The file to be deleted</param>
         /// <param name="fileCat">The category of the file</param>
-        private void SetDeleteAction(OrgPath file, FileCategory fileCat, int pathNum, int procNum)
+        private OrgItem BuildDeleteAction(OrgPath file, FileCategory fileCat)
         {
             OrgItem newItem;
             if (file.AllowDelete)
             {
                 newItem = new OrgItem(OrgAction.Delete, file.Path, fileCat, file.OrgFolder);
                 newItem.Enable = true;
-                UpdateResult(newItem, pathNum, procNum);
             }
             else
             {
                 newItem = new OrgItem(OrgAction.None, file.Path, fileCat, file.OrgFolder);
-                UpdateResult(newItem, pathNum, procNum);
             }
+            return newItem;
         }
 
         #endregion
