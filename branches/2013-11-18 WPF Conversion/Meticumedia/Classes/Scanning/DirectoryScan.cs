@@ -331,7 +331,7 @@ namespace Meticumedia.Classes
                                 path = defaultTvFolder.FullPath;
 
                             // Perform search for matching TV show
-                            matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, out bestMatch);
+                            matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, true, out bestMatch);
                             bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
                             TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
 
@@ -544,7 +544,7 @@ namespace Meticumedia.Classes
 
             // Search for match to movie
             Movie searchResult;
-            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, out searchResult);
+            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, true, out searchResult);
 
             // Add closest match item
             if (searchSucess)

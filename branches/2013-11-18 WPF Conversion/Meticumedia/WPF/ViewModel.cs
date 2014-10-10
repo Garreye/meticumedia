@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Meticumedia.Classes;
 
-namespace Meticumedia.Controls
+namespace Meticumedia.WPF
 {
     public class ViewModel : INotifyPropertyChanged
     {

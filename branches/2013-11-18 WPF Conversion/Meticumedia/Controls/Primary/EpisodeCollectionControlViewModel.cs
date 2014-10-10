@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using Meticumedia.Classes;
+using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
 {

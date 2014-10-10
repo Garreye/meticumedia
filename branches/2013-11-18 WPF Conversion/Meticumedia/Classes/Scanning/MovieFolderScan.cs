@@ -206,7 +206,7 @@ namespace Meticumedia.Classes
                 // Try to match file to movie
                 string search = Path.GetFileNameWithoutExtension(files[i].Path);
                 Movie searchResult;
-                bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, files[i].RootFolder.FullPath, string.Empty, false, out searchResult);
+                bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, files[i].RootFolder.FullPath, string.Empty, false, true, out searchResult);
 
                 // Add closest match item
                 OrgItem item = new OrgItem(OrgAction.None, files[i].Path, fileCat, files[i].OrgFolder);

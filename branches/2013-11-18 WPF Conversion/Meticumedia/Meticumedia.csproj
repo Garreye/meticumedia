@@ -109,6 +109,10 @@
     <Compile Include="Windows\ContentEditorWindow.xaml.cs">
       <DependentUpon>ContentEditorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\MatchTestWindow.xaml.cs">
+      <DependentUpon>MatchTestWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\MatchTestWindowViewModel.cs" />
     <Compile Include="Windows\OrgItemEditorWindow.xaml.cs">
       <DependentUpon>OrgItemEditorWindow.xaml</DependentUpon>
     </Compile>
@@ -382,6 +386,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Windows\ContentEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\MatchTestWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1130,6 +1130,13 @@ namespace Meticumedia.Controls
 
         private void SetSelectedItemToDelete()
         {
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                // Check that action is already exists
+                item.Replace = true;
+                item.Action = OrgAction.Delete;
+                item.Enable = true;
+            }
         }
 
         private void IgnoreItems()
