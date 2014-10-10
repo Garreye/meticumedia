@@ -59,6 +59,11 @@ namespace Meticumedia.Classes
         }
 
         /// <summary>
+        /// Directory scanner
+        /// </summary>
+        private static DirectoryScan scan = new DirectoryScan(true);
+
+        /// <summary>
         /// Updates list of TV episodes found in scan directories. Performs a directory scan in background that
         /// only matches to files that are categorized as TV video.
         /// </summary>
@@ -67,7 +72,6 @@ namespace Meticumedia.Classes
             // Run scan to look for TV files
             if (dirScanSearch)
             {
-                DirectoryScan scan = new DirectoryScan(true);
                 scan.RunScan(Settings.ScanDirectories.ToList(), new List<OrgItem>(), true, true, true);
                 Items = scan.Items;
             }
