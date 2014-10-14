@@ -56,20 +56,37 @@ namespace MeticumediaTesting
         public MatchTestWindowViewModel()
         {
             this.MatchProcessing = new ObservableCollection<string>();
+            ContentSearch.DebugNotification += ContentSearch_DebugNotification;
         }
+
+        
 
         #endregion
 
         #region Methods
 
+        void ContentSearch_DebugNotification(object sender, DebugNotificationArgs e)
+        {
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                this.MatchProcessing.Add(e.Notification);
+            });
+        }
+
         private void RunMatch()
         {
-            DirectoryScan scan = new DirectoryScan(false);
-            string matchTo = this.MatchString + ".avi";
-            OrgPath path = new OrgPath(matchTo, false, true, new OrgFolder(matchTo));
-            OrgItem item = scan.ProcessPath(path, false, false, false, 0);
+            string matchTo = this.MatchString;
+            if (!this.MatchString.Contains('.'))
+                matchTo += ".avi";
 
-            this.MatchProcessing.Add(item.ToString());
+            this.MatchProcessing.Clear();
+            
+            DirectoryScan scan = new DirectoryScan(false);
+            scan.DebugNotification += ContentSearch_DebugNotification;
+            OrgPath path = new OrgPath(matchTo, false, true, new OrgFolder());
+            OrgItem item = scan.ProcessPath(path, false, false, false, false, 0);
+
+            this.MatchProcessing.Add("Final result: " + item.ToString());
         }
 
         #endregion

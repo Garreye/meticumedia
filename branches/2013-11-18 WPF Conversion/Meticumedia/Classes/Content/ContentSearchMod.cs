@@ -12,5 +12,6 @@ namespace Meticumedia.Classes
     /// <summary>
     /// Types of modification that can be made to search strings
     /// </summary>
+    [Flags]
     public enum ContentSearchMod { None = 0, YearRemoved = 1, SpaceRemoved = 2, WordsRemoved = 4, WordSlit = 8, TheAdded = 16, BrackRemoval = 32, SingleLetterAdded = 64, All = 127 }
 }

@@ -96,7 +96,19 @@ namespace Meticumedia.Classes
             }
         }
 
+        /// <summary>
+        /// Debug noitification message event
+        /// </summary>
+        public event EventHandler<DebugNotificationArgs> DebugNotification;
 
+        /// <summary>
+        /// Triggers DebugNotification event
+        /// </summary>
+        protected void OnDebugNotificationd(string message)
+        {
+            if (DebugNotification != null)
+                DebugNotification(this, new DebugNotificationArgs(message) );
+        }
 
         #endregion
 

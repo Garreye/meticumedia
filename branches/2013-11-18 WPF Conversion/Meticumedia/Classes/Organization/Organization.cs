@@ -161,11 +161,13 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Loads organization data from XML files.
         /// </summary>
-        public static void Load()
+        public static void Load(bool doUpdating)
         {            
             string basePath = GetBasePath(false);
             if (!Directory.Exists(basePath))
                 return;
+
+            Organization.DoUpdating = doUpdating;
 
             // Load TV shows
             LoadShowsAsync();
@@ -176,6 +178,8 @@ namespace Meticumedia.Classes
             // Action Log
             LoadActionLogAsync();
         }
+
+        private static bool DoUpdating = true;
 
         /// <summary>
         /// Asynchronously load TV shows from XML
@@ -193,7 +197,7 @@ namespace Meticumedia.Classes
         /// </summary>
         private static void tvLoadWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Shows.Load();
+            Shows.Load(Organization.DoUpdating);
         }
 
         /// <summary>
@@ -202,7 +206,8 @@ namespace Meticumedia.Classes
         private static void tvLoadWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             // Update TV folder
-            UpdateRootFolders(ContentType.TvShow);
+            if (Organization.DoUpdating)
+                UpdateRootFolders(ContentType.TvShow);
         }
 
         /// <summary>
@@ -221,7 +226,7 @@ namespace Meticumedia.Classes
         /// </summary>
         static void movieLoadWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Movies.Load();
+            Movies.Load(Organization.DoUpdating);
         }
 
         /// <summary>
@@ -229,7 +234,8 @@ namespace Meticumedia.Classes
         /// </summary>
         static void movieLoadWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            UpdateRootFolders(ContentType.Movie);            
+            if(Organization.DoUpdating)
+                UpdateRootFolders(ContentType.Movie);
         }
 
         /// <summary>
