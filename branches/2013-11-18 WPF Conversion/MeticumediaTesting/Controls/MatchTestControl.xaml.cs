@@ -10,18 +10,23 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Meticumedia.Windows
+namespace MeticumediaTesting
 {
     /// <summary>
-    /// Interaction logic for MatchTestWindow.xaml
+    /// Interaction logic for MatchTestControl.xaml
     /// </summary>
-    public partial class MatchTestWindow : Window
+    public partial class MatchTestControl : UserControl
     {
-        public MatchTestWindow()
+        private MatchTestWindowViewModel viewModel;
+        
+        public MatchTestControl()
         {
             InitializeComponent();
+            viewModel = new MatchTestWindowViewModel();
+            this.DataContext = viewModel;
         }
     }
 }

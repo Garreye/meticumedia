@@ -228,7 +228,7 @@ namespace Meticumedia.Classes
                 ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
 
                 // Process path
-                OrgItem results = ProcessPath(orgPath, pathNum, totalPaths, updateNumber, tvOnlyCheck, skipMatching, fast, procNumber);
+                OrgItem results = ProcessPath(orgPath, tvOnlyCheck, skipMatching, fast, procNumber);
 
                 // Update results and progress
                 UpdateResult(results, pathNum, procNumber);
@@ -236,7 +236,7 @@ namespace Meticumedia.Classes
             }
         }
 
-        public OrgItem ProcessPath(OrgPath orgPath, int pathNum, int totalPaths, int updateNumber, bool tvOnlyCheck, bool skipMatching, bool fast, int procNumber)
+        public OrgItem ProcessPath(OrgPath orgPath, bool tvOnlyCheck, bool skipMatching, bool fast, int procNumber)
         {
             // Create default none item
             FileCategory fileCat = FileHelper.CategorizeFile(orgPath, orgPath.Path);

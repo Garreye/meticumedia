@@ -239,7 +239,10 @@ namespace Meticumedia.Classes
         /// <returns></returns>
         public bool IsIgnored(string path)
         {
-            return ignoreFiles.Contains(path.Remove(0, this.FolderPath.Length + 1));
+            if (path.Length > this.FolderPath.Length)
+                return ignoreFiles.Contains(path.Remove(0, this.FolderPath.Length + 1));
+            else
+                return false;
         }
 
         #endregion
