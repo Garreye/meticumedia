@@ -19,10 +19,14 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Text="Path Name" Margin="3" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding MatchString}" />
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding MatchString, UpdateSourceTrigger=PropertyChanged}" >
+                <TextBox.InputBindings>
+                    <KeyBinding Command="{Binding RunMatchCommand}" Key="Enter" />
+                </TextBox.InputBindings>
+            </TextBox>
             <Button Grid.Column="2" Margin="3" Padding="10,2" Content="Match" Command="{Binding RunMatchCommand}" />
         </Grid>
 
-        <ListBox Grid.Row="1" IsEnabled="False" ItemsSource="{Binding MatchProcessing}" />
+        <ListBox Grid.Row="1" ItemsSource="{Binding MatchProcessing}" />
     </Grid>
 </UserControl>

@@ -17,6 +17,24 @@ namespace Meticumedia.Classes
     /// </summary>
     public abstract class ContentSearch
     {
+        #region Events
+
+        /// <summary>
+        /// Debug noitification message event
+        /// </summary>
+        public static event EventHandler<DebugNotificationArgs> DebugNotification;
+
+        /// <summary>
+        /// Triggers DebugNotification event
+        /// </summary>
+        protected static void OnDebugNotificationd(string message)
+        {
+            if (DebugNotification != null)
+                DebugNotification(null, new DebugNotificationArgs(message));
+        }
+
+        #endregion
+
         /// <summary>
         /// Type of content bein searched for
         /// </summary>
@@ -363,9 +381,7 @@ namespace Meticumedia.Classes
                 }
                 // Synchronized: call search method
                 else
-                {
                     SearchThread(args);
-                }
 
                 searchNum++;
             }
@@ -455,6 +471,9 @@ namespace Meticumedia.Classes
         /// <returns>whether match was successful</returns>
         private bool DoMatch(string search, string folderPath, string rootFolder, int year, ContentSearchMod baseMods, out List<SearchResult> matches)
         {
+            /// Debug notification
+            OnDebugNotificationd("Performing database search for: " + search);
+            
             // Search for content
             List<Content> searchResults = PerformSearch(search, false);
 
@@ -465,6 +484,8 @@ namespace Meticumedia.Classes
             if (searchResults != null)
                 foreach (Content searchResult in searchResults)
                 {
+                    OnDebugNotificationd("Attempting to match to database entry: " + searchResult);
+                    
                     SearchResult result = new SearchResult();
                     result.Mods = baseMods;
 
@@ -522,15 +543,20 @@ namespace Meticumedia.Classes
                         match = FileHelper.CompareStrings(simplifiedSearch, dbContentName, out theAddedToMatch, out singleLetterDiff);
                         result.MatchedString = simplifiedSearch;
                     }
-
-                    // No match, next result!
-                    if (!match)
-                        continue;
+                    
 
                     if (theAddedToMatch)
                         result.Mods |= ContentSearchMod.TheAdded;
                     if (singleLetterDiff)
                         result.Mods |= ContentSearchMod.SingleLetterAdded;
+
+                    // Match notification
+                    if (match)
+                        OnDebugNotificationd("Matched with following mods: " + result.Mods);
+
+                    // No match, next result!
+                    if (!match)
+                        continue;
 
                     // Set results folder/path
                     result.Content = searchResult;

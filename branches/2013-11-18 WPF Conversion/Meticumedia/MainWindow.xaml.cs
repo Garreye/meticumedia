@@ -33,7 +33,7 @@ namespace Meticumedia
             
             // Load organization and settings from XML
             Settings.Load();
-            Organization.Load();
+            Organization.Load(true);
         }
 
         private void menuSettings_Click(object sender, RoutedEventArgs e)

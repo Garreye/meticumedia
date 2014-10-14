@@ -228,7 +228,7 @@ namespace Meticumedia.Classes
                 ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
 
                 // Process path
-                OrgItem results = ProcessPath(orgPath, tvOnlyCheck, skipMatching, fast, procNumber);
+                OrgItem results = ProcessPath(orgPath, tvOnlyCheck, skipMatching, fast, true, procNumber);
 
                 // Update results and progress
                 UpdateResult(results, pathNum, procNumber);
@@ -236,14 +236,19 @@ namespace Meticumedia.Classes
             }
         }
 
-        public OrgItem ProcessPath(OrgPath orgPath, bool tvOnlyCheck, bool skipMatching, bool fast, int procNumber)
+        public OrgItem ProcessPath(OrgPath orgPath, bool tvOnlyCheck, bool skipMatching, bool fast, bool threaded, int procNumber)
         {
             // Create default none item
             FileCategory fileCat = FileHelper.CategorizeFile(orgPath, orgPath.Path);
             OrgItem noneItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
             
             // Setup match to filename and folder name (if it's in a folder inside of downloads)
-            string[] pathSplit = orgPath.Path.Replace(orgPath.OrgFolder.FolderPath, "").Split('\\');
+            string[] pathSplit;
+            if (!string.IsNullOrEmpty(orgPath.OrgFolder.FolderPath))
+                pathSplit = orgPath.Path.Replace(orgPath.OrgFolder.FolderPath, "").Split('\\');
+            else
+                pathSplit = orgPath.Path.Split('\\');
+
             List<string> possibleMatchPaths = new List<string>();
             possibleMatchPaths.Add(pathSplit.Last());
             if (pathSplit.Length > 2)
@@ -252,11 +257,15 @@ namespace Meticumedia.Classes
             // Try to match to each string
             foreach (string matchString in possibleMatchPaths)
             {
+                OnDebugNotificationd("Attempting to match to path: \" " + matchString + "\"");
+                
                 // Get simple file name
                 string simpleFile = FileHelper.BasicSimplify(Path.GetFileNameWithoutExtension(matchString), false);
+                OnDebugNotificationd("Simplifies to:  \" " + simpleFile + "\"");
 
                 // Categorize current match string
                 FileCategory matchFileCat = FileHelper.CategorizeFile(orgPath, matchString);
+                OnDebugNotificationd("Classified as: " + matchFileCat);
 
                 // Check tv
                 if (tvOnlyCheck && matchFileCat != FileCategory.TvVideo)
@@ -269,24 +278,6 @@ namespace Meticumedia.Classes
                 // Set whether item is for new show
                 bool newShow = false;
 
-                // Try to match file to existing show
-                Dictionary<TvShow, MatchCollection> matches = new Dictionary<TvShow, MatchCollection>();
-                for (int j = 0; j < Organization.Shows.Count; j++)
-                {
-                    MatchCollection match = Organization.Shows[j].MatchFileToContent(matchString);
-                    if (match != null && match.Count > 0)
-                        matches.Add((TvShow)Organization.Shows[j], match);
-                }
-
-                // Try to match to temporary show
-                lock (directoryScanLock)
-                    foreach (TvShow show in temporaryShows)
-                    {
-                        MatchCollection match = show.MatchFileToContent(matchString);
-                        if (match != null && match.Count > 0)
-                            matches.Add(show, match);
-                    }
-
                 // Check for cancellation
                 if (scanCanceled || procNumber < scanNumber)
                     return null;
@@ -297,6 +288,37 @@ namespace Meticumedia.Classes
                     // TV item
                     case FileCategory.TvVideo:
 
+                        // Try to match file to existing show
+                        Dictionary<TvShow, MatchCollection> matches = new Dictionary<TvShow, MatchCollection>();
+                        for (int j = 0; j < Organization.Shows.Count; j++)
+                        {
+                            MatchCollection match = Organization.Shows[j].MatchFileToContent(matchString);
+                            if (match != null && match.Count > 0)
+                                matches.Add((TvShow)Organization.Shows[j], match);
+                        }
+
+                        // Try to match to temporary show
+                        lock (directoryScanLock)
+                            foreach (TvShow show in temporaryShows)
+                            {
+                                MatchCollection match = show.MatchFileToContent(matchString);
+                                if (match != null && match.Count > 0)
+                                    matches.Add(show, match);
+                            }
+
+                        // Debug notification for show matches
+                        string matchNotification = "Show name matches found: ";
+                        if (matches.Count == 0)
+                            matchNotification += "NONE";
+                        else
+                        {
+                            foreach (TvShow match in matches.Keys)
+                                matchNotification += match.DisplayName + ", ";
+                            matchNotification = matchNotification.Substring(0, matchNotification.Length - 2);
+                        }
+                        OnDebugNotificationd(matchNotification);
+
+                        // Check for matches to existing show
                         TvShow bestMatch = null;
                         bool matchSucess = false;
                         if (matches.Count > 0)
@@ -323,11 +345,15 @@ namespace Meticumedia.Classes
                                         bestMatch = match.Key;
                                     }
                                 }
+
+                            OnDebugNotificationd("Matched to show " + bestMatch.DisplayName);
                         }
 
                         // Episode not matched to a TV show, search database!
                         if (bestMatch == null && !skipMatching)
                         {
+                            OnDebugNotificationd("Not matched to existing show; searching database.");
+                            
                             // Setup search string
                             string showFile = Path.GetFileNameWithoutExtension(matchString);
 
@@ -338,7 +364,7 @@ namespace Meticumedia.Classes
                                 path = defaultTvFolder.FullPath;
 
                             // Perform search for matching TV show
-                            matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, true, out bestMatch);
+                            matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, threaded, out bestMatch);
                             bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
                             TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
 
@@ -392,7 +418,7 @@ namespace Meticumedia.Classes
                         {
                             // Try to match to a movie
                             OrgItem movieItem;
-                            if (CreateMovieAction(orgPath, matchString, out movieItem, fast))
+                            if (CreateMovieAction(orgPath, matchString, out movieItem, threaded, fast))
                                 return movieItem;
                         }
 
@@ -402,7 +428,7 @@ namespace Meticumedia.Classes
                     case FileCategory.MovieVideo:
                         // Create action
                         OrgItem item;
-                        CreateMovieAction(orgPath, matchString, out item, fast);
+                        CreateMovieAction(orgPath, matchString, out item, threaded, fast);
 
                         // If delete action created (for sample file)
                         if (item.Action == OrgAction.Delete)
@@ -491,7 +517,7 @@ namespace Meticumedia.Classes
         /// <param name="file">The file to create movie action from</param>
         /// <param name="item">The resulting movie action</param>
         /// <returns>Whether the file was matched to a movie</returns>
-        private bool CreateMovieAction(OrgPath file, string matchString, out OrgItem item, bool fast)
+        private bool CreateMovieAction(OrgPath file, string matchString, out OrgItem item, bool threaded, bool fast)
         {
             // Initialize item
             item = new OrgItem(OrgAction.None, file.Path, FileCategory.MovieVideo, file.OrgFolder);
@@ -519,7 +545,7 @@ namespace Meticumedia.Classes
 
             // Search for match to movie
             Movie searchResult;
-            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, true, out searchResult);
+            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, threaded, out searchResult);
 
             // Add closest match item
             if (searchSucess)

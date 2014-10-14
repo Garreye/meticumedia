@@ -1608,6 +1608,31 @@ namespace Meticumedia.Classes
             }
         }
 
+        public override string ToString()
+        {
+            string str = this.SourcePath + " (" + this.Category + ")" + " - Action: " + this.Action;
+
+            switch (this.Action)
+            {
+                case OrgAction.Empty:
+                    break;
+                case OrgAction.None:
+                    break;
+                case OrgAction.AlreadyExists:
+                    str +=  " (" + this.DestinationPath + ")";
+                    break;
+                case OrgAction.Move:
+                case OrgAction.Copy:
+                case OrgAction.Rename:
+                    str += " to " + this.DestinationPath;
+                    break;
+                default:
+                    break;
+            }
+
+            return str;
+        }
+
         #endregion
 
         #region Colors

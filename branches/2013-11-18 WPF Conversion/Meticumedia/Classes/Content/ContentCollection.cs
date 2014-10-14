@@ -207,7 +207,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Load collection from saved XML file
         /// </summary>
-        public void Load()
+        public void Load(bool doUpdating)
         {
             XmlTextReader reader = null;
             XmlDocument xmlDoc = new XmlDocument();
@@ -245,7 +245,8 @@ namespace Meticumedia.Classes
                                         if (show.Load(contentNodes[i]))
                                         {
                                             loadContent.Add(show);
-                                            show.UpdateMissing();
+                                            if (doUpdating)
+                                                show.UpdateMissing();
                                         }
                                         break;
                                     case ContentType.Movie:
@@ -285,7 +286,7 @@ namespace Meticumedia.Classes
             }
 
             // Start updating of TV episode in scan dirs.
-            if (this.ContentType == ContentType.TvShow)
+            if (this.ContentType == ContentType.TvShow && doUpdating)
             {
                 TvItemInScanDirHelper.DoUpdate(false);
                 TvItemInScanDirHelper.StartUpdateTimer();

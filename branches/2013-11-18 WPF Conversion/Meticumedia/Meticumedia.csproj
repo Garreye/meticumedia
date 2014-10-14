@@ -82,6 +82,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\Organization\OrgItemCollection.cs" />
+    <Compile Include="Classes\Scanning\DebugNotificationArgs.cs" />
     <Compile Include="Classes\Settings\FileTypesGroup.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
     <Compile Include="Classes\Tv\TvGroupingType.cs" />
