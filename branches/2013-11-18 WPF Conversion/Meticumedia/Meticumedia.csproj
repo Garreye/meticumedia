@@ -83,7 +83,7 @@
     </ApplicationDefinition>
     <Compile Include="Classes\Organization\OrgItemCollection.cs" />
     <Compile Include="Classes\Scanning\DebugNotificationArgs.cs" />
-    <Compile Include="Classes\Settings\FileTypesGroup.cs" />
+    <Compile Include="Classes\Settings\GeneralSettings.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
     <Compile Include="Classes\Tv\TvGroupingType.cs" />
     <Compile Include="Controls\Editors\ContentEditorControl.xaml.cs">
@@ -106,6 +106,14 @@
     <Compile Include="Controls\Primary\QueueControlViewModel.cs" />
     <Compile Include="Controls\Primary\ScheduleControlViewModel.cs" />
     <Compile Include="Controls\Primary\TvCollectionControl.cs" />
+    <Compile Include="Controls\Settings\FileNameControlViewModel.cs" />
+    <Compile Include="Controls\Settings\FileTypesControlViewModel.cs" />
+    <Compile Include="Controls\Settings\GeneralSettingsControl.xaml.cs">
+      <DependentUpon>GeneralSettingsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\GeneralSettingsControlViewModel.cs" />
+    <Compile Include="Controls\Settings\RootFolderControlViewModel.cs" />
+    <Compile Include="Controls\Settings\ScanFoldersControlViewModel.cs" />
     <Compile Include="Windows\ContentEditorWindowViewModel.cs" />
     <Compile Include="Windows\ContentEditorWindow.xaml.cs">
       <DependentUpon>ContentEditorWindow.xaml</DependentUpon>
@@ -114,12 +122,15 @@
       <DependentUpon>OrgItemEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\OrgItemEditorWindowViewModel.cs" />
+    <Compile Include="Windows\SettingsWindowViewModel.cs" />
     <Compile Include="WPF\BindableMultiSelectDataGrid.cs" />
     <Compile Include="WPF\Commands.cs" />
     <Compile Include="WPF\Converters\EnumInverseBooleanConverter.cs" />
     <Compile Include="WPF\Converters\EnumBooleanConverter.cs" />
     <Compile Include="WPF\Converters\EnumVisibilityConverter.cs" />
     <Compile Include="WPF\Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="WPF\BindableMultiSelectListBox.cs" />
+    <Compile Include="WPF\BindableSelectTreeView.cs" />
     <Compile Include="WPF\ProgressViewModel.cs" />
     <Compile Include="WPF\RelayCommand.cs" />
     <Compile Include="Controls\Primary\ContentCollectionControl.xaml.cs">
@@ -188,6 +199,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Settings\FileTypesControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\GeneralSettingsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

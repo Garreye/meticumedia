@@ -11,6 +11,7 @@
         <wpfr:EnumBooleanConverter x:Key="enumBooleanConverter" />
         <wpfr:EnumVisibilityConverter x:Key="enumVisConverter" />
         <wpfr:EnumInverseBooleanConverter x:Key="enumInvBooleanConverter" />
+        <BooleanToVisibilityConverter x:Key="boolToVisConv" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -26,10 +27,12 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
             <TextBlock Grid.Column="0" Text="Source" Margin="3" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" Margin="3" Text="{Binding Item.SourcePath}" />
+            <TextBox Grid.Column="1" Margin="3" Text="{Binding Item.SourcePath}" IsEnabled="{Binding SourceEditingAllowed}" />
+            <Button Grid.Column="2" Margin="3" Content="..." Padding="10,2" Visibility="{Binding SourceEditingAllowed, Converter={StaticResource boolToVisConv}}" Command="{Binding SetSourcePathCommand}" />
         </Grid>
         
         <GroupBox Grid.Row="1" Header="Action">
@@ -94,7 +97,7 @@
 
             <TextBlock Grid.Column="0" Text="Destination" Margin="3" VerticalAlignment="Center" />
             <TextBox Grid.Column="1" Margin="3" Text="{Binding Item.DestinationPath}" IsEnabled="{Binding Path=Item.Category, Mode=OneWay, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Custom}" />
-            <Button Grid.Column="2" Margin="3" Content="..." Padding="10,2" />
+            <Button Grid.Column="2" Margin="3" Content="..." Padding="10,2" Visibility="{Binding Path=Item.Category, Mode=OneWay, Converter={StaticResource enumVisConverter}, ConverterParameter=Custom}" Command="{Binding SetDestinationPathCommand}" />
         </Grid>
 
         <Grid Grid.Row="5">

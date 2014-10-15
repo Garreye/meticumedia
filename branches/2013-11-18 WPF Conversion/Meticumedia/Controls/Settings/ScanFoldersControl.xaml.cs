@@ -35,78 +35,59 @@ namespace Meticumedia.Controls
 
         #region Variables
 
-        private ObservableCollection<OrgFolder> folders = new ObservableCollection<OrgFolder>();
-
-        private List<NotifyCollectionChangedEventArgs> collectionChanges = new List<NotifyCollectionChangedEventArgs>();
 
         #endregion
 
         #region Save/Load 
 
-        public void LoadSettings()
-        {
-            folders = new ObservableCollection<OrgFolder>();
-            foreach (OrgFolder flder in Meticumedia.Classes.Settings.ScanDirectories)
-            {
-                OrgFolder addFldr = new OrgFolder(flder);
-                folders.Add(addFldr);
-            }
-            folders.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(folders_CollectionChanged);
-            lbScanFolders.ItemsSource = folders;
-        }
-
-        private void folders_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            collectionChanges.Add(e);
-        }
 
         public void SaveSettings()
         {           
-            Meticumedia.Classes.Settings.ScanDirectories.Clear();
-            foreach (OrgFolder fldr in folders)
-               Meticumedia.Classes.Settings.ScanDirectories.Add(fldr);
+            //Meticumedia.Classes.Settings.ScanDirectories.Clear();
+            //foreach (OrgFolder fldr in folders)
+            //   Meticumedia.Classes.Settings.ScanDirectories.Add(fldr);
         }
 
         #endregion
 
         #region Event Handlers
 
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            // Open folder browser
-            VistaFolderBrowserDialog folderSel = new VistaFolderBrowserDialog();
+        //private void btnAdd_Click(object sender, RoutedEventArgs e)
+        //{
+        //    // Open folder browser
+        //    VistaFolderBrowserDialog folderSel = new VistaFolderBrowserDialog();
 
-            // Add folder if valid folder selected
-            if ((bool)folderSel.ShowDialog() && Directory.Exists(folderSel.SelectedPath))
-                folders.Add(new OrgFolder(folderSel.SelectedPath));
-        }
+        //    // Add folder if valid folder selected
+        //    if ((bool)folderSel.ShowDialog() && Directory.Exists(folderSel.SelectedPath))
+        //        folders.Add(new OrgFolder(folderSel.SelectedPath));
+        //}
 
-        private void btnRemove_Click(object sender, RoutedEventArgs e)
-        {
-            if (lbScanFolders.SelectedItem != null)
-                folders.Remove((OrgFolder)lbScanFolders.SelectedItem);
-        }
+        //private void btnRemove_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (lbScanFolders.SelectedItem != null)
+        //        folders.Remove((OrgFolder)lbScanFolders.SelectedItem);
+        //}
 
-        private void btnClear_Click(object sender, RoutedEventArgs e)
-        {
-            folders.Clear();
-        }
+        //private void btnClear_Click(object sender, RoutedEventArgs e)
+        //{
+        //    folders.Clear();
+        //}
 
-        private void btnFolderSel_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            var dataContext = button.DataContext;
-            ListBoxItem clickedListBoxItem = lbScanFolders.ItemContainerGenerator.ContainerFromItem(dataContext) as ListBoxItem;
-            OrgFolder folder = (OrgFolder)clickedListBoxItem.Content;
-            clickedListBoxItem.IsSelected = true;
+        //private void btnFolderSel_Click(object sender, RoutedEventArgs e)
+        //{
+        //    Button button = sender as Button;
+        //    var dataContext = button.DataContext;
+        //    ListBoxItem clickedListBoxItem = lbScanFolders.ItemContainerGenerator.ContainerFromItem(dataContext) as ListBoxItem;
+        //    OrgFolder folder = (OrgFolder)clickedListBoxItem.Content;
+        //    clickedListBoxItem.IsSelected = true;
 
-            VistaFolderBrowserDialog folderSel = new VistaFolderBrowserDialog();
-            folderSel.SelectedPath = folder.FolderPath;
+        //    VistaFolderBrowserDialog folderSel = new VistaFolderBrowserDialog();
+        //    folderSel.SelectedPath = folder.FolderPath;
 
-            if ((bool)folderSel.ShowDialog() && Directory.Exists(folderSel.SelectedPath))
-                folder.FolderPath = folderSel.SelectedPath;
+        //    if ((bool)folderSel.ShowDialog() && Directory.Exists(folderSel.SelectedPath))
+        //        folder.FolderPath = folderSel.SelectedPath;
 
-        }
+        //}
 
         #endregion
     }

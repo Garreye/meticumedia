@@ -57,6 +57,8 @@ namespace Meticumedia.Classes
 
         private TvEpisodeFormat episodeFormat = new TvEpisodeFormat();
 
+        public ContentType ContentType {get;set;}
+
         #endregion
 
         #region Events
@@ -79,10 +81,10 @@ namespace Meticumedia.Classes
         /// Constructor that specifies whether it's for a movie or not
         /// </summary>
         /// <param name="movie">Whether file name formating will be for movie - for default format setup</param>
-        public FileNameFormat(bool movie)
+        public FileNameFormat(ContentType type)
         {
             // Default formats
-            if (movie)
+            if (type == Classes.ContentType.Movie)
             {
                 format.Add(new FileNamePortion(FileWordType.MovieName, string.Empty, " ", FileNamePortion.CaseOptionType.None));
                 format.Add(new FileNamePortion(FileWordType.Year, "[", "]", FileNamePortion.CaseOptionType.None));
@@ -127,22 +129,22 @@ namespace Meticumedia.Classes
         /// Constructor for copying instance
         /// </summary>
         /// <param name="format"></param>
-        public FileNameFormat(FileNameFormat format)
+        public FileNameFormat(FileNameFormat format) : this(format.ContentType)
         {
-            this.Format = new ObservableCollection<FileNamePortion>();
-            foreach (FileNamePortion portion in format.Format)
-                this.Format.Add(new FileNamePortion(portion));
-            this.EpisodeFormat = new TvEpisodeFormat(format.EpisodeFormat);
-
-            foreach (FileNamePortion fnp in this.format)
-                fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
-            this.format.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(format_CollectionChanged);
-            this.episodeFormat.PropertyChanged += new PropertyChangedEventHandler(episodeFormat_PropertyChanged);
+            Clone(format);
         }
 
         #endregion
 
         #region Methods
+
+        public void Clone(FileNameFormat format)
+        {
+            this.Format.Clear();
+            foreach (FileNamePortion portion in format.Format)
+                this.Format.Add(new FileNamePortion(portion));
+            this.EpisodeFormat = new TvEpisodeFormat(format.EpisodeFormat);
+        }
 
         /// <summary>
         /// Builds formatted file name for movie from an existing file path.
@@ -165,7 +167,7 @@ namespace Meticumedia.Classes
             if (Directory.Exists(folderPath)) // Check in case path was empty
             {
                 string[] dirFiles = Directory.GetFiles(folderPath);
-                List<string> diffFiles = dirFiles.ToList().FindAll(f => Path.GetFileName(f) != Path.GetFileName(fileName) && Settings.VideoFileTypes.Types.Contains(Path.GetExtension(f)));
+                List<string> diffFiles = dirFiles.ToList().FindAll(f => Path.GetFileName(f) != Path.GetFileName(fileName) && Settings.VideoFileTypes.Contains(Path.GetExtension(f)));
 
                 // Get differentiating part of string for other files with similar name
                 foreach (string diffFile in diffFiles)
@@ -377,32 +379,45 @@ namespace Meticumedia.Classes
         public string BuildEpisodeName(TvEpisode episode1, TvEpisode episode2)
         {
             string epName;
-            if (episode2 != null && !string.IsNullOrEmpty(episode2.Name))
+            if (episode2 != null && !string.IsNullOrEmpty(episode2.Name) && episode2.DatabaseNumber > 0)
             {
                 char[] ep1Chars = episode1.Name.ToCharArray();
                 char[] ep2Chars = episode2.Name.ToCharArray();
 
-                List<char> name1Build = ep1Chars.ToList();
-                List<char> name2Build = ep2Chars.ToList();
-
-                // Go through characters of episode names and remove identicals
-                bool closingBracketFound = false;
-                for (int i = Math.Min(ep1Chars.Length, ep2Chars.Length) - 1; i >= 0; i--)
+                // Check if name have any similarities at start
+                int matchLen = 0;
+                for (int i = 0; i < Math.Min(ep1Chars.Length, ep2Chars.Length); i++)
                     if (ep1Chars[i] == ep2Chars[i])
-                    {
-                        if (ep1Chars[i] == ')' && !closingBracketFound)
+                        matchLen++;
+                    else
+                        break;
+
+                if (matchLen > 3)
+                {
+                    List<char> name1Build = ep1Chars.ToList();
+                    List<char> name2Build = ep2Chars.ToList();
+
+                    // Go through characters of episode names and remove identicals
+                    bool closingBracketFound = false;
+                    for (int i = Math.Min(ep1Chars.Length, ep2Chars.Length) - 1; i >= 0; i--)
+                        if (ep1Chars[i] == ep2Chars[i])
                         {
-                            closingBracketFound = true;
-                            name1Build.RemoveAt(i);
+                            if (ep1Chars[i] == ')' && !closingBracketFound)
+                            {
+                                closingBracketFound = true;
+                                name1Build.RemoveAt(i);
+                            }
+
+                            name2Build.RemoveAt(i);
                         }
 
-                        name2Build.RemoveAt(i);
-                    }
+                    epName = new String(name1Build.ToArray()) + " & " + new String(name2Build.ToArray());
 
-                epName = new String(name1Build.ToArray()) + " & " + new String(name2Build.ToArray());
-
-                if (closingBracketFound)
-                    epName += ")";
+                    if (closingBracketFound)
+                        epName += ")";
+                }
+                else
+                    epName = episode1.Name + " & " + episode2.Name;
             }
             else
                 epName = episode1.Name;

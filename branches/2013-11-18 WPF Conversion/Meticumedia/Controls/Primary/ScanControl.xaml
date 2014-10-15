@@ -120,13 +120,13 @@
 
                     <DataGrid.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Edit" Command="{Binding EditSelectedItemCommand}" Visibility="{Binding SingleSelectionVisibility}" />
+                            <MenuItem Header="Edit" Command="{Binding EditSelectedItemCommand}" Visibility="{Binding SingleDirScanSelectionVisibility}" />
                             <MenuItem Header="Set Destination Movie Folder" Visibility="{Binding AllMoviesSelectedResultsVisibility}" ItemsSource="{Binding MovieFolderItems}" />
                             <MenuItem Header="Set Action To Replace Existing" Command="{Binding SetReplaceExistingCommand}" Visibility="{Binding AllAlreadyExistSelectedResultsVisibility}" />
-                            <MenuItem Header="Set to Delete" Command="{Binding SetSelectedItemToDeleteCommand}" Visibility="{Binding AnySelectionVisibility}" />
+                            <MenuItem Header="Set to Delete" Command="{Binding SetSelectedItemToDeleteCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
                             <MenuItem Header="Ignore Item(s)" Command="{Binding IgnoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
                             <MenuItem Header="Unignore Items(s)" Command="{Binding UnignoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
-                            <MenuItem Header="Locate Episode" Command="{Binding LocateEpisodeCommand}" Visibility="{Binding TvMissingScanSingleSelectedResultsVisibility}" />
+                            <MenuItem Header="Locate Episode" Command="{Binding LocateEpisodeCommand}" Visibility="{Binding TvMissingScanSingleMissingSelectedResultsVisibility}" />
                             <MenuItem Header="Ignore" Visibility="{Binding TvMissingScanAnySelectedResultsVisibility}">
                                 <MenuItem Header="Episode(s)" Command="{Binding IgnoreEpisodeCommand}" />
                                 <MenuItem Header="Season(s)" Command="{Binding IgnoreSeasonCommand}" />

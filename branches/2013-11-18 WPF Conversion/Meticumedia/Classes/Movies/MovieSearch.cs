@@ -28,7 +28,7 @@ namespace Meticumedia.Classes
         /// <returns>List of content matching search string from online database</returns>
         protected override List<Content> PerformSearch(string search, bool includeSummaries)
         {
-            return MovieDatabaseHelper.PerformMovieSearch(Settings.DefaultMovieDatabase, search, false);
+            return MovieDatabaseHelper.PerformMovieSearch(Settings.General.DefaultMovieDatabase, search, false);
         }
 
         /// <summary>

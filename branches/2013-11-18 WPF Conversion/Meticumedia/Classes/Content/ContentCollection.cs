@@ -354,19 +354,34 @@ namespace Meticumedia.Classes
         }
 
         /// <summary>
-        /// Get a lists of content that are set to be included in scanning (by IncludeInScan property)
+        /// Get a lists of content that are set to be included in scanning
         /// </summary>
         /// <returns>List of show that are included in scanning</returns>
-        public List<Content> GetScannableContent(bool updateMissing)
+        public List<Content> GetScannableContent(bool updateMissing, ScanType scanType)
         {
             List<Content> includeShow = new List<Content>();
             for (int i = 0; i < this.Count; i++)
-                if (this[i].IncludeInScan && !string.IsNullOrEmpty(this[i].DatabaseName))
+            {
+                bool include = true;
+                switch (scanType)
+                {
+                    case ScanType.TvMissing:
+                        include = (this[i] as TvShow).DoMissingCheck;
+                        break;
+                    case ScanType.TvRename:
+                    case ScanType.TvFolder:
+                    case ScanType.MovieFolder:
+                        include = this[i].DoRenaming;
+                        break;
+                }
+
+                if (include && !string.IsNullOrEmpty(this[i].DatabaseName))
                 {
                     if (updateMissing)
                         this[i].UpdateMissing();
                     includeShow.Add(this[i]);
                 }
+            }
             return includeShow;
         }
 

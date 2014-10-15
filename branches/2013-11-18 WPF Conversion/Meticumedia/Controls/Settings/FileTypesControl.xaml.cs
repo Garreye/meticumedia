@@ -20,72 +20,21 @@ namespace Meticumedia.Controls
     /// </summary>
     public partial class FileTypesControl : UserControl
     {
+        public FileTypesControlViewModel ViewModel
+        {
+            get
+            {
+                return this.DataContext as FileTypesControlViewModel;
+            }
+            set
+            {
+                this.DataContext = value;
+            }
+        }
+        
         public FileTypesControl()
         {
             InitializeComponent();            
         }
-
-        #region Save/Load
-
-        private FileTypesGroup videoFileTypes = new FileTypesGroup();
-        private FileTypesGroup deleteFileTypes = new FileTypesGroup();
-        private FileTypesGroup ignoreFileTypes = new FileTypesGroup();
-
-        public void LoadSettings()
-        {
-            foreach (string str in Settings.VideoFileTypes.Types)
-                this.videoFileTypes.Types.Add(str);
-            foreach (string str in Settings.DeleteFileTypes.Types)
-                this.deleteFileTypes.Types.Add(str);
-            foreach (string str in Settings.IgnoreFileTypes.Types)
-                this.ignoreFileTypes.Types.Add(str);
-
-            ctntVideoFiles.Content = videoFileTypes;
-            ctntDeleteFiles.Content = deleteFileTypes;
-            ctntIgnoreFiles.Content = ignoreFileTypes;
-        }
-
-        public void SaveSettings()
-        {
-            Settings.VideoFileTypes.Types.Clear();
-            foreach (string str in videoFileTypes.Types)
-                Settings.VideoFileTypes.Types.Add(str);
-            Settings.DeleteFileTypes.Types.Clear();
-            foreach (string str in deleteFileTypes.Types)
-                Settings.DeleteFileTypes.Types.Add(str);
-            Settings.IgnoreFileTypes.Types.Clear();
-            foreach (string str in ignoreFileTypes.Types)
-                Settings.IgnoreFileTypes.Types.Add(str);
-
-        }
-
-        #endregion
-
-        #region Event Handlers
-
-        private void AddTypeButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            FileTypesGroup collection = (FileTypesGroup)button.DataContext;
-
-            if (collection.Types.Contains(collection.NextItem))
-            {
-                MessageBox.Show("Extension already added.");
-                return;
-            }
-
-            collection.Types.Add(collection.NextItem);
-            collection.NextItem = string.Empty;
-        }
-
-        private void RemTypeButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button button = sender as Button;
-            FileTypesGroup collection = (FileTypesGroup)button.DataContext;
-
-            // TODO: remove selected item
-        }
-
-        #endregion
     }
 }

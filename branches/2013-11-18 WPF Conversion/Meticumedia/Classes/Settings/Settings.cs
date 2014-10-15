@@ -48,12 +48,12 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Format for renaming TV files
         /// </summary>
-        public static FileNameFormat TvFileFormat = new FileNameFormat(false);
+        public static FileNameFormat TvFileFormat = new FileNameFormat(ContentType.TvShow);
 
         /// <summary>
         /// Format for renaming movie files
         /// </summary>
-        public static FileNameFormat MovieFileFormat = new FileNameFormat(true);
+        public static FileNameFormat MovieFileFormat = new FileNameFormat(ContentType.Movie);
 
         /// <summary>
         /// List of root folders containing movies
@@ -68,40 +68,27 @@ namespace Meticumedia.Classes
         /// <summary>
         /// File types to match to video files
         /// </summary>
-        public static FileTypesGroup VideoFileTypes = new FileTypesGroup();
+        public static ObservableCollection<string> VideoFileTypes = new ObservableCollection<string>();
 
         /// <summary>
         /// File types to delete during scan
         /// </summary>
-        public static FileTypesGroup DeleteFileTypes = new FileTypesGroup();
+        public static ObservableCollection<string> DeleteFileTypes = new ObservableCollection<string>();
 
         // <summary>
         /// File types to ignored during scan
         /// </summary>
-        public static FileTypesGroup IgnoreFileTypes = new FileTypesGroup();
+        public static ObservableCollection<string> IgnoreFileTypes = new ObservableCollection<string>();
 
         /// <summary>
         /// Persistent setting for options in UI.
         /// </summary>
         public static GuiSettings GuiControl = new GuiSettings();
 
-#if DEBUG
-        public static int NumProcessingThreads = 1;
-        public static int NumSimultaneousSearches = 1;
-#else
-        public static int NumProcessingThreads = 10;
-        public static int NumSimultaneousSearches = 5;
-#endif
-
         /// <summary>
-        /// Default database to use for matching to TV shows.
+        /// General settings for application
         /// </summary>
-        public static TvDataBaseSelection DefaultTvDatabase = TvDataBaseSelection.TheTvDb;
-
-        /// <summary>
-        /// Default database to use for matching to movies.
-        /// </summary>
-        public static MovieDatabaseSelection DefaultMovieDatabase = MovieDatabaseSelection.TheMovieDb;
+        public static GeneralSettings General = new GeneralSettings();
 
         #endregion
 
@@ -308,7 +295,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Properties that are elements.
         /// </summary>
-        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, Gui };
+        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, Gui, General };
 
         /// <summary>
         /// Root element for setting XML.
@@ -358,19 +345,22 @@ namespace Meticumedia.Classes
                                 tvFolder.Save(xw);
                             break;
                         case XmlElements.VideoFileTypes:
-                            foreach (string fileType in VideoFileTypes.Types)
+                            foreach (string fileType in VideoFileTypes)
                                 xw.WriteElementString(FILE_TYPE_XML, fileType);
                             break;
                         case XmlElements.DeleteFileTypes:
-                            foreach (string fileType in DeleteFileTypes.Types)
+                            foreach (string fileType in DeleteFileTypes)
                                 xw.WriteElementString(FILE_TYPE_XML, fileType);
                             break;
                         case XmlElements.IgnoreFileTypes:
-                            foreach (string fileType in IgnoreFileTypes.Types)
+                            foreach (string fileType in IgnoreFileTypes)
                                 xw.WriteElementString(FILE_TYPE_XML, fileType);
                             break;
                         case XmlElements.Gui:
                             GuiControl.Save(xw);
+                            break;
+                        case XmlElements.General:
+                            General.Save(xw);
                             break;
                         default:
                             throw new Exception("Unkonw element!");
@@ -393,15 +383,15 @@ namespace Meticumedia.Classes
                 return;
 
             // Initialize file types to defautls
-            VideoFileTypes = new FileTypesGroup();
+            VideoFileTypes = new ObservableCollection<string>();
             foreach (string type in DefaultVideoFileTypes)
-                VideoFileTypes.Types.Add(type);
-            DeleteFileTypes = new FileTypesGroup();
+                VideoFileTypes.Add(type);
+            DeleteFileTypes = new ObservableCollection<string>();
             foreach (string type in DefaultDeleteFileTypes)
-                DeleteFileTypes.Types.Add(type);
-            IgnoreFileTypes = new FileTypesGroup();
+                DeleteFileTypes.Add(type);
+            IgnoreFileTypes = new ObservableCollection<string>();
             foreach (string type in DefaultIgnoreFileTypes)
-                IgnoreFileTypes.Types.Add(type);
+                IgnoreFileTypes.Add(type);
 
             // Load settings XML
             string path = Path.Combine(basePath, ROOT_XML + ".xml");
@@ -455,22 +445,40 @@ namespace Meticumedia.Classes
                             }
                             break;
                         case XmlElements.VideoFileTypes:
-                            VideoFileTypes = new FileTypesGroup();
-                            foreach (XmlNode fielTypeNode in propNode.ChildNodes)
-                                VideoFileTypes.Types.Add(fielTypeNode.InnerText);                            
+                            VideoFileTypes = new ObservableCollection<string>();
+                            foreach (XmlNode fileTypeNode in propNode.ChildNodes)
+                            {
+                                string videoType = fileTypeNode.InnerText;
+                                if (videoType.StartsWith("."))
+                                    videoType = videoType.Substring(1, videoType.Length - 1);
+                                VideoFileTypes.Add(videoType);
+                            }
                             break;
                         case XmlElements.DeleteFileTypes:
-                            DeleteFileTypes = new FileTypesGroup();
-                            foreach (XmlNode fielTypeNode in propNode.ChildNodes)
-                                DeleteFileTypes.Types.Add(fielTypeNode.InnerText);
+                            DeleteFileTypes = new ObservableCollection<string>();
+                            foreach (XmlNode fileTypeNode in propNode.ChildNodes)
+                            {
+                                string delType = fileTypeNode.InnerText;
+                                if (delType.StartsWith("."))
+                                    delType = delType.Substring(1, delType.Length - 1);
+                                DeleteFileTypes.Add(delType);
+                            }
                             break;
                         case XmlElements.IgnoreFileTypes:
-                            IgnoreFileTypes = new FileTypesGroup();
-                            foreach (XmlNode fielTypeNode in propNode.ChildNodes)
-                                IgnoreFileTypes.Types.Add(fielTypeNode.InnerText);
+                            IgnoreFileTypes = new ObservableCollection<string>();
+                            foreach (XmlNode fileTypeNode in propNode.ChildNodes)
+                            {
+                                string ignoreType = fileTypeNode.InnerText;
+                                if (ignoreType.StartsWith("."))
+                                    ignoreType = ignoreType.Substring(1, ignoreType.Length - 1);
+                                IgnoreFileTypes.Add(ignoreType);
+                            }
                             break;
                         case XmlElements.Gui:
                             GuiControl.Load(propNode);
+                            break;
+                        case XmlElements.General:
+                            General.Load(propNode);
                             break;
                     }
                 }

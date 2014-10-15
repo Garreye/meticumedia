@@ -93,7 +93,7 @@ namespace Meticumedia.Classes
                             {
                                 OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, ep.File.FilePath, builtPath, ep, ep2, FileCategory.TvVideo, null);
                                 newItem.Enable = true;
-                                if (!shows[i].IncludeInScan)
+                                if (!show.DoRenaming)
                                     newItem.Category = FileCategory.Ignored;
                                 newItem.Number = number++;
                                 missingCheckItem.Add(newItem);
@@ -109,7 +109,7 @@ namespace Meticumedia.Classes
                     if (!found && ep.Aired && show.DoMissingCheck)
                     {
                         OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
-                        if (!shows[i].IncludeInScan)
+                        if (!show.DoRenaming)
                             newItem.Category = FileCategory.Ignored;
                         newItem.Number = number++;
                         missingCheckItem.Add(newItem);

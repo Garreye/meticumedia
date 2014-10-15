@@ -4,38 +4,57 @@
         xmlns:cntrls="clr-namespace:Meticumedia.Controls"
         Title="Settings" Height="542" Width="674">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="92*"/>
+            <ColumnDefinition Width="241*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <TabControl Grid.Row="0" Name="tabControl1">
+
+        <TabControl Grid.Row="0" Name="tabControl1" Grid.ColumnSpan="2">
             <TabItem Header="General" Name="tiGeneral">
-                <Grid />
+                <cntrls:GeneralSettingsControl DataContext="{Binding GeneralSettingsViewModel}" />
             </TabItem>
             <TabItem Header="Scan Folders" Name="tiScanFolders">
-                <cntrls:ScanFoldersControl x:Name="cntrlScanFolder" />
+                <cntrls:ScanFoldersControl DataContext="{Binding ScanFoldersViewModel}" />
             </TabItem>
             <TabItem Header="TV Root Folders" Name="tiTvRootFolders">
-                <cntrls:RootFolderControl x:Name="cntrlTvFolder" />
+                <cntrls:RootFolderControl DataContext="{Binding TvRootFoldersViewModel}" />
             </TabItem>
             <TabItem Header="TV File Name" Name="tiTvFileNames">
-                <cntrls:FileNameControl x:Name="cntrlTvFileName" />
+                <cntrls:FileNameControl DataContext="{Binding TvFileNameViewModel}" />
             </TabItem>
             <TabItem Header="Movie Root Folders" Name="tiMovieRootFolders">
-                <cntrls:RootFolderControl x:Name="cntrlMovieFolder" />
+                <cntrls:RootFolderControl  DataContext="{Binding MovieRootFoldersViewModel}" />
             </TabItem>
             <TabItem Header="Movie File Name" Name="tiMovieFileNames">
-                <cntrls:FileNameControl x:Name="cntrlMovieFileName" />
+                <cntrls:FileNameControl DataContext="{Binding MovieFileNameViewModel}" />
             </TabItem>
             <TabItem Header="File Types" Name="tiFileTypes">
-                <cntrls:FileTypesControl x:Name="cntrlFileTypes"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Grid.Column="0" Header="Video File Types">
+                        <cntrls:FileTypesControl DataContext="{Binding VideoFileTypesViewModel}" />
+                    </GroupBox>
+                    <GroupBox Grid.Column="1" Header="Delete File Types">
+                        <cntrls:FileTypesControl DataContext="{Binding DeleteFileTypesViewModel}" />
+                    </GroupBox>
+                    <GroupBox Grid.Column="2" Header="Ignore File Types">
+                        <cntrls:FileTypesControl DataContext="{Binding IgnoreFileTypesViewModel}" />
+                    </GroupBox>
+                </Grid>
             </TabItem>
         </TabControl>
-        
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="OK" Height="23" Name="btnOk" Width="75" Margin="5" Click="btnOk_Click" />
-            <Button Content="Cancel" Height="23" Name="btnCancel" Width="75" Margin="0,5,5,5" Click="btnCancel_Click" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
+            <Button Content="OK" Height="23" Name="btnOk" Width="75" Margin="5" Command="{Binding OkCommand}" />
+            <Button Content="Cancel" Height="23" Name="btnCancel" Width="75" Margin="0,5,5,5" Command="{Binding CancelCommand}" />
         </StackPanel>
     </Grid>
 </Window>

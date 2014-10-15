@@ -3,44 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpfr="clr-namespace:Meticumedia.WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="393" d:DesignWidth="491">
-    <UserControl.Resources>
-        <DataTemplate x:Key="fileTypeView">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                
-                <TextBox Text="{Binding NextItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0" Margin="5" />
-                <Button Content="+"  Width="20"  Grid.Row="0" Grid.Column="1" Margin="0,5,5,5" Click="AddTypeButton_Click" />
-                <Button Content="-"  Width="20" Grid.Row="0" Grid.Column="2" Margin="0,5,5,5" Click="RemTypeButton_Click" />
-                <ListBox ItemsSource="{Binding Types}" Grid.Row="1" Grid.ColumnSpan="3" Margin="3" />
-            </Grid>
-        </DataTemplate>
-    </UserControl.Resources>
-    
+             d:DesignHeight="393" d:DesignWidth="150">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
         
-        <GroupBox Header="Video File Types" Grid.Column="0">
-            <ContentControl Name="ctntVideoFiles" ContentTemplate="{StaticResource fileTypeView}"/>
-        </GroupBox>
-        <GroupBox Header="Delete File Types" Grid.Column="1">
-            <ContentControl Name="ctntDeleteFiles" ContentTemplate="{StaticResource fileTypeView}"/>
-        </GroupBox>
-        <GroupBox Header="Ignore File Types" Grid.Column="2">
-            <ContentControl Name="ctntIgnoreFiles" ContentTemplate="{StaticResource fileTypeView}"/>
-        </GroupBox>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" Text="{Binding FileTypeEntry, UpdateSourceTrigger=PropertyChanged}" Margin="5" />
+            <Button Grid.Column="1" Content="+" Width="20" Margin="0,5,5,5" Command="{Binding AddTypeCommand}" />
+            <Button Grid.Column="2" Content="-" Width="20" Margin="0,5,5,5" Command="{Binding RemoveTypesCommand}" />
+        </Grid>
+
+        <wpfr:BindableMultiSelectListBox Grid.Row="1" ItemsSource="{Binding FileTypes}" SelectionMode="Extended" BindableSelectedItems="{Binding SelectedTypes, Mode=OneWayToSource}" Margin="3" />
     </Grid>
 </UserControl>

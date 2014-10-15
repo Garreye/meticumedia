@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Windows.Media;
 using Ookii.Dialogs.Wpf;
 using System.ComponentModel;
+using Meticumedia.Windows;
 
 namespace Meticumedia.Classes
 {
@@ -657,24 +658,22 @@ namespace Meticumedia.Classes
             }
 
             // Build org item
-            OrgAction action = copyAction ? OrgAction.Move : OrgAction.Copy;
+            OrgAction action = copyAction ? OrgAction.Copy : OrgAction.Move;
             string destination = show.BuildFilePath(ep1, ep2, Path.GetExtension(ofd.FileName));
             OrgItem item = new OrgItem(OrgStatus.Found, action, ofd.FileName, destination, ep1, ep2, FileCategory.TvVideo, null);
 
             // Display modifier
             if (showActionModifer)
             {
-                throw new NotImplementedException();
-                // TODO: editor for this
-                //OrgItemEditor oie = new OrgItemEditor(item);
-                //oie.ShowDialog();
+                OrgItemEditorWindow editor = new OrgItemEditorWindow(item);
+                editor.ShowDialog();
 
-                //// Add results if valid
-                //if (oie.Result == null)
-                //    return false;
+                // Add results if valid
+                if (editor.Results == null)
+                    return false;
 
-                //items.Add(oie.Result);
-                //return true;
+                items.Add(editor.Results);
+                return true;
             }
 
             items.Add(item);

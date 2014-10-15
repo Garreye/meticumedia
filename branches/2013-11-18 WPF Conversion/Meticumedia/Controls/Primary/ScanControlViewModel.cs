@@ -639,11 +639,11 @@ namespace Meticumedia.Controls
 
         public ObservableCollection<MenuItem> MovieFolderItems { get; set; }
 
-        public Visibility SingleSelectionVisibility
+        public Visibility SingleDirScanSelectionVisibility
         {
             get
             {
-                return this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+                return this.lastRunScan == ScanType.Directory && this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -671,11 +671,11 @@ namespace Meticumedia.Controls
             }
         }
 
-        public Visibility TvMissingScanSingleSelectedResultsVisibility
+        public Visibility TvMissingScanSingleMissingSelectedResultsVisibility
         {
             get
             {
-                return this.lastRunScan == ScanType.TvMissing && this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+                return this.lastRunScan == ScanType.TvMissing && this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 && (this.SelectedResultsItems[0] as OrgItem).Status == OrgStatus.Missing ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -717,11 +717,11 @@ namespace Meticumedia.Controls
         
         void grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            OnPropertyChanged(this, "SingleSelectionVisibility");
+            OnPropertyChanged(this, "SingleDirScanSelectionVisibility");
             OnPropertyChanged(this, "AnySelectionVisibility");
             OnPropertyChanged(this, "DirectoryScanAnySelectedResultsVisibility");
             OnPropertyChanged(this, "TvMissingScanAnySelectedResultsVisibility");
-            OnPropertyChanged(this, "TvMissingScanSingleSelectedResultsVisibility");
+            OnPropertyChanged(this, "TvMissingScanSingleMissingSelectedResultsVisibility");
             OnPropertyChanged(this, "AllMoviesSelectedResultsVisibility");
             OnPropertyChanged(this, "AllAlreadyExistSelectedResultsVisibility");
 
@@ -898,10 +898,12 @@ namespace Meticumedia.Controls
                     throw new Exception("Unknown scan type!");
             }
 
-            this.ScanResults.Clear();
-            foreach (OrgItem item in scanResults)
-                this.ScanResults.Add(item);
-            OnPropertyChanged(this, "ScanResults");
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                this.ScanResults.Clear();
+                foreach (OrgItem item in scanResults)
+                    this.ScanResults.Add(item);
+            });
 
         }
 
@@ -984,7 +986,7 @@ namespace Meticumedia.Controls
                 case ScanType.TvMissing:
                     List<Content> shows;
                     if (this.SelectedRunSelection == TvShow.AllShows)
-                        shows = Organization.Shows.GetScannableContent(true);
+                        shows = Organization.Shows.GetScannableContent(true, this.RunType);
                     else
                     {
                         shows = new List<Content>();
@@ -1132,44 +1134,132 @@ namespace Meticumedia.Controls
         {
             foreach (OrgItem item in this.SelectedResultsItems)
             {
-                // Check that action is already exists
                 item.Replace = true;
                 item.Action = OrgAction.Delete;
+                item.Category = FileCategory.Trash;
                 item.Enable = true;
+                item.DestinationPath = item.BuildDestination();
             }
         }
 
         private void IgnoreItems()
         {
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                item.Enable = false;
+                item.Action = OrgAction.None;
+                item.Category = FileCategory.Ignored;
+
+                foreach (OrgFolder scanDir in Settings.ScanDirectories)
+                    if (scanDir.FolderPath == item.ScanDirectory.FolderPath)
+                        scanDir.AddIgnoreFile(item.SourcePath);
+            }
+            Settings.Save();
         }
 
         private void UnignoreItems()
         {
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                foreach (OrgFolder scanDir in Settings.ScanDirectories)
+                    if (scanDir.FolderPath == item.ScanDirectory.FolderPath)
+                        if (scanDir.RemoveIgnoreFile(item.SourcePath))
+                            item.Category = FileCategory.Unknown;
+            }
+            Settings.Save();
         }
 
         private void LocateEpisode()
         {
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                List<OrgItem> items;
+                if (item.TvEpisode.UserLocate(false, false, out items))
+                {
+                    item.Clone(items[0]);
+                    item.Enable = true;
+                }
+            }
         }
 
         private void IgnoreEpisode()
         {
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                item.Enable = false;
+                item.TvEpisode.Ignored = true;
+                item.Category = FileCategory.Ignored;
+            }
+            Organization.Shows.Save();
         }
 
         private void IgnoreSeason()
         {
+            // Get show seasons to ignore
+            List<Tuple<TvShow, int>> setShowSeasons = new List<Tuple<TvShow, int>>();
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                TvShow show = item.TvEpisode.Show;
+                int season = item.TvEpisode.Season;
+                
+                Tuple<TvShow, int> showSeason = new Tuple<TvShow, int>(show, season);
+                if (!setShowSeasons.Contains(showSeason))
+                {
+                    setShowSeasons.Add(showSeason);
+                    foreach (TvEpisode ep in show.Episodes)
+                        if (ep.Season == season)
+                            ep.Ignored = true;
+                }
+            }
+
+            for(int i=this.ScanResults.Count-1;i>=0;i--)
+            {
+                TvShow show = this.ScanResults[i].TvEpisode.Show;
+                int season = this.ScanResults[i].TvEpisode.Season;
+
+                if(setShowSeasons.Contains(new Tuple<TvShow,int>(show, season)))
+                    this.ScanResults.RemoveAt(i);
+            }
+            Organization.Shows.Save();
         }
 
         private void IgnoreShow()
         {
+            List<TvShow> shows = new List<TvShow>();
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                TvShow show = item.TvEpisode.Show;
+                if (!shows.Contains(show))
+                {
+                    shows.Add(show);
+                    show.DoRenaming = false;
+                }
+            }
         }
 
         private void SetReplaceExisting()
         {
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                foreach (OrgFolder dir in Settings.ScanDirectories)
+                    if (dir.FolderPath == item.ScanDirectory.FolderPath)
+                    {
+                        // Set action based on scan directory
+                        item.Action = dir.CopyFrom ? OrgAction.Copy : OrgAction.Move;
+                        item.Replace = true;
+                        item.Enable = true;
+                        break;
+                    }
+            }
         }
 
         private void SetMovieFolder(string path)
         {
-
+            foreach (OrgItem item in this.SelectedResultsItems)
+            {
+                item.Movie.RootFolder = path;
+                item.DestinationPath = item.BuildDestination();
+            }
         }
 
         #endregion
@@ -1192,7 +1282,7 @@ namespace Meticumedia.Controls
             if (this.RunType == ScanType.TvMissing)
             {
                 AddTextColumn("Status", "Status");
-                AddTextColumn("Show", "Show");
+                AddTextColumn("Show", "TvEpisode.Show.DisplayName");
                 AddTextColumn("Season", "TvEpisode.Season");
                 AddTextColumn("Episode", "TvEpisode.Number");
             }

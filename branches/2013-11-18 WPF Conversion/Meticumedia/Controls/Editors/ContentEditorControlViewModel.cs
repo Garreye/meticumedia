@@ -471,12 +471,12 @@ namespace Meticumedia.Controls
                 case ContentType.Movie:
                     foreach (MovieDatabaseSelection selection in Enum.GetValues(typeof(MovieDatabaseSelection)))
                         this.Databases.Add(selection.Description());
-                    this.SelectedSearchDatabaseIndex = (int)Settings.DefaultMovieDatabase;
+                    this.SelectedSearchDatabaseIndex = (int)Settings.General.DefaultMovieDatabase;
                     break;
                 case ContentType.TvShow:
                     foreach (TvDataBaseSelection selection in Enum.GetValues(typeof(TvDataBaseSelection)))
                         this.Databases.Add(selection.Description());
-                    this.SelectedSearchDatabaseIndex = (int)Settings.DefaultTvDatabase;
+                    this.SelectedSearchDatabaseIndex = (int)Settings.General.DefaultTvDatabase;
                     break;
                 default:
                     throw new Exception("Unknown content type");

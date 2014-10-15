@@ -70,11 +70,6 @@ namespace Meticumedia.Classes
         private bool includeInSchedule = true;
 
         /// <summary>
-        /// Determines whether or not the content is to be included in scanning.
-        /// </summary>
-        public override bool IncludeInScan { get { return this.DoRenaming || this.DoMissingCheck; } }
-
-        /// <summary>
         /// List of alternative names to match to
         /// </summary>
         public ObservableCollection<string> AlternativeNameMatches
@@ -505,7 +500,6 @@ namespace Meticumedia.Classes
                             {
                                 if(seasPropNode.Name == "Episodes")
                                 {
-                                    
                                     foreach(XmlNode epNode in seasPropNode.ChildNodes)
                                     {
                                         TvEpisode episode = new TvEpisode(this);

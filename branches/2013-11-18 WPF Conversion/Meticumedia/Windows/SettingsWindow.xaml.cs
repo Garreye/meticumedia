@@ -22,33 +22,14 @@ namespace Meticumedia.Windows
         public SettingsWindow()
         {
             InitializeComponent();
-            cntrlScanFolder.LoadSettings();
-            cntrlMovieFolder.LoadSettings(ContentType.Movie);
-            cntrlTvFolder.LoadSettings(ContentType.TvShow);
-            cntrlTvFileName.LoadSettings(ContentType.TvShow);
-            cntrlMovieFileName.LoadSettings(ContentType.Movie);
-            cntrlFileTypes.LoadSettings();
+            SettingsWindowViewModel vm = new SettingsWindowViewModel();
+            vm.ResultsSet += vm_ResultsSet;
+            this.DataContext = vm;
         }
 
-        #region Event Handlers
-
-        private void btnOk_Click(object sender, RoutedEventArgs e)
-        {
-            cntrlScanFolder.SaveSettings();
-            cntrlMovieFolder.SaveSettings();
-            cntrlTvFolder.SaveSettings();
-            cntrlTvFileName.SaveSettings();
-            cntrlMovieFileName.SaveSettings();
-            cntrlFileTypes.SaveSettings();
-            Settings.Save();
-            this.Close();
-        }
-
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        void vm_ResultsSet(object sender, EventArgs e)
         {
             this.Close();
         }
-
-        #endregion
     }
 }

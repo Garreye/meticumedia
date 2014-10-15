@@ -241,10 +241,10 @@ namespace Meticumedia.Controls
 
             // Set properties to trigger live updating
             ICollectionViewLiveShaping liveCollection = this.ContentsCollectionView as ICollectionViewLiveShaping;
-            liveCollection.LiveFilteringProperties.Add("Genres");
-            liveCollection.LiveFilteringProperties.Add("Date");
+            liveCollection.LiveFilteringProperties.Add("DisplayGenres");
+            liveCollection.LiveFilteringProperties.Add("DisplayYear");
             liveCollection.LiveFilteringProperties.Add("RootFolder");
-            liveCollection.LiveFilteringProperties.Add("Name");
+            liveCollection.LiveFilteringProperties.Add("DisplayName");
             liveCollection.IsLiveFiltering = true;
         }
 

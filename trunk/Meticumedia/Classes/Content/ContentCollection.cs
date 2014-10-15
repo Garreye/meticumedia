@@ -319,8 +319,10 @@ namespace Meticumedia
                 //Console.WriteLine(this.ToString() + " lock save");
                 lock (XmlLock)
                 {
-                    using (XmlWriter xw = XmlWriter.Create(tempPath))
+                    using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
                     {
+                        xw.Formatting = Formatting.Indented;
+
                         xw.WriteStartElement(XML_ROOT);
                         xw.WriteElementString("LastUpdate", this.LastUpdate);
 

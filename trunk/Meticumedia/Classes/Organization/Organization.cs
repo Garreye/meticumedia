@@ -144,8 +144,9 @@ namespace Meticumedia
             lock (ActionLogLock)
             {
                 lock (ActionLogFileLock)
-                    using (XmlWriter xw = XmlWriter.Create(path))
+                    using (XmlTextWriter xw = new XmlTextWriter(path, Encoding.ASCII))
                     {
+                        xw.Formatting = Formatting.Indented;
                         xw.WriteStartElement(ACTION_LOG_XML);
 
                         foreach (OrgItem action in ActionLog)
