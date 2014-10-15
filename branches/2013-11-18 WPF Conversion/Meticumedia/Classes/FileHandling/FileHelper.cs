@@ -38,7 +38,7 @@ namespace Meticumedia.Classes
                 return FileCategory.Ignored;            
 
             // Check against each type
-            foreach (string ext in Settings.VideoFileTypes.Types)
+            foreach (string ext in Settings.VideoFileTypes)
             {
                 Regex extRe = new Regex(@"\." + ext + "$");
                 Match extMatch = extRe.Match(extenstion);
@@ -55,7 +55,7 @@ namespace Meticumedia.Classes
                         return FileCategory.MovieVideo;
                 }
             }
-            foreach (string ext in Settings.DeleteFileTypes.Types)
+            foreach (string ext in Settings.DeleteFileTypes)
             {
                 Regex extRe = new Regex(@"\." + ext + "$");
                 Match extMatch = extRe.Match(extenstion);
@@ -63,7 +63,7 @@ namespace Meticumedia.Classes
                     return FileCategory.Trash;
             }
 
-            foreach (string ext in Settings.IgnoreFileTypes.Types)
+            foreach (string ext in Settings.IgnoreFileTypes)
             {
                 Regex extRe = new Regex(@"\." + ext + "$");
                 Match extMatch = extRe.Match(extenstion);

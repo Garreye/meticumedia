@@ -10,6 +10,7 @@
     <UserControl.Resources>
         <wpfr:BoolInverterConverter x:Key="boolInverter" />
         <wpfr:DefaultColorConverter x:Key="defaultColorConverted" />
+        <wpfr:NullToVisibilityConverter x:Key="nullToVisConv" />
     </UserControl.Resources>
 
     <Grid>
@@ -27,38 +28,32 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Add" Grid.Column="0" Height="23" HorizontalAlignment="Left" Margin="5" Name="btnAdd" VerticalAlignment="Top" Width="75" Click="btnAdd_Click" />
-            <Button Content="Remove" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="5" Name="btnRemove" VerticalAlignment="Top" Width="75" Click="btnRemove_Click" />
-            <Button Content="Clear" Grid.Column="3" Height="23" HorizontalAlignment="Right" Margin="5" Name="btnClear" VerticalAlignment="Top" Width="75" Click="btnClear_Click" />
+            <Button Content="Add" Grid.Column="0" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding AddFolderCommand}" />
+            <Button Content="Remove" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding RemoveFolderCommand}" />
+            <Button Content="Clear" Grid.Column="3" Height="23" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding ClearFoldersCommand}" />
         </Grid>
 
-        <TreeView Grid.Row="1" Name="tvFolders" SelectedItemChanged="tvFolders_SelectedItemChanged">
+        <wpfr:BindableSelectTreeView Grid.Row="1" ItemsSource="{Binding RootFolders}" BindableSelectedItem="{Binding SelectedRootFolder, Mode=OneWayToSource}" >
             <TreeView.Resources>
                 <HierarchicalDataTemplate ItemsSource="{Binding Path=ChildFolders}" DataType="{x:Type classes:ContentRootFolder}">
-                    <TextBlock Text="{Binding Path=SubPath}" Foreground="{Binding Path=Default, Converter={StaticResource defaultColorConverted}}"></TextBlock>
+                    <TextBlock Text="{Binding Path=SubPath}" Foreground="{Binding Path=Default, Converter={StaticResource defaultColorConverted}}" />
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
-        </TreeView>
+        </wpfr:BindableSelectTreeView>
 
-        <ContentControl Grid.Row="2" Name="ctntSelectedItem" IsEnabled="False" >
-            <ContentControl.ContentTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+        <Grid Grid.Row="2" Visibility="{Binding SelectedRootFolder, Converter={StaticResource nullToVisConv}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-                        <CheckBox Grid.Row="0" IsChecked="{Binding Default}" IsEnabled="{Binding Default, Converter={StaticResource boolInverter}}" Content="Default (Directory scan will move/copy new items to here by default)" Margin="5" Checked="DefaultCheckBox_Checked" />
-                        <CheckBox Grid.Row="1" IsChecked="{Binding AllowOrganizing}" Content="Allow meticumedia to rename content folders" Margin="5" />
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" >
-                            <Button Name="btnAddChild" Content="Set a Sub-Folder as Child Root Folder" Margin="5" Click="btnAddChild_Click" />
-                            <Button Name="btnSetAllChilds" Content="Set All Sub-Folders as Child Root Folders" Margin="0,5,5,5" Click="btnSetAllChilds_Click" />
-                        </StackPanel>
-                    </Grid>
-                </DataTemplate>
-            </ContentControl.ContentTemplate>
-        </ContentControl>        
+            <CheckBox Grid.Row="0" IsChecked="{Binding SelectedRootFolder.Default}" IsEnabled="{Binding SelectedRootFolder.Default, Converter={StaticResource boolInverter}}" Content="Default (Directory scan will move/copy new items to here by default)" Margin="5" />
+            <CheckBox Grid.Row="1" IsChecked="{Binding SelectedRootFolder.AllowOrganizing}" Content="Allow meticumedia to organize files/folders" Margin="5" />
+            <StackPanel Grid.Row="2" Orientation="Horizontal" >
+                <Button Content="Set a Sub-Folder as Child Root Folder" Margin="5" Command="{Binding AddChildCommand}" />
+                <Button Content="Set All Sub-Folders as Child Root Folders" Margin="0,5,5,5" Command="{Binding SetAllSubFoldersAsChildrenCommand}" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

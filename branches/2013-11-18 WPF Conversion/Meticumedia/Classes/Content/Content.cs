@@ -72,7 +72,7 @@ namespace Meticumedia.Classes
             }
         }
 
-        private int databaseSelection = (int)Settings.DefaultTvDatabase;
+        private int databaseSelection = (int)Settings.General.DefaultTvDatabase;
 
         /// <summary>
         /// User-defined name for the content
@@ -143,8 +143,10 @@ namespace Meticumedia.Classes
             {
                 if (useDatabaseName && !string.IsNullOrEmpty(databaseName))
                     return databaseName;
-                else
+                else if (!useDatabaseName && !string.IsNullOrEmpty(userName))
                     return userName;
+                else
+                    return "Unknown";
             }
             set
             {
@@ -408,6 +410,19 @@ namespace Meticumedia.Classes
 
         private int id = UNKNOWN_ID;
 
+        public string DatabaseString
+        {
+            get
+            {
+                if (this.Id > 0)
+                    return (this.ContentType == Classes.ContentType.TvShow ? ((TvDataBaseSelection)this.DatabaseSelection).ToString() : ((MovieDatabaseSelection)this.DatabaseSelection).ToString()) + " - ID " + this.Id;
+                else if (this.DisplayName == "Unknown")
+                    return "None";
+                else
+                    return "None (user-defined)";
+            }
+        }
+
         /// <summary>
         /// Indication of whether content has been watched by user
         /// </summary>
@@ -425,12 +440,6 @@ namespace Meticumedia.Classes
         }
 
         private bool watched = false;
-
-        /// <summary>
-        /// Determines whether or not the content's directory (and files within it) is to be included
-        /// in scanning of root directory for organization
-        /// </summary>
-        public virtual bool IncludeInScan { get { return this.doRenaming; } }
 
         /// <summary>
         /// Indicates whether files in content's directory are allowed to be renamed by application
@@ -477,7 +486,7 @@ namespace Meticumedia.Classes
         {
             get
             {
-                if (string.IsNullOrEmpty(userName) && string.IsNullOrEmpty(databaseName))
+                if ((!useDatabaseName && string.IsNullOrEmpty(userName)) || (useDatabaseName && string.IsNullOrEmpty(databaseName)))
                     return "LightCoral";
                 else if (this.id == UNKNOWN_ID)
                     return "LightCoral";
@@ -983,7 +992,6 @@ namespace Meticumedia.Classes
             info.AddValue("ContentFolder", this.RootFolder);
             info.AddValue("Id", this.Id);
             info.AddValue("Watched", this.Watched);
-            info.AddValue("IncludeInScan", this.IncludeInScan);
             info.AddValue("DoRenaming", this.DoRenaming);
             info.AddValue("LastUpdated", this.LastUpdated.ToString());
 

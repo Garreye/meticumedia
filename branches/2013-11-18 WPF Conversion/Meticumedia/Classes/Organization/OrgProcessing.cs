@@ -117,7 +117,7 @@ namespace Meticumedia.Classes
             for (i = 0; i < paths.Count; i++)
             {
                 // Limit number of threads
-                while (i >= numItemProcessed + Settings.NumProcessingThreads && !cancel)
+                while (i >= numItemProcessed + Settings.General.NumProcessingThreads && !cancel)
                     Thread.Sleep(100);
 
                 // Check for cancellation

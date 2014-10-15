@@ -66,20 +66,18 @@
                 </StackPanel>
                 <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="3">
                     <TextBlock Text="Genres: " FontWeight="Bold" Padding="1" />
-                    <TextBlock Text="{Binding Content.Genres.GenresString}" Padding="1" />
+                    <TextBlock Text="{Binding Content.DisplayGenres.GenresString}" Padding="1" />
                 </StackPanel>
                 <StackPanel Grid.Column="0" Grid.Row="6" Orientation="Horizontal" Margin="3">
                     <TextBlock Text="Database: " FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Content.Database}" Padding="1" VerticalAlignment="Center" />
-                    <TextBlock Text=" - ID " Padding="1" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Content.Id}" Padding="1" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Content.DatabaseString}" Padding="1" VerticalAlignment="Center" />
                 </StackPanel>
             </WrapPanel>
 
-            <TextBlock Grid.Row="1" Name='tbOverview' Text="{Binding Content.Overview}" Padding="1" TextWrapping="Wrap" MaxHeight="190" Grid.ColumnSpan="2" Margin="0,24,0,30" />
+            <TextBlock Grid.Row="1" Text="{Binding Content.Overview}" Padding="1" TextWrapping="Wrap" MaxHeight="190" Grid.ColumnSpan="2" Margin="0,24,0,30" />
         </Grid>
 
-        <GroupBox x:Name="gbEpisodes" Header="Episodes" Grid.Row="1" Visibility="{Binding EpisodesModel, Converter={StaticResource nullToVisConverter}}" >
+        <GroupBox Header="Episodes" Grid.Row="1" Visibility="{Binding EpisodesModel, Converter={StaticResource nullToVisConverter}}" >
             <cntrls:EpisodeCollectionControl DataContext="{Binding  EpisodesModel}" />
         </GroupBox>
     </Grid>

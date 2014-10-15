@@ -56,16 +56,14 @@ namespace MeticumediaTesting
         public MatchTestWindowViewModel()
         {
             this.MatchProcessing = new ObservableCollection<string>();
-            ContentSearch.DebugNotification += ContentSearch_DebugNotification;
+            ContentSearch.DebugNotification += Search_DebugNotification;
         }
-
-        
 
         #endregion
 
         #region Methods
 
-        void ContentSearch_DebugNotification(object sender, DebugNotificationArgs e)
+        void Search_DebugNotification(object sender, DebugNotificationArgs e)
         {
             App.Current.Dispatcher.Invoke((Action)delegate
             {
@@ -82,7 +80,7 @@ namespace MeticumediaTesting
             this.MatchProcessing.Clear();
             
             DirectoryScan scan = new DirectoryScan(false);
-            scan.DebugNotification += ContentSearch_DebugNotification;
+            scan.DebugNotification += Search_DebugNotification;
             OrgPath path = new OrgPath(matchTo, false, true, new OrgFolder());
             OrgItem item = scan.ProcessPath(path, false, false, false, false, 0);
 

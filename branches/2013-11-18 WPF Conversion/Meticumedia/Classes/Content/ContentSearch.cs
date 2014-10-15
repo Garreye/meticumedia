@@ -363,7 +363,7 @@ namespace Meticumedia.Classes
                 }
 
                 // Limit number of search threads created
-                if (status.NumStarted - status.NumCompleted >= Settings.NumSimultaneousSearches)
+                if (status.NumStarted - status.NumCompleted >= Settings.General.NumSimultaneousSearches)
                 {
                     Thread.Sleep(100);
                     continue;

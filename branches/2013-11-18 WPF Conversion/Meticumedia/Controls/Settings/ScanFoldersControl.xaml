@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpfr="clr-namespace:Meticumedia.WPF"
+             xmlns:cntrls="clr-namespace:Meticumedia.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="358" d:DesignWidth="636">
     <UserControl.Resources>
-        <wpfr:BoolInverterConverter x:Key="converter" />
+        <wpfr:BoolInverterConverter x:Key="boolInvConv" />
     </UserControl.Resources>
     
     <Grid>
@@ -23,11 +24,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Add" Grid.Column="0" Height="23" HorizontalAlignment="Left" Margin="5" Name="btnAdd" VerticalAlignment="Top" Width="75" Click="btnAdd_Click" />
-            <Button Content="Remove" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="5" Name="btnRemove" VerticalAlignment="Top" Width="75" Click="btnRemove_Click" />
-            <Button Content="Clear" Grid.Column="3" Height="23" HorizontalAlignment="Right" Margin="5" Name="btnClear" VerticalAlignment="Top" Width="75" Click="btnClear_Click" />
+            <Button Content="Add" Grid.Column="0" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding AddFolderCommand}" />
+            <Button Content="Remove" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding RemoveFolderCommand}" />
+            <Button Content="Clear" Grid.Column="3" Height="23" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding ClearFoldersCommand}" />
         </Grid>
-        <ListBox Grid.Row="1" Name="lbScanFolders" HorizontalContentAlignment="Stretch">
+        <ListBox Grid.Row="1" ItemsSource="{Binding Folders}" HorizontalContentAlignment="Stretch" SelectionMode="Single" SelectedItem="{Binding SelectedFolder}" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border BorderThickness="1" BorderBrush="Black" Margin="5">
@@ -40,17 +41,17 @@
 
                             <StackPanel Grid.Row="0" Orientation="Horizontal">
                                 <TextBlock Text="Directory" Margin="5,0" VerticalAlignment="Center" />
-                                <TextBox Height="23" Text="{Binding FolderPath}" Name="textBox1" Width="250" Margin="5" VerticalAlignment="Center" />
-                                <Button Content="..." Height="23" Name="btnFolderSel" Width="40" Margin="5" Click="btnFolderSel_Click" />
+                                <TextBox Height="23" Text="{Binding FolderPath}" Width="250" Margin="5" VerticalAlignment="Center" />
+                                <Button Content="..." Height="23" Width="40" Margin="5" Command="{Binding DataContext.ModifyFolderPathCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
                             </StackPanel>
                             <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                <RadioButton IsChecked="{Binding CopyFrom, Converter={StaticResource converter}}" Content="Move Files From" Height="16" Name="rbMove" Margin="5" />
+                                <RadioButton IsChecked="{Binding CopyFrom, Converter={StaticResource boolInvConv}}" Content="Move Files From" Height="16" Name="rbMove" Margin="5" />
                                 <RadioButton IsChecked="{Binding CopyFrom}" Content="Copy Files From" Height="16" Name="rbCopy" Margin="5" />
                             </StackPanel>
                             <StackPanel Grid.Row="2" Orientation="Horizontal">
-                                <CheckBox IsChecked="{Binding Recursive}" Content="Recurvsive" Height="16" Name="chkRecursive" Margin="5"/>
-                                <CheckBox IsChecked="{Binding AllowDeleting}" Content="Allow Files to be Deletec" Height="16" Name="chkAllowDelete" Margin="5"/>
-                                <CheckBox IsChecked="{Binding AutomaticallyDeleteEmptyFolders}" Content="Automatically Delete Empty Folders" Height="16" Name="chkAutoDeleteEmptyFolders" Margin="5"/>
+                                <CheckBox IsChecked="{Binding Recursive}" Content="Recurvsive" Height="16" Margin="5"/>
+                                <CheckBox IsChecked="{Binding AllowDeleting}" Content="Allow Files to be Deletec" Height="16" Margin="5"/>
+                                <CheckBox IsChecked="{Binding AutomaticallyDeleteEmptyFolders}" Content="Automatically Delete Empty Folders" Height="16" Margin="5"/>
                             </StackPanel>
                         </Grid>
                     </Border>

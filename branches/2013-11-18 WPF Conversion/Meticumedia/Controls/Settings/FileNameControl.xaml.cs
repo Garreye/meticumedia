@@ -20,81 +20,54 @@ namespace Meticumedia.Controls
     /// </summary>
     public partial class FileNameControl : UserControl
     {
+        public FileNameControlViewModel ViewModel
+        {
+            get
+            {
+                return this.DataContext as FileNameControlViewModel;
+            }
+            set
+            {
+                this.DataContext = value;
+            }
+        }
+
         public FileNameControl()
         {
             InitializeComponent();
         }
 
-        private FileNameFormat fileNameFormat;
+        //private ContentType contentType;
 
-        private ContentType contentType;
+        //#region Save/Load
 
-        #region Save/Load
+        //public void LoadSettings(ContentType type)
+        //{
+        //    this.contentType = type;
+        //    switch (type)
+        //    {
+        //        case ContentType.Movie:
+        //            this.ViewModel = new FileNameControlViewModel(Settings.MovieFileFormat, type);
+        //            break;
+        //        case ContentType.TvShow:
+        //            this.ViewModel = new FileNameControlViewModel(Settings.TvFileFormat, type);
+        //            break;
+        //    }
+        //}
 
-        public void LoadSettings(ContentType type)
-        {
-            this.contentType = type;
-            switch (type)
-            {
-                case ContentType.Movie:
-                    this.fileNameFormat = new FileNameFormat(Settings.MovieFileFormat);
-                    break;
-                case ContentType.TvShow:
-                    this.fileNameFormat = new FileNameFormat(Settings.TvFileFormat);
-                    break;
-            }
-            this.fileNameFormat.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(fileNameFormat_PropertyChanged);
-            ctntFileNameFormat.Content = this.fileNameFormat;
-            UpdatePreview();
-        }
+        //public void SaveSettings()
+        //{
+        //    switch (contentType)
+        //    {
+        //        case ContentType.Movie:
+        //            Settings.MovieFileFormat = this.ViewModel.FileNameFormat;
+        //            break;
+        //        case ContentType.TvShow:
+        //            Settings.TvFileFormat = this.ViewModel.FileNameFormat;
+        //            break;
+        //    }
+        //}
 
-        void fileNameFormat_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            UpdatePreview();
-        }
-
-        /// <summary>
-        /// Update file name format previews in control.
-        /// </summary>
-        private void UpdatePreview()
-        {
-            // Build preview
-            switch (contentType)
-            {
-                case ContentType.Movie:
-                    Movie movie = new Movie("Donnie Darko");
-                    movie.DatabaseYear = 2001;
-                    tbExample1.Text = "Example 1: 'Donnie Darko', 720p, bluray rip - x264, 5.1 audio - english, extended cut, file part 1";
-                    txtFilePreview1.Text = System.IO.Path.GetFileNameWithoutExtension(this.fileNameFormat.BuildMovieFileName(movie, "Donnie Darko 720p blurayrip x264 5.1 en extended cut cd1.avi"));
-
-                    movie = new Movie("The Matrix");
-                    movie.DatabaseYear = 1999;
-                    tbExample2.Text = "Example 2: 'The Matrix', video/audio information unknown, no parts";
-                    txtFilePreview2.Text = System.IO.Path.GetFileNameWithoutExtension(this.fileNameFormat.BuildMovieFileName(movie, "The Matrix.avi"));
-                    break;
-                case ContentType.TvShow:
-                    tbExample1.Text = "Example 1: Single Episode: Episode 5 of season 1 of the show 'Arrested Development'";;
-                    txtFilePreview1.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("Charity Drive", new TvShow("Arrested Development"), 1, 5, "", ""), null, string.Empty);
-                    tbExample2.Text = "Example 2: Double Episode: Episode 23 and 24 of season 9 of the show 'Seinfeld'";
-                    txtFilePreview2.Text = this.fileNameFormat.BuildTvFileName(new TvEpisode("The Finale (Part 1)", new TvShow("Seinfeld"), 9, 23, "", ""), new TvEpisode("The Finale (Part 2)", new TvShow("Seinfeld"), 9, 24, "", ""), string.Empty);
-                    break;
-            }
-        }
-
-        public void SaveSettings()
-        {
-            switch (contentType)
-            {
-                case ContentType.Movie:
-                    Settings.MovieFileFormat = fileNameFormat;
-                    break;
-                case ContentType.TvShow:
-                    Settings.TvFileFormat = fileNameFormat;
-                    break;
-            }
-
-        }
-
-        #endregion
+        //#endregion
     }
 }

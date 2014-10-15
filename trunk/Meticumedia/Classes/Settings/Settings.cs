@@ -291,8 +291,10 @@ namespace Meticumedia
         {
             string path = Path.Combine(Organization.GetBasePath(true), ROOT_XML + ".xml");
 
-            using (XmlWriter xw = XmlWriter.Create(path))
+            using (XmlTextWriter xw = new XmlTextWriter(path, Encoding.ASCII))
             {
+                xw.Formatting = Formatting.Indented;
+
                 // Start season element
                 xw.WriteStartElement(ROOT_XML);
 

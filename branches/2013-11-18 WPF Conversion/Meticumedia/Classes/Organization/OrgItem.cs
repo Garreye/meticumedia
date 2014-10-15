@@ -572,7 +572,8 @@ namespace Meticumedia.Classes
             else
                 this.DestinationPath = string.Empty;
             this.TvEpisode = new TvEpisode(episode);
-            this.TvEpisode2 = new TvEpisode(episode2);
+            if (episode2 != null)
+                this.TvEpisode2 = new TvEpisode(episode2);
             this.Category = category;
             this.Enable = false;
             this.ScanDirectory = scanDir;
@@ -1601,7 +1602,7 @@ namespace Meticumedia.Classes
 
                     return fileName + Path.GetExtension(this.SourcePath);
                 case FileCategory.MovieVideo:
-                    // TODO: don't use default path if alread in movies folder!
+                    // TODO: don't use default path if already in movies folder!
                     return this.Movie.BuildFilePath(this.SourcePath);
                 default:
                     throw new Exception("Unknown file category!");

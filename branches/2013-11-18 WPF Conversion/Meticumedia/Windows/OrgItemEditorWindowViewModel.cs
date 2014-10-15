@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Meticumedia.Classes;
 using Meticumedia.Controls;
 using Meticumedia.WPF;
+using Ookii.Dialogs.Wpf;
 
 namespace Meticumedia.Windows
 {
@@ -60,6 +61,20 @@ namespace Meticumedia.Windows
             }
         }
         private OrgItem item;
+
+        public bool SourceEditingAllowed
+        {
+            get
+            {
+                return sourceEditingAllowed;
+            }
+            set
+            {
+                sourceEditingAllowed = value;
+                OnPropertyChanged(this, "SourceEditingAllowed");
+            }
+        }
+        private bool sourceEditingAllowed;
 
         /// <summary>
         /// Modification made set to OK by user
@@ -187,6 +202,36 @@ namespace Meticumedia.Windows
             }
         }
 
+        private ICommand setSourcePathCommand;
+        public ICommand SetSourcePathCommand
+        {
+            get
+            {
+                if (setSourcePathCommand == null)
+                {
+                    setSourcePathCommand = new RelayCommand(
+                        param => this.SetSourcePath()
+                    );
+                }
+                return setSourcePathCommand;
+            }
+        }
+
+        private ICommand setDestinationPathCommand;
+        public ICommand SetDestinationPathCommand
+        {
+            get
+            {
+                if (setDestinationPathCommand == null)
+                {
+                    setDestinationPathCommand = new RelayCommand(
+                        param => this.SetDestinationPath()
+                    );
+                }
+                return setDestinationPathCommand;
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -196,6 +241,7 @@ namespace Meticumedia.Windows
             this.OriginalItem = item;
             this.Item = new OrgItem(item);
             this.Item.PropertyChanged += Item_PropertyChanged;
+            this.SourceEditingAllowed = string.IsNullOrEmpty(this.Item.SourcePath);
 
             // Set path for movie to item source path (for filling in search box)
             if (string.IsNullOrEmpty(this.Item.Movie.Path))
@@ -209,15 +255,24 @@ namespace Meticumedia.Windows
             this.Shows = new ObservableCollection<TvShow>();
             foreach (TvShow show in Organization.Shows)
                 this.Shows.Add(show);
-            if (!string.IsNullOrEmpty(this.Item.TvEpisode.Show.DatabaseName) && this.Shows.Count > 0)
+            if (string.IsNullOrEmpty(this.Item.TvEpisode.Show.DatabaseName) && this.Shows.Count > 0)
                 this.Item.TvEpisode.Show = this.Shows[0];
-            if (!this.Shows.Contains(this.Item.TvEpisode.Show))
+            if (!string.IsNullOrEmpty(this.Item.TvEpisode.Show.DatabaseName) && !this.Shows.Contains(this.Item.TvEpisode.Show))
                 this.Shows.Add(this.Item.TvEpisode.Show);
+            this.Item.TvEpisode.PropertyChanged += ItemSubProperty_PropertyChanged;
         }
+
+        private string currentShow = string.Empty;
 
         void ItemSubProperty_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             this.Item.DestinationPath = this.Item.BuildDestination();
+
+            if (e.PropertyName == "Show" && (sender as TvEpisode).Show.DatabaseName != currentShow)
+            {
+                currentShow = (sender as TvEpisode).Show.DatabaseName;
+                UpdateEpisodes(this.SeasonNumber, this.EpisodeNumber);
+            }
         }
 
         void Item_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -236,15 +291,37 @@ namespace Meticumedia.Windows
 
         #region Methods
 
-        public void OkResults()
+        private void OkResults()
         {
             this.ResultsOk = true;
             OnResultsSet();
         }
 
-        public void CancelResults()
+        private void CancelResults()
         {
             OnResultsSet();
+        }
+
+        private void SetSourcePath()
+        {
+            VistaSaveFileDialog ofd = new VistaSaveFileDialog();
+            ofd.Filter = "All Files|*.*";
+            ofd.FileName = this.Item.SourcePath;
+            if (ofd.ShowDialog() == false)
+                return;
+
+            this.Item.SourcePath = ofd.FileName;
+        }
+
+        private void SetDestinationPath()
+        {
+            VistaSaveFileDialog ofd = new VistaSaveFileDialog();
+            ofd.Filter = "All Files|*.*";
+            ofd.FileName = this.Item.DestinationPath;
+            if (ofd.ShowDialog() == false)
+                return;
+
+            this.Item.DestinationPath = ofd.FileName;
         }
 
         #endregion
