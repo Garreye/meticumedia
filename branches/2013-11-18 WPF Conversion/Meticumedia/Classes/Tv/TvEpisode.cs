@@ -687,7 +687,7 @@ namespace Meticumedia.Classes
         {
             // File is in TV show folder
             if (this.Missing == MissingStatus.Located && !string.IsNullOrEmpty(this.File.FilePath) && System.IO.File.Exists(this.File.FilePath))
-                Process.Start(this.File.FilePath); // TODO: if 2nd part of multi-part then notify!
+                Process.Start(this.File.FilePath);
             
             // File is in scan directory
             else if (this.Missing == MissingStatus.InScanDirectory)

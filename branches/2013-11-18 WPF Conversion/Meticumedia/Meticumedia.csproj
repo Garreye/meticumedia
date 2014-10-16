@@ -125,6 +125,7 @@
     <Compile Include="Windows\SettingsWindowViewModel.cs" />
     <Compile Include="WPF\BindableMultiSelectDataGrid.cs" />
     <Compile Include="WPF\Commands.cs" />
+    <Compile Include="WPF\Converters\EnumInverseVisibilityConverter.cs" />
     <Compile Include="WPF\Converters\EnumInverseBooleanConverter.cs" />
     <Compile Include="WPF\Converters\EnumBooleanConverter.cs" />
     <Compile Include="WPF\Converters\EnumVisibilityConverter.cs" />

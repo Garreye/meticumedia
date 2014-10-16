@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Meticumedia.Windows;
 using Meticumedia.Classes;
+using System.Diagnostics;
 
 namespace Meticumedia
 {
@@ -23,7 +24,7 @@ namespace Meticumedia
     {
         public MainWindow()
         {
-            InitializeComponent();     
+            InitializeComponent();
         }
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)

@@ -1210,6 +1210,7 @@ namespace Meticumedia.Classes
                         }
                         else
                             this.ActionComplete = CopyMoveFile(this.SourcePath, this.DestinationPath, 0, 100);
+
                         break;
                     case OrgAction.Delete:
                         if (this.Category == FileCategory.Folder)
@@ -1254,6 +1255,45 @@ namespace Meticumedia.Classes
                         foreach (OrgFolder sd in Settings.ScanDirectories)
                             if (this.ScanDirectory != null && sd.FolderPath == this.ScanDirectory.FolderPath)
                                 sd.AddIgnoreFile(this.SourcePath);
+
+                    // Check if we need to update Shows/Movies
+                    if (this.Action == OrgAction.Copy || this.Action == OrgAction.Move)
+                    {
+                        this.Movie.Path = this.Movie.BuildFolderPath();
+                        if (this.Category == FileCategory.MovieVideo && Directory.Exists(this.Movie.Path))
+                        {
+                            bool movieExists = false;
+                            foreach (Movie movie in Organization.Movies)
+                                if (movie.DatabaseName == this.Movie.DatabaseName && movie.Path == this.Movie.Path)
+                                {
+                                    movieExists = true;
+                                    break;
+                                }
+                            if (!movieExists)
+                            {
+                                Organization.Movies.Add(this.Movie);
+                                Organization.Save();
+                            }
+                        }
+
+                        if (this.Category == FileCategory.TvVideo && Directory.Exists(this.TvEpisode.Show.Path))
+                        {
+                            bool showExists = false;
+                            foreach (TvShow show in Organization.Shows)
+                                if (show.DatabaseName == this.TvEpisode.Show.DatabaseName && show.Path == this.TvEpisode.Show.Path)
+                                {
+                                    showExists = true;
+                                    break;
+                                }
+                            if (!showExists)
+                            {
+                                Organization.Shows.Add(this.TvEpisode.Show);
+                                Organization.Save();
+                            }
+
+                        }
+                            
+                    }
 
                     // Set Completed status
                     this.QueueStatus = OrgQueueStatus.Completed;
@@ -1585,25 +1625,30 @@ namespace Meticumedia.Classes
         /// Build destination path based on form
         /// </summary>
         /// <returns></returns>
-        public string BuildDestination()
+        public void BuildDestination()
         {
             // Build destination file based on category
             switch (this.Category)
             {
                 case FileCategory.Unknown:
                 case FileCategory.Ignored:
-                    return string.Empty;
+                    this.DestinationPath = string.Empty;
+                    return;
                 case FileCategory.Custom:
-                    return this.DestinationPath;
+                    this.DestinationPath = this.DestinationPath;
+                    return;
                 case FileCategory.Trash:
-                    return FileHelper.DELETE_DIRECTORY;
+                    this.DestinationPath = FileHelper.DELETE_DIRECTORY;
+                    return;
                 case FileCategory.TvVideo:
                     string fileName = this.TvEpisode.Show.BuildFilePath(this.TvEpisode, this.TvEpisode2, string.Empty);
 
-                    return fileName + Path.GetExtension(this.SourcePath);
+                    this.DestinationPath = fileName + Path.GetExtension(this.SourcePath);
+                    return;
                 case FileCategory.MovieVideo:
                     // TODO: don't use default path if already in movies folder!
-                    return this.Movie.BuildFilePath(this.SourcePath);
+                    this.DestinationPath = this.Movie.BuildFilePath(this.SourcePath);
+                    return;
                 default:
                     throw new Exception("Unknown file category!");
             }

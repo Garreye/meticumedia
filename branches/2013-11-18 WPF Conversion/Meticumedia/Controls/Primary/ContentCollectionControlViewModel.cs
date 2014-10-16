@@ -489,16 +489,25 @@ namespace Meticumedia.Controls
             bool recursive;
             List<ContentRootFolder> selRootFolders = GetFilteredRootFolders(out recursive);
 
-            // Check if movie is in the folder
+            // Check if content is in the folder
             bool contentInSelFolder = false;
-            foreach (ContentRootFolder folder in selRootFolders)
-                if (folder.ContainsContent(content, recursive))
-                {
-                    contentInSelFolder = true;
-                    break;
-                }
+            if (selRootFolders.Count == 0)
+                contentInSelFolder = true;
+            else
+            {
+                foreach (ContentRootFolder folder in selRootFolders)
+                    if (folder.ContainsContent(content, recursive))
+                    {
+                        contentInSelFolder = true;
+                        break;
+                    }
+            }
 
-            return genreMatch && yearMatch && nameMatch && contentInSelFolder;
+            bool filterResult = genreMatch && yearMatch && nameMatch && contentInSelFolder;
+
+            //Console.WriteLine((obj as Content) + " filter results: " + filterResult);
+
+            return filterResult;
         }
 
         /// <summary>

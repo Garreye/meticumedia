@@ -224,10 +224,24 @@ namespace Meticumedia.Classes
         /// <returns>True if paths are very similar</returns>
         public static bool PathsVerySimilar(string path1, string path2)
         {
+            char diff1, diff2;
+            return PathsVerySimilar(path1, path2, out diff1, out diff2);
+        }
+
+        public static bool PathsVerySimilar(string path1, string path2, out char diff1, out char diff2)
+        {
+            diff1 = ' ';
+            diff2 = ' ';
             int diffCnt = 0;
             for (int i = 0; i < Math.Max(path1.Length, path2.Length); i++)
-                if (i > path1.Length || i > path2.Length || path1[i] != path2[i])
+                if (i >= path1.Length || i >= path2.Length || path1[i] != path2[i])
+                {
                     diffCnt++;
+                    if (i < path1.Length)
+                        diff1 = path1[i];
+                    if (i < path2.Length)
+                        diff2 = path2[i];
+                }
 
             return diffCnt < 2;
         }
@@ -433,6 +447,7 @@ namespace Meticumedia.Classes
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "srt", FileWordType.LanguageSubstitution),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "r5", FileWordType.None),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "cd\\d", FileWordType.FilePart),
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "\\d", FileWordType.FilePart),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "vost", FileWordType.LanguageSubstitution),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "hdtv", FileWordType.None),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "lol", FileWordType.None)

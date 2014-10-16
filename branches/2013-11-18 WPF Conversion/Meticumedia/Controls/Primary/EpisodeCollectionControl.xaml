@@ -8,6 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="500">
     <UserControl.Resources>
+        <wpfr:EnumInverseVisibilityConverter x:Key="enumInvVisConv" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -42,19 +43,19 @@
                 <DataTemplate>
                     <VirtualizingStackPanel Orientation="Vertical">
                         <VirtualizingStackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Show.DisplayName}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" />
-                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" />
-                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" />
-                            <TextBlock Text="Season " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" />
-                            <TextBlock Text="{Binding Season}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" />
-                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" />
-                            <TextBlock Text="Episode " Margin="0,1" FontWeight="Bold" />
-                            <TextBlock Text="{Binding Number}" Margin="0,1" FontWeight="Bold"/>
-                            <TextBlock Text=": " Margin="0,1" FontWeight="Bold" />
-                            <TextBlock Text="{Binding Name}" Margin="0,1"  FontWeight="Bold" />
-                            <TextBlock Text="{Binding AirDateString}" Margin="0,1"  FontWeight="Bold"/>
-                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" />
-                            <TextBlock Text="{Binding Status}" Margin="0,1"  FontWeight="Bold" Foreground="{Binding StatusColor}"/>
+                            <TextBlock Text="{Binding Show.DisplayName}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="Season " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Season}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="Episode " Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Number}" Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text=": " Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Name}" Margin="0,1"  FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding AirDateString}" Margin="0,1"  FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Status}" Margin="0,1"  FontWeight="Bold" VerticalAlignment="Center" Foreground="{Binding StatusColor}"/>
                         </VirtualizingStackPanel>
                         <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" Visibility="{Binding Path=DataContext.DisplayOverview, RelativeSource={StaticResource parent}}" >-->
                             <TextBlock.Style>

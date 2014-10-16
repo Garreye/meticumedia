@@ -715,27 +715,6 @@ namespace Meticumedia.Controls
             }
         }
         
-        void grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            OnPropertyChanged(this, "SingleDirScanSelectionVisibility");
-            OnPropertyChanged(this, "AnySelectionVisibility");
-            OnPropertyChanged(this, "DirectoryScanAnySelectedResultsVisibility");
-            OnPropertyChanged(this, "TvMissingScanAnySelectedResultsVisibility");
-            OnPropertyChanged(this, "TvMissingScanSingleMissingSelectedResultsVisibility");
-            OnPropertyChanged(this, "AllMoviesSelectedResultsVisibility");
-            OnPropertyChanged(this, "AllAlreadyExistSelectedResultsVisibility");
-
-            this.MovieFolderItems.Clear();
-            foreach (ContentRootFolder folder in Settings.MovieFolders)
-            {
-                MenuItem item = new MenuItem();
-                item.Header = folder.FullPath;
-                item.Command = new RelayCommand(param => this.SetMovieFolder(folder.FullPath));
-
-                this.MovieFolderItems.Add(item);
-            }
-        }
-
         #endregion
 
         #endregion
@@ -795,6 +774,19 @@ namespace Meticumedia.Controls
 
         #region Event Handlers
 
+        void grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            OnPropertyChanged(this, "SingleDirScanSelectionVisibility");
+            OnPropertyChanged(this, "AnySelectionVisibility");
+            OnPropertyChanged(this, "DirectoryScanAnySelectedResultsVisibility");
+            OnPropertyChanged(this, "TvMissingScanAnySelectedResultsVisibility");
+            OnPropertyChanged(this, "TvMissingScanSingleMissingSelectedResultsVisibility");
+            OnPropertyChanged(this, "AllMoviesSelectedResultsVisibility");
+            OnPropertyChanged(this, "AllAlreadyExistSelectedResultsVisibility");
+
+            UpdateMovieFolderItems();
+        }
+
         void QueueControlViewModel_QueueItemsChanged(object sender, QueueControlViewModel.QueueItemsChangedArgs e)
         {
             this.queuedItems = e.QueueItems;
@@ -803,6 +795,7 @@ namespace Meticumedia.Controls
         void Settings_SettingsModified(object sender, EventArgs e)
         {
             UpdateRunSelectionsSafe();
+            UpdateMovieFolderItems();
         }
 
         void directoryScan_ItemsInitialized(object sender, Scan.ItemsInitializedArgs e)
@@ -1095,6 +1088,19 @@ namespace Meticumedia.Controls
 
         #region Methods
 
+        private void UpdateMovieFolderItems()
+        {
+            this.MovieFolderItems.Clear();
+            foreach (ContentRootFolder folder in Settings.MovieFolders)
+            {
+                MenuItem item = new MenuItem();
+                item.Header = folder.FullPath;
+                item.Command = new RelayCommand(param => this.SetMovieFolder(folder.FullPath));
+
+                this.MovieFolderItems.Add(item);
+            }
+        }
+
         private void QueueItems()
         {
             List<OrgItem> toQueue = new List<OrgItem>();
@@ -1128,6 +1134,26 @@ namespace Meticumedia.Controls
 
             if (editor.Results != null)
                 selItem.Clone(editor.Results);
+            else
+                return;
+
+            if (selItem.Action != OrgAction.None)
+                selItem.Enable = true;
+            
+            // Automatically apply the movie to unknown items with similar names
+            if (lastRunScan == ScanType.Directory && selItem.Category == FileCategory.MovieVideo && (selItem.Action == OrgAction.Move || selItem.Action == OrgAction.Copy))
+            {
+                foreach (OrgItem item in this.ScanResults)
+                {
+                    if(FileHelper.PathsVerySimilar(item.SourcePath, selItem.SourcePath))
+                    {
+                        item.Movie = selItem.Movie;
+                        item.DestinationPath = item.Movie.BuildFilePath(item.SourcePath);
+                        item.Action = selItem.Action;
+                        item.Enable = true;
+                    }
+                }
+            }
         }
 
         private void SetSelectedItemToDelete()
@@ -1138,7 +1164,7 @@ namespace Meticumedia.Controls
                 item.Action = OrgAction.Delete;
                 item.Category = FileCategory.Trash;
                 item.Enable = true;
-                item.DestinationPath = item.BuildDestination();
+                item.BuildDestination();
             }
         }
 
@@ -1258,7 +1284,14 @@ namespace Meticumedia.Controls
             foreach (OrgItem item in this.SelectedResultsItems)
             {
                 item.Movie.RootFolder = path;
-                item.DestinationPath = item.BuildDestination();
+                item.BuildDestination();
+
+                foreach (OrgItem otherItem in this.ScanResults)
+                    if (otherItem.Movie.DatabaseName == item.Movie.DatabaseName)
+                    {
+                        otherItem.Movie.RootFolder = path;
+                        otherItem.BuildDestination();
+                    }
             }
         }
 

@@ -158,7 +158,7 @@ namespace Meticumedia.Windows
 
 
             // Update destination
-            this.Item.DestinationPath = this.Item.BuildDestination();
+            this.Item.BuildDestination();
         }
 
         #endregion
@@ -266,7 +266,7 @@ namespace Meticumedia.Windows
 
         void ItemSubProperty_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            this.Item.DestinationPath = this.Item.BuildDestination();
+            this.Item.BuildDestination();
 
             if (e.PropertyName == "Show" && (sender as TvEpisode).Show.DatabaseName != currentShow)
             {
@@ -284,7 +284,7 @@ namespace Meticumedia.Windows
                 UpdateEpisodes(this.SeasonNumber, this.EpisodeNumber);
 
             if (!e.PropertyName.Contains("DestinationPath"))
-                this.Item.DestinationPath = this.Item.BuildDestination();
+                this.Item.BuildDestination();
         }
 
         #endregion

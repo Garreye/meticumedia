@@ -28,11 +28,17 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Triggers SettingsModified event.
         /// </summary>
-        private static void OnSettingsModified()
+        private static void OnSettingsModified(bool initial)
         {
             if (SettingsModified != null)
             {
                 SettingsModified(null, new EventArgs());
+            }
+
+            if (!initial)
+            {
+                Organization.UpdateRootFolders(ContentType.Movie);
+                Organization.UpdateRootFolders(ContentType.TvShow);
             }
         }
 
@@ -370,7 +376,7 @@ namespace Meticumedia.Classes
 
                 xw.WriteEndElement();
             }
-            OnSettingsModified();
+            OnSettingsModified(false);
         }
 
         /// <summary>
@@ -484,7 +490,7 @@ namespace Meticumedia.Classes
                 }
 
             }
-            OnSettingsModified();
+            OnSettingsModified(true);
         }
 
         #endregion

@@ -33,6 +33,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 
                 <Grid Grid.Column="0" >
@@ -50,7 +51,8 @@
                     <TextBlock Grid.Column="3" Text=")" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
                 </Grid>
 
-                <Button Grid.Column="1" Content="Edit" Height="25" Margin="5,0" Padding="20,0" Command="{Binding EditCommand}"/>
+                <Button Grid.Column="1" Content="Play" Height="25" Margin="5,0" Padding="20,0" Command="{Binding PlayCommand}" Visibility="{Binding PlayVisibility}"/>
+                <Button Grid.Column="2" Content="Edit" Height="25" Margin="5,0" Padding="20,0" Command="{Binding EditCommand}"/>
             </Grid>
                 
             <!--<Image Grid.Row="1" Grid.RowSpan="7" Height="100" Width="100" />-->
