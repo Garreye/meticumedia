@@ -46,6 +46,11 @@ namespace Meticumedia.Classes
         public Content Content { get; set; }
 
         /// <summary>
+        /// Index of path this path is similar to (for directory scan)
+        /// </summary>
+        public int SimilarTo { get; set; }
+
+        /// <summary>
         /// Constructor for file from scan folder
         /// </summary>
         /// <param name="path">file's path</param>
@@ -58,6 +63,7 @@ namespace Meticumedia.Classes
             this.Copy = copy;
             this.AllowDelete = allowDelete;
             this.OrgFolder = folder;
+            this.SimilarTo = -1;
         }
 
         /// <summary>
@@ -74,6 +80,7 @@ namespace Meticumedia.Classes
             this.AllowDelete = allowDelete;
             this.RootFolder = folder;
             this.Content = content;
+            this.SimilarTo = -1;
         }
 
         public override string ToString()

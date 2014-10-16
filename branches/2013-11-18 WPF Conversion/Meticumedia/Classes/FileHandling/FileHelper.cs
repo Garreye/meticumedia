@@ -216,6 +216,22 @@ namespace Meticumedia.Classes
                 diff = set1.Except(set2).ToList();
         }
 
+        /// <summary>
+        /// Determines whether 2 paths are very similar (max 1 char difference)
+        /// </summary>
+        /// <param name="path1">First path</param>
+        /// <param name="path2">Second path</param>
+        /// <returns>True if paths are very similar</returns>
+        public static bool PathsVerySimilar(string path1, string path2)
+        {
+            int diffCnt = 0;
+            for (int i = 0; i < Math.Max(path1.Length, path2.Length); i++)
+                if (i > path1.Length || i > path2.Length || path1[i] != path2[i])
+                    diffCnt++;
+
+            return diffCnt < 2;
+        }
+
         #endregion
 
         #region TV

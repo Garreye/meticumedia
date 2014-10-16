@@ -113,6 +113,10 @@ namespace Meticumedia.Classes
             // Loop through all paths
             lock (processingLock)
                 numItemProcessed = 0;
+            
+            List<Tuple<int, OrgPath>> orderedPaths = new List<Tuple<int, OrgPath>>();
+            // TODO: do non similar items first!
+
             int i = 0;
             for (i = 0; i < paths.Count; i++)
             {
