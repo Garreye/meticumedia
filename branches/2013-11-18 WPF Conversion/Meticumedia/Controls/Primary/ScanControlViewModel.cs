@@ -631,7 +631,7 @@ namespace Meticumedia.Controls
                 RefreshResultsSafe(false);
             }
         }
-        private FileCategory categoryFilter = FileCategory.All;
+        private FileCategory categoryFilter = FileCategory.All ^ FileCategory.Ignored;
 
         #endregion        
 

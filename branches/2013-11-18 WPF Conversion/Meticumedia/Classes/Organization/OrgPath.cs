@@ -75,5 +75,10 @@ namespace Meticumedia.Classes
             this.RootFolder = folder;
             this.Content = content;
         }
+
+        public override string ToString()
+        {
+            return this.Path;
+        }
     }
 }
