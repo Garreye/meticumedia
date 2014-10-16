@@ -61,7 +61,7 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="folders">Set of organization folders to get files from</param>
         /// <returns>List of files contained in folders</returns>
-        private List<OrgPath> GetFolderFiles(List<OrgFolder> folders)
+        public List<OrgPath> GetFolderFiles(List<OrgFolder> folders)
         {
             List<OrgPath> files = new List<OrgPath>();
             foreach (OrgFolder folder in folders)
@@ -243,17 +243,19 @@ namespace Meticumedia.Classes
             OrgItem noneItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
             
             // Setup match to filename and folder name (if it's in a folder inside of downloads)
+            string pathBase = orgPath.Path.Replace(orgPath.OrgFolder.FolderPath, "");
             string[] pathSplit;
             if (!string.IsNullOrEmpty(orgPath.OrgFolder.FolderPath))
-                pathSplit = orgPath.Path.Replace(orgPath.OrgFolder.FolderPath, "").Split('\\');
+                pathSplit = pathBase.Split('\\');
             else
                 pathSplit = orgPath.Path.Split('\\');
 
             List<string> possibleMatchPaths = new List<string>();
             possibleMatchPaths.Add(pathSplit.Last());
-            if (pathSplit.Length > 2)
-                possibleMatchPaths.Add(pathSplit[pathSplit.Length - 2] + Path.GetExtension(orgPath.Path));
-            
+            for (int i = pathSplit.Length - 2; i > 0; i--)
+                possibleMatchPaths.Add(pathSplit[i] + Path.GetExtension(orgPath.Path));
+            possibleMatchPaths.Add(pathBase.Replace('\\', ' '));
+
             // Try to match to each string
             foreach (string matchString in possibleMatchPaths)
             {
@@ -345,8 +347,8 @@ namespace Meticumedia.Classes
                                         bestMatch = match.Key;
                                     }
                                 }
-
-                            OnDebugNotificationd("Matched to show " + bestMatch.DisplayName);
+                            if (bestMatch != null)
+                                OnDebugNotificationd("Matched to show " + bestMatch.DisplayName);
                         }
 
                         // Episode not matched to a TV show, search database!
@@ -364,15 +366,21 @@ namespace Meticumedia.Classes
                                 path = defaultTvFolder.FullPath;
 
                             // Perform search for matching TV show
-                            matchSucess = SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, threaded, out bestMatch);
-                            bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
-                            TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
+                            if (SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, threaded, out bestMatch))
+                            {
+                                bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
+                                TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
 
-                            // Save show in temporary shows list (in case there are more files that may match to it during scan)
-                            lock (directoryScanLock)
-                                if (!temporaryShows.Contains(bestMatch))
-                                    temporaryShows.Add(bestMatch);
-                            newShow = true;
+                                // Save show in temporary shows list (in case there are more files that may match to it during scan)
+                                lock (directoryScanLock)
+                                    if (!temporaryShows.Contains(bestMatch))
+                                        temporaryShows.Add(bestMatch);
+                                newShow = true;
+                            }
+                            else
+                                bestMatch = null;
+
+                            
                         }
                         else if (temporaryShows.Contains(bestMatch))
                             newShow = true;
@@ -384,6 +392,18 @@ namespace Meticumedia.Classes
                             int seasonNum, episodeNum1, episodeNum2;
                             if (FileHelper.GetEpisodeInfo(matchString, bestMatch.DatabaseName, out seasonNum, out episodeNum1, out episodeNum2))
                             {
+                                // No season match means file only had episode number, allow this for single season shows
+                                if (seasonNum == -1)
+                                {
+                                    int maxSeason = 0;
+                                    foreach (int season in bestMatch.Seasons)
+                                        if (season > maxSeason)
+                                            maxSeason = season;
+
+                                    if (maxSeason == 1)
+                                        seasonNum = 1;
+                                }
+                                
                                 // Try to get the episode from the show
                                 TvEpisode episode1, episode2 = null;
                                 if (bestMatch.FindEpisode(seasonNum, episodeNum1, false, out episode1))

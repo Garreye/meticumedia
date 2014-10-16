@@ -303,7 +303,7 @@
     <Compile Include="Classes\Organization\OrgColumnType.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\Organization\OrgFile.cs">
+    <Compile Include="Classes\Organization\OrgPath.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Classes\Organization\OrgFolder.cs">

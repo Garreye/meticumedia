@@ -1,0 +1,36 @@
+updating adds even when not in filter (e.g. watched)
+
+group related file names - e.g. nfo with movie
+
+Scan item mod of new TV show -> scan none item for match to newly added show..
+
+folder name format in settings
+
+loose files in tv folder
+
+forced tv update not refleted on tv schedule?
+
+Set quality, encoding, etc. for content
+
+more than 2 episodes per file - more than 1 file per episode
+
+new files tab
+
+tv loading does a tv scan dir check synchronously..
+
+breakout scan helper into classes - maybe split tv into missing and folder scans
+
+handle dvd folders for movies and tv shows
+
+Show episodes that are in folder, but not in database
+
+file type auto move to location
+
+multiple passes on dir scan - fast, default DB, other DBs
+
+match to entire portion before/after : in name (e.g. the hobbit: the desomation of smaug would match to 'the hobbit')
+
+save database search results in org item -> add select movie option to context menu with list of search result possibilities
+
+Wait on matching similar items to database in dir scan (e.g. a whole season of a show that isn't in database - wait for search on first one to be done to continue with remaining)
+
