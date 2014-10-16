@@ -39,10 +39,10 @@ namespace Meticumedia.Classes
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <param name="threaded">Whether search is threaded, setting to false can help with debugging</param>
         /// <returns>Match movie item, null if no match</returns>
-        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, bool threaded, out Movie match)
+        public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, bool threaded, out Movie match, Movie knownContent)
         {
             Content contentMatch;
-            bool results = base.ContentMatch(search, rootFolder, folderPath, fast, threaded, out contentMatch);
+            bool results = base.ContentMatch(search, rootFolder, folderPath, fast, threaded, out contentMatch, knownContent);
             match = new Movie(contentMatch);
             if (results)
                 MovieDatabaseHelper.UpdateMovieInfo(match);
@@ -58,7 +58,7 @@ namespace Meticumedia.Classes
         public bool PathMatch(string rootFolder, string path, bool fast, bool threaded, out Movie match)
         {
             Content contentMatch;
-            bool results = base.PathMatch(rootFolder, path, fast, threaded, out contentMatch);
+            bool results = base.PathMatch(rootFolder, path, fast, threaded, out contentMatch, null);
             match = new Movie(contentMatch);
             if (match.Id > 0)
                 MovieDatabaseHelper.UpdateMovieInfo(match);

@@ -234,14 +234,14 @@ namespace Meticumedia.Classes
         /// <param name="rootFolder">Root folder content will belong to</param>
         /// <param name="path">Current path of content</param>
         /// <returns>Content from database that was matched, null if no match</returns>
-        protected bool PathMatch(string rootFolder, string path, bool threaded, bool fast, out Content match)
+        protected bool PathMatch(string rootFolder, string path, bool threaded, bool fast, out Content match, Content knownContent)
         {
             // Get folder name from full path
             string[] dirs = path.Split('\\');
             string endDir = dirs[dirs.Length - 1];
 
             // Do match
-            return ContentMatch(endDir, rootFolder, path, fast, threaded, out match);
+            return ContentMatch(endDir, rootFolder, path, fast, threaded, out match, knownContent);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace Meticumedia.Classes
         /// <param name="rootFolder">The root folder the content will belong to</param>
         /// <param name="folderPath">Folder path where the content should be moved to</param>
         /// <returns>Match content item, null if no match</returns>
-        protected bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, bool threaded, out Content match)
+        protected bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, bool threaded, out Content match, Content knownContent)
         {
             // Create empty content
             Content emptyContent;
@@ -370,7 +370,7 @@ namespace Meticumedia.Classes
                 }
 
                 // Build search arguments
-                object[] args = { currSeachCnt, searchNum, searches[searchNum].SimplifiedString, folderPath, rootFolder, dirYear, searches[searchNum].Modifications };
+                object[] args = { currSeachCnt, searchNum, searches[searchNum].SimplifiedString, folderPath, rootFolder, dirYear, searches[searchNum].Modifications, knownContent };
 
                 // Threaded: add a search to thread pool
                 if (threaded)
@@ -448,11 +448,12 @@ namespace Meticumedia.Classes
             string movieFolder = (string)args[4];
             int year = (int)args[5];
             ContentSearchMod mods = (ContentSearchMod)args[6];
+            Content knownContent = (Content)args[7];
 
             // Check search is still active
             List<SearchResult> matches = new List<SearchResult>();
             if (searchStatus.ContainsKey(statusIndex))
-                DoMatch(search, folderPath, movieFolder, year, mods, out matches);
+                DoMatch(search, folderPath, movieFolder, year, mods, out matches, knownContent);
 
             // Check search is still active then put results into status
             lock (searchLock)
@@ -469,13 +470,17 @@ namespace Meticumedia.Classes
         /// <param name="year">Year to match to content</param>
         /// <param name="result">resulting match found from search</param>
         /// <returns>whether match was successful</returns>
-        private bool DoMatch(string search, string folderPath, string rootFolder, int year, ContentSearchMod baseMods, out List<SearchResult> matches)
+        private bool DoMatch(string search, string folderPath, string rootFolder, int year, ContentSearchMod baseMods, out List<SearchResult> matches, Content knownContent)
         {
             /// Debug notification
             OnDebugNotificationd("Performing database search for: " + search);
             
             // Search for content
-            List<Content> searchResults = PerformSearch(search, false);
+            List<Content> searchResults;
+            if (knownContent == null)
+                searchResults = PerformSearch(search, false);
+            else
+                searchResults = new List<Content>() { knownContent };
 
             // Initialize resutls
             matches = new List<SearchResult>();

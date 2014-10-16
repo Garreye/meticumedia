@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -64,6 +65,8 @@ namespace Meticumedia.Controls
         }
         private EpisodeCollectionControlViewModel episodesModel;
 
+        public Visibility PlayVisibility { get; set; }
+
         #endregion
 
         #region Commands
@@ -89,6 +92,21 @@ namespace Meticumedia.Controls
             return true;
         }
 
+        private ICommand playCommand;
+        public ICommand PlayCommand
+        {
+            get
+            {
+                if (playCommand == null)
+                {
+                    playCommand = new RelayCommand(
+                        param => this.PlayContent()
+                    );
+                }
+                return playCommand;
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -101,7 +119,11 @@ namespace Meticumedia.Controls
             {
                 TvShow show = this.Content as TvShow;
                 this.EpisodesModel = new EpisodeCollectionControlViewModel(show.Episodes, show);
+                this.PlayVisibility = Visibility.Collapsed;
             }
+            else
+                this.PlayVisibility = Visibility.Visible;
+
         }
 
         #endregion
@@ -130,6 +152,11 @@ namespace Meticumedia.Controls
                 }
             }
 
+        }
+
+        private void PlayContent()
+        {
+            (this.Content as Movie).PlayMovieFle();
         }
 
         #endregion

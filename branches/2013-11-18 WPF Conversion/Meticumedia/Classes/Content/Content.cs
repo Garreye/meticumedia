@@ -371,7 +371,7 @@ namespace Meticumedia.Classes
             }
         }
 
-        private bool found = true;
+        private bool found = false;
 
         /// <summary>
         /// Path to root content folder this belongs to

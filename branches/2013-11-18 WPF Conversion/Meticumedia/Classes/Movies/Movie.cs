@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml;
+using System.Diagnostics;
 
 namespace Meticumedia.Classes
 {
@@ -90,6 +91,25 @@ namespace Meticumedia.Classes
         public void Clone(Movie movie, bool replacePath)
         {
             base.Clone(movie, replacePath);
+        }
+
+        public void PlayMovieFle()
+        {
+            PlayVideoFiles(this.Path);            
+        }
+
+        private void PlayVideoFiles(string path)
+        {
+            string[] files = Directory.GetFiles(path);
+            foreach (string file in files)
+            {
+                if (FileHelper.CategorizeFile(new OrgPath(file, false, false, null, null), file) == FileCategory.MovieVideo)
+                    Process.Start(file);
+            }
+
+            string[] subDirs = Directory.GetDirectories(path);
+            foreach (string subDir in subDirs)
+                PlayVideoFiles(subDir);
         }
 
         /// <summary>

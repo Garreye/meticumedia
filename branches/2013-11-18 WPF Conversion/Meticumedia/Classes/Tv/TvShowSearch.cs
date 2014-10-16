@@ -67,7 +67,7 @@ namespace Meticumedia.Classes
         public bool ContentMatch(string search, string rootFolder, string folderPath, bool fast, bool threaded, out TvShow match)
         {
             Content contentMatch;
-            bool results = base.ContentMatch(search, rootFolder, folderPath, fast, threaded, out contentMatch);
+            bool results = base.ContentMatch(search, rootFolder, folderPath, fast, threaded, out contentMatch, null);
             match = new TvShow(contentMatch);
             if (results)
                 TvDatabaseHelper.FullShowSeasonsUpdate(match);
@@ -83,7 +83,7 @@ namespace Meticumedia.Classes
         public bool PathMatch(string rootFolder, string path, bool fast, bool threaded, out TvShow match)
         {
             Content contentMatch;
-            bool results = base.PathMatch(rootFolder, path, fast, threaded, out contentMatch);
+            bool results = base.PathMatch(rootFolder, path, fast, threaded, out contentMatch, null);
             match = new TvShow(contentMatch);
             TvDatabaseHelper.FullShowSeasonsUpdate(match);
             return results;

@@ -122,16 +122,17 @@ namespace Meticumedia.Controls
 
             // TODO: this make loading the control slow as fuck
             // Set properties to trigger live updating
-            //ICollectionViewLiveShaping liveCollection = this.EpisodesCollectionView as ICollectionViewLiveShaping;
-            //liveCollection.LiveFilteringProperties.Add("Genres");
-            //liveCollection.LiveFilteringProperties.Add("Date");
-            //liveCollection.LiveFilteringProperties.Add("RootFolder");
-            //liveCollection.LiveFilteringProperties.Add("Name");
-            //liveCollection.IsLiveFiltering = true;
-            //liveCollection.LiveGroupingProperties.Add("Missing");
-            //liveCollection.LiveGroupingProperties.Add("Season");
-            //liveCollection.LiveGroupingProperties.Add("Show");
-            //liveCollection.IsLiveGrouping = true;
+            ICollectionViewLiveShaping liveCollection = this.EpisodesCollectionView as ICollectionViewLiveShaping;
+            liveCollection.LiveFilteringProperties.Add("Genres");
+            liveCollection.LiveFilteringProperties.Add("Date");
+            liveCollection.LiveFilteringProperties.Add("RootFolder");
+            liveCollection.LiveFilteringProperties.Add("Name");
+            liveCollection.LiveFilteringProperties.Add("Status");
+            liveCollection.IsLiveFiltering = true;
+            liveCollection.LiveGroupingProperties.Add("Missing");
+            liveCollection.LiveGroupingProperties.Add("Season");
+            liveCollection.LiveGroupingProperties.Add("Show");
+            liveCollection.IsLiveGrouping = true;
 
             this.Groupings = new ObservableCollection<TvGroupingType>();
             this.Groupings.Add(TvGroupingType.None);

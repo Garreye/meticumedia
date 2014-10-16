@@ -231,25 +231,67 @@ namespace Meticumedia.Classes
                     }
             // If item is already in the queue, skip it
             if (alreadyQueued)
-                ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
+                ProcessUpdate(orgPath.Path, false, totalPaths);
             else
             {                
                 // Update progress
                 lock (directoryScanLock)
                     this.Items[pathNum].Action = OrgAction.Processing;
-                ProcessUpdate(orgPath.Path, true, pathNum, totalPaths);
+                ProcessUpdate(orgPath.Path, true, totalPaths);
 
                 // Process path
                 OrgItem results = ProcessPath(orgPath, tvOnlyCheck, skipMatching, fast, true, procNumber);
 
                 // Update results and progress
                 UpdateResult(results, pathNum, procNumber);
-                ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
+                ProcessUpdate(orgPath.Path, false, totalPaths);
             }
         }
 
         public OrgItem ProcessPath(OrgPath orgPath, bool tvOnlyCheck, bool skipMatching, bool fast, bool threaded, int procNumber)
         {
+            // If similar to earlier item, wait for it to complete before continuing
+            while (orgPath.SimilarTo >= 0 && orgPath.SimilarTo < this.Items.Count && (this.Items[orgPath.SimilarTo].Action == OrgAction.TBD || this.Items[orgPath.SimilarTo].Action == OrgAction.Processing))
+            {
+                // Check for cancellation
+                if (scanCanceled || procNumber < scanNumber)
+                    return null;
+
+                Thread.Sleep(50);
+            }
+
+            // If similar to earlier item, check if we can use it's info
+            if (orgPath.SimilarTo > 0 && orgPath.SimilarTo < this.Items.Count)
+            {
+                switch (this.Items[orgPath.SimilarTo].Action)
+                {
+                    case OrgAction.None:
+                    case OrgAction.Delete:
+                        OrgItem copyItem = new OrgItem(this.Items[orgPath.SimilarTo]);
+                        copyItem.SourcePath = orgPath.Path;
+                        copyItem.BuildDestination();
+                        return copyItem;
+                    case OrgAction.Move:
+                    case OrgAction.Copy:
+                        if (this.Items[orgPath.SimilarTo].Category == FileCategory.MovieVideo)
+                        {
+                            OrgItem movieItem = new OrgItem(this.Items[orgPath.SimilarTo]);
+                            movieItem.SourcePath = orgPath.Path;
+                            movieItem.BuildDestination();
+
+                            OrgItem item;
+                            CreateMovieAction(orgPath, orgPath.Path, out item, threaded, fast, this.Items[orgPath.SimilarTo].Movie);
+
+                            return movieItem;
+                        }
+                        break;
+                    case OrgAction.Queued:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             // Create default none item
             FileCategory fileCat = FileHelper.CategorizeFile(orgPath, orgPath.Path);
             OrgItem noneItem = new OrgItem(OrgAction.None, orgPath.Path, fileCat, orgPath.OrgFolder);
@@ -334,7 +376,6 @@ namespace Meticumedia.Classes
 
                         // Check for matches to existing show
                         TvShow bestMatch = null;
-                        bool matchSucess = false;
                         if (matches.Count > 0)
                         {
                             // Find best match, based on length
@@ -380,7 +421,7 @@ namespace Meticumedia.Classes
                             // Perform search for matching TV show
                             if (SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, threaded, out bestMatch))
                             {
-                                bestMatch.RootFolder = Path.Combine(path, bestMatch.DatabaseName);
+                                bestMatch.RootFolder = path;
                                 TvDatabaseHelper.FullShowSeasonsUpdate(bestMatch);
 
                                 // Save show in temporary shows list (in case there are more files that may match to it during scan)
@@ -390,9 +431,7 @@ namespace Meticumedia.Classes
                                 newShow = true;
                             }
                             else
-                                bestMatch = null;
-
-                            
+                                bestMatch = null;  
                         }
                         else if (temporaryShows.Contains(bestMatch))
                             newShow = true;
@@ -450,7 +489,7 @@ namespace Meticumedia.Classes
                         {
                             // Try to match to a movie
                             OrgItem movieItem;
-                            if (CreateMovieAction(orgPath, matchString, out movieItem, threaded, fast))
+                            if (CreateMovieAction(orgPath, matchString, out movieItem, threaded, fast, null))
                                 return movieItem;
                         }
 
@@ -460,7 +499,7 @@ namespace Meticumedia.Classes
                     case FileCategory.MovieVideo:
                         // Create action
                         OrgItem item;
-                        CreateMovieAction(orgPath, matchString, out item, threaded, fast);
+                        CreateMovieAction(orgPath, matchString, out item, threaded, fast, null);
 
                         // If delete action created (for sample file)
                         if (item.Action == OrgAction.Delete)
@@ -511,7 +550,7 @@ namespace Meticumedia.Classes
         /// <param name="starting">Whether file processing is just started</param>
         /// <param name="pathum">The file's number in queue of all files</param>
         /// <param name="totalPaths">Total number of files queued for processing</param>
-        private void ProcessUpdate(string file, bool starting, int pathum, int totalPaths)
+        private void ProcessUpdate(string file, bool starting, int totalPaths)
         {
             // Add new files to list of files being processed, remove completed files
             lock (processLock)
@@ -549,7 +588,7 @@ namespace Meticumedia.Classes
         /// <param name="file">The file to create movie action from</param>
         /// <param name="item">The resulting movie action</param>
         /// <returns>Whether the file was matched to a movie</returns>
-        private bool CreateMovieAction(OrgPath file, string matchString, out OrgItem item, bool threaded, bool fast)
+        private bool CreateMovieAction(OrgPath file, string matchString, out OrgItem item, bool threaded, bool fast, Movie knownMovie)
         {
             // Initialize item
             item = new OrgItem(OrgAction.None, file.Path, FileCategory.MovieVideo, file.OrgFolder);
@@ -577,7 +616,7 @@ namespace Meticumedia.Classes
 
             // Search for match to movie
             Movie searchResult;
-            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, threaded, out searchResult);
+            bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, threaded, out searchResult, knownMovie);
 
             // Add closest match item
             if (searchSucess)

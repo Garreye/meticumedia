@@ -113,12 +113,19 @@ namespace Meticumedia.Classes
             // Loop through all paths
             lock (processingLock)
                 numItemProcessed = 0;
-            
-            List<Tuple<int, OrgPath>> orderedPaths = new List<Tuple<int, OrgPath>>();
-            // TODO: do non similar items first!
 
+            // Get order to process paths in
             int i = 0;
+            List<int> pathOrder = new List<int>();
             for (i = 0; i < paths.Count; i++)
+                if (paths[i].SimilarTo < 0)
+                    pathOrder.Add(i);
+            for (i = 0; i < paths.Count; i++)
+                if (paths[i].SimilarTo >= 0)
+                    pathOrder.Add(i);
+
+
+            for (i = 0; i < pathOrder.Count; i++)
             {
                 // Limit number of threads
                 while (i >= numItemProcessed + Settings.General.NumProcessingThreads && !cancel)
@@ -129,7 +136,7 @@ namespace Meticumedia.Classes
                     break;
 
                 // Create new processing thread for path
-                object[] args = { paths[i], paths.Count, i, processSpecificArgs };
+                object[] args = { paths[pathOrder[i]], paths.Count, pathOrder[i], processSpecificArgs };
                 ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessThread), args);
             }
 
@@ -147,13 +154,13 @@ namespace Meticumedia.Classes
             object[] args = (object[])stateInfo;
             OrgPath orgPath = (OrgPath)args[0];
             int totalPaths = (int)args[1];
-            int updateNumer = (int)args[2];
+            int updateNumber = (int)args[2];
             object processSpecificArgs = args[3];
 
             lock (processingLock)
                 ++numItemStarted;
 
-            process(orgPath, updateNumer, totalPaths, this.ProcessNumber, ref numItemProcessed, ref numItemStarted, processSpecificArgs);
+            process(orgPath, updateNumber, totalPaths, this.ProcessNumber, ref numItemProcessed, ref numItemStarted, processSpecificArgs);
 
             lock (processingLock)
                 ++numItemProcessed;

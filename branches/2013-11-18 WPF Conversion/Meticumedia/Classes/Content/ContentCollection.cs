@@ -348,7 +348,7 @@ namespace Meticumedia.Classes
             lock (this.ContentLock)
             {
                 for (int i = this.Count - 1; i >= 0; i--)
-                    if (!this[i].Found && this[i].RootFolder.StartsWith(rootFolder.FullPath))
+                    if (!this[i].Found && rootFolder.ContainsContent(this[i], true))
                         RemoveAt(i);
             }
         }

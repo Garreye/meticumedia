@@ -126,7 +126,10 @@ namespace Meticumedia.Classes
                     filterString = "Episodes in Scan Directory";
                     break;
                 case FilterType.Season:
-                    filterString = "Season " + this.Season;
+                    if (this.Season == 0)
+                        filterString = "Specials";
+                    else
+                        filterString = "Season " + this.Season;
                     break;
                 case FilterType.Unaired:
                     filterString = "Unaired";
