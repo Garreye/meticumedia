@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Meticumedia.Classes
 {
@@ -66,6 +67,17 @@ namespace Meticumedia.Classes
             List<OrgPath> files = new List<OrgPath>();
             foreach (OrgFolder folder in folders)
                 GetFolderFiles(folder, folder.FolderPath, files);
+
+            // Similarity checks
+            for(int i=1;i<files.Count;i++)
+                if (FileHelper.PathsVerySimilar(files[i].Path, files[i - 1].Path))
+                {
+                    if (files[i - 1].SimilarTo > 0)
+                        files[i].SimilarTo = files[i - 1].SimilarTo;
+                    else
+                        files[i].SimilarTo = i - 1;
+                }
+
             return files;
         }
 
@@ -221,7 +233,7 @@ namespace Meticumedia.Classes
             if (alreadyQueued)
                 ProcessUpdate(orgPath.Path, false, pathNum, totalPaths);
             else
-            {
+            {                
                 // Update progress
                 lock (directoryScanLock)
                     this.Items[pathNum].Action = OrgAction.Processing;
