@@ -270,7 +270,7 @@ namespace Meticumedia.Classes
         /// Movie that file is associated with.
         /// </summary>
         public Movie Movie
-            {
+        {
             get
             {
                 return movie;
@@ -282,6 +282,20 @@ namespace Meticumedia.Classes
             }
         }
         private Movie movie;
+
+        public AutoMoveFileSetup AutoMoveSetup
+        {
+            get
+            {
+                return autoMoveSetup;
+            }
+            set
+            {
+                autoMoveSetup = value;
+                OnPropertyChanged("AutoMoveSetup");
+            }
+        }
+        private AutoMoveFileSetup autoMoveSetup;
 
         /// <summary>
         /// Scan Directory where source comes from
@@ -600,6 +614,26 @@ namespace Meticumedia.Classes
             this.Enable = false;
             this.ScanDirectory = scanDir;
             this.Number = 0;
+        }
+
+        /// <summary>
+        /// Constructor for directory scan for file that is unknown.
+        /// </summary>
+        /// <param name="action">action to be performed</param>
+        /// <param name="file">source path</param>
+        /// <param name="category">file category</param>
+        public OrgItem(string file, AutoMoveFileSetup autoMoveSetup, OrgFolder scanDir)
+            : this()
+        {
+            this.Progress = 0;
+            this.Action = scanDir.CopyFrom ? OrgAction.Copy : OrgAction.Move;
+            this.AutoMoveSetup = autoMoveSetup;
+            this.SourcePath = file;
+            this.Category = FileCategory.AutoMove;
+            this.Enable = true;
+            this.ScanDirectory = scanDir;
+            this.Number = 0;
+            this.BuildDestination();
         }
 
         /// <summary>
@@ -1649,6 +1683,9 @@ namespace Meticumedia.Classes
                     // TODO: don't use default path if already in movies folder!
                     this.DestinationPath = this.Movie.BuildFilePath(this.SourcePath);
                     return;
+                case FileCategory.AutoMove:
+                    this.DestinationPath = this.AutoMoveSetup.DestinationPath + Path.GetFileName(this.SourcePath);
+                    break;
                 default:
                     throw new Exception("Unknown file category!");
             }

@@ -62,11 +62,13 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="folders">Set of organization folders to get files from</param>
         /// <returns>List of files contained in folders</returns>
-        public List<OrgPath> GetFolderFiles(List<OrgFolder> folders)
+        public List<OrgPath> GetFolderFiles(List<OrgFolder> folders, out List<OrgItem> autoMoves)
         {
+            autoMoves = new List<OrgItem>();
+            
             List<OrgPath> files = new List<OrgPath>();
             foreach (OrgFolder folder in folders)
-                GetFolderFiles(folder, folder.FolderPath, files);
+                GetFolderFiles(folder, folder.FolderPath, files, autoMoves);
 
             // Similarity checks
             for(int i=1;i<files.Count;i++)
@@ -88,7 +90,7 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="folder">Organization folder to get files from</param>
         /// <param name="files">List of file being built</param>
-        private void GetFolderFiles(OrgFolder baseFolder, string folderPath, List<OrgPath> files)
+        private void GetFolderFiles(OrgFolder baseFolder, string folderPath, List<OrgPath> files, List<OrgItem> autoMoves)
         {
             // Get each file from the folder (try/catch here so that if user specifies as directory that needs special permission it doesn't crash)
             try
@@ -96,14 +98,42 @@ namespace Meticumedia.Classes
                 // Get all files from current path, convert to OrgPath and add to list
                 string[] fileList = Directory.GetFiles(folderPath);
                 foreach (string file in fileList)
-                    files.Add(new OrgPath(file, baseFolder.CopyFrom, baseFolder.AllowDeleting, baseFolder));
+                {
+                    bool autoMoving = false;
+                    foreach (AutoMoveFileSetup autoSetup in Settings.AutoMoveSetups)
+                    {
+                        OrgItem item;
+                        if(autoSetup.BuildFileMoveItem(file, baseFolder, out item))
+                        {
+                            autoMoves.Add(item);
+                            autoMoving = true;
+                            break;
+                        }
+                    }
+                    if (!autoMoving)
+                        files.Add(new OrgPath(file, baseFolder.CopyFrom, baseFolder.AllowDeleting, baseFolder));
+                }
 
                 // Recursively seach sub-folders if recursive folder
                 if (baseFolder.Recursive)
                 {
                     string[] subDirs = Directory.GetDirectories(folderPath);
                     foreach (string subDir in subDirs)
-                        GetFolderFiles(baseFolder, subDir, files);
+                    {
+                        bool autoMoving = false;
+                        foreach (AutoMoveFileSetup autoSetup in Settings.AutoMoveSetups)
+                        {
+                            OrgItem item;
+                            if (autoSetup.BuildFolderMoveItem(subDir, baseFolder, out item))
+                            {
+                                autoMoves.Add(item);
+                                autoMoving = true;
+                                break;
+                            }
+                        }
+                        if (!autoMoving)
+                            GetFolderFiles(baseFolder, subDir, files, autoMoves);
+                    }
                 }
             }
             catch { }
@@ -156,7 +186,8 @@ namespace Meticumedia.Classes
                 temporaryShows = new List<TvShow>();
 
                 // Create items
-                paths = GetFolderFiles(folders);
+                List<OrgItem> autoMoves;
+                paths = GetFolderFiles(folders, out autoMoves);
                 this.Items.Clear();
                 foreach(OrgPath path in paths)
                     this.Items.Add(new OrgItem(OrgAction.TBD, path.Path, FileCategory.Unknown, path.OrgFolder));
