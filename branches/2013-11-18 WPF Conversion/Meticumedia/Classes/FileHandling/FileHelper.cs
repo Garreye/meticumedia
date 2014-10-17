@@ -29,10 +29,7 @@ namespace Meticumedia.Classes
         /// <param name="matchTo">String to match TV categorization to</param>
         /// <returns>The file category</returns>
         public static FileCategory CategorizeFile(OrgPath file, string matchTo)
-        {
-            // Get file extension
-            string extenstion = Path.GetExtension(file.Path).ToLower();
-            
+        {            
             // Check if ignored
             if (file.OrgFolder != null && file.OrgFolder.IsIgnored(file.Path))
                 return FileCategory.Ignored;            
@@ -40,10 +37,7 @@ namespace Meticumedia.Classes
             // Check against each type
             foreach (string ext in Settings.VideoFileTypes)
             {
-                Regex extRe = new Regex(@"\." + ext + "$");
-                Match extMatch = extRe.Match(extenstion);
-
-                if (extMatch.Success)
+                if (FileTypeMatch(ext, file.Path))
                 {
                     // Check if sample!
                     if (matchTo.ToLower().Contains("sample"))
@@ -57,21 +51,30 @@ namespace Meticumedia.Classes
             }
             foreach (string ext in Settings.DeleteFileTypes)
             {
-                Regex extRe = new Regex(@"\." + ext + "$");
-                Match extMatch = extRe.Match(extenstion);
-                if (extMatch.Success)
+                if (FileTypeMatch(ext, file.Path))
                     return FileCategory.Trash;
             }
 
             foreach (string ext in Settings.IgnoreFileTypes)
             {
-                Regex extRe = new Regex(@"\." + ext + "$");
-                Match extMatch = extRe.Match(extenstion);
-                if (extMatch.Success)
+                if (FileTypeMatch(ext, file.Path))
                     return FileCategory.Ignored;
             }
 
             return FileCategory.Unknown;
+        }
+
+        /// <summary>
+        /// Check if a file path match an file extension pattern
+        /// </summary>
+        /// <param name="ext">File extension pattern</param>
+        /// <param name="path">File path to check</param>
+        /// <returns>Whether path matches extenstion type</returns>
+        public static bool FileTypeMatch(string ext, string path)
+        {
+            Regex extRe = new Regex(@"\." + ext.ToLower() + "$");
+            Match extMatch = extRe.Match(Path.GetExtension(path).ToLower());
+            return extMatch.Success;
         }
 
         /// <summary>

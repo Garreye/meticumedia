@@ -120,7 +120,8 @@ namespace MeticumediaTesting
         private void UpdateScanDirPaths()
         {
             this.ScanDirPaths.Clear();
-            List<OrgPath> paths = scan.GetFolderFiles(Settings.ScanDirectories.ToList());
+            List<OrgItem> autoMoves;
+            List<OrgPath> paths = scan.GetFolderFiles(Settings.ScanDirectories.ToList(), out autoMoves);
             foreach (OrgPath path in paths)
                 this.ScanDirPaths.Add(path);
 

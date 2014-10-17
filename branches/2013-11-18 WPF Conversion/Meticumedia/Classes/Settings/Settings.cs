@@ -87,6 +87,11 @@ namespace Meticumedia.Classes
         public static ObservableCollection<string> IgnoreFileTypes = new ObservableCollection<string>();
 
         /// <summary>
+        /// Automatic file type move setups
+        /// </summary>
+        public static ObservableCollection<AutoMoveFileSetup> AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>();
+
+        /// <summary>
         /// Persistent setting for options in UI.
         /// </summary>
         public static GuiSettings GuiControl = new GuiSettings();

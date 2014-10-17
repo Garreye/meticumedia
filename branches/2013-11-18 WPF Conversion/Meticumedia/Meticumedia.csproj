@@ -83,6 +83,7 @@
     </ApplicationDefinition>
     <Compile Include="Classes\Organization\OrgItemCollection.cs" />
     <Compile Include="Classes\Scanning\DebugNotificationArgs.cs" />
+    <Compile Include="Classes\Settings\AutoMoveFileSetup.cs" />
     <Compile Include="Classes\Settings\GeneralSettings.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
     <Compile Include="Classes\Tv\TvGroupingType.cs" />
