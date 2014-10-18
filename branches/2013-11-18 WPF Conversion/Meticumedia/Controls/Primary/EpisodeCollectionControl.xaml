@@ -9,6 +9,7 @@
              d:DesignHeight="300" d:DesignWidth="500">
     <UserControl.Resources>
         <wpfr:EnumInverseVisibilityConverter x:Key="enumInvVisConv" />
+        <BooleanToVisibilityConverter x:Key="boolToVisConv" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -35,7 +36,7 @@
         </Grid>
 
 
-        <ListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" VirtualizingPanel.IsVirtualizing="True" >
+        <wpfr:BindableMultiSelectListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" BindableSelectedItems="{Binding SelectedEpisodes, Mode=OneWayToSource}" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" >
             <ListBox.Resources>
                 <RelativeSource x:Key="parent" AncestorType="{x:Type cntrls:EpisodeCollectionControl}" />
             </ListBox.Resources>
@@ -43,21 +44,21 @@
                 <DataTemplate>
                     <VirtualizingStackPanel Orientation="Vertical">
                         <VirtualizingStackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Show.DisplayName}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text="Season " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Season}" Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text="Episode " Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Number}" Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
-                            <TextBlock Text=": " Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Name}" Margin="0,1"  FontWeight="Bold" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding AirDateString}" Margin="0,1"  FontWeight="Bold" VerticalAlignment="Center" />
-                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Status}" Margin="0,1"  FontWeight="Bold" VerticalAlignment="Center" Foreground="{Binding StatusColor}"/>
+                            <TextBlock Text="{Binding Show.DisplayName}" Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplayShowName, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="Season " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Season}" Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="Episode " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Number}" Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=": " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Name}" Margin="0,1"  FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding AirDateString}" Margin="0,1"  FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text=" " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Status}" Margin="0,1"  FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" Foreground="{Binding StatusColor}"/>
                         </VirtualizingStackPanel>
-                        <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" Visibility="{Binding Path=DataContext.DisplayOverview, RelativeSource={StaticResource parent}}" >-->
+                        <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" Visibility="{Binding Path=DataContext.DisplayOverview, RelativeSource={StaticResource parent}, Converter={StaticResource boolToVisConv}}" >-->
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Style.Triggers>
@@ -89,6 +90,21 @@
                     </GroupStyle.ContainerStyle>
                 </GroupStyle>
             </ListBox.GroupStyle>
-        </ListBox>
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Play" Command="{Binding PlayCommand}" Visibility="{Binding SinglePlayableItemSelectionVisibility}" ToolTip="Opens episode file." />
+                    <MenuItem Header="Copy Episode Info to Clipboard" Command="{Binding CopyEpisodeInfoToClipboardCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Copies show name and season/episode value to clipboard. (Paste this into the search box of your download site.)"/>
+                    <MenuItem Header="Edit" Command="{Binding EditCommand}" Visibility="{Binding SingleItemSelectionVisibility}"  />
+                    <MenuItem Header="Locate and Move" Command="{Binding LocateAndMoveEpisodeCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Locate episode file and move it into the show folder." />
+                    <MenuItem Header="Locate and Copy" Command="{Binding LocateAndCopyEpisodeCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Locate episode file and copy it into the show folder."/>
+
+                    <MenuItem Header="Ignore Episode(s)" Command="{Binding IgnoreEpisodeCommand}" Visibility="{Binding IgnorableSelectionVisibility}" />
+                    <MenuItem Header="Unignore Episode(s)" Command="{Binding UnignoreEpisodeCommand}" Visibility="{Binding UnignorableSelectionVisibility}" />
+                    <MenuItem Header="Delete File(s) for Episode(s)" Command="{Binding DeleteEpisodeFilesCommand}" Visibility="{Binding DeletableSelectionVisibility}" ToolTip="Delete files related to selected episodes."/>
+                    <MenuItem Header="New Episode" Command="{Binding AddEpisodeCommand}" ToolTip="Add a new episode to the show."/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+        </wpfr:BindableMultiSelectListBox>
     </Grid>
 </UserControl>
+

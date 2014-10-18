@@ -96,11 +96,17 @@
       <DependentUpon>ContentControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Primary\ContentControlViewModel.cs" />
+    <Compile Include="Controls\Primary\OrgItemQueueableViewModel.cs" />
     <Compile Include="Controls\Primary\EpisodeCollectionControl.xaml.cs">
       <DependentUpon>EpisodeCollectionControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Primary\EpisodeCollectionControlViewModel.cs" />
+    <Compile Include="Controls\Primary\LogControl.xaml.cs">
+      <DependentUpon>LogControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\LogControlViewModel.cs" />
     <Compile Include="Controls\Primary\MovieCollectionControl.cs" />
+    <Compile Include="Controls\Primary\OrgItemDisplayViewModel.cs" />
     <Compile Include="Controls\Primary\QueueControl.xaml.cs">
       <DependentUpon>QueueControl.xaml</DependentUpon>
     </Compile>
@@ -185,6 +191,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Primary\EpisodeCollectionControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\LogControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

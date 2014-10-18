@@ -38,7 +38,7 @@
                 <cntrls:QueueControl />
             </TabItem>
             <TabItem Header="Log" Name="tiLog">
-                <Grid />
+                <cntrls:LogControl />
             </TabItem>
         </TabControl>
     </Grid>

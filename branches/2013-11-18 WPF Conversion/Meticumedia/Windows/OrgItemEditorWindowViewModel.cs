@@ -86,9 +86,15 @@ namespace Meticumedia.Windows
         /// </summary>
         public ContentEditorControlViewModel MovieViewModel
         {
-            get;
-            set;
-
+            get
+            {
+                return movieViewModel;
+            }
+            set
+            {
+                movieViewModel = value;
+                OnPropertyChanged(this, "MovieViewModel");
+            }
         }
         private ContentEditorControlViewModel movieViewModel;
 

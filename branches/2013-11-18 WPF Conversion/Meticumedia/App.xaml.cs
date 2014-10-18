@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Windows;
+using Meticumedia.Classes;
 
 namespace Meticumedia
 {
@@ -12,5 +13,9 @@ namespace Meticumedia
     /// </summary>
     public partial class App : Application
     {
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            Settings.Save(false);
+        }
     }
 }

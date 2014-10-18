@@ -297,20 +297,6 @@ namespace Meticumedia.Controls
 
         public IList SelectedQueueItems { get; set; }
 
-        public bool AutoClearCompleted
-        {
-            get
-            {
-                return autoClearComplete;
-            }
-            set
-            {
-                autoClearComplete = value;
-                OnPropertyChanged(this, "AutoClearCompleted");
-            }
-        }
-        private bool autoClearComplete = true;
-
         public enum PauseButtonStates { Pause, Resume };
 
         public PauseButtonStates PauseButtonState
@@ -353,9 +339,7 @@ namespace Meticumedia.Controls
             OrgItem.QueuePaused = false;
 
             // Register to queuing event
-            ScanControlViewModel.ItemsToQueue += HandleItemsToQueue;
-            ContentCollectionControlViewModel.ItemsToQueue += HandleItemsToQueue;
-            //LogControl.ItemsToQueue += new EventHandler<ItemsToQueueArgs>(HandleItemsToQueue);
+            OrgItemQueueableViewModel.ItemsToQueue += HandleItemsToQueue;
 
         }       
 
@@ -403,7 +387,6 @@ namespace Meticumedia.Controls
         /// </summary>
         public void UpdateFromSettings(List<OrgItem> items)
         {
-            this.AutoClearCompleted = Settings.GuiControl.AutoClearCompleted;
             //chkAutoClear.CheckedChanged += chkAutoClear_CheckedChanged;
         }
 
@@ -765,7 +748,7 @@ namespace Meticumedia.Controls
 
         private bool RemoveQueueItemIfNeeded(OrgItem item)
         {
-            bool doRemove = item.QueueStatus == OrgQueueStatus.Completed && this.AutoClearCompleted;
+            bool doRemove = item.QueueStatus == OrgQueueStatus.Completed && Settings.GuiControl.AutoClearCompleted;
             if (doRemove)
             {
                 RemoveQueueItem(item);

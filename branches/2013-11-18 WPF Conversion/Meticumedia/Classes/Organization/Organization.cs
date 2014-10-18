@@ -11,6 +11,7 @@ using System.Xml;
 using System.ComponentModel;
 using System.Threading;
 using Meticumedia.Classes;
+using System.Collections.ObjectModel;
 
 namespace Meticumedia.Classes
 {
@@ -34,7 +35,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Contains log of organization actions.
         /// </summary>
-        public static List<OrgItem> ActionLog = new List<OrgItem>();
+        public static ObservableCollection<OrgItem> ActionLog = new ObservableCollection<OrgItem>();
 
         /// <summary>
         /// Lock for accessing ActionLog
@@ -280,7 +281,11 @@ namespace Meticumedia.Classes
                         OnActionLogLoadProgressChange(100);
 
                         lock (ActionLogLock)
-                            ActionLog = loadActionLog;
+                        {
+                            ActionLog.Clear();
+                            foreach (OrgItem item in loadActionLog)
+                                ActionLog.Add(item);
+                        }
                     }
             }
             catch { }

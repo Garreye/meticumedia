@@ -1223,6 +1223,28 @@ namespace Meticumedia.Classes
             return true;
         }
 
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+            //    int hash = 13;
+            //    hash = (hash * 7) + ContentType.GetHashCode();
+            //    hash = (hash * 7) + UseDatabaseName.GetHashCode();
+            //    hash = (hash * 7) + DatabaseSelection.GetHashCode();
+            //    hash = (hash * 7) + UseDatabaseYear.GetHashCode();
+            //    hash = (hash * 7) + UserYear.GetHashCode();
+            //    hash = (hash * 7) + DatabaseYear.GetHashCode();
+            //    hash = (hash * 7) + Overview.GetHashCode();
+            //    hash = (hash * 7) + RootFolder.GetHashCode();
+            //    hash = (hash * 7) + Path.GetHashCode();
+            //    hash = (hash * 7) + Id.GetHashCode();
+            //    hash = (hash * 7) + DoRenaming.GetHashCode();
+            //    hash = (hash * 7) + LastUpdated.GetHashCode();
+            //    hash = (hash * 7) + UseDatabaseGenres.GetHashCode();
+            //    hash = (hash * 7) + DatabaseGenres.GetHashCode();
+            //    hash = (hash * 7) + UserGenres.GetHashCode();
+            //    return hash;
+        }
+
         #endregion
     }
 }

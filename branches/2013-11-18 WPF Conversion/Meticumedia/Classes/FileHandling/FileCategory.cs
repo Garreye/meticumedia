@@ -42,6 +42,9 @@ namespace Meticumedia.Classes
         [Description("Auto Move")]
         AutoMove = 128,
 
+        [Description("Auto Move Folder")]
+        AutoMoveFolder = AutoMove | Folder,
+
         [Description("Mutiple categories")]
         All = 255 
     };

@@ -6,7 +6,7 @@
         xmlns:wpfr="clr-namespace:Meticumedia.WPF"
         xmlns:mm="clr-namespace:Meticumedia.Classes"
         xmlns:cntrls="clr-namespace:Meticumedia.Controls"
-        Title="OrgItemEditorWindow" Height="550" Width="500">
+        Title="Organization Item Editor" Height="550" Width="500">
     <Window.Resources>
         <wpfr:EnumBooleanConverter x:Key="enumBooleanConverter" />
         <wpfr:EnumVisibilityConverter x:Key="enumVisConverter" />

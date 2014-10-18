@@ -191,6 +191,8 @@ namespace Meticumedia.Classes
                 this.Items.Clear();
                 foreach(OrgPath path in paths)
                     this.Items.Add(new OrgItem(OrgAction.TBD, path.Path, FileCategory.Unknown, path.OrgFolder));
+                foreach (OrgItem autoMove in autoMoves)
+                    this.Items.Add(autoMove);
             }
             OnItemsInitialized(ScanProcess.Directory, this.Items);
 

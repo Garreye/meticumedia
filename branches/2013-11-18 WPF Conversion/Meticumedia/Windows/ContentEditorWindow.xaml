@@ -6,7 +6,7 @@
         xmlns:wpfr="clr-namespace:Meticumedia.WPF"
         xmlns:mm="clr-namespace:Meticumedia.Classes"
         xmlns:cntrls="clr-namespace:Meticumedia.Controls"
-        Title="ContentEditorWindow" Height="650" Width="400">
+        Title="Content Editor" Height="650" Width="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

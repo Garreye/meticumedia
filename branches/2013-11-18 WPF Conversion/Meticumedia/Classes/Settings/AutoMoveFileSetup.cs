@@ -64,6 +64,13 @@ namespace Meticumedia.Classes
         public AutoMoveFileSetup()
         {
             this.FileTypes = new ObservableCollection<string>();
+            this.MoveFolder = true;
+        }
+
+        public AutoMoveFileSetup(string ext, string destination) : this()
+        {
+            this.FileTypes.Add(ext);
+            this.DestinationPath = destination;
         }
 
         #endregion
@@ -76,7 +83,14 @@ namespace Meticumedia.Classes
             foreach (string fileType in this.FileTypes)
                 if (FileHelper.FileTypeMatch(fileType, filePath))
                 {
-                    item = new OrgItem(filePath, this, scanDir);
+                    item = new OrgItem(filePath, this, scanDir, false);
+
+                    if (File.Exists(item.DestinationPath))
+                    {
+                        item.Action = OrgAction.AlreadyExists;
+                        item.Enable = false;
+                    }
+
                     return true;
                 }
             return false;
@@ -86,13 +100,18 @@ namespace Meticumedia.Classes
         {
             item = null;
 
+            if (!this.MoveFolder)
+                return false;
+
             string[] fileList = Directory.GetFiles(folderPath);
             foreach (string file in fileList)
             {
                 OrgItem fileItem;
                 if (this.BuildFileMoveItem(file, scanDir, out fileItem))
                 {
-                    item = new OrgItem(folderPath, this, scanDir);
+                    item = new OrgItem(folderPath, this, scanDir, true);
+
+
                     return true;
                 }
             }

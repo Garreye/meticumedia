@@ -396,6 +396,18 @@ namespace Meticumedia.Classes
             return true;
         }
 
+        public override int GetHashCode()
+        {
+            //int hash = 13;
+            //hash = (hash * 7) + base.GetHashCode();
+            //hash = (hash * 7) + IncludeInSchedule.GetHashCode();
+            //hash = (hash * 7) + DoMissingCheck.GetHashCode();
+            //hash = (hash * 7) + DvdEpisodeOrder.GetHashCode();
+            //hash = (hash * 7) + AlternativeNameMatches.GetHashCode();
+            //return hash;
+            return base.GetHashCode();
+        }
+
         #endregion
 
         #region XML
