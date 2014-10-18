@@ -26,6 +26,14 @@ namespace Meticumedia.Controls
             InitializeComponent();
             viewModel = new QueueControlViewModel();
             this.DataContext = viewModel;
+
+            OrgItemQueueableViewModel.ItemsToQueue += OrgItemQueueableViewModel_ItemsToQueue;
+        }
+
+        void OrgItemQueueableViewModel_ItemsToQueue(object sender, Classes.ItemsToQueueArgs e)
+        {
+            TabItem tab = LogicalTreeHelper.GetParent(this) as TabItem;
+            tab.Focus();
         }
     }
 }

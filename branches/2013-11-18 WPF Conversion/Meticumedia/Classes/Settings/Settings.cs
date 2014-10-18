@@ -89,7 +89,10 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Automatic file type move setups
         /// </summary>
-        public static ObservableCollection<AutoMoveFileSetup> AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>();
+        public static ObservableCollection<AutoMoveFileSetup> AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>()
+        {
+            //new AutoMoveFileSetup("mp3", @"C:\Garretts_Data\Test\Music")
+        };
 
         /// <summary>
         /// Persistent setting for options in UI.
@@ -321,7 +324,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Save settings to XML.
         /// </summary>
-        public static void Save()
+        public static void Save(bool triggerModifiedEvent = true)
         {
             string path = Path.Combine(Organization.GetBasePath(true), ROOT_XML + ".xml");
 
@@ -381,7 +384,8 @@ namespace Meticumedia.Classes
 
                 xw.WriteEndElement();
             }
-            OnSettingsModified(false);
+            if (triggerModifiedEvent)
+                OnSettingsModified(false);
         }
 
         /// <summary>

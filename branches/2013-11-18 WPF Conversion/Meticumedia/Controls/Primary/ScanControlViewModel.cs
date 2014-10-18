@@ -15,27 +15,8 @@ using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
 {
-    public class ScanControlViewModel : ProgressViewModel
+    public class ScanControlViewModel : OrgItemDisplayViewModel
     {
-        #region Events
-
-        /// <summary>
-        /// Event indicating there are items to be sent to the queue
-        /// </summary>
-        public static event EventHandler<ItemsToQueueArgs> ItemsToQueue;
-
-        /// <summary>
-        /// Triggers ItemsToQueue event
-        /// </summary>
-        /// <param name="items"></param>
-        protected static void OnItemsToQueue(List<OrgItem> items)
-        {
-            if (ItemsToQueue != null)
-                ItemsToQueue(null, new ItemsToQueueArgs(items));
-        }
-
-        #endregion
-
         #region Variables
 
         /// <summary>
@@ -101,11 +82,7 @@ namespace Meticumedia.Controls
         /// <summary>
         /// Flag that scan has been cancelled
         /// </summary>
-        private bool scanCancelled = false;
-
-        private DataGrid grid;
-
-        private DateTime lastRefresh = DateTime.Now;
+        private bool scanCancelled = false;        
 
         #endregion
 
@@ -171,7 +148,7 @@ namespace Meticumedia.Controls
 
         private bool CanDoEditSelectedItemCommand()
         {
-            return this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1;
+            return this.SelectedOrgItems != null && this.SelectedOrgItems.Count == 1;
         }
 
         private ICommand setSelectedItemToDeleteCommand;
@@ -298,6 +275,8 @@ namespace Meticumedia.Controls
 
         #region Properties
 
+        #region General
+
         public bool Fast
         {
             get
@@ -348,12 +327,6 @@ namespace Meticumedia.Controls
         }
         private object selectedRunSelection = new object();
 
-        public ObservableCollection<OrgItem> ScanResults
-        {
-            get;
-            private set;
-        }
-
         public bool MoveCopyEnables
         {
             get
@@ -384,256 +357,7 @@ namespace Meticumedia.Controls
         }
         private bool deleteEnables = true;
 
-        public IList SelectedResultsItems { get; set; }
-
-        public ICollectionView ScanResultsCollection { get; set; }
-
-        #region Action Filter
-
-        public bool NoneActionFilter
-        {
-            get
-            {
-                return (int)(actionFilter & OrgAction.None) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.ActionFilter = actionFilter | OrgAction.None;
-                else
-                    this.ActionFilter = actionFilter & ~OrgAction.None;
-            }
-        }
-
-        public bool MoveCopyActionFilter
-        {
-            get
-            {
-                return (int)(actionFilter & (OrgAction.Move | OrgAction.Copy)) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.ActionFilter = actionFilter | (OrgAction.Move | OrgAction.Copy);
-                else
-                    this.ActionFilter = actionFilter & ~(OrgAction.Move | OrgAction.Copy);
-            }
-        }
-
-        public bool RenameActionFilter
-        {
-            get
-            {
-                return (int)(actionFilter & OrgAction.Rename) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.ActionFilter = actionFilter | OrgAction.Rename;
-                else
-                    this.ActionFilter = actionFilter & ~OrgAction.Rename;
-            }
-        }
-
-        public bool DeleteActionFilter
-        {
-            get
-            {
-                return (int)(actionFilter & OrgAction.Delete) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.ActionFilter = actionFilter | OrgAction.Delete;
-                else
-                    this.ActionFilter = actionFilter & ~OrgAction.Delete;
-            }
-        }
-
-        public bool QueuedActionFilter
-        {
-            get
-            {
-                return (int)(actionFilter & OrgAction.Queued) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.ActionFilter = actionFilter | OrgAction.Queued;
-                else
-                    this.ActionFilter = actionFilter & ~OrgAction.Queued;
-            }
-        }
-
-        public bool TbdActionFilter
-        {
-            get
-            {
-                return (int)(actionFilter & OrgAction.TBD) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.ActionFilter = actionFilter | OrgAction.TBD | OrgAction.Processing;
-                else
-                    this.ActionFilter = actionFilter & ~(OrgAction.TBD | OrgAction.Processing);
-            }
-        }
-
-        public OrgAction ActionFilter
-        {
-            get
-            {
-                return actionFilter;
-            }
-            set
-            {
-                actionFilter = value;
-                OnPropertyChanged(this, "ActionFilter");
-                OnPropertyChanged(this, "NoneActionFilter");
-                OnPropertyChanged(this, "MoveCopyActionFilter");
-                OnPropertyChanged(this, "RenameActionFilter");
-                OnPropertyChanged(this, "DeleteActionFilter");
-                OnPropertyChanged(this, "QueuedActionFilter");
-                OnPropertyChanged(this, "TbdActionFilter");
-                RefreshResultsSafe(false);
-            }
-        }
-        private OrgAction actionFilter = OrgAction.All;
-
-
         #endregion
-
-        #region Category Filter
-
-        public bool TvVideoCategoryFilter
-        {
-            get
-            {
-                return (int)(categoryFilter & FileCategory.TvVideo) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.CategoryFilter = categoryFilter | FileCategory.TvVideo;
-                else
-                    this.CategoryFilter = categoryFilter & ~FileCategory.TvVideo;
-            }
-        }
-
-        public bool MovieVideoCategoryFilter
-        {
-            get
-            {
-                return (int)(categoryFilter & FileCategory.MovieVideo) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.CategoryFilter = categoryFilter | FileCategory.MovieVideo;
-                else
-                    this.CategoryFilter = categoryFilter & ~FileCategory.MovieVideo;
-            }
-        }
-
-        public bool CustomCategoryFilter
-        {
-            get
-            {
-                return (int)(categoryFilter & FileCategory.Custom) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.CategoryFilter = categoryFilter | FileCategory.Custom;
-                else
-                    this.CategoryFilter = categoryFilter & ~FileCategory.Custom;
-            }
-        }
-
-        public bool TrashCategoryFilter
-        {
-            get
-            {
-                return (int)(categoryFilter & FileCategory.Trash) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.CategoryFilter = categoryFilter | FileCategory.Trash;
-                else
-                    this.CategoryFilter = categoryFilter & ~FileCategory.Trash;
-            }
-        }
-
-        public bool UnknownCategoryFilter
-        {
-            get
-            {
-                return (int)(categoryFilter & FileCategory.Unknown) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.CategoryFilter = categoryFilter | FileCategory.Unknown;
-                else
-                    this.CategoryFilter = categoryFilter & ~FileCategory.Unknown;
-            }
-        }
-
-        public bool FolderCategoryFilter
-        {
-            get
-            {
-                return (int)(categoryFilter & FileCategory.Folder) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.CategoryFilter = categoryFilter | FileCategory.Folder;
-                else
-                    this.CategoryFilter = categoryFilter & ~FileCategory.Folder;
-            }
-        }
-
-        public bool IgnoredCategoryFilter
-        {
-            get
-            {
-                return (int)(categoryFilter & FileCategory.Ignored) > 0;
-            }
-            set
-            {
-                if (value)
-                    this.CategoryFilter = categoryFilter | FileCategory.Ignored;
-                else
-                    this.CategoryFilter = categoryFilter & ~FileCategory.Ignored;
-            }
-        }
-
-        public FileCategory CategoryFilter
-        {
-            get
-            {
-                return categoryFilter;
-            }
-            set
-            {
-                categoryFilter = value;
-                OnPropertyChanged(this, "CategoryFilter");
-                OnPropertyChanged(this, "TvVideoCategoryFilter");
-                OnPropertyChanged(this, "MovieVideoCategoryFilter");
-                OnPropertyChanged(this, "CustomCategoryFilter");
-                OnPropertyChanged(this, "TrashCategoryFilter");
-                OnPropertyChanged(this, "UnknownCategoryFilter");
-                OnPropertyChanged(this, "FolderCategoryFilter");
-                OnPropertyChanged(this, "IgnoredCategoryFilter");
-                RefreshResultsSafe(false);
-            }
-        }
-        private FileCategory categoryFilter = FileCategory.All ^ FileCategory.Ignored;
-
-        #endregion        
 
         #region Context Menu Related
 
@@ -643,7 +367,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                return this.lastRunScan == ScanType.Directory && this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+                return this.lastRunScan == ScanType.Directory && this.SelectedOrgItems != null && this.SelectedOrgItems.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -651,7 +375,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                return this.SelectedResultsItems != null && this.SelectedResultsItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                return this.SelectedOrgItems != null && this.SelectedOrgItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -659,7 +383,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                return this.lastRunScan == ScanType.Directory && this.SelectedResultsItems != null && this.SelectedResultsItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                return this.lastRunScan == ScanType.Directory && this.SelectedOrgItems != null && this.SelectedOrgItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -667,7 +391,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                return this.lastRunScan == ScanType.TvMissing && this.SelectedResultsItems != null && this.SelectedResultsItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                return this.lastRunScan == ScanType.TvMissing && this.SelectedOrgItems != null && this.SelectedOrgItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -675,7 +399,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                return this.lastRunScan == ScanType.TvMissing && this.SelectedResultsItems != null && this.SelectedResultsItems.Count == 1 && (this.SelectedResultsItems[0] as OrgItem).Status == OrgStatus.Missing ? Visibility.Visible : Visibility.Collapsed;
+                return this.lastRunScan == ScanType.TvMissing && this.SelectedOrgItems != null && this.SelectedOrgItems.Count == 1 && (this.SelectedOrgItems[0] as OrgItem).Status == OrgStatus.Missing ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
@@ -683,10 +407,10 @@ namespace Meticumedia.Controls
         {
             get
             {                
-                if (this.SelectedResultsItems == null || this.SelectedResultsItems.Count == 0)
+                if (this.SelectedOrgItems == null || this.SelectedOrgItems.Count == 0)
                     return Visibility.Collapsed;
 
-                foreach (object obj in this.SelectedResultsItems)
+                foreach (object obj in this.SelectedOrgItems)
                 {
                     OrgItem item = obj as OrgItem;
                     if (item.Category != FileCategory.MovieVideo || (item.Action != OrgAction.Move && item.Action != OrgAction.Copy))
@@ -701,10 +425,10 @@ namespace Meticumedia.Controls
         {
             get
             {
-                if (this.SelectedResultsItems == null || this.SelectedResultsItems.Count == 0)
+                if (this.SelectedOrgItems == null || this.SelectedOrgItems.Count == 0)
                     return Visibility.Collapsed;
 
-                foreach (object obj in this.SelectedResultsItems)
+                foreach (object obj in this.SelectedOrgItems)
                 {
                     OrgItem item = obj as OrgItem;
                     if (item.Action != OrgAction.AlreadyExists)
@@ -721,24 +445,12 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public ScanControlViewModel(DataGrid grid)
+        public ScanControlViewModel(DataGrid grid) : base(grid)
         {
-            this.grid = grid;
             grid.SelectionChanged += grid_SelectionChanged;
 
             this.RunSelections = new ObservableCollection<object>();
             UpdateRunSelections();
-
-            this.ScanResults = new ObservableCollection<OrgItem>();
-            CollectionViewSource scanResultsViewSource = new CollectionViewSource() { Source = ScanResults };
-            this.ScanResultsCollection = scanResultsViewSource.View;
-            this.ScanResultsCollection.Filter = new Predicate<object>(FilterItem);
-            
-            // Set properties to trigger live updating
-            ICollectionViewLiveShaping liveCollection = this.ScanResultsCollection as ICollectionViewLiveShaping;
-            liveCollection.LiveFilteringProperties.Add("Category");
-            liveCollection.LiveFilteringProperties.Add("Action");
-            liveCollection.IsLiveFiltering = true;
 
             // Setup scan worker
             scanWorker = new BackgroundWorker();
@@ -802,62 +514,23 @@ namespace Meticumedia.Controls
         {
             if (App.Current.Dispatcher.CheckAccess())
             {
-                this.ScanResults.Clear();
+                this.OrgItems.Clear();
                 foreach (OrgItem item in e.Items)
-                    this.ScanResults.Add(item);
+                    this.OrgItems.Add(item);
             }
             else
                 App.Current.Dispatcher.Invoke((Action)delegate
                 {
-                    this.ScanResults.Clear();
+                    this.OrgItems.Clear();
                     foreach (OrgItem item in e.Items)
-                        this.ScanResults.Add(item);
+                        this.OrgItems.Add(item);
                 });
         }
 
 
-        private bool FilterItem(object obj)
-        {
-            OrgItem item = obj as OrgItem;
-            
-            // Action filter
-            if ((int)(item.Action & this.ActionFilter) == 0)
-                return false;
-
-            // Category filter
-            if ((int)(item.Category & this.CategoryFilter) == 0)
-                return false;
-
-             return true;
-        }
-
         #endregion
 
         #region Scanning
-
-        private void RefreshResultsSafe(bool limitRate)
-        {
-            if (limitRate && (DateTime.Now - lastRefresh).TotalSeconds < 5)
-                return;
-
-            lastRefresh = DateTime.Now;
-
-            try
-            {
-                if (App.Current.Dispatcher.CheckAccess())
-                {
-                    grid.CancelEdit();
-                    this.ScanResultsCollection.Refresh();
-
-                }
-                else
-                    App.Current.Dispatcher.Invoke((Action)delegate
-                    {
-                        this.ScanResultsCollection.Refresh();
-                    });
-            }
-            catch { }
-        }
 
         /// <summary>
         /// Work event for scanning worker.
@@ -893,9 +566,9 @@ namespace Meticumedia.Controls
 
             App.Current.Dispatcher.Invoke((Action)delegate
             {
-                this.ScanResults.Clear();
+                this.OrgItems.Clear();
                 foreach (OrgItem item in scanResults)
-                    this.ScanResults.Add(item);
+                    this.OrgItems.Add(item);
             });
 
         }
@@ -1104,31 +777,31 @@ namespace Meticumedia.Controls
         private void QueueItems()
         {
             List<OrgItem> toQueue = new List<OrgItem>();
-            for (int i = 0; i < this.ScanResults.Count; i++)
+            for (int i = 0; i < this.OrgItems.Count; i++)
             {
-                if(!FilterItem(this.ScanResults[i]) || !this.ScanResults[i].Enable)
+                if(!FilterItem(this.OrgItems[i]) || !this.OrgItems[i].Enable)
                     continue;
-                toQueue.Add(new OrgItem(this.ScanResults[i]));
+                toQueue.Add(new OrgItem(this.OrgItems[i]));
 
-                this.ScanResults[i].Action = OrgAction.Queued;
-                this.ScanResults[i].Enable = false;
+                this.OrgItems[i].Action = OrgAction.Queued;
+                this.OrgItems[i].Enable = false;
             }
             OnItemsToQueue(toQueue);
         }
 
         private void SetEnables(OrgAction action, bool enable)
         {
-            for (int i = 0; i < this.ScanResults.Count; i++)
-                if ((this.ScanResults[i].Action & action) > 0)
+            for (int i = 0; i < this.OrgItems.Count; i++)
+                if ((this.OrgItems[i].Action & action) > 0)
                 {
-                    this.ScanResults[i].Enable = enable;
+                    this.OrgItems[i].Enable = enable;
                 }
             RefreshResultsSafe(false);
         }
 
         private void EditSelectedItem()
         {
-            OrgItem selItem = (this.SelectedResultsItems[0] as OrgItem);
+            OrgItem selItem = (this.SelectedOrgItems[0] as OrgItem);
             OrgItemEditorWindow editor = new OrgItemEditorWindow(selItem);
             editor.ShowDialog();
 
@@ -1143,7 +816,7 @@ namespace Meticumedia.Controls
             // Automatically apply the movie to unknown items with similar names
             if (lastRunScan == ScanType.Directory && selItem.Category == FileCategory.MovieVideo && (selItem.Action == OrgAction.Move || selItem.Action == OrgAction.Copy))
             {
-                foreach (OrgItem item in this.ScanResults)
+                foreach (OrgItem item in this.OrgItems)
                 {
                     if(FileHelper.PathsVerySimilar(item.SourcePath, selItem.SourcePath))
                     {
@@ -1158,7 +831,7 @@ namespace Meticumedia.Controls
 
         private void SetSelectedItemToDelete()
         {
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 item.Replace = true;
                 item.Action = OrgAction.Delete;
@@ -1170,7 +843,7 @@ namespace Meticumedia.Controls
 
         private void IgnoreItems()
         {
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 item.Enable = false;
                 item.Action = OrgAction.None;
@@ -1185,7 +858,7 @@ namespace Meticumedia.Controls
 
         private void UnignoreItems()
         {
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 foreach (OrgFolder scanDir in Settings.ScanDirectories)
                     if (scanDir.FolderPath == item.ScanDirectory.FolderPath)
@@ -1197,7 +870,7 @@ namespace Meticumedia.Controls
 
         private void LocateEpisode()
         {
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 List<OrgItem> items;
                 if (item.TvEpisode.UserLocate(false, false, out items))
@@ -1210,7 +883,7 @@ namespace Meticumedia.Controls
 
         private void IgnoreEpisode()
         {
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 item.Enable = false;
                 item.TvEpisode.Ignored = true;
@@ -1223,7 +896,7 @@ namespace Meticumedia.Controls
         {
             // Get show seasons to ignore
             List<Tuple<TvShow, int>> setShowSeasons = new List<Tuple<TvShow, int>>();
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 TvShow show = item.TvEpisode.Show;
                 int season = item.TvEpisode.Season;
@@ -1238,13 +911,13 @@ namespace Meticumedia.Controls
                 }
             }
 
-            for(int i=this.ScanResults.Count-1;i>=0;i--)
+            for(int i=this.OrgItems.Count-1;i>=0;i--)
             {
-                TvShow show = this.ScanResults[i].TvEpisode.Show;
-                int season = this.ScanResults[i].TvEpisode.Season;
+                TvShow show = this.OrgItems[i].TvEpisode.Show;
+                int season = this.OrgItems[i].TvEpisode.Season;
 
                 if(setShowSeasons.Contains(new Tuple<TvShow,int>(show, season)))
-                    this.ScanResults.RemoveAt(i);
+                    this.OrgItems.RemoveAt(i);
             }
             Organization.Shows.Save();
         }
@@ -1252,7 +925,7 @@ namespace Meticumedia.Controls
         private void IgnoreShow()
         {
             List<TvShow> shows = new List<TvShow>();
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 TvShow show = item.TvEpisode.Show;
                 if (!shows.Contains(show))
@@ -1265,7 +938,7 @@ namespace Meticumedia.Controls
 
         private void SetReplaceExisting()
         {
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 foreach (OrgFolder dir in Settings.ScanDirectories)
                     if (dir.FolderPath == item.ScanDirectory.FolderPath)
@@ -1281,12 +954,12 @@ namespace Meticumedia.Controls
 
         private void SetMovieFolder(string path)
         {
-            foreach (OrgItem item in this.SelectedResultsItems)
+            foreach (OrgItem item in this.SelectedOrgItems)
             {
                 item.Movie.RootFolder = path;
                 item.BuildDestination();
 
-                foreach (OrgItem otherItem in this.ScanResults)
+                foreach (OrgItem otherItem in this.OrgItems)
                     if (otherItem.Movie.DatabaseName == item.Movie.DatabaseName)
                     {
                         otherItem.Movie.RootFolder = path;

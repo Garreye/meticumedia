@@ -4,20 +4,55 @@
 // --------------------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Xml;
 
 namespace Meticumedia.Classes
 {
-    public class GuiSettings
+    public class GuiSettings : INotifyPropertyChanged
     {
+        #region Events
+
+        /// <summary>
+        /// INotifyPropertyChanged interface event
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+
+        /// <summary>
+        /// Triggers PropertyChanged event.
+        /// </summary>
+        /// <param name="name">Name of the property that has changed value</param>
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        #endregion
+        
         #region Properties
 
         /// <summary>
         /// Whether auto clear completed check box is checked
         /// </summary>
-        public bool AutoClearCompleted { get; set; }
+        public bool AutoClearCompleted
+        {
+            get
+            {
+                return autoClearCompleted;
+            }
+            set
+            {
+                autoClearCompleted = value;
+                OnPropertyChanged("AutoClearCompleted");
+            }
+        }
+        private bool autoClearCompleted;
 
         #endregion
 

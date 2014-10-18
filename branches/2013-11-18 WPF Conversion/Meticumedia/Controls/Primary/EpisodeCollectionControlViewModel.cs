@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,12 +9,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using Meticumedia.Classes;
 using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
 {
-    public class EpisodeCollectionControlViewModel : ViewModel
+    public class EpisodeCollectionControlViewModel : OrgItemQueueableViewModel
     {
         #region Properties
 
@@ -76,12 +78,19 @@ namespace Meticumedia.Controls
             set
             {
                 displayOverview = value;
-                if (this.EpisodesCollectionView != null)
-                    this.EpisodesCollectionView.Refresh();
                 OnPropertyChanged(this, "DisplayOverview");
+                OnPropertyChanged(this, "ShowInfoFontSize");
             }
         }
         private bool displayOverview = false;
+
+        public int ShowInfoFontSize
+        {
+            get
+            {
+                return this.DisplayOverview ? 12 : 18;
+            }
+        }
 
         public ObservableCollection<TvGroupingType> Groupings { get; set; }
 
@@ -102,6 +111,219 @@ namespace Meticumedia.Controls
         }
         private TvGroupingType selectedGrouping = TvGroupingType.None;
 
+        public IList SelectedEpisodes
+        {
+            get
+            {
+                return selectedEpisodes;
+            }
+            set
+            {
+                selectedEpisodes = value;
+                OnPropertyChanged(this, "SelectedEpisodes");
+                OnPropertyChanged(this, "SinglePlayableItemSelectionVisibility");
+                OnPropertyChanged(this, "SingleItemSelectionVisibility");
+                OnPropertyChanged(this, "IgnorableSelectionVisibility");
+                OnPropertyChanged(this, "UnignorableSelectionVisibility");
+                OnPropertyChanged(this, "DeletableSelectionVisibility");                
+            }
+        }
+        private IList selectedEpisodes;
+
+        public Visibility SingleItemSelectionVisibility
+        {
+            get
+            {
+                return this.SelectedEpisodes != null && this.SelectedEpisodes.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility SinglePlayableItemSelectionVisibility
+        {
+            get
+            {
+                return this.SelectedEpisodes != null && this.SelectedEpisodes.Count == 1 && ((TvEpisode)this.SelectedEpisodes[0]).Missing != MissingStatus.Missing ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        public Visibility IgnorableSelectionVisibility
+        {
+            get
+            {
+                if (this.SelectedEpisodes == null)
+                    return Visibility.Collapsed;
+                foreach (TvEpisode ep in this.SelectedEpisodes)
+                    if (!ep.Ignored)
+                        return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        public Visibility UnignorableSelectionVisibility
+        {
+            get
+            {
+                if (this.SelectedEpisodes == null)
+                    return Visibility.Collapsed;
+                foreach (TvEpisode ep in this.SelectedEpisodes)
+                    if (ep.Ignored)
+                        return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        public Visibility DeletableSelectionVisibility
+        {
+            get
+            {
+                if (this.SelectedEpisodes == null)
+                    return Visibility.Collapsed;
+                foreach (TvEpisode ep in this.SelectedEpisodes)
+                    if (ep.Missing != MissingStatus.Missing)
+                        return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        #endregion
+
+        #region Commands
+
+        private ICommand playCommand;
+        public ICommand PlayCommand
+        {
+            get
+            {
+                if (playCommand == null)
+                {
+                    playCommand = new RelayCommand(
+                        param => this.PlayEpisode()
+                    );
+                }
+                return playCommand;
+            }
+        }
+
+        private ICommand copyEpisodeInfoToClipboardCommand;
+        public ICommand CopyEpisodeInfoToClipboardCommand
+        {
+            get
+            {
+                if (copyEpisodeInfoToClipboardCommand == null)
+                {
+                    copyEpisodeInfoToClipboardCommand = new RelayCommand(
+                        param => this.CopyEpisodeInfoToClipboard()
+                    );
+                }
+                return copyEpisodeInfoToClipboardCommand;
+            }
+        }
+
+        private ICommand editCommand;
+        public ICommand EditCommand
+        {
+            get
+            {
+                if (editCommand == null)
+                {
+                    editCommand = new RelayCommand(
+                        param => this.EditEpisode()
+                    );
+                }
+                return editCommand;
+            }
+        }
+
+        private ICommand locateAndCopyEpisodeCommand;
+        public ICommand LocateAndCopyEpisodeCommand
+        {
+            get
+            {
+                if (locateAndCopyEpisodeCommand == null)
+                {
+                    locateAndCopyEpisodeCommand = new RelayCommand(
+                        param => this.LocateEpisode(true)
+                    );
+                }
+                return locateAndCopyEpisodeCommand;
+            }
+        }
+
+        private ICommand locateAndMoveEpisodeCommand;
+        public ICommand LocateAndMoveEpisodeCommand
+        {
+            get
+            {
+                if (locateAndMoveEpisodeCommand == null)
+                {
+                    locateAndMoveEpisodeCommand = new RelayCommand(
+                        param => this.LocateEpisode(false)
+                    );
+                }
+                return locateAndMoveEpisodeCommand;
+            }
+        }
+
+        private ICommand ignoreEpisodeCommand;
+        public ICommand IgnoreEpisodeCommand
+        {
+            get
+            {
+                if (ignoreEpisodeCommand == null)
+                {
+                    ignoreEpisodeCommand = new RelayCommand(
+                        param => this.SetEpisodeIgnore(true)
+                    );
+                }
+                return ignoreEpisodeCommand;
+            }
+        }
+
+        private ICommand unignoreEpisodeCommand;
+        public ICommand UnignoreEpisodeCommand
+        {
+            get
+            {
+                if (unignoreEpisodeCommand == null)
+                {
+                    unignoreEpisodeCommand = new RelayCommand(
+                        param => this.SetEpisodeIgnore(false)
+                    );
+                }
+                return unignoreEpisodeCommand;
+            }
+        }
+
+        private ICommand deleteEpisodeFilesCommand;
+        public ICommand DeleteEpisodeFilesCommand
+        {
+            get
+            {
+                if (deleteEpisodeFilesCommand == null)
+                {
+                    deleteEpisodeFilesCommand = new RelayCommand(
+                        param => this.DeleteEpisodeFiles()
+                    );
+                }
+                return deleteEpisodeFilesCommand;
+            }
+        }
+
+        private ICommand addEpisodeCommand;
+        public ICommand AddEpisodeCommand
+        {
+            get
+            {
+                if (addEpisodeCommand == null)
+                {
+                    addEpisodeCommand = new RelayCommand(
+                        param => this.AddNewEpisode()
+                    );
+                }
+                return addEpisodeCommand;
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -116,30 +338,24 @@ namespace Meticumedia.Controls
             if (this.EpisodeFilters.Count > 0)
                 this.SelectedEpisodeFilter = this.EpisodeFilters[0];
 
-            CollectionViewSource episodesViewSource = new CollectionViewSource() { Source = episodes };
-            this.EpisodesCollectionView = episodesViewSource.View;
+            this.EpisodesCollectionView = CollectionViewSource.GetDefaultView(episodes);
             this.EpisodesCollectionView.Filter = new Predicate<object>(FilterEpisode);
 
             // TODO: this make loading the control slow as fuck
-            // Set properties to trigger live updating
-            ICollectionViewLiveShaping liveCollection = this.EpisodesCollectionView as ICollectionViewLiveShaping;
-            liveCollection.LiveFilteringProperties.Add("Genres");
-            liveCollection.LiveFilteringProperties.Add("Date");
-            liveCollection.LiveFilteringProperties.Add("RootFolder");
-            liveCollection.LiveFilteringProperties.Add("Name");
-            liveCollection.LiveFilteringProperties.Add("Status");
-            liveCollection.IsLiveFiltering = true;
-            liveCollection.LiveGroupingProperties.Add("Missing");
-            liveCollection.LiveGroupingProperties.Add("Season");
-            liveCollection.LiveGroupingProperties.Add("Show");
-            liveCollection.IsLiveGrouping = true;
+            EnableLiveFiltering();
 
             this.Groupings = new ObservableCollection<TvGroupingType>();
             this.Groupings.Add(TvGroupingType.None);
             if (show == null)
+            {
                 this.Groupings.Add(TvGroupingType.Show);
+                this.DisplayOverview = false;
+            }
             else
+            {
                 this.Groupings.Add(TvGroupingType.Season);
+                this.DisplayOverview = true;
+            }
             this.Groupings.Add(TvGroupingType.Status);
 
             if (show == null)
@@ -152,6 +368,20 @@ namespace Meticumedia.Controls
                 this.SelectedGrouping = TvGroupingType.Season;
                 this.DisplayShowName = Visibility.Collapsed;
             }
+        }
+
+        private void EnableLiveFiltering()
+        {
+            // Set properties to trigger live updating
+            ICollectionViewLiveShaping liveCollection = this.EpisodesCollectionView as ICollectionViewLiveShaping;
+            liveCollection.LiveFilteringProperties.Add("Season");
+            liveCollection.LiveFilteringProperties.Add("Name");
+            liveCollection.LiveFilteringProperties.Add("Status");
+            liveCollection.IsLiveFiltering = true;
+            liveCollection.LiveGroupingProperties.Add("Missing");
+            liveCollection.LiveGroupingProperties.Add("Season");
+            liveCollection.LiveGroupingProperties.Add("Show");
+            liveCollection.IsLiveGrouping = true;
         }
 
         #endregion
@@ -201,6 +431,52 @@ namespace Meticumedia.Controls
                 default:
                     break;
             }
+        }
+
+        private void PlayEpisode()
+        {
+            foreach (TvEpisode ep in this.SelectedEpisodes)
+                ep.PlayEpisodeFile();
+        }
+
+        private void CopyEpisodeInfoToClipboard()
+        {
+            Clipboard.SetText(((TvEpisode)this.SelectedEpisodes[0]).BuildEpString());
+        }
+
+        private void EditEpisode()
+        {
+            MessageBox.Show("Implement editor!");
+        }
+
+        private void LocateEpisode(bool copy)
+        {
+            List<OrgItem> items;
+            if (((TvEpisode)this.SelectedEpisodes[0]).UserLocate(true, copy, out items))
+                OnItemsToQueue(items);
+        }
+
+        private void SetEpisodeIgnore(bool ignore)
+        {
+            foreach (TvEpisode ep in this.SelectedEpisodes)
+                ep.Ignored = ignore;
+        }
+
+        private void DeleteEpisodeFiles()
+        {
+            if (MessageBox.Show("Are you sure you want to delete the files for selected episode? This operation cannot be undone", "Sure?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                List<OrgItem> items = new List<OrgItem>();
+                foreach (TvEpisode ep in this.SelectedEpisodes)
+                    if (System.IO.File.Exists(ep.File.FilePath))
+                        items.Add(new OrgItem(OrgAction.Delete, ep.File.FilePath, FileCategory.Trash, null));
+                OnItemsToQueue(items);
+            }
+        }
+
+        private void AddNewEpisode()
+        {
+            MessageBox.Show("Adding requires someone to implement editor!");
         }
 
         #endregion

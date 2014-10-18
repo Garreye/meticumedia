@@ -89,29 +89,30 @@
 
                     <GroupBox Grid.Column="0" Header="Action Filter">
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <CheckBox Content="None" x:Name="chkNoneFilter" Margin="3" IsChecked="{Binding NoneActionFilter}" />
-                            <CheckBox Content="Move/Copy" x:Name="chkMoveCopyFilter" Margin="3" IsChecked="{Binding MoveCopyActionFilter}" />
-                            <CheckBox Content="Rename" x:Name="chkRenameFilter" Margin="3" IsChecked="{Binding RenameActionFilter}" />
-                            <CheckBox Content="Delete" x:Name="chkDelFilter" Margin="3" IsChecked="{Binding DeleteActionFilter}" />
-                            <CheckBox Content="Queued" x:Name="chkQueueFilter" Margin="3" IsChecked="{Binding QueuedActionFilter}" />
-                            <CheckBox Content="TBD" x:Name="chkTbdFilter" Margin="3" IsChecked="{Binding TbdActionFilter}" />
+                            <CheckBox Content="None" Margin="3" IsChecked="{Binding NoneActionFilter}" />
+                            <CheckBox Content="Move/Copy" Margin="3" IsChecked="{Binding MoveCopyActionFilter}" />
+                            <CheckBox Content="Rename" Margin="3" IsChecked="{Binding RenameActionFilter}" />
+                            <CheckBox Content="Delete" Margin="3" IsChecked="{Binding DeleteActionFilter}" />
+                            <CheckBox Content="Queued" Margin="3" IsChecked="{Binding QueuedActionFilter}" />
+                            <CheckBox Content="TBD" Margin="3" IsChecked="{Binding TbdActionFilter}" />
                         </StackPanel>
                     </GroupBox>
 
                     <GroupBox Grid.Column="1" Header="Category Filter">
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <CheckBox Content="TV Video" x:Name="chkTvCatFilter" Margin="3" IsChecked="{Binding TvVideoCategoryFilter}" />
-                            <CheckBox Content="Movie Video" x:Name="chkNonTvCatFilter" Margin="3" IsChecked="{Binding MovieVideoCategoryFilter}"/>
-                            <CheckBox Content="Custom" x:Name="chkCustomCatFilter" Margin="3" IsChecked="{Binding CustomCategoryFilter}"/>
-                            <CheckBox Content="Trash" x:Name="chkTrashCatFilter" Margin="3" IsChecked="{Binding TrashCategoryFilter}"/>
-                            <CheckBox Content="Unknown" x:Name="chkUnknownCatFilter" Margin="3" IsChecked="{Binding UnknownCategoryFilter}"/>
-                            <CheckBox Content="Folder" x:Name="chkFolderCatFilter" Margin="3" IsChecked="{Binding FolderCategoryFilter}"/>
-                            <CheckBox Content="Ignored" x:Name="chkIgnoreCatFilter" Margin="3" IsChecked="{Binding IgnoredCategoryFilter}" />
+                            <CheckBox Content="TV" Margin="3" IsChecked="{Binding TvVideoCategoryFilter}" />
+                            <CheckBox Content="Movie" Margin="3" IsChecked="{Binding MovieVideoCategoryFilter}"/>
+                            <CheckBox Content="Custom" Margin="3" IsChecked="{Binding CustomCategoryFilter}"/>
+                            <CheckBox Content="Trash" Margin="3" IsChecked="{Binding TrashCategoryFilter}"/>
+                            <CheckBox Content="Unknown" Margin="3" IsChecked="{Binding UnknownCategoryFilter}"/>
+                            <CheckBox Content="Folder" Margin="3" IsChecked="{Binding FolderCategoryFilter}"/>
+                            <CheckBox Content="Ignored" Margin="3" IsChecked="{Binding IgnoredCategoryFilter}" />
+                            <CheckBox Content="Auto Move" Margin="3" IsChecked="{Binding AutoMoveCategoryFilter}" />
                         </StackPanel>
                     </GroupBox>
                 </Grid>
 
-                <wpfr:BindableMultiSelectDataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding ScanResultsCollection}" SelectedItems="{Binding Path=SelectedResultsItems, Mode=OneWayToSource}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" wpfr:Commands.DataGridDoubleClickCommand="{Binding EditSelectedItemCommand}" >
+                <wpfr:BindableMultiSelectDataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding OrgItemsCollection}" SelectedItems="{Binding Path=SelectedOrgItems, Mode=OneWayToSource}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" wpfr:Commands.DataGridDoubleClickCommand="{Binding EditSelectedItemCommand}" >
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
                             <Setter Property="Foreground" Value="{Binding ActionColor}"/>

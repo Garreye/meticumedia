@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -7,31 +8,15 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using Meticumedia.Classes;
+using Meticumedia.Windows;
+using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
 {
-    public class ContentCollectionControlViewModel : ProgressViewModel
+    public class ContentCollectionControlViewModel : OrgItemQueueableViewModel
     {
-        #region Events
-
-        /// <summary>
-        /// Event indicating there are items to be sent to the queue
-        /// </summary>
-        public static event EventHandler<ItemsToQueueArgs> ItemsToQueue;
-
-        /// <summary>
-        /// Triggers ItemsToQueue event
-        /// </summary>
-        /// <param name="items"></param>
-        protected static void OnItemsToQueue(List<OrgItem> items)
-        {
-            if (ItemsToQueue != null)
-                ItemsToQueue(null, new ItemsToQueueArgs(items));
-        }
-
-        #endregion
-
         #region Variables
 
         /// <summary>
@@ -44,6 +29,8 @@ namespace Meticumedia.Controls
         #endregion
 
         #region Properties
+
+        public ContentType ContentType { get; set; }
 
         /// <summary>
         /// Item source for root folder combo box
@@ -202,11 +189,105 @@ namespace Meticumedia.Controls
         }
         private Content selectedContent = null;
 
+        Dictionary<Content, ContentControlViewModel> contentViewModels = new Dictionary<Content, ContentControlViewModel>();
+
+        public IList SelectedContents
+        {
+            get
+            {
+                return selectedContents;
+            }
+            set
+            {
+                selectedContents = value;
+                OnPropertyChanged(this, "SelectedContentViewModel");
+                OnPropertyChanged(this, "SingleItemSelectionVisibility");
+            }
+        }
+        private IList selectedContents;
+
         public ContentControlViewModel SelectedContentViewModel
         {
             get
             {
-                return new ContentControlViewModel(this.SelectedContent);
+                if (this.SelectedContents == null || this.SelectedContents.Count != 1 || this.SelectedContent == null)
+                    selectedContentViewModel = null;
+                else if (selectedContentViewModel == null || !selectedContentViewModel.Content.Equals(this.SelectedContent))
+                    selectedContentViewModel = contentViewModels[this.SelectedContent];
+                return selectedContentViewModel;
+            }
+        }
+        private ContentControlViewModel selectedContentViewModel;
+
+        public Visibility SingleItemSelectionVisibility
+        {
+            get
+            {
+                return this.SelectedContents != null && this.SelectedContents.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
+        #endregion
+
+        #region Commands
+
+        private ICommand editCommand;
+        public ICommand EditCommand
+        {
+            get
+            {
+                if (editCommand == null)
+                {
+                    editCommand = new RelayCommand(
+                        param => this.EditContent()
+                    );
+                }
+                return editCommand;
+            }
+        }
+
+        private ICommand markAsWatchedCommand;
+        public ICommand MarkAsWatchedCommand
+        {
+            get
+            {
+                if (markAsWatchedCommand == null)
+                {
+                    markAsWatchedCommand = new RelayCommand(
+                        param => this.SetWatched(true)
+                    );
+                }
+                return markAsWatchedCommand;
+            }
+        }
+
+        private ICommand unmarkAsWatchedCommand;
+        public ICommand UnmarkAsWatchedCommand
+        {
+            get
+            {
+                if (unmarkAsWatchedCommand == null)
+                {
+                    unmarkAsWatchedCommand = new RelayCommand(
+                        param => this.SetWatched(false)
+                    );
+                }
+                return unmarkAsWatchedCommand;
+            }
+        }
+
+        private ICommand setFolderToRootCommand;
+        public ICommand SetFolderToRootCommand
+        {
+            get
+            {
+                if (setFolderToRootCommand == null)
+                {
+                    setFolderToRootCommand = new RelayCommand(
+                        param => this.SetAsRootFolder()
+                    );
+                }
+                return setFolderToRootCommand;
             }
         }
 
@@ -220,6 +301,7 @@ namespace Meticumedia.Controls
             this.FolderFilters = new ObservableCollection<string>();
             this.GenreFilters = new ObservableCollection<string>();
 
+            this.ContentType = contentType;
             ContentCollection contentCollection = contentType == ContentType.TvShow ? Organization.Shows : Organization.Movies;
             lock (contentCollection.ContentLock)
             {
@@ -325,14 +407,23 @@ namespace Meticumedia.Controls
         private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+            {
                 Contents.Clear();
+                contentViewModels.Clear();
+            }
 
             if (e.OldItems != null)
                 foreach (Content remItem in e.OldItems)
+                {
                     Contents.Remove(remItem);
+                    contentViewModels.Remove(remItem);
+                }
             if (e.NewItems != null)
                 foreach (Content addItem in e.NewItems)
+                {
                     Contents.Add(addItem);
+                    contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
+                }
 
         }
 
@@ -356,6 +447,54 @@ namespace Meticumedia.Controls
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Open content editor window
+        /// </summary>
+        private void EditContent()
+        {
+            ContentEditorWindow cew = new ContentEditorWindow(this.SelectedContent);
+            cew.ShowDialog();
+
+            if (cew.Results != null)
+            {
+                if (this.SelectedContent is Movie)
+                {
+                    (this.SelectedContent as Movie).Clone(cew.Results as Movie, false);
+                    Organization.Movies.Save();
+                }
+                else
+                {
+                    (this.SelectedContent as TvShow).Clone(cew.Results as TvShow, false);
+                    Organization.Shows.Save();
+                }
+            }
+
+        }
+
+        private void SetWatched(bool watched)
+        {
+            this.SelectedContent.Watched = watched;
+        }
+
+        private void SetAsRootFolder()
+        {
+            // Mark each item
+            foreach (Content cnt in this.SelectedContents)
+            {
+                // Format path
+                string fullPath = System.IO.Path.GetFullPath(cnt.Path).TrimEnd(System.IO.Path.DirectorySeparatorChar);
+                string path = System.IO.Path.GetFileName(fullPath);
+
+                // Get content folder for content
+                ContentRootFolder folder;
+                if (Settings.GetContentFolder(cnt.RootFolder, out folder))
+                    // Convert movie folder as sub-folder
+                    folder.ChildFolders.Add(new ContentRootFolder(this.ContentType, path, fullPath));
+            }
+            Settings.Save();
+            Organization.UpdateRootFolders(this.ContentType);
+        }
 
         private void RefreshContentsSafe(bool limitRate)
         {

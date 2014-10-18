@@ -81,14 +81,23 @@
                     <TextBox x:Name="txtNameFilter" Text="{Binding NameFilter}"  Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" Margin="3"/>
                 </Grid>
 
-                <ListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" ItemTemplate="{StaticResource showItemTemplate}" ItemsSource="{Binding ContentsCollectionView}" SelectedItem="{Binding SelectedContent}" />
+                <wpfr:BindableMultiSelectListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" ItemTemplate="{StaticResource showItemTemplate}" ItemsSource="{Binding ContentsCollectionView}" SelectedItem="{Binding SelectedContent}" BindableSelectedItems="{Binding SelectedContents, Mode=OneWayToSource}"  SelectionMode="Extended" >
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Edit" Command="{Binding EditCommand}" Visibility="{Binding SingleItemSelectionVisibility}" />
+                            <MenuItem Header="Mark as Watched" Command="{Binding MarkAsWatchedCommand}"/>
+                            <MenuItem Header="Unmark as Watched" Command="{Binding UnmarkAsWatchedCommand}"/>
+                            <MenuItem Header="Set as Child Root Folder" Command="{Binding SetFolderToRootCommand}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                </wpfr:BindableMultiSelectListBox>
             </Grid>
 
             <GridSplitter Background="DarkGray"  ResizeDirection="Columns" Grid.Column="1"
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                   ResizeBehavior="PreviousAndNext" Padding="10" />
 
-            <GroupBox Grid.Column="2" Header="Selected Item" x:Name="gbSelItem" Visibility="{Binding SelectedContent, Converter={StaticResource nullToVisConverter}}">
+            <GroupBox Grid.Column="2" Header="Selected Item" x:Name="gbSelItem" Visibility="{Binding SelectedContentViewModel, Converter={StaticResource nullToVisConverter}}">
                 <cntrls:ContentControl DataContext="{Binding SelectedContentViewModel}"  />
             </GroupBox>
 

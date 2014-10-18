@@ -622,7 +622,7 @@ namespace Meticumedia.Classes
         /// <param name="action">action to be performed</param>
         /// <param name="file">source path</param>
         /// <param name="category">file category</param>
-        public OrgItem(string file, AutoMoveFileSetup autoMoveSetup, OrgFolder scanDir)
+        public OrgItem(string file, AutoMoveFileSetup autoMoveSetup, OrgFolder scanDir, bool folder)
             : this()
         {
             this.Progress = 0;
@@ -630,6 +630,8 @@ namespace Meticumedia.Classes
             this.AutoMoveSetup = autoMoveSetup;
             this.SourcePath = file;
             this.Category = FileCategory.AutoMove;
+            if (folder)
+                this.Category |= FileCategory.Folder;
             this.Enable = true;
             this.ScanDirectory = scanDir;
             this.Number = 0;
@@ -1233,7 +1235,7 @@ namespace Meticumedia.Classes
                     case OrgAction.Copy:
                     case OrgAction.Move:
                     case OrgAction.Rename:
-                        if (this.Category == FileCategory.Folder)
+                        if ((this.Category & FileCategory.Folder) > 0)
                         {
                             this.ActionComplete = CopyMoveFolder();
                             if (this.ActionComplete)
@@ -1247,7 +1249,7 @@ namespace Meticumedia.Classes
 
                         break;
                     case OrgAction.Delete:
-                        if (this.Category == FileCategory.Folder)
+                        if ((this.Category & FileCategory.Folder) > 0)
                             DeleteDirectory(this.SourcePath);
                         else
                             File.Delete(this.SourcePath);
@@ -1277,11 +1279,15 @@ namespace Meticumedia.Classes
                 if (time < 25)
                     Thread.Sleep(25 - time);
 
-                // Check if sucessful
+                // Check if successful
                 if (this.ActionSucess)
                 {
+                    // Log action
+                    Organization.ActionLog.Add(new OrgItem(this));
+                    Organization.SaveLog();
+                    
                     // Cleanup folder (delete empty sub-folders)
-                    if (this.Category != FileCategory.Folder)
+                    if ((this.Category & FileCategory.Folder) == 0)
                         CleanupFolder();
 
                     // Add current file to ignore if copy action
@@ -1291,7 +1297,7 @@ namespace Meticumedia.Classes
                                 sd.AddIgnoreFile(this.SourcePath);
 
                     // Check if we need to update Shows/Movies
-                    if (this.Action == OrgAction.Copy || this.Action == OrgAction.Move)
+                    if ((this.Action == OrgAction.Copy || this.Action == OrgAction.Move) && (this.Category & FileCategory.Folder | FileCategory.AutoMove) == 0)
                     {
                         this.Movie.Path = this.Movie.BuildFolderPath();
                         if (this.Category == FileCategory.MovieVideo && Directory.Exists(this.Movie.Path))
@@ -1505,15 +1511,13 @@ namespace Meticumedia.Classes
             // Check for directory already exists condition
             if (!actionStarted && Directory.Exists(this.DestinationPath))
             {
-                throw new NotImplementedException();
-                // TODO: message box for this
-                //DialogResult results = MessageBox.Show("Destination folder '" + this.DestinationPath + "' already existst. Folder rename action will merge the two folder (source files will replace destination files), would you like to continue?", "Merge destination folder?", MessageBoxButtons.YesNo);
-                //if (results == DialogResult.No)
-                //{
-                //    this.ActionSucess = false;
-                //    this.QueueStatus = OrgQueueStatus.Cancelled;
-                //    return true;
-                //}
+                MessageBoxResult results = MessageBox.Show("Destination folder '" + this.DestinationPath + "' already existst. " + this.Category.Description() + " action from source " + this.SourcePath + " will merge the two folder (source files will replace destination files). Would you like to continue?", "Merge destination folder?", MessageBoxButton.YesNo);
+                if (results != MessageBoxResult.Yes)
+                {
+                    this.ActionSucess = false;
+                    this.QueueStatus = OrgQueueStatus.Cancelled;
+                    return true; 
+                }
             }
             
             // Rename or move on same drive
@@ -1655,6 +1659,10 @@ namespace Meticumedia.Classes
             }
         }
 
+        #endregion
+
+        #region Methods
+
         /// <summary>
         /// Build destination path based on form
         /// </summary>
@@ -1684,13 +1692,18 @@ namespace Meticumedia.Classes
                     this.DestinationPath = this.Movie.BuildFilePath(this.SourcePath);
                     return;
                 case FileCategory.AutoMove:
-                    this.DestinationPath = this.AutoMoveSetup.DestinationPath + Path.GetFileName(this.SourcePath);
+                case FileCategory.AutoMove | FileCategory.Folder:
+                    this.DestinationPath = Path.Combine(this.AutoMoveSetup.DestinationPath, Path.GetFileName(this.SourcePath));
                     break;
                 default:
                     throw new Exception("Unknown file category!");
             }
         }
 
+        /// <summary>
+        /// Gets string for item.
+        /// </summary>
+        /// <returns>Item source, action, and destination string</returns>
         public override string ToString()
         {
             string str = this.SourcePath + " (" + this.Category + ")" + " - Action: " + this.Action;
@@ -1702,7 +1715,7 @@ namespace Meticumedia.Classes
                 case OrgAction.None:
                     break;
                 case OrgAction.AlreadyExists:
-                    str +=  " (" + this.DestinationPath + ")";
+                    str += " (" + this.DestinationPath + ")";
                     break;
                 case OrgAction.Move:
                 case OrgAction.Copy:
@@ -1734,7 +1747,7 @@ namespace Meticumedia.Classes
                 case OrgAction.Copy:
                     return Colors.DarkGreen;
                 case OrgAction.Rename:
-                    return Colors.Green;
+                    return Colors.DarkBlue;
                 case OrgAction.Delete:
                     return Colors.Red;
                 case OrgAction.Queued:
