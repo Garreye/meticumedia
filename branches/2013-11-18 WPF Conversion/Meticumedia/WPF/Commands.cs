@@ -27,7 +27,7 @@ namespace Meticumedia.WPF
 
         public static void AttachOrRemoveDataGridDoubleClickEvent(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            DataGrid dataGrid = obj as DataGrid;
+            Control dataGrid = obj as Control;
             if (dataGrid != null)
             {
                 ICommand cmd = (ICommand)args.NewValue;

@@ -240,7 +240,7 @@ namespace Meticumedia.Classes
             if (Directory.Exists(this.Path))
                 UpdateMissingRecursive(this.Path);
 
-            // Search through scan directoru
+            // Search through scan directory
             foreach (OrgItem item in TvItemInScanDirHelper.Items)
             {
                 List<TvEpisode> eps = new List<TvEpisode>();
@@ -252,7 +252,7 @@ namespace Meticumedia.Classes
                     if (ep.Show.DatabaseName == this.DatabaseName)
                     {
                         TvEpisode matchEp;
-                        if (this.FindEpisode(ep.Season, ep.Number, false, out matchEp))
+                        if (this.FindEpisode(ep.Season, ep.DisplayNumber, false, out matchEp))
                             if (matchEp.Missing == MissingStatus.Missing)
                                 matchEp.Missing = MissingStatus.InScanDirectory;
                     }
@@ -321,7 +321,7 @@ namespace Meticumedia.Classes
         {
             episode = null;
             foreach (TvEpisode ep in this.Episodes)
-                if (ep.Season == seasonNumber && ((ep.Number == episodeNumber && !databaseNum) || (ep.DatabaseNumber == episodeNumber && databaseNum)))
+                if (ep.Season == seasonNumber && ((ep.DisplayNumber == episodeNumber && !databaseNum) || (ep.DatabaseNumber == episodeNumber && databaseNum)))
                 {
                     episode = ep;
                     return true;

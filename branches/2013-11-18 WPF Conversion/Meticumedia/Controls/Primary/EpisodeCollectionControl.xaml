@@ -36,7 +36,7 @@
         </Grid>
 
 
-        <wpfr:BindableMultiSelectListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" BindableSelectedItems="{Binding SelectedEpisodes, Mode=OneWayToSource}" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" >
+        <wpfr:BindableMultiSelectListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" BindableSelectedItems="{Binding SelectedEpisodes, Mode=OneWayToSource}" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" wpfr:Commands.DataGridDoubleClickCommand="{Binding DoubleClickCommand}" >
             <ListBox.Resources>
                 <RelativeSource x:Key="parent" AncestorType="{x:Type cntrls:EpisodeCollectionControl}" />
             </ListBox.Resources>
@@ -51,14 +51,14 @@
                             <TextBlock Text="{Binding Season}" Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
                             <TextBlock Text=" - " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" Visibility="{Binding Path=DataContext.DisplaySeasonNumber, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
                             <TextBlock Text="Episode " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Number}" Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding DisplayNumber}" Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
                             <TextBlock Text=": " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Name}" Margin="0,1"  FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding DisplayName}" Margin="0,1"  FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding AirDateString}" Margin="0,1"  FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
                             <TextBlock Text=" " Margin="0,1" FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding Status}" Margin="0,1"  FontWeight="Bold" FontSize="{Binding Path=DataContext.ShowInfoFontSize, RelativeSource={StaticResource parent}}" VerticalAlignment="Center" Foreground="{Binding StatusColor}"/>
                         </VirtualizingStackPanel>
-                        <TextBlock Grid.Row="1" Text="{Binding Overview}" Margin="1" Visibility="{Binding Path=DataContext.DisplayOverview, RelativeSource={StaticResource parent}, Converter={StaticResource boolToVisConv}}" >-->
+                        <TextBlock Grid.Row="1" Text="{Binding DisplayOverview}" Margin="1" Visibility="{Binding Path=DataContext.DisplayOverview, RelativeSource={StaticResource parent}, Converter={StaticResource boolToVisConv}}" >
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Style.Triggers>

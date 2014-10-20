@@ -379,10 +379,10 @@ namespace Meticumedia.Classes
         public string BuildEpisodeName(TvEpisode episode1, TvEpisode episode2)
         {
             string epName;
-            if (episode2 != null && !string.IsNullOrEmpty(episode2.Name) && episode2.DatabaseNumber > 0)
+            if (episode2 != null && !string.IsNullOrEmpty(episode2.DisplayName) && episode2.DatabaseNumber > 0)
             {
-                char[] ep1Chars = episode1.Name.ToCharArray();
-                char[] ep2Chars = episode2.Name.ToCharArray();
+                char[] ep1Chars = episode1.DisplayName.ToCharArray();
+                char[] ep2Chars = episode2.DisplayName.ToCharArray();
 
                 // Check if name have any similarities at start
                 int matchLen = 0;
@@ -417,10 +417,10 @@ namespace Meticumedia.Classes
                         epName += ")";
                 }
                 else
-                    epName = episode1.Name + " & " + episode2.Name;
+                    epName = episode1.DisplayName + " & " + episode2.DisplayName;
             }
             else
-                epName = episode1.Name;
+                epName = episode1.DisplayName;
 
             return epName.Trim();
         }

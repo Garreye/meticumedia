@@ -362,24 +362,24 @@ namespace Meticumedia.Classes
                                 case "FirstAired":
                                     DateTime airData;
                                     DateTime.TryParse(subNode.InnerText, out airData);
-                                    ep.AirDate = airData;
+                                    ep.DatabaseAirDate = airData;
                                     break;
                                 case "Overview":
-                                    ep.Overview = subNode.InnerText;
+                                    ep.DatabaseOverview = subNode.InnerText;
                                     break;
                             }
                         }
                         ep.InDatabase = true;
 
-                        if (ep.Number > -1 && season > -1)
+                        if (ep.DisplayNumber > -1 && season > -1)
                         {
                             // If episode already exists just update it, else add it
                             TvEpisode existingMatch;
                             if (show.FindEpisode(ep.Season, ep.DatabaseNumber, true, out existingMatch))
                             {
                                 existingMatch.DatabaseName = ep.DatabaseName;
-                                existingMatch.AirDate = ep.AirDate;
-                                existingMatch.Overview = ep.Overview;
+                                existingMatch.DatabaseAirDate = ep.DatabaseAirDate;
+                                existingMatch.DatabaseOverview = ep.DatabaseOverview;
                                 existingMatch.InDatabase = true;
                             }
                             else
