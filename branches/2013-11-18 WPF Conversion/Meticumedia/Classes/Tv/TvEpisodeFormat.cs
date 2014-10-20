@@ -206,19 +206,19 @@ namespace Meticumedia.Classes
                 else
                 {
                     if (this.ForceEpisodeDoubleDigits)
-                        epStr += this.EpisodeHeader + ep1.Number.ToString("00");
+                        epStr += this.EpisodeHeader + ep1.DisplayNumber.ToString("00");
                     else
-                        epStr += this.EpisodeHeader + ep1.Number.ToString();
+                        epStr += this.EpisodeHeader + ep1.DisplayNumber.ToString();
 
-                    if (ep2 != null && ep2.Number > 0)
+                    if (ep2 != null && ep2.DisplayNumber > 0)
                     {
                         if (this.HeaderPerEpisode)
                             epStr += this.EpisodeHeader;
 
                         if (this.ForceEpisodeDoubleDigits)
-                            epStr += ep2.Number.ToString("00");
+                            epStr += ep2.DisplayNumber.ToString("00");
                         else
-                            epStr += ep2.Number.ToString(); 
+                            epStr += ep2.DisplayNumber.ToString(); 
                     }
                 }
             }

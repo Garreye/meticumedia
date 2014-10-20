@@ -1034,7 +1034,7 @@ namespace Meticumedia.Classes
                 if (y == null)
                     sortResult = 1;
                 else
-                    sortResult = x.TvEpisode.Number.CompareTo(y.TvEpisode.Number);
+                    sortResult = x.TvEpisode.DisplayNumber.CompareTo(y.TvEpisode.DisplayNumber);
             }
 
             if (sortResult == 0)

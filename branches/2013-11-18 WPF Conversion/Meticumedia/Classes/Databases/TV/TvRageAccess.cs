@@ -214,13 +214,13 @@ namespace Meticumedia.Classes
                                                 case "airdate":
                                                     DateTime airDate;
                                                     DateTime.TryParse(epPropNode.InnerText, out airDate);
-                                                    ep.AirDate = airDate;
+                                                    ep.DatabaseAirDate = airDate;
                                                     break;
                                                 case "title":
                                                     ep.DatabaseName = epPropNode.InnerText;
                                                     break;
                                                 case "summary":
-                                                    ep.Overview = epPropNode.InnerText.Replace('\n', ' ');
+                                                    ep.DatabaseOverview = epPropNode.InnerText.Replace('\n', ' ');
                                                     break;
                                             }
                                         ep.InDatabase = true;
@@ -232,8 +232,8 @@ namespace Meticumedia.Classes
                                             if (!existingMatch.PreventDatabaseUpdates)
                                             {
                                                 existingMatch.DatabaseName = ep.DatabaseName;
-                                                existingMatch.AirDate = ep.AirDate;
-                                                existingMatch.Overview = ep.Overview;
+                                                existingMatch.DatabaseAirDate = ep.DatabaseAirDate;
+                                                existingMatch.DatabaseOverview = ep.DatabaseOverview;
                                                 existingMatch.InDatabase = true;
                                             }
                                         }

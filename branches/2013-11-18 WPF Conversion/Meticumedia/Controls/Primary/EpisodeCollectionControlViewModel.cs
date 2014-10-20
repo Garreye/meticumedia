@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using Meticumedia.Classes;
+using Meticumedia.Windows;
 using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
@@ -188,6 +189,21 @@ namespace Meticumedia.Controls
         #endregion
 
         #region Commands
+
+        public ICommand DoubleClickCommand
+        {
+            get
+            {
+                if (this.SelectedEpisodes == null || this.SelectedEpisodes.Count != 1)
+                    return null;
+
+                TvEpisode ep = this.SelectedEpisodes[0] as TvEpisode;
+                if (ep.Missing == MissingStatus.Missing)
+                    return CopyEpisodeInfoToClipboardCommand;
+                else
+                    return PlayCommand;
+            }
+        }
 
         private ICommand playCommand;
         public ICommand PlayCommand
@@ -446,7 +462,12 @@ namespace Meticumedia.Controls
 
         private void EditEpisode()
         {
-            MessageBox.Show("Implement editor!");
+            TvEpisode ep = this.SelectedEpisodes[0] as TvEpisode;
+
+            EpisodeEditorWindow editor = new EpisodeEditorWindow(ep);
+            editor.ShowDialog();
+
+
         }
 
         private void LocateEpisode(bool copy)

@@ -133,7 +133,7 @@ namespace Meticumedia.Classes
                 Shows.Save();
             if (Movies.LoadCompleted)
                 Movies.Save();
-            SaveLog();
+            //SaveLog();
         }
 
         /// <summary>

@@ -125,6 +125,10 @@
     <Compile Include="Windows\ContentEditorWindow.xaml.cs">
       <DependentUpon>ContentEditorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\EpisodeEditorWindow.xaml.cs">
+      <DependentUpon>EpisodeEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EpisodeEditorWindowViewModel.cs" />
     <Compile Include="Windows\OrgItemEditorWindow.xaml.cs">
       <DependentUpon>OrgItemEditorWindow.xaml</DependentUpon>
     </Compile>
@@ -413,6 +417,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Windows\EpisodeEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\OrgItemEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -463,9 +471,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="license.txt">
+    <Content Include="license.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

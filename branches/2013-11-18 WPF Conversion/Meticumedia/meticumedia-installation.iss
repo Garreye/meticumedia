@@ -13,6 +13,8 @@ OutputDir=Install
 [Files]
 Source: "Meticumedia.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "Ionic.Zip.dll"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "Ookii.Dialogs.Wpf.dll"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "Xceed.Wpf.Toolkit.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "wordsEn.txt"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "license.txt"; DestDir: "{app}"; Flags: ignoreversion;
 

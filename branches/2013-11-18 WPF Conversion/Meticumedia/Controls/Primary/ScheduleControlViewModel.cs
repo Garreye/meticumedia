@@ -197,7 +197,7 @@ namespace Meticumedia.Controls
                 {
                     foreach (TvEpisode episode in shows[i].Episodes)
                     {
-                        TimeSpan timeDiff = episode.AirDate.Subtract(DateTime.Now);
+                        TimeSpan timeDiff = episode.DisplayAirDate.Subtract(DateTime.Now);
                         if (!episode.Ignored && Math.Abs(timeDiff.Days) < days)
                         {
                             if (upcoming && timeDiff.Days >= 0)

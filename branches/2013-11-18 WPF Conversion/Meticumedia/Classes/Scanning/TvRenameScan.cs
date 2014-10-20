@@ -71,11 +71,8 @@ namespace Meticumedia.Classes
                             {
                                 if (ep.File.Part == 1)
                                 {
-                                    // TODO: Need episode collection for addressing episodes like seasons, so I can do the following:
-                                    // TvEpisode ep2 = show.Seasons[ep.Season].Episodes[ep.Number + 1];
-                                    // instead of the below:
                                     foreach (TvEpisode epEnumerated in show.Episodes)
-                                        if (epEnumerated.Season == ep.Season && epEnumerated.Number == ep.Number + 1)
+                                        if (epEnumerated.Season == ep.Season && epEnumerated.DisplayNumber == ep.DisplayNumber + 1)
                                         {
                                             ep2 = epEnumerated;
                                             break;
