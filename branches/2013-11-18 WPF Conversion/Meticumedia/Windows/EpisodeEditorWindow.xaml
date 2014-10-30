@@ -4,7 +4,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:wpfr="clr-namespace:Meticumedia.WPF"
         xmlns:mm="clr-namespace:Meticumedia.Classes"    
-        Title="Episode Editor" Height="200" Width="350">
+        Title="Episode Editor" Height="300" Width="350">
     <Window.Resources>
         <wpfr:BoolInverterConverter x:Key="boolInvConv" />
     </Window.Resources>
@@ -32,21 +32,21 @@
             
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" VerticalAlignment="Center" Margin="3" />
             <TextBox Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Episode.DisplayName}" IsEnabled="{Binding Episode.UseDatabaseName, Converter={StaticResource boolInvConv}}" />
-            <CheckBox Grid.Row="0" Grid.Column="2" Content="Use Database" Margin="3" VerticalAlignment="Center" IsChecked="{Binding Episode.UseDatabaseName}" />
+            <CheckBox Grid.Row="0" Grid.Column="2" Content="Use Database" Margin="3" VerticalAlignment="Center" IsChecked="{Binding Episode.UseDatabaseName}" IsEnabled="{Binding Episode.UserDefined, Converter={StaticResource boolInvConv}}" />
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Season" VerticalAlignment="Center" Margin="3" />
-            <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Episode.Season}" Margin="3" />
+            <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Episode.Season}" Margin="3" IsEnabled="{Binding Episode.UserDefined}" />
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Episode" VerticalAlignment="Center" Margin="3" />
-            <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Episode.DisplayNumber}" Margin="3" />
+            <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Episode.DisplayNumber}" Margin="3" IsEnabled="{Binding Episode.UserDefined}" />
 
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Air Date" VerticalAlignment="Center" Margin="3" />
             <xctk:DateTimePicker Grid.Row="3" Grid.Column="1" Margin="3" Format="LongDate" Value="{Binding Episode.DisplayAirDate}" IsEnabled="{Binding Episode.UseDatabaseAirDate, Converter={StaticResource boolInvConv}}" />
-            <CheckBox Grid.Row="3" Grid.Column="2" Content="Use Database" Margin="4,5,2,5" VerticalAlignment="Center" IsChecked="{Binding Episode.UseDatabaseAirDate}" />
+            <CheckBox Grid.Row="3" Grid.Column="2" Content="Use Database" Margin="4,5,2,5" VerticalAlignment="Center" IsChecked="{Binding Episode.UseDatabaseAirDate}" IsEnabled="{Binding Episode.UserDefined, Converter={StaticResource boolInvConv}}" />
 
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Overview" VerticalAlignment="Top" Margin="3,5" />
-            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Episode.DisplayOverview}" Margin="3" IsEnabled="{Binding Episode.UseDatabaseOverview, Converter={StaticResource boolInvConv}}" />
-            <CheckBox Grid.Row="4" Grid.Column="2" Content="Use Database" Margin="3,5" VerticalAlignment="Top" IsChecked="{Binding Episode.UseDatabaseOverview}"  />
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Overview" VerticalAlignment="Center" Margin="3,5" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Episode.DisplayOverview}" Margin="3" IsEnabled="{Binding Episode.UseDatabaseOverview, Converter={StaticResource boolInvConv}}" TextWrapping="Wrap" />
+            <CheckBox Grid.Row="4" Grid.Column="2" Content="Use Database" Margin="3,5" VerticalAlignment="Center" IsChecked="{Binding Episode.UseDatabaseOverview}" IsEnabled="{Binding Episode.UserDefined, Converter={StaticResource boolInvConv}}" />
         </Grid>
         
         <Grid Grid.Row="2" Margin="0,2,0,-2">
@@ -56,8 +56,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
-            <Button Grid.Column="1" Content="OK" Width="70" Margin="3" />
-            <Button Grid.Column="2" Content="Cancel" Width="70" Margin="3" />
+            <Button Grid.Column="1" Content="OK" Width="70" Margin="3" Command="{Binding OkCommand}" />
+            <Button Grid.Column="2" Content="Cancel" Width="70" Margin="3" Command="{Binding CancelCommand}" />
             
         </Grid>
         

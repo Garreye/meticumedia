@@ -179,11 +179,6 @@ namespace Meticumedia.Classes
             this.Id = idCnt++;
         }
 
-        void childFolders_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            OnPropertyChanged("ChildFolders");
-        }
-
         /// <summary>
         /// Constructor with known path.
         /// </summary>
@@ -200,13 +195,13 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="folder">instance to clone</param>
         public ContentRootFolder(ContentRootFolder folder)
+            : this(folder.ContentType)
         {
-            this.ContentType = folder.ContentType;
             this.SubPath = folder.SubPath;
             this.FullPath = folder.FullPath;
             this.AllowOrganizing = folder.AllowOrganizing;
             this.Default = folder.Default;
-            this.ChildFolders = new ObservableCollection<ContentRootFolder>();
+            this.ChildFolders.Clear();
             foreach (ContentRootFolder subFolder in folder.ChildFolders)
                 this.ChildFolders.Add(new ContentRootFolder(subFolder));
             this.Id = folder.Id;
@@ -215,6 +210,11 @@ namespace Meticumedia.Classes
         #endregion
 
         #region Methods
+
+        private void childFolders_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("ChildFolders");
+        }
 
         /// <summary>
         /// Return path as string.

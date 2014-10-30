@@ -198,7 +198,7 @@ namespace Meticumedia.Controls
                     foreach (TvEpisode episode in shows[i].Episodes)
                     {
                         TimeSpan timeDiff = episode.DisplayAirDate.Subtract(DateTime.Now);
-                        if (!episode.Ignored && Math.Abs(timeDiff.Days) < days)
+                        if (!episode.Ignored && Math.Abs(timeDiff.TotalDays) < days)
                         {
                             if (upcoming && timeDiff.Days >= 0)
                                 epList.Add(episode);

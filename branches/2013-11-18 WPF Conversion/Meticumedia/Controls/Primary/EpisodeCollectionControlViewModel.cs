@@ -190,21 +190,6 @@ namespace Meticumedia.Controls
 
         #region Commands
 
-        public ICommand DoubleClickCommand
-        {
-            get
-            {
-                if (this.SelectedEpisodes == null || this.SelectedEpisodes.Count != 1)
-                    return null;
-
-                TvEpisode ep = this.SelectedEpisodes[0] as TvEpisode;
-                if (ep.Missing == MissingStatus.Missing)
-                    return CopyEpisodeInfoToClipboardCommand;
-                else
-                    return PlayCommand;
-            }
-        }
-
         private ICommand playCommand;
         public ICommand PlayCommand
         {
@@ -340,13 +325,32 @@ namespace Meticumedia.Controls
             }
         }
 
+        private ICommand removeEpisodeCommand;
+        public ICommand RemoveEpisodeCommand
+        {
+            get
+            {
+                if (removeEpisodeCommand == null)
+                {
+                    removeEpisodeCommand = new RelayCommand(
+                        param => this.RemoveEpisodes()
+                    );
+                }
+                return removeEpisodeCommand;
+            }
+        }
+
         #endregion
 
         #region Constructor
 
+        private TvShow show;
+
         public EpisodeCollectionControlViewModel(ObservableCollection<TvEpisode> episodes, TvShow show = null )
         {
-            List<TvEpisodeFilter> filters = TvEpisodeFilter.BuildFilters(show, show != null);
+            this.show = show;
+
+            List<TvEpisodeFilter> filters = TvEpisodeFilter.BuildFilters(show, show == null);
             this.EpisodeFilters = new ObservableCollection<TvEpisodeFilter>();
             foreach (TvEpisodeFilter filter in filters)
                 this.EpisodeFilters.Add(filter);
@@ -391,7 +395,7 @@ namespace Meticumedia.Controls
             // Set properties to trigger live updating
             ICollectionViewLiveShaping liveCollection = this.EpisodesCollectionView as ICollectionViewLiveShaping;
             liveCollection.LiveFilteringProperties.Add("Season");
-            liveCollection.LiveFilteringProperties.Add("Name");
+            liveCollection.LiveFilteringProperties.Add("DisplayName");
             liveCollection.LiveFilteringProperties.Add("Status");
             liveCollection.IsLiveFiltering = true;
             liveCollection.LiveGroupingProperties.Add("Missing");
@@ -403,6 +407,18 @@ namespace Meticumedia.Controls
         #endregion
 
         #region Methods
+
+        public void HandleDoubleClick()
+        {
+            if (this.SelectedEpisodes == null || this.SelectedEpisodes.Count != 1)
+                return;
+
+            TvEpisode ep = this.SelectedEpisodes[0] as TvEpisode;
+            if (ep.Missing == MissingStatus.Missing)
+                CopyEpisodeInfoToClipboard();
+            else
+                PlayEpisode();
+        }
 
         private bool FilterEpisode(object obj)
         {
@@ -451,12 +467,18 @@ namespace Meticumedia.Controls
 
         private void PlayEpisode()
         {
+            if (this.SelectedEpisodes == null || this.SelectedEpisodes.Count == 0)
+                return;
+
             foreach (TvEpisode ep in this.SelectedEpisodes)
                 ep.PlayEpisodeFile();
         }
 
         private void CopyEpisodeInfoToClipboard()
         {
+            if (this.SelectedEpisodes == null || this.SelectedEpisodes.Count != 1)
+                return;
+
             Clipboard.SetText(((TvEpisode)this.SelectedEpisodes[0]).BuildEpString());
         }
 
@@ -467,6 +489,11 @@ namespace Meticumedia.Controls
             EpisodeEditorWindow editor = new EpisodeEditorWindow(ep);
             editor.ShowDialog();
 
+            if (editor.Results != null)
+            {
+                ep.Clone(editor.Results);
+                Organization.Shows.Save();
+            }
 
         }
 
@@ -497,7 +524,63 @@ namespace Meticumedia.Controls
 
         private void AddNewEpisode()
         {
-            MessageBox.Show("Adding requires someone to implement editor!");
+            if (show == null)
+                return;
+            
+            TvEpisode ep = new TvEpisode("", show, 1, -1, DateTime.Now.ToString(), "");
+            ep.UseDatabaseAirDate = false;
+            ep.UseDatabaseOverview = false;
+            ep.UseDatabaseNumber = false;
+            ep.UseDatabaseName = false;
+            ep.UserName = "";
+            ep.UserNumber = 1;
+
+            if (show.Episodes.Count > 0)
+            {
+                TvEpisode lastEp = show.Episodes.Last();
+                ep.Season = lastEp.Season;
+                ep.UserNumber = lastEp.DisplayNumber + 1;
+            }
+
+            EpisodeEditorWindow editor = new EpisodeEditorWindow(ep);
+            editor.ShowDialog();
+
+            if (editor.Results != null)
+            {
+                // Check if episode already exists
+                if (this.show.FindEpisode(editor.Results.Season, editor.Results.DisplayNumber, false, out ep))
+                {
+                    MessageBox.Show("Episode with this season/number already exists. Select edit on existing episode to make changes to it (if not visible try looking with ignored episodes filter).", "Already exists");
+                    return;
+                }
+                
+                show.Episodes.Add(editor.Results);
+                Organization.Shows.Save();
+            }
+        }
+
+        private void RemoveEpisodes()
+        {
+            if(this.show == null)
+                return;
+
+            string didNotRemove = "";
+            for (int i = this.SelectedEpisodes.Count - 1; i >= 0; i--)
+            {
+                TvEpisode ep = (this.SelectedEpisodes[i] as TvEpisode);
+                if (ep.UserDefined)
+                    this.show.Episodes.Remove(ep);
+                else
+                {
+                    ep.Ignored = true;
+                    didNotRemove += Environment.NewLine + "\t" + ep.ToString();
+                }
+            }
+
+            if (!string.IsNullOrEmpty(didNotRemove))
+                MessageBox.Show("Only custom added episodes can be removed. The following episode are defined in the online database, so were set to ignored instead:" + didNotRemove);
+
+            Organization.Shows.Save();
         }
 
         #endregion

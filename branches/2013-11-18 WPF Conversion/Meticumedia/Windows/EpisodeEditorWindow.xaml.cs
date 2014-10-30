@@ -20,11 +20,30 @@ namespace Meticumedia.Windows
     /// </summary>
     public partial class EpisodeEditorWindow : Window
     {
+        public TvEpisode Results
+        {
+            get
+            {
+                if (viewModel.ResultsOk)
+                    return viewModel.Episode;
+                else
+                    return null;
+            }
+        }
+
+        private EpisodeEditorWindowViewModel viewModel;
+        
         public EpisodeEditorWindow(TvEpisode episode)
         {
             InitializeComponent();
-            EpisodeEditorWindowViewModel vm = new EpisodeEditorWindowViewModel(episode);
-            this.DataContext = vm;
+            viewModel = new EpisodeEditorWindowViewModel(episode);
+            viewModel.ResultsSet += vm_ResultsSet;
+            this.DataContext = viewModel;
+        }
+
+        void vm_ResultsSet(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

@@ -179,12 +179,10 @@ namespace Meticumedia.Classes
         {
             get
             {
-                if (useDatabaseName && !string.IsNullOrEmpty(databaseName))
+                if (useDatabaseName)
                     return databaseName;
-                else if (!useDatabaseName && !string.IsNullOrEmpty(userName))
-                    return userName;
                 else
-                    return "Unknown";
+                    return userName;
             }
             set
             {
@@ -323,10 +321,10 @@ namespace Meticumedia.Classes
             set
             {
                 useDatabaseNumber = value;
-                
 
-                OnPropertyChanged("UseDatabaseName");
-                OnPropertyChanged("DisplayName");
+
+                OnPropertyChanged("UseDatabaseNumber");
+                OnPropertyChanged("DisplayNumber");
             }
         }
         private bool useDatabaseNumber = true;
@@ -408,6 +406,9 @@ namespace Meticumedia.Classes
             {
                 useDatabaseAirDate = value;
 
+                if (!useDatabaseAirDate && this.UserAirDate.Equals(new DateTime()))
+                    this.UserAirDate = this.DatabaseAirDate;
+
                 OnPropertyChanged("UseDatabaseAirDate");
                 OnPropertyChanged("DisplayAirDate");
                 OnPropertyChanged("Aired");
@@ -470,11 +471,11 @@ namespace Meticumedia.Classes
             set
             {
                 useDatabaseOverview = value;
+                if(!useDatabaseOverview && string.IsNullOrEmpty(this.UserOverview))
+                    this.UserOverview = this.DatabaseOverview;
 
-                OnPropertyChanged("UseDatabaseAirDate");
-                OnPropertyChanged("DisplayAirDate");
-                OnPropertyChanged("Aired");
-                OnPropertyChanged("StatusColor");
+                OnPropertyChanged("UseDatabaseOverview");
+                OnPropertyChanged("DisplayOverview");
             }
         }
         private bool useDatabaseOverview = true;
@@ -595,7 +596,7 @@ namespace Meticumedia.Classes
         {
             get
             {
-                return userNumber >= 0 && databaseNumber < 0;
+                return userNumber >= 0 && databaseNumber <= 0;
             }
         }
 
@@ -761,11 +762,12 @@ namespace Meticumedia.Classes
         /// <param name="episode"></param>
         public void Clone(TvEpisode episode)
         {
+            this.UseDatabaseName = episode.UseDatabaseName;
             this.UserName = episode.UserName;
             this.DatabaseName = episode.DatabaseName;
             this.Show = episode.Show;
             this.Season = episode.Season;
-            this.UseDatabaseName = episode.UseDatabaseName;
+            this.UseDatabaseNumber = episode.UseDatabaseNumber;
             this.UserNumber = episode.UserNumber;
             this.DatabaseNumber = episode.DatabaseNumber;
             this.DatabaseDvdNumber = episode.DatabaseDvdNumber;

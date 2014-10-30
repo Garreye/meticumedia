@@ -16,13 +16,13 @@ handle dvd folders for movies and tv shows
 
 Show episodes that are in folder, but not in database
 
-file type auto move to location (e.g. .mp3 move to music folder)
-
 multiple passes on dir scan - fast, default DB, other DBs
-
-match to entire portion before/after : in name (e.g. the hobbit: the desomation of smaug would match to 'the hobbit')
 
 save database search results in org item -> add select movie option to context menu with list of search result possibilities
 
 content folder match - if multiple matches use newest (should consider year removed to be on the same level as no mods)
 
+Store previous scan results to be reused if needed (reuse if category the same)
+
+
+Periodically check for changes to folder structure in root folder for changes

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Meticumedia.Classes;
 using Meticumedia.WPF;
 
@@ -25,6 +26,20 @@ namespace Meticumedia.Controls
             }
         }
         private FileNameFormat fileNameFormat;
+
+        public FileNamePortion SelectedFileNamePortion
+        {
+            get
+            {
+                return selectedFileNamePortion;
+            }
+            set
+            {
+                selectedFileNamePortion = value;
+                OnPropertyChanged(this, "SelectedFileNamePortion");
+            }
+        }
+        private FileNamePortion selectedFileNamePortion;
 
         public ContentType ContentType
         {
@@ -98,6 +113,85 @@ namespace Meticumedia.Controls
 
         #endregion
 
+        #region Commands
+
+        private ICommand addSectionCommand;
+        public ICommand AddSectionCommand
+        {
+            get
+            {
+                if (addSectionCommand == null)
+                {
+                    addSectionCommand = new RelayCommand(
+                        param => this.AddSection()
+                    );
+                }
+                return addSectionCommand;
+            }
+        }
+
+        private ICommand removeSectionCommand;
+        public ICommand RemoveSectionCommand
+        {
+            get
+            {
+                if (removeSectionCommand == null)
+                {
+                    removeSectionCommand = new RelayCommand(
+                        param => this.RemoveSection()
+                    );
+                }
+                return removeSectionCommand;
+            }
+        }
+
+        private ICommand clearSectionsCommand;
+        public ICommand ClearSectionsCommand
+        {
+            get
+            {
+                if (clearSectionsCommand == null)
+                {
+                    clearSectionsCommand = new RelayCommand(
+                        param => this.ClearSections()
+                    );
+                }
+                return clearSectionsCommand;
+            }
+        }
+
+        private ICommand moveUpSectionCommand;
+        public ICommand MoveUpSectionCommand
+        {
+            get
+            {
+                if (moveUpSectionCommand == null)
+                {
+                    moveUpSectionCommand = new RelayCommand(
+                        param => this.MoveSection(true)
+                    );
+                }
+                return moveUpSectionCommand;
+            }
+        }
+
+        private ICommand moveDownSectionCommand;
+        public ICommand MoveDownSectionCommand
+        {
+            get
+            {
+                if (moveDownSectionCommand == null)
+                {
+                    moveDownSectionCommand = new RelayCommand(
+                        param => this.MoveSection(false)
+                    );
+                }
+                return moveDownSectionCommand;
+            }
+        }        
+
+        #endregion
+
         #region Constructor
 
         public FileNameControlViewModel(FileNameFormat format, ContentType type)
@@ -105,6 +199,10 @@ namespace Meticumedia.Controls
             this.ContentType = type;
             this.FileNameFormat = new FileNameFormat(format);
             this.FileNameFormat.PropertyChanged += Format_PropertyChanged;
+            this.FileNameFormat.EpisodeFormat.PropertyChanged += Format_PropertyChanged;
+            this.FileNameFormat.Format.CollectionChanged += Format_CollectionChanged;
+            foreach (FileNamePortion portion in this.FileNameFormat.Format)
+                portion.PropertyChanged += Format_PropertyChanged;
             UpdatePreview();
         }
 
@@ -142,7 +240,52 @@ namespace Meticumedia.Controls
             UpdatePreview();
         }
 
-        #endregion
+        private void Format_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdatePreview();
 
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                if (e.NewItems != null)
+                    foreach (FileNamePortion addItem in e.NewItems)
+                        addItem.PropertyChanged += Format_PropertyChanged;
+            });
+        }
+
+        private void AddSection()
+        {
+            this.FileNameFormat.Format.Add(new FileNamePortion());
+        }
+
+        private void RemoveSection()
+        {
+            if (this.SelectedFileNamePortion == null)
+                return;
+
+            this.FileNameFormat.Format.Remove(this.SelectedFileNamePortion);
+        }
+
+        private void ClearSections()
+        {
+            this.FileNameFormat.Format.Clear();
+        }
+
+        private void MoveSection(bool up)
+        {
+            if (this.SelectedFileNamePortion == null)
+                return;
+
+            int i;
+            for (i = 0; i < this.FileNameFormat.Format.Count; i++)
+                if (this.SelectedFileNamePortion == this.FileNameFormat.Format[i])
+                    break;
+
+            if (up && i > 0)
+                this.FileNameFormat.Format.Move(i, i - 1);
+            else if (!up && i < this.FileNameFormat.Format.Count - 1)
+                this.FileNameFormat.Format.Move(i, i + 1);
+        }
+
+        #endregion
     }
 }

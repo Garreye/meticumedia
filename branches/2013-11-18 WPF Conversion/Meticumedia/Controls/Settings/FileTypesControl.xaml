@@ -18,12 +18,12 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
-            <TextBox Grid.Column="0" Text="{Binding FileTypeEntry, UpdateSourceTrigger=PropertyChanged}" Margin="5" />
-            <Button Grid.Column="1" Content="+" Width="20" Margin="0,5,5,5" Command="{Binding AddTypeCommand}" />
-            <Button Grid.Column="2" Content="-" Width="20" Margin="0,5,5,5" Command="{Binding RemoveTypesCommand}" />
+            
+            <TextBox Grid.Column="0" Text="{Binding FileTypeEntry, UpdateSourceTrigger=PropertyChanged}" Margin="5" ToolTip="Enter file type to add here, then click + button." />
+            <Button Grid.Column="1" Content="+" Width="20" Margin="0,5,5,5" Command="{Binding AddTypeCommand}" ToolTip="Add file type enter in text box to the list of types." />
+            <Button Grid.Column="2" Content="-" Width="20" Margin="0,5,5,5" Command="{Binding RemoveTypesCommand}" ToolTip="Remove file types selected in below list." />
         </Grid>
 
-        <wpfr:BindableMultiSelectListBox Grid.Row="1" ItemsSource="{Binding FileTypes}" SelectionMode="Extended" BindableSelectedItems="{Binding SelectedTypes, Mode=OneWayToSource}" Margin="3" />
+        <wpfr:BindableMultiSelectListBox Grid.Row="1" ItemsSource="{Binding FileTypes}" SelectionMode="Extended" BindableSelectedItems="{Binding SelectedTypes, Mode=OneWayToSource}" Margin="3" MinHeight="40" />
     </Grid>
 </UserControl>

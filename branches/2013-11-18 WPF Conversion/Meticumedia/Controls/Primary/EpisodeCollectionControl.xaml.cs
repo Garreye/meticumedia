@@ -24,5 +24,14 @@ namespace Meticumedia.Controls
         {
             InitializeComponent();
         }
+
+        private void BindableMultiSelectListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (this.DataContext != null && this.DataContext is EpisodeCollectionControlViewModel)
+            {
+                EpisodeCollectionControlViewModel vm = this.DataContext as EpisodeCollectionControlViewModel;
+                vm.HandleDoubleClick();
+            }
+        }
     }
 }

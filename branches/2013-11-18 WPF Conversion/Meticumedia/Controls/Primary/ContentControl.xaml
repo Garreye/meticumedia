@@ -45,7 +45,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="{Binding Content.DisplayName}" FontSize="16" FontWeight="Bold" Foreground="{Binding Content.StatusColor}" />
+                    <TextBlock Grid.Column="0" Text="{Binding Content.DisplayName}" FontSize="16" FontWeight="Bold" />
                     <TextBlock Grid.Column="1" Text=" (" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />
                     <TextBlock Grid.Column="2" Text="{Binding Content.Path}" Padding="1" VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="3" Text=")" FontWeight="Bold" Padding="1" VerticalAlignment="Center" />

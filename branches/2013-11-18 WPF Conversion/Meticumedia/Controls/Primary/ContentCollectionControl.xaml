@@ -70,15 +70,20 @@
                     <TextBlock Text="Genre" Grid.Column="0" Grid.Row="1" Margin="5" VerticalAlignment="Center"/>
                     <ComboBox Grid.Column="1" Grid.Row="1" Margin="5" ItemsSource="{Binding GenreFilters}" SelectedItem="{Binding SelectedGenreFilter}" />
 
-                    <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Orientation="Horizontal" Margin="5,0,0,0" >
-                        <CheckBox Content="Year" VerticalAlignment="Center" Margin="5,0" IsChecked="{Binding YearFilterEnable}" />
-                        <xctk:IntegerUpDown x:Name="numYearStart" Value="{Binding YearFilterStart}" Width="50" IsEnabled="False" />
-                        <TextBlock Text="to" VerticalAlignment="Center" Margin="5,0" />
-                        <xctk:IntegerUpDown x:Name="numYearStop" Value="{Binding YearFilterStop}" Width="50" IsEnabled="False" />
+                    <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Orientation="Horizontal" Margin="3" >
+                        <CheckBox Content="Year" VerticalAlignment="Center" Margin="3" IsChecked="{Binding YearFilterEnable}" />
+                        <xctk:IntegerUpDown x:Name="numYearStart" Value="{Binding YearFilterStart}" Width="50" IsEnabled="False" Margin="3" />
+                        <TextBlock Text="to" VerticalAlignment="Center" Margin="3" />
+                        <xctk:IntegerUpDown x:Name="numYearStop" Value="{Binding YearFilterStop}" Width="50" IsEnabled="False" Margin="3" />
                     </StackPanel>
 
                     <TextBlock Text="Name" Grid.Column="0" Grid.Row="2" Margin="5" VerticalAlignment="Center"/>
-                    <TextBox x:Name="txtNameFilter" Text="{Binding NameFilter}"  Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3" Margin="3"/>
+                    <TextBox x:Name="txtNameFilter" Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}"  Grid.Column="1" Grid.Row="2"  Margin="3"/>
+
+                    <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Center" Orientation="Horizontal" Margin="3" >
+                        <CheckBox Content="Watched" VerticalAlignment="Center" IsChecked="{Binding WatchedFilter}" Margin="3" />
+                        <CheckBox Content="Unwatched" VerticalAlignment="Center" IsChecked="{Binding UnwatchedFilter}" Margin="6,3"  />
+                    </StackPanel>
                 </Grid>
 
                 <wpfr:BindableMultiSelectListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" ItemTemplate="{StaticResource showItemTemplate}" ItemsSource="{Binding ContentsCollectionView}" SelectedItem="{Binding SelectedContent}" BindableSelectedItems="{Binding SelectedContents, Mode=OneWayToSource}"  SelectionMode="Extended" >
@@ -90,6 +95,11 @@
                             <MenuItem Header="Set as Child Root Folder" Command="{Binding SetFolderToRootCommand}"/>
                         </ContextMenu>
                     </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding Command="{Binding EditCommand}" Key="E" />
+                        <KeyBinding Command="{Binding MarkAsWatchedCommand}" Key="W" />
+                        <KeyBinding Command="{Binding UnmarkAsWatchedCommand}" Key="U" />
+                    </ListBox.InputBindings>
                 </wpfr:BindableMultiSelectListBox>
             </Grid>
 

@@ -19,7 +19,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Type of filters that can be applies to episodes.
         /// </summary>
-        public enum FilterType { All, Regular, Missing, Located, InScanDir, Unaired, Season };
+        public enum FilterType { All, Regular, Ignored, Missing, Located, InScanDir, Unaired, Season };
 
         /// <summary>
         /// The type of episode filter being used.
@@ -31,11 +31,6 @@ namespace Meticumedia.Classes
         /// </summary>
         public int Season { get; set; }
 
-        /// <summary>
-        /// Allow ignore episodes
-        /// </summary>
-        public bool Ignored { get; set; }
-
         #endregion
 
         #region Constructor
@@ -45,11 +40,10 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="type"></param>
         /// <param name="season"></param>
-        public TvEpisodeFilter(FilterType type, int season, bool ignored = false)
+        public TvEpisodeFilter(FilterType type, int season)
         {
             this.Type = type;
             this.Season = season;
-            this.Ignored = ignored;
         }
 
         #endregion
@@ -63,7 +57,7 @@ namespace Meticumedia.Classes
         /// <returns>True if the episode makes it through filter</returns>
         public bool FilterEpisode(TvEpisode ep)
         {
-            if (ep.Ignored && !this.Ignored)
+            if (ep.Ignored && this.Type != FilterType.Ignored)
                 return false;
             
             switch (this.Type)
@@ -74,6 +68,8 @@ namespace Meticumedia.Classes
                     if (ep.Season > 0)
                         return true;
                     break;
+                case FilterType.Ignored:
+                    return ep.Ignored;
                 case FilterType.Located:
                     if (ep.Missing != MissingStatus.Missing)
                         return true;
@@ -116,6 +112,9 @@ namespace Meticumedia.Classes
                 case FilterType.Regular:
                     filterString = "All Regular Season Episodes";
                     break;
+                case FilterType.Ignored:
+                    filterString = "Ignored Episodes";
+                    break;
                 case FilterType.Missing:
                     filterString = "Missing Episodes";
                     break;
@@ -137,9 +136,6 @@ namespace Meticumedia.Classes
                 default:
                     throw new Exception("Unknown type");
             }
-
-            if (this.Ignored)
-                filterString += " (Including Ignored)";
 
             return filterString;
         }
@@ -178,20 +174,21 @@ namespace Meticumedia.Classes
         /// <param name="show">The show to build filters for</param>
         /// <param name="displayIgnored">Whether to add ignored season filters</param>
         /// <returns></returns>
-        public static List<TvEpisodeFilter> BuildFilters(TvShow show, bool seasons)
+        public static List<TvEpisodeFilter> BuildFilters(TvShow show, bool schedule)
         {
             List<TvEpisodeFilter> filters = new List<TvEpisodeFilter>();
 
             filters.Add(new TvEpisodeFilter(FilterType.Regular, 0));
             filters.Add(new TvEpisodeFilter(FilterType.All, 0));
-            if (seasons)
-                filters.Add(new TvEpisodeFilter(FilterType.All, 0, true));
+            if (!schedule)
+                filters.Add(new TvEpisodeFilter(FilterType.Ignored, 0));
             filters.Add(new TvEpisodeFilter(FilterType.Missing, 0));
             filters.Add(new TvEpisodeFilter(FilterType.Located, 0));
             filters.Add(new TvEpisodeFilter(FilterType.InScanDir, 0));
-            filters.Add(new TvEpisodeFilter(FilterType.Unaired, 0));
+            if (!schedule)
+                filters.Add(new TvEpisodeFilter(FilterType.Unaired, 0));
 
-            if (seasons)
+            if (!schedule)
                 foreach (int season in show.Seasons)
                     filters.Add(new TvEpisodeFilter(FilterType.Season, season));
 

@@ -8,8 +8,8 @@ using Meticumedia.WPF;
 
 namespace Meticumedia.Windows
 {
-    public class EpisodeEditorWindowViewModel : ViewModel
-    {
+    public class EpisodeEditorWindowViewModel : OkCancelWindowViewModel
+    {        
         #region Properties
 
         public TvEpisode Episode
@@ -34,12 +34,6 @@ namespace Meticumedia.Windows
         {
             this.Episode = new TvEpisode(episode);
         }
-
-        #endregion
-
-        #region Methods
-        
-
 
         #endregion
     }

@@ -176,7 +176,7 @@ namespace Meticumedia.Classes
 
             // Clear update variables
             processStarted = 0;
-            processEnded = 0;
+            processCompletes = 0;
 
             // Initialize variables used in scan
             List<OrgPath> paths;
@@ -264,20 +264,19 @@ namespace Meticumedia.Classes
                     }
             // If item is already in the queue, skip it
             if (alreadyQueued)
-                ProcessUpdate(orgPath.Path, false, totalPaths);
+                ProcessUpdate(orgPath.Path, totalPaths);
             else
             {                
                 // Update progress
                 lock (directoryScanLock)
                     this.Items[pathNum].Action = OrgAction.Processing;
-                ProcessUpdate(orgPath.Path, true, totalPaths);
 
                 // Process path
                 OrgItem results = ProcessPath(orgPath, tvOnlyCheck, skipMatching, fast, true, procNumber);
 
                 // Update results and progress
                 UpdateResult(results, pathNum, procNumber);
-                ProcessUpdate(orgPath.Path, false, totalPaths);
+                ProcessUpdate(orgPath.Path, totalPaths);
             }
         }
 
@@ -574,28 +573,24 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Number of processes that have completed
         /// </summary>
-        int processEnded = 0;
+        int processCompletes = 0;
 
         /// <summary>
         /// Update progress for scan processing
         /// </summary>
         /// <param name="file">Current file being processes</param>
-        /// <param name="starting">Whether file processing is just started</param>
         /// <param name="pathum">The file's number in queue of all files</param>
         /// <param name="totalPaths">Total number of files queued for processing</param>
-        private void ProcessUpdate(string file, bool starting, int totalPaths)
+        private void ProcessUpdate(string file, int totalPaths)
         {
             // Add new files to list of files being processed, remove completed files
             lock (processLock)
             {
-                if (starting)
-                    processStarted++;
-                else
-                    processEnded++;
+                processCompletes++;
             }
 
             // Update progress
-            int perc = (int)Math.Round((double)(processStarted + processEnded) / (totalPaths * 2) * dirScanProgressAmount);
+            int perc = (int)Math.Round((double)processCompletes / totalPaths * dirScanProgressAmount);
 
             if (!scanCanceled)
                 OnProgressChange(ScanProcess.Directory, string.Empty, perc);

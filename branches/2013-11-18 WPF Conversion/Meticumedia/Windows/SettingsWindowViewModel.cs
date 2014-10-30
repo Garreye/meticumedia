@@ -110,47 +110,19 @@ namespace Meticumedia.Windows
         }
         private FileNameControlViewModel tvFileNameViewModel;
 
-        public FileTypesControlViewModel VideoFileTypesViewModel
+        public FileTypeSettingsControlViewModel FileTypeSettingsViewModel
         {
             get
             {
-                return videoFileTypesViewModel;
+                return fileTypeSettings;
             }
             set
             {
-                videoFileTypesViewModel = value;
-                OnPropertyChanged(this, "VideoFileTypesViewModel");
+                fileTypeSettings = value;
+                OnPropertyChanged(this, "FileTypeSettings");
             }
         }
-        private FileTypesControlViewModel videoFileTypesViewModel;
-
-        public FileTypesControlViewModel DeleteFileTypesViewModel
-        {
-            get
-            {
-                return seleteFileTypesViewModel;
-            }
-            set
-            {
-                seleteFileTypesViewModel = value;
-                OnPropertyChanged(this, "DeleteFileTypesViewModel");
-            }
-        }
-        private FileTypesControlViewModel seleteFileTypesViewModel;
-
-        public FileTypesControlViewModel IgnoreFileTypesViewModel
-        {
-            get
-            {
-                return ignoreFileTypesViewModel;
-            }
-            set
-            {
-                ignoreFileTypesViewModel = value;
-                OnPropertyChanged(this, "IgnoreFileTypesViewModel");
-            }
-        }
-        private FileTypesControlViewModel ignoreFileTypesViewModel;
+        private FileTypeSettingsControlViewModel fileTypeSettings;
 
         #endregion
 
@@ -198,9 +170,7 @@ namespace Meticumedia.Windows
             this.TvRootFoldersViewModel = new RootFolderControlViewModel(Settings.TvFolders, ContentType.TvShow);
             this.TvFileNameViewModel = new FileNameControlViewModel(Settings.TvFileFormat, ContentType.TvShow);
             this.MovieFileNameViewModel = new FileNameControlViewModel(Settings.MovieFileFormat, ContentType.Movie);
-            this.VideoFileTypesViewModel = new FileTypesControlViewModel(Settings.VideoFileTypes);
-            this.DeleteFileTypesViewModel = new FileTypesControlViewModel(Settings.DeleteFileTypes);
-            this.IgnoreFileTypesViewModel = new FileTypesControlViewModel(Settings.IgnoreFileTypes);
+            this.FileTypeSettingsViewModel = new FileTypeSettingsControlViewModel(Settings.VideoFileTypes, Settings.DeleteFileTypes, Settings.IgnoreFileTypes, Settings.AutoMoveSetups);
         }
 
         #endregion
@@ -228,16 +198,20 @@ namespace Meticumedia.Windows
             Settings.TvFileFormat.Clone(this.TvFileNameViewModel.FileNameFormat);
 
             Settings.VideoFileTypes.Clear();
-            foreach (string fileType in this.VideoFileTypesViewModel.FileTypes)
+            foreach (string fileType in this.FileTypeSettingsViewModel.VideoFileTypesViewModel.FileTypes)
                 Settings.VideoFileTypes.Add(fileType);
 
             Settings.DeleteFileTypes.Clear();
-            foreach (string fileType in this.DeleteFileTypesViewModel.FileTypes)
+            foreach (string fileType in this.FileTypeSettingsViewModel.DeleteFileTypesViewModel.FileTypes)
                 Settings.DeleteFileTypes.Add(fileType);
 
             Settings.IgnoreFileTypes.Clear();
-            foreach (string fileType in this.IgnoreFileTypesViewModel.FileTypes)
+            foreach (string fileType in this.FileTypeSettingsViewModel.IgnoreFileTypesViewModel.FileTypes)
                 Settings.IgnoreFileTypes.Add(fileType);
+
+            Settings.AutoMoveSetups.Clear();
+            foreach (AutoMoveSetupControlViewModel setup in this.FileTypeSettingsViewModel.AutoMoveSetupsViewModel.Setups)
+                Settings.AutoMoveSetups.Add(setup.Setup);
 
             Settings.Save();
             OnResultsSet();

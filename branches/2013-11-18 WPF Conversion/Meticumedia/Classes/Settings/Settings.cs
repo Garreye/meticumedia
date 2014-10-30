@@ -309,7 +309,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Properties that are elements.
         /// </summary>
-        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, Gui, General };
+        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, AutoMoveSetups, Gui, General };
 
         /// <summary>
         /// Root element for setting XML.
@@ -320,6 +320,11 @@ namespace Meticumedia.Classes
         /// Name for file type XML element.
         /// </summary>
         private static readonly string FILE_TYPE_XML = "FileType";
+
+        /// <summary>
+        /// Name for auto file move setup XML element.
+        /// </summary>
+        private static readonly string AUTO_MOVE_SETUP_XML = "FileType";
 
         /// <summary>
         /// Save settings to XML.
@@ -369,6 +374,10 @@ namespace Meticumedia.Classes
                         case XmlElements.IgnoreFileTypes:
                             foreach (string fileType in IgnoreFileTypes)
                                 xw.WriteElementString(FILE_TYPE_XML, fileType);
+                            break;
+                        case XmlElements.AutoMoveSetups:
+                            foreach (AutoMoveFileSetup setup in AutoMoveSetups)
+                                setup.Save(xw);
                             break;
                         case XmlElements.Gui:
                             GuiControl.Save(xw);
@@ -487,6 +496,15 @@ namespace Meticumedia.Classes
                                 if (ignoreType.StartsWith("."))
                                     ignoreType = ignoreType.Substring(1, ignoreType.Length - 1);
                                 IgnoreFileTypes.Add(ignoreType);
+                            }
+                            break;
+                        case XmlElements.AutoMoveSetups:
+                            AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>();
+                            foreach (XmlNode setupNode in propNode.ChildNodes)
+                            {
+                                AutoMoveFileSetup setup = new AutoMoveFileSetup();
+                                setup.Load(setupNode);
+                                AutoMoveSetups.Add(setup);
                             }
                             break;
                         case XmlElements.Gui:

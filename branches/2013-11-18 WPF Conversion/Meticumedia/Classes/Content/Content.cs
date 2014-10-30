@@ -436,6 +436,7 @@ namespace Meticumedia.Classes
             {
                 watched = value;
                 OnPropertyChanged("Watched");
+                OnPropertyChanged("StatusColor");
             }
         }
 
@@ -490,10 +491,17 @@ namespace Meticumedia.Classes
                     return "LightCoral";
                 else if (this.id == UNKNOWN_ID)
                     return "LightCoral";
+                else if (this.Watched)
+                    return "DarkGray";
                 else
                     return "Black";
             }
         }
+
+        /// <summary>
+        /// Seasons only used by inheretance for TvShow, but used in shared control bindings
+        /// </summary>
+        public virtual List<int> Seasons { get { return new List<int>(); } }
 
         #endregion
 
