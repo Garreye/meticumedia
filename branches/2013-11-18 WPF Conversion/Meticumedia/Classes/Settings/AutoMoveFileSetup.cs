@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Meticumedia.Classes
 {
@@ -67,15 +68,31 @@ namespace Meticumedia.Classes
             this.MoveFolder = true;
         }
 
-        public AutoMoveFileSetup(string ext, string destination) : this()
+        public AutoMoveFileSetup(string ext, string destination)
+            : this()
         {
             this.FileTypes.Add(ext);
             this.DestinationPath = destination;
         }
 
+        public AutoMoveFileSetup(AutoMoveFileSetup clone)
+            : this()
+        {
+            Clone(clone);
+        }
+
         #endregion
 
         #region Methods
+
+        public void Clone(AutoMoveFileSetup setup)
+        {
+            this.FileTypes.Clear();
+            foreach (string type in setup.FileTypes)
+                this.FileTypes.Add(type);
+            this.DestinationPath = setup.DestinationPath;
+            this.MoveFolder = setup.MoveFolder;
+        }
 
         public bool BuildFileMoveItem(string filePath, OrgFolder scanDir, out OrgItem item)
         {
@@ -117,6 +134,103 @@ namespace Meticumedia.Classes
             }
 
             return false;
+        }
+
+        #endregion
+
+        #region XML
+
+        /// <summary>
+        /// Root XML element string for this class.
+        /// </summary>
+        private static readonly string ROOT_XML = "AutoMoveSetup";
+
+        /// <summary>
+        /// XML element string for single file type
+        /// </summary>
+        private static readonly string FILE_TYPE_XML = "FileType";
+
+        /// <summary>
+        /// Element names for properties that need to be saved to XML.
+        /// </summary>
+        private enum XmlElements { FileTypes, DestinationPath, MoveFolder };
+
+        /// <summary>
+        /// Saves instance properties to XML file.
+        /// </summary>
+        /// <param name="xw">Writer for accessing XML file</param>
+        public void Save(XmlWriter xw)
+        {
+            xw.WriteStartElement(ROOT_XML);
+            
+            // Write properties as sub-elements
+            foreach (XmlElements element in Enum.GetValues(typeof(XmlElements)))
+            {
+                string value = null;
+                switch (element)
+                {
+                    case XmlElements.FileTypes:
+                        xw.WriteStartElement(element.ToString());
+                        foreach (string type in this.FileTypes)
+                            xw.WriteElementString(FILE_TYPE_XML, type);
+                        xw.WriteEndElement();
+                        break;
+                    case XmlElements.DestinationPath:
+                        value = this.DestinationPath;
+                        break;
+                    case XmlElements.MoveFolder:
+                        value = this.MoveFolder.ToString();
+                        break;
+                    default:
+                        throw new Exception("Unkonw element!");
+                }
+
+                if (value != null)
+                    xw.WriteElementString(element.ToString(), value);
+            }
+
+            xw.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Loads instance properties from XML.
+        /// </summary>
+        /// <param name="itemNode">Node to load XML from</param>
+        /// <returns>true if sucessfully loaded from XML</returns>
+        public bool Load(XmlNode fileNameNode)
+        {
+            // Loop through sub-nodes
+            foreach (XmlNode propNode in fileNameNode.ChildNodes)
+            {
+                // Get element/property type
+                XmlElements element; ;
+                if (!Enum.TryParse<XmlElements>(propNode.Name, out element))
+                    continue;
+
+                // Get value string
+                string value = propNode.InnerText;
+
+                // Load value into appropriate property
+                switch (element)
+                {
+                    case XmlElements.FileTypes:
+                        this.FileTypes.Clear();
+                        foreach (XmlNode typeNode in propNode.ChildNodes)
+                            this.FileTypes.Add(typeNode.InnerText);
+                        break;
+                    case XmlElements.DestinationPath:
+                        this.DestinationPath = value;
+                        break;
+                    case XmlElements.MoveFolder:
+                        bool move;
+                        if (bool.TryParse(value, out move))
+                            this.MoveFolder = move;
+                        break;
+                }
+            }
+
+            // Success
+            return true;
         }
 
         #endregion

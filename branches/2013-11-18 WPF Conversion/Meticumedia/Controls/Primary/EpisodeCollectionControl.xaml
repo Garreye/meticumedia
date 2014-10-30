@@ -36,7 +36,7 @@
         </Grid>
 
 
-        <wpfr:BindableMultiSelectListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" BindableSelectedItems="{Binding SelectedEpisodes, Mode=OneWayToSource}" VirtualizingPanel.IsVirtualizing="True" SelectionMode="Extended" wpfr:Commands.DataGridDoubleClickCommand="{Binding DoubleClickCommand}" >
+        <wpfr:BindableMultiSelectListBox Grid.Row="1" Margin="8" ItemsSource="{Binding EpisodesCollectionView}" BindableSelectedItems="{Binding SelectedEpisodes, Mode=OneWayToSource}" MouseDoubleClick="BindableMultiSelectListBox_MouseDoubleClick" SelectionMode="Extended" >
             <ListBox.Resources>
                 <RelativeSource x:Key="parent" AncestorType="{x:Type cntrls:EpisodeCollectionControl}" />
             </ListBox.Resources>
@@ -95,13 +95,14 @@
                     <MenuItem Header="Play" Command="{Binding PlayCommand}" Visibility="{Binding SinglePlayableItemSelectionVisibility}" ToolTip="Opens episode file." />
                     <MenuItem Header="Copy Episode Info to Clipboard" Command="{Binding CopyEpisodeInfoToClipboardCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Copies show name and season/episode value to clipboard. (Paste this into the search box of your download site.)"/>
                     <MenuItem Header="Edit" Command="{Binding EditCommand}" Visibility="{Binding SingleItemSelectionVisibility}"  />
+                    <MenuItem Header="Add Episode" Command="{Binding AddEpisodeCommand}" ToolTip="Add a new episode to the show."/>
+                    <MenuItem Header="Remove Episode" Command="{Binding RemoveEpisodeCommand}" ToolTip="Removes selected episode(s) from the show."/>
                     <MenuItem Header="Locate and Move" Command="{Binding LocateAndMoveEpisodeCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Locate episode file and move it into the show folder." />
                     <MenuItem Header="Locate and Copy" Command="{Binding LocateAndCopyEpisodeCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Locate episode file and copy it into the show folder."/>
-
                     <MenuItem Header="Ignore Episode(s)" Command="{Binding IgnoreEpisodeCommand}" Visibility="{Binding IgnorableSelectionVisibility}" />
                     <MenuItem Header="Unignore Episode(s)" Command="{Binding UnignoreEpisodeCommand}" Visibility="{Binding UnignorableSelectionVisibility}" />
                     <MenuItem Header="Delete File(s) for Episode(s)" Command="{Binding DeleteEpisodeFilesCommand}" Visibility="{Binding DeletableSelectionVisibility}" ToolTip="Delete files related to selected episodes."/>
-                    <MenuItem Header="New Episode" Command="{Binding AddEpisodeCommand}" ToolTip="Add a new episode to the show."/>
+                    
                 </ContextMenu>
             </ListBox.ContextMenu>
         </wpfr:BindableMultiSelectListBox>

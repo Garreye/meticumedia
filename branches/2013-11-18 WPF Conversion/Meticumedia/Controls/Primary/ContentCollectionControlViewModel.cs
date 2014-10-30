@@ -97,8 +97,8 @@ namespace Meticumedia.Controls
             set
             {
                 selectedGenreFilter = value;
-                this.ContentsCollectionView.Refresh();
                 OnPropertyChanged(this, "SelectedGenreFilter");
+                this.ContentsCollectionView.Refresh();
             }
         }
         private string selectedGenreFilter = string.Empty;
@@ -113,6 +113,7 @@ namespace Meticumedia.Controls
             {
                 yearFilterEnable = value;
                 OnPropertyChanged(this, "YearFilterEnable");
+                this.ContentsCollectionView.Refresh();
             }
         }
         private bool yearFilterEnable = false;
@@ -127,6 +128,7 @@ namespace Meticumedia.Controls
             {
                 yearFilterStart = value;
                 OnPropertyChanged(this, "YearFilterStart");
+                this.ContentsCollectionView.Refresh();
             }
         }
         private int yearFilterStart = 1990;
@@ -141,6 +143,7 @@ namespace Meticumedia.Controls
             {
                 yearFilterStop = value;
                 OnPropertyChanged(this, "YearFilterStop");
+                this.ContentsCollectionView.Refresh();
             }
         }
         private int yearFilterStop = 2015;
@@ -155,9 +158,40 @@ namespace Meticumedia.Controls
             {
                 nameFilter = value;
                 OnPropertyChanged(this, "NameFilter");
+                this.ContentsCollectionView.Refresh();
             }
         }
         private string nameFilter = string.Empty;
+
+        public bool WatchedFilter
+        {
+            get
+            {
+                return watchedFilter;
+            }
+            set
+            {
+                watchedFilter = value;
+                OnPropertyChanged(this, "WatchedFilter");
+                this.ContentsCollectionView.Refresh();
+            }
+        }
+        private bool watchedFilter = true;
+
+        public bool UnwatchedFilter
+        {
+            get
+            {
+                return unwatchedFilter;
+            }
+            set
+            {
+                unwatchedFilter = value;
+                OnPropertyChanged(this, "UnwatchedFilter");
+                this.ContentsCollectionView.Refresh();
+            }
+        }
+        private bool unwatchedFilter = true;
 
         #endregion
 
@@ -327,6 +361,7 @@ namespace Meticumedia.Controls
             liveCollection.LiveFilteringProperties.Add("DisplayYear");
             liveCollection.LiveFilteringProperties.Add("RootFolder");
             liveCollection.LiveFilteringProperties.Add("DisplayName");
+            liveCollection.LiveFilteringProperties.Add("Watched");
             liveCollection.IsLiveFiltering = true;
         }
 
@@ -628,6 +663,8 @@ namespace Meticumedia.Controls
             bool recursive;
             List<ContentRootFolder> selRootFolders = GetFilteredRootFolders(out recursive);
 
+            // Watched filter
+
             // Check if content is in the folder
             bool contentInSelFolder = false;
             if (selRootFolders.Count == 0)
@@ -642,10 +679,9 @@ namespace Meticumedia.Controls
                     }
             }
 
-            bool filterResult = genreMatch && yearMatch && nameMatch && contentInSelFolder;
+            bool watchedFilter = (content.Watched && this.WatchedFilter) || (!content.Watched && this.UnwatchedFilter);
 
-            //Console.WriteLine((obj as Content) + " filter results: " + filterResult);
-
+            bool filterResult = genreMatch && yearMatch && nameMatch && contentInSelFolder && watchedFilter;
             return filterResult;
         }
 

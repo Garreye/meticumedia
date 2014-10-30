@@ -12,20 +12,8 @@ using Ookii.Dialogs.Wpf;
 
 namespace Meticumedia.Windows
 {
-    public class OrgItemEditorWindowViewModel : ViewModel
-    {
-        #region Events
-
-        public event EventHandler ResultsSet;
-
-        private void OnResultsSet()
-        {
-            if (ResultsSet != null)
-                ResultsSet(this, new EventArgs());
-        }
-
-        #endregion
-        
+    public class OrgItemEditorWindowViewModel : OkCancelWindowViewModel
+    {    
         #region Properties
 
         /// <summary>
@@ -75,11 +63,6 @@ namespace Meticumedia.Windows
             }
         }
         private bool sourceEditingAllowed;
-
-        /// <summary>
-        /// Modification made set to OK by user
-        /// </summary>
-        public bool ResultsOk { get; private set; }
 
         /// <summary>
         /// View model for movie editor
@@ -171,43 +154,6 @@ namespace Meticumedia.Windows
 
         #region Commands
 
-        private ICommand okCommand;
-        public ICommand OkCommand
-        {
-            get
-            {
-                if (okCommand == null)
-                {
-                    okCommand = new RelayCommand(
-                        param => this.OkResults(),
-                        param => this.CanDoOkCommand()
-                    );
-                }
-                return okCommand;
-            }
-        }
-
-        private bool CanDoOkCommand()
-        {
-            return true;
-        }
-
-
-        private ICommand cancelCommand;
-        public ICommand CancelCommand
-        {
-            get
-            {
-                if (cancelCommand == null)
-                {
-                    cancelCommand = new RelayCommand(
-                        param => this.CancelResults()
-                    );
-                }
-                return cancelCommand;
-            }
-        }
-
         private ICommand setSourcePathCommand;
         public ICommand SetSourcePathCommand
         {
@@ -296,17 +242,6 @@ namespace Meticumedia.Windows
         #endregion
 
         #region Methods
-
-        private void OkResults()
-        {
-            this.ResultsOk = true;
-            OnResultsSet();
-        }
-
-        private void CancelResults()
-        {
-            OnResultsSet();
-        }
 
         private void SetSourcePath()
         {

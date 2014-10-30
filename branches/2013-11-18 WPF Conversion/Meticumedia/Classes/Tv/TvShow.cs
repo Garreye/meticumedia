@@ -84,7 +84,7 @@ namespace Meticumedia.Classes
 
         private ObservableCollection<string> alternativeNameMatches = new ObservableCollection<string>();
 
-        public List<int> Seasons
+        public override List<int> Seasons
         {
             get
             {

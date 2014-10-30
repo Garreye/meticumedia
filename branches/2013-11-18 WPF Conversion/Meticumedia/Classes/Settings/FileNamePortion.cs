@@ -16,14 +16,6 @@ namespace Meticumedia.Classes
     /// </summary>
     public class FileNamePortion : INotifyPropertyChanged
     {
-        #region Enum
-
-        /// <summary>
-        /// Types of options that can be applied to case of portion
-        /// </summary>
-        public enum CaseOptionType { None, LowerCase, UpperCase }
-
-        #endregion
 
         #region Properties
 

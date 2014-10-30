@@ -86,16 +86,16 @@ namespace Meticumedia.Classes
             // Default formats
             if (type == Classes.ContentType.Movie)
             {
-                format.Add(new FileNamePortion(FileWordType.MovieName, string.Empty, " ", FileNamePortion.CaseOptionType.None));
-                format.Add(new FileNamePortion(FileWordType.Year, "[", "]", FileNamePortion.CaseOptionType.None));
-                format.Add(new FileNamePortion(FileWordType.VideoResolution, "[", "]", FileNamePortion.CaseOptionType.None));
-                format.Add(new FileNamePortion(FileWordType.FilePart, "[", "]", FileNamePortion.CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.MovieName, string.Empty, " ", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.Year, "[", "]", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.VideoResolution, "[", "]", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.FilePart, "[", "]", CaseOptionType.None));
             }
             else
             {
-                format.Add(new FileNamePortion(FileWordType.ShowName, string.Empty, " - ", FileNamePortion.CaseOptionType.None));
-                format.Add(new FileNamePortion(FileWordType.EpisodeNumber, string.Empty, " - ", FileNamePortion.CaseOptionType.None));
-                format.Add(new FileNamePortion(FileWordType.EpisodeName, string.Empty, string.Empty, FileNamePortion.CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.ShowName, string.Empty, " - ", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.EpisodeNumber, string.Empty, " - ", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.EpisodeName, string.Empty, string.Empty, CaseOptionType.None));
             }
 
             foreach (FileNamePortion fnp in format)
@@ -312,12 +312,12 @@ namespace Meticumedia.Classes
                     // Apply case options
                     switch (portion.CaseOption)
                     {
-                        case FileNamePortion.CaseOptionType.None:
+                        case CaseOptionType.None:
                             break;
-                        case FileNamePortion.CaseOptionType.LowerCase:
+                        case CaseOptionType.LowerCase:
                             value = value.ToLower();
                             break;
-                        case FileNamePortion.CaseOptionType.UpperCase:
+                        case CaseOptionType.UpperCase:
                             value = value.ToUpper();
                             break;
                     }

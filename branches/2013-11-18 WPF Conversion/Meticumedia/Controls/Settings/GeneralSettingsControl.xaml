@@ -34,16 +34,18 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Maximum Simultaneous Processing Threads" Margin="3" VerticalAlignment="Center" />
-        <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Value="{Binding GeneralSettings.NumProcessingThreads}" Margin="3" Minimum="1" />
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Maximum Simultaneous Processing Threads" Margin="3" VerticalAlignment="Center"
+                   ToolTip="Maximum number of threads that meticumedia is allowed to run simultaneously during scanning and folder updates. More threads may improve scan/update times, but will results in higher CPU usage."/>
+        <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Value="{Binding GeneralSettings.NumProcessingThreads}" Margin="3" Minimum="1" Maximum="25" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Maximum Simultaneous Database Searches" Margin="3" VerticalAlignment="Center" />
-        <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding GeneralSettings.NumSimultaneousSearches}" Margin="3" Minimum="1" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Maximum Simultaneous Database Searches" Margin="3" VerticalAlignment="Center" 
+                   ToolTip="Maximum number of database searches that meticumedia is allowed to perform simultaneously for each scan/update thread. More searches may improve scan/update time, but will results in higher CPU usage."/>
+        <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding GeneralSettings.NumSimultaneousSearches}" Margin="3" Minimum="1" Maximum="25" />
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Primary TV Database" Margin="3" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Primary TV Database" Margin="3" VerticalAlignment="Center" ToolTip="Database that meticumedia will uses for matching to new TV shows during scans/updates." />
         <ComboBox Grid.Row="2" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource TvDbTypeEnum}}" SelectedItem="{Binding GeneralSettings.DefaultTvDatabase}" />
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="Primary Movie Database" Margin="3" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Primary Movie Database" Margin="3" VerticalAlignment="Center" ToolTip="Database that meticumedia will uses for matching to new movies during scans/updates." />
         <ComboBox Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource MovieDbTypeEnum}}" SelectedItem="{Binding GeneralSettings.DefaultMovieDatabase}" />
 
     </Grid>
