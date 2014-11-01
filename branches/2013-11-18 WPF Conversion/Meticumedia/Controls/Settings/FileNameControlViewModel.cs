@@ -244,12 +244,19 @@ namespace Meticumedia.Controls
         {
             UpdatePreview();
 
-            App.Current.Dispatcher.Invoke((Action)delegate
+            if (App.Current.Dispatcher.CheckAccess())
             {
                 if (e.NewItems != null)
                     foreach (FileNamePortion addItem in e.NewItems)
                         addItem.PropertyChanged += Format_PropertyChanged;
-            });
+            }
+            else
+                App.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    if (e.NewItems != null)
+                        foreach (FileNamePortion addItem in e.NewItems)
+                            addItem.PropertyChanged += Format_PropertyChanged;
+                });
         }
 
         private void AddSection()

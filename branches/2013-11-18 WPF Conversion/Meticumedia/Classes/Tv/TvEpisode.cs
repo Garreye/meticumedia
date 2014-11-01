@@ -633,7 +633,7 @@ namespace Meticumedia.Classes
                 else if (!this.Aired)
                     return "Gray";
                 else if (this.Missing == MissingStatus.Missing)
-                    return "LightCoral";
+                    return "DarkRed";
                 else if (this.Missing == MissingStatus.InScanDirectory)
                     return "MediumSeaGreen";
                 else if (this.Watched)

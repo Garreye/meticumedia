@@ -300,8 +300,7 @@ namespace Meticumedia.Controls
             this.grid = grid;
             
             this.OrgItems = new ObservableCollection<OrgItem>();
-            CollectionViewSource scanResultsViewSource = new CollectionViewSource() { Source = OrgItems };
-            this.OrgItemsCollection = scanResultsViewSource.View;
+            this.OrgItemsCollection = CollectionViewSource.GetDefaultView(OrgItems);
             this.OrgItemsCollection.Filter = new Predicate<object>(FilterItem);
             
             // Set properties to trigger live updating

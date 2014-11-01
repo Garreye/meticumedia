@@ -18,6 +18,20 @@ namespace Meticumedia.Controls
 {
     public class EpisodeCollectionControlViewModel : OrgItemQueueableViewModel
     {
+        #region Events
+
+        public event EventHandler ShowScanIncludeMod;
+
+        protected void OnShowScanIncludeMod()
+        {
+            if (ShowScanIncludeMod != null)
+            {
+                ShowScanIncludeMod(this, new EventArgs());
+            }
+        }
+
+        #endregion
+        
         #region Properties
 
         public ObservableCollection<TvEpisode> Episodes { get; set; }
@@ -89,7 +103,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                return this.DisplayOverview ? 12 : 18;
+                return this.DisplayOverview ? 12 : 16;
             }
         }
 
@@ -124,6 +138,7 @@ namespace Meticumedia.Controls
                 OnPropertyChanged(this, "SelectedEpisodes");
                 OnPropertyChanged(this, "SinglePlayableItemSelectionVisibility");
                 OnPropertyChanged(this, "SingleItemSelectionVisibility");
+                OnPropertyChanged(this, "SingleItemSelectionAndShowVisibility");
                 OnPropertyChanged(this, "IgnorableSelectionVisibility");
                 OnPropertyChanged(this, "UnignorableSelectionVisibility");
                 OnPropertyChanged(this, "DeletableSelectionVisibility");                
@@ -139,6 +154,14 @@ namespace Meticumedia.Controls
             }
         }
 
+        public Visibility SingleItemSelectionAndShowVisibility
+        {
+            get
+            {
+                return this.show != null && this.SelectedEpisodes != null && this.SelectedEpisodes.Count == 1 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+
         public Visibility SinglePlayableItemSelectionVisibility
         {
             get
@@ -151,7 +174,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                if (this.SelectedEpisodes == null)
+                if (this.SelectedEpisodes == null || this.show == null)
                     return Visibility.Collapsed;
                 foreach (TvEpisode ep in this.SelectedEpisodes)
                     if (!ep.Ignored)
@@ -164,7 +187,7 @@ namespace Meticumedia.Controls
         {
             get
             {
-                if (this.SelectedEpisodes == null)
+                if (this.SelectedEpisodes == null || this.show == null)
                     return Visibility.Collapsed;
                 foreach (TvEpisode ep in this.SelectedEpisodes)
                     if (ep.Ignored)
@@ -177,12 +200,20 @@ namespace Meticumedia.Controls
         {
             get
             {
-                if (this.SelectedEpisodes == null)
+                if (this.SelectedEpisodes == null || this.show == null)
                     return Visibility.Collapsed;
                 foreach (TvEpisode ep in this.SelectedEpisodes)
                     if (ep.Missing != MissingStatus.Missing)
                         return Visibility.Visible;
                 return Visibility.Collapsed;
+            }
+        }
+
+        public Visibility ShowModsVisibility
+        {
+            get
+            {
+                return this.show == null ? Visibility.Collapsed : Visibility.Visible;
             }
         }
 
@@ -337,6 +368,21 @@ namespace Meticumedia.Controls
                     );
                 }
                 return removeEpisodeCommand;
+            }
+        }
+
+        private ICommand excludeShowFromScheduleCommand;
+        public ICommand ExcludeShowFromScheduleCommand
+        {
+            get
+            {
+                if (excludeShowFromScheduleCommand == null)
+                {
+                    excludeShowFromScheduleCommand = new RelayCommand(
+                        param => this.ExcludeShowFromSchedule()
+                    );
+                }
+                return excludeShowFromScheduleCommand;
             }
         }
 
@@ -581,6 +627,19 @@ namespace Meticumedia.Controls
                 MessageBox.Show("Only custom added episodes can be removed. The following episode are defined in the online database, so were set to ignored instead:" + didNotRemove);
 
             Organization.Shows.Save();
+        }
+
+        private void ExcludeShowFromSchedule()
+        {
+            for (int i = this.SelectedEpisodes.Count - 1; i >= 0; i--)
+            {
+                TvShow show = ((TvEpisode)this.SelectedEpisodes[i]).Show;
+
+                if (show != null)
+                    show.IncludeInSchedule = false;
+            }
+            Organization.Shows.Save();
+            OnShowScanIncludeMod();
         }
 
         #endregion

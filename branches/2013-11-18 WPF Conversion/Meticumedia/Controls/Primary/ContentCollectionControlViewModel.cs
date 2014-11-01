@@ -247,7 +247,11 @@ namespace Meticumedia.Controls
                 if (this.SelectedContents == null || this.SelectedContents.Count != 1 || this.SelectedContent == null)
                     selectedContentViewModel = null;
                 else if (selectedContentViewModel == null || !selectedContentViewModel.Content.Equals(this.SelectedContent))
+                {
+                    if (!contentViewModels.ContainsKey(this.SelectedContent))
+                        contentViewModels.Add(this.SelectedContent, new ContentControlViewModel(this.SelectedContent));
                     selectedContentViewModel = contentViewModels[this.SelectedContent];
+                }
                 return selectedContentViewModel;
             }
         }
@@ -341,6 +345,7 @@ namespace Meticumedia.Controls
             {
                 foreach (Content cntnt in contentCollection)
                     Contents.Add(cntnt);
+                contentCollection.LoadProgressChange += Content_LoadProgressChange;
                 contentCollection.CollectionChanged += Contents_CollectionChanged;
                 contentCollection.LoadComplete += Content_LoadComplete;
             }
@@ -351,8 +356,7 @@ namespace Meticumedia.Controls
             this.Folders = new ObservableCollection<ContentRootFolder>();
 
             this.Contents = new ObservableCollection<Content>();
-            CollectionViewSource contentViewSource = new CollectionViewSource() { Source = this.Contents };
-            this.ContentsCollectionView = contentViewSource.View;
+            this.ContentsCollectionView = CollectionViewSource.GetDefaultView( this.Contents);
             this.ContentsCollectionView.Filter = new Predicate<object>(ContentFilter);
 
             // Set properties to trigger live updating
@@ -415,6 +419,8 @@ namespace Meticumedia.Controls
                 this.SelectedFolder = this.Folders[0];
         }
 
+        private bool contentLoaded = false;
+
         /// <summary>
         /// Loading complete of shows load them into shows listbox
         /// </summary>
@@ -424,6 +430,7 @@ namespace Meticumedia.Controls
             if (contentCollection.ContentType != this.contentType)
                 return;
 
+            contentLoaded = true;
             UpdateGenresComboBoxSafe();
             UpdateProgressSafe(100, "Loading complete!", true);
         }
@@ -433,10 +440,16 @@ namespace Meticumedia.Controls
         /// </summary>
         private void Contents_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            App.Current.Dispatcher.Invoke((Action)delegate
-            {
+            if (contentLoaded)
+                UpdateGenresComboBoxSafe();
+
+            if (App.Current.Dispatcher.CheckAccess())
                 UpdateContents(e);
-            });
+            else
+                App.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    UpdateContents(e);
+                });
         }
 
         private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -457,7 +470,7 @@ namespace Meticumedia.Controls
                 foreach (Content addItem in e.NewItems)
                 {
                     Contents.Add(addItem);
-                    contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
+                    //contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
                 }
 
         }
@@ -467,7 +480,7 @@ namespace Meticumedia.Controls
         /// </summary>
         private void Content_LoadProgressChange(object sender, System.ComponentModel.ProgressChangedEventArgs e)
         {
-            UpdateProgressSafe(e.ProgressPercentage, "Loading " + this.contentType.Description() + "s " + (string)e.UserState, e.ProgressPercentage >= 100);
+            UpdateProgressSafe(e.ProgressPercentage, "Loading " + this.contentType.Description() + "s " + (string)e.UserState, e.ProgressPercentage < 100);
         }
 
         private void ContentRootFolder_UpdateProgressChange(object sender, OrgProgressChangesEventArgs e)

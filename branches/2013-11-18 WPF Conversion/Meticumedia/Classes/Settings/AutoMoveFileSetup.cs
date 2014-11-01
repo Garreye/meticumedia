@@ -115,7 +115,7 @@ namespace Meticumedia.Classes
 
         public bool BuildFolderMoveItem(string folderPath, OrgFolder scanDir, out OrgItem item)
         {
-            item = null;
+            item = new OrgItem(folderPath, this, scanDir, true);
 
             if (!this.MoveFolder)
                 return false;
@@ -125,12 +125,14 @@ namespace Meticumedia.Classes
             {
                 OrgItem fileItem;
                 if (this.BuildFileMoveItem(file, scanDir, out fileItem))
-                {
-                    item = new OrgItem(folderPath, this, scanDir, true);
-
-
                     return true;
-                }
+            }
+            string[] subDirs = Directory.GetDirectories(folderPath);
+            foreach (string subDir in subDirs)
+            {
+                OrgItem subItem;
+                if (this.BuildFolderMoveItem(subDir, scanDir, out subItem))
+                    return true;
             }
 
             return false;

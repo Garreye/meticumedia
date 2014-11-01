@@ -215,13 +215,18 @@ namespace Meticumedia.Classes
             this.IncludeInSchedule = show.IncludeInSchedule;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
-            this.Episodes.Clear();
-            foreach (TvEpisode episode in show.Episodes)
+            
+
+            App.Current.Dispatcher.Invoke((Action)delegate
             {
-                TvEpisode copyEp = new TvEpisode(episode);
-                this.Episodes.Add(copyEp);
-                copyEp.Show = this;
-            }
+                this.Episodes.Clear();
+                foreach (TvEpisode episode in show.Episodes)
+                {
+                    TvEpisode copyEp = new TvEpisode(episode);
+                    this.Episodes.Add(copyEp);
+                    copyEp.Show = this;
+                }
+            });
             this.AlternativeNameMatches = new ObservableCollection<string>();
             foreach (string altName in show.AlternativeNameMatches)
                 this.AlternativeNameMatches.Add(altName);

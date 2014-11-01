@@ -277,6 +277,20 @@ namespace Meticumedia.Controls
 
         #region General
 
+        public string RunButtonText
+        {
+            get
+            {
+                return runButtonText;
+            }
+            set
+            {
+                runButtonText = value;
+                OnPropertyChanged(this, "RunButtonText");
+            }
+        }
+        private string runButtonText = "Run";
+
         public bool Fast
         {
             get
@@ -616,6 +630,11 @@ namespace Meticumedia.Controls
                     scanCancelled = false;
                 RefreshResultsSafe(false);
                 scanRunning = false;
+
+                App.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    this.RunButtonText = "Run";
+                });
             }
         }
 
@@ -624,6 +643,19 @@ namespace Meticumedia.Controls
         /// </summary>
         private void Run()
         {
+            if (!scanRunning)
+            {
+                App.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    this.RunButtonText = "Stop";
+                });
+            }
+            else
+            {
+                CancelScan();
+                return;
+            }
+            
             scanRunning = true;
 
             // Clear results
@@ -705,6 +737,10 @@ namespace Meticumedia.Controls
 
             this.Progress = 0;
             this.ProgressMessage = string.Empty;
+
+            for (int i = OrgItems.Count - 1; i >= 0; i--)
+                if (OrgItems[i].Action == OrgAction.TBD || OrgItems[i].Action == OrgAction.Processing)
+                    OrgItems.RemoveAt(i);
         }
 
 
