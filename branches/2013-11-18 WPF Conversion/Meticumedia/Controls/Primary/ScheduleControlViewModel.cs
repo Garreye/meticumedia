@@ -86,12 +86,15 @@ namespace Meticumedia.Controls
             this.Shows = new ObservableCollection<TvShow>();
             this.Results = new ObservableCollection<TvEpisode>();
             this.EpisodesModel = new EpisodeCollectionControlViewModel(this.Results);
+            this.EpisodesModel.ShowScanIncludeMod += EpisodesModel_ShowScanIncludeMod;
             Organization.Shows.LoadComplete += Shows_LoadComplete;
         }
 
         #endregion
 
         #region Methods
+
+        private bool showsLoaded = false;
 
         private void Shows_LoadComplete(object sender, EventArgs e)
         {
@@ -101,6 +104,12 @@ namespace Meticumedia.Controls
         }
 
         private void Shows_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateShowsSafe();
+            UpdateResultsSafe();
+        }
+
+        void EpisodesModel_ShowScanIncludeMod(object sender, EventArgs e)
         {
             UpdateShowsSafe();
             UpdateResultsSafe();

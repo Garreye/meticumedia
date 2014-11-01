@@ -68,7 +68,7 @@
                         <TextBlock x:Name="tbPbText" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding ProgressMessage}" />
                     </Grid>
 
-                    <Button Grid.Column="1" x:Name="btnRun" Content="Run" Padding="40,5" Margin="3" Command="{Binding RunCommand}" />
+                    <Button Grid.Column="1" Content="{Binding RunButtonText}" Padding="40,5" Margin="3" Command="{Binding RunCommand}" />
                 </Grid>
             </Grid>
         </GroupBox>

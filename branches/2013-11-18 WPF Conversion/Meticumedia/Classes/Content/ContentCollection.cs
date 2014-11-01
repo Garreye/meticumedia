@@ -70,6 +70,15 @@ namespace Meticumedia.Classes
                 CollectionChanged(this, new NotifyCollectionChangedEventArgs(action, item));
         }
 
+        public void OnCollectionChanged(List<Content> items)
+        {
+            if (CollectionChanged != null)
+            {
+                NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items);
+                CollectionChanged(this, args);
+            }
+        }
+
         /// <summary>
         /// Static event that fires when show loading progress changes
         /// </summary>
@@ -153,6 +162,16 @@ namespace Meticumedia.Classes
         #endregion
 
         #region New base methods with locking
+
+        private void AddMultiple(List<Content> items)
+        {
+            lock (ContentLock)
+            {
+               foreach(Content item in items)
+                base.Add(item);
+            }
+            OnCollectionChanged(items);
+        }
 
         public new void Add(Content item)
         {
@@ -269,8 +288,7 @@ namespace Meticumedia.Classes
                         //Console.WriteLine(this.ToString() + " lock load");
                         this.LastUpdate = loadContent.LastUpdate;
                         this.Clear();
-                        foreach (Content content in loadContent)
-                            Add(content);
+                        AddMultiple(loadContent);
                     }
                     //Console.WriteLine(this.ToString() + " release load");
                 }

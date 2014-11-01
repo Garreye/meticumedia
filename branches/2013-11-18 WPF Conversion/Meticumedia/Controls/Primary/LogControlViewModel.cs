@@ -67,6 +67,8 @@ namespace Meticumedia.Controls
                 if (e.NewItems != null)
                     foreach (OrgItem addItem in e.NewItems)
                         OrgItems.Add(addItem);
+                
+               // OrgItemsCollection.Refresh();
             });
         }
 
