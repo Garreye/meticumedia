@@ -94,7 +94,7 @@ namespace Meticumedia.Classes
         /// <param name="e"></param>
         static void scanDirUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            updateTimer.Interval = 30000;
+            updateTimer.Interval = 120000;
             DoUpdate(true);
         }
 

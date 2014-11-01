@@ -239,11 +239,15 @@ namespace Meticumedia.Classes
             for (int i = 0; i < Math.Max(path1.Length, path2.Length); i++)
                 if (i >= path1.Length || i >= path2.Length || path1[i] != path2[i])
                 {
-                    diffCnt++;
+                    diffCnt++;                    
+
                     if (i < path1.Length)
                         diff1 = path1[i];
                     if (i < path2.Length)
                         diff2 = path2[i];
+
+                    if (diffCnt == 2)
+                        return false;
                 }
 
             return diffCnt < 2;

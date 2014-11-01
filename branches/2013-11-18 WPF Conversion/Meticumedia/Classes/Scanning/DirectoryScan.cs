@@ -62,23 +62,26 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="folders">Set of organization folders to get files from</param>
         /// <returns>List of files contained in folders</returns>
-        public List<OrgPath> GetFolderFiles(List<OrgFolder> folders, out List<OrgItem> autoMoves)
+        public List<OrgPath> GetFolderFiles(List<OrgFolder> folders, bool fast, out List<OrgItem> autoMoves)
         {
             autoMoves = new List<OrgItem>();
-            
+
             List<OrgPath> files = new List<OrgPath>();
             foreach (OrgFolder folder in folders)
                 GetFolderFiles(folder, folder.FolderPath, files, autoMoves);
 
             // Similarity checks
-            for(int i=1;i<files.Count;i++)
-                if (FileHelper.PathsVerySimilar(files[i].Path, files[i - 1].Path))
-                {
-                    if (files[i - 1].SimilarTo > 0)
-                        files[i].SimilarTo = files[i - 1].SimilarTo;
-                    else
-                        files[i].SimilarTo = i - 1;
-                }
+            if (!fast)
+                for (int i = 1; i < files.Count; i++)
+                    for (int j = i - 1; j >= Math.Max(0, j - 50); j--)
+                        if (FileHelper.PathsVerySimilar(files[i].Path, files[j].Path))
+                        {
+                            if (files[j].SimilarTo > 0)
+                                files[i].SimilarTo = files[j].SimilarTo;
+                            else
+                                files[i].SimilarTo = j;
+                            break;
+                        }
 
             return files;
         }
@@ -187,7 +190,7 @@ namespace Meticumedia.Classes
 
                 // Create items
                 List<OrgItem> autoMoves;
-                paths = GetFolderFiles(folders, out autoMoves);
+                paths = GetFolderFiles(folders, fast, out autoMoves);
                 this.Items.Clear();
                 foreach(OrgPath path in paths)
                     this.Items.Add(new OrgItem(OrgAction.TBD, path.Path, FileCategory.Unknown, path.OrgFolder));

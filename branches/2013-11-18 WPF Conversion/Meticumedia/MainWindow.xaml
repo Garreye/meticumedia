@@ -16,8 +16,8 @@
                 <MenuItem Header="Settings" Click="menuSettings_Click" />
             </MenuItem>
             <MenuItem Header="Help" >
-                <MenuItem Header="About" />                
-                <MenuItem Header="Donate" />
+                <MenuItem Header="About" Click="About_Click" />                
+                <MenuItem Header="Donate" Click="Donate_Click" />
             </MenuItem>
         </Menu>
         
