@@ -41,7 +41,9 @@ namespace Meticumedia.Classes
         /// </summary>
         protected virtual JsonRateLimit JSON_RATE_LIMITER { get { throw new NotImplementedException(); } }
 
-
+        /// <summary>
+        /// API key request parameter string value
+        /// </summary>
         protected virtual string API_KEY_PARAM_NAME { get { return "api_key"; } }
 
         #endregion

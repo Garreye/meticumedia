@@ -42,7 +42,7 @@ namespace Meticumedia.Classes
             // Do directory scan on all TV folders
             DirectoryScan dirScan = new DirectoryScan(false);
             dirScan.ProgressChange += dirScan_ProgressChange;
-            dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false, fast);
+            dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false, fast, true);
             List<OrgItem> results = dirScan.Items;
 
             // Check if show folder needs to be renamed!

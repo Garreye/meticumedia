@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Meticumedia.Classes;
 
 namespace MeticumediaTesting
 {
@@ -25,6 +26,8 @@ namespace MeticumediaTesting
         public MatchTestControl()
         {
             InitializeComponent();
+            Organization.LoadScanDirLog(this, new System.ComponentModel.DoWorkEventArgs(null));
+
             viewModel = new MatchTestWindowViewModel();
             this.DataContext = viewModel;
         }

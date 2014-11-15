@@ -164,7 +164,7 @@ namespace Meticumedia.Classes
         public TvShow(TvShow show)
             : this()
         {
-            Clone(show, true);
+            Clone(show);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace Meticumedia.Classes
         public TvShow(Content content)
             : this()
         {
-            base.Clone(content, true);
+            base.CloneAndHandlePath(content, true);
         }
 
         #endregion
@@ -205,18 +205,30 @@ namespace Meticumedia.Classes
             return this.DatabaseName == string.Empty ? "UNKNOWN" : this.DatabaseName;
         }
 
-        /// <summary>
-        /// Clones another instance of class 
-        /// </summary>
-        /// <param name="show">Show to clone</param>
-        public void Clone(TvShow show, bool replacePath)
+        public new void Clone(Content content)
         {
-            base.Clone(show, replacePath);
+            CloneAndHandlePath(content, true, false);
+        }
+
+        /// <summary>
+        /// Copies properties from another instance into this instance.
+        /// </summary>
+        /// <param name="content">Instance to copy properties from</param>
+        /// <param name="replacePath">Whether path related properties should be cloned or not</param>
+        /// <param name="handleEmptyPath">Whether to build path if one being cloned is empty</param>
+        public override void CloneAndHandlePath(Content content, bool replacePath, bool handleEmptyPath = true)
+        {
+            if (!(content is TvShow))
+                throw new Exception("Content must be TvShow");
+            TvShow show = content as TvShow;
+
+            base.CloneAndHandlePath(show, replacePath, handleEmptyPath);
+
             this.IncludeInSchedule = show.IncludeInSchedule;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
-            
 
+            // TODO: this is a hack
             App.Current.Dispatcher.Invoke((Action)delegate
             {
                 this.Episodes.Clear();

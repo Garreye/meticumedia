@@ -24,7 +24,7 @@ namespace Meticumedia.Controls
         public QueueControl()
         {
             InitializeComponent();
-            viewModel = new QueueControlViewModel();
+            viewModel = new QueueControlViewModel(dgQueue);
             this.DataContext = viewModel;
 
             OrgItemQueueableViewModel.ItemsToQueue += OrgItemQueueableViewModel_ItemsToQueue;

@@ -604,10 +604,10 @@ namespace Meticumedia.Controls
             switch (this.Content.ContentType)
             {
                 case ContentType.Movie:
-                    ((Movie)this.Content).Clone((Movie)this.SelectedSearchContent, false);
+                    ((Movie)this.Content).CloneAndHandlePath((Movie)this.SelectedSearchContent, false);
                     break;
                 case ContentType.TvShow:
-                    ((TvShow)this.Content).Clone((TvShow)this.SelectedSearchContent, false);
+                    ((TvShow)this.Content).CloneAndHandlePath((TvShow)this.SelectedSearchContent, false);
                     break;
             }
             this.Content.UpdateInfoFromDatabase();
@@ -626,6 +626,7 @@ namespace Meticumedia.Controls
 
         private void SimplifySearchString()
         {
+            this.SearchString = FileHelper.SimplifyFileName(this.SearchString, FileHelper.OptionalSimplifyRemoves.YearAndFollowing);
         }
         
         #endregion

@@ -109,6 +109,7 @@ namespace Meticumedia.Controls
         private void AddType()
         {
             this.FileTypes.Add(this.FileTypeEntry);
+            this.FileTypeEntry = string.Empty;
         }
 
         private void RemoveTypes()

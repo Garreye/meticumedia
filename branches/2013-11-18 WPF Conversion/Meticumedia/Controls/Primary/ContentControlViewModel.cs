@@ -142,12 +142,12 @@ namespace Meticumedia.Controls
             {
                 if (this.Content is Movie)
                 {
-                    (this.Content as Movie).Clone(cew.Results as Movie, false);
+                    (this.Content as Movie).CloneAndHandlePath(cew.Results as Movie, false);
                     Organization.Movies.Save();
                 }
                 else
                 {
-                    (this.Content as TvShow).Clone(cew.Results as TvShow, false);
+                    (this.Content as TvShow).CloneAndHandlePath(cew.Results as TvShow, false);
                     Organization.Shows.Save();
                 }
             }

@@ -354,7 +354,8 @@ namespace Meticumedia.Classes
             // Attempt to match against eaching matching expression
             foreach (string reStr in SeasonEpMatch)
             {
-                MatchCollection matches = Regex.Matches(simpleName, reStr, RegexOptions.IgnoreCase);
+                string newRe = @"((^|\W)s(eason)?\W?\d+\W?)?" + reStr;
+                MatchCollection matches = Regex.Matches(simpleName, newRe, RegexOptions.IgnoreCase);
                 for (int i = matches.Count - 1; i >= 0; i--)
                 {
                     string matchStr = simpleName.Substring(matches[i].Index, matches[i].Length);
@@ -423,7 +424,7 @@ namespace Meticumedia.Classes
         {
             new RemoveFileWord(Separator.None, Separator.None, "repack", FileWordType.None),
             new RemoveFileWord(Separator.None, Separator.None, "internal", FileWordType.None),
-            new RemoveFileWord(Separator.None, Separator.None, "(?:extended|final|directors)(?:\\W+cut)?", FileWordType.ContentFormat),
+            new RemoveFileWord(Separator.None, Separator.None, "(?:extended|final|directors|unrated)(?:\\W+cut)?", FileWordType.ContentFormat),
             new RemoveFileWord(Separator.None, Separator.None, "audio", FileWordType.None),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "cam", FileWordType.VideoQuality),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "dub", FileWordType.LanguageSubstitution),
@@ -454,7 +455,6 @@ namespace Meticumedia.Classes
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "srt", FileWordType.LanguageSubstitution),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "r5", FileWordType.None),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "cd\\d", FileWordType.FilePart),
-            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "\\d", FileWordType.FilePart),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "vost", FileWordType.LanguageSubstitution),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "hdtv", FileWordType.None),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "lol", FileWordType.None)
@@ -470,13 +470,14 @@ namespace Meticumedia.Classes
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "(?:and|&)", FileWordType.None, false, false),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, @"us|uk", FileWordType.None),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, @"the", FileWordType.None),
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "\\d", FileWordType.FilePart),
         };
 
         /// <summary>
         /// Optional remove file word types - matches OptionalRemoveWords items
         /// </summary>
         [Flags]
-        public enum OptionalSimplifyRemoves { None = 0, Year = 1, YearAndFollowing = 2, And = 4, Country = 8, The = 16 }
+        public enum OptionalSimplifyRemoves { None = 0, Year = 1, YearAndFollowing = 2, And = 4, Country = 8, The = 16, SingleDigitPart = 32 }
 
         /// <summary>
         /// Result from simplification process of a string.

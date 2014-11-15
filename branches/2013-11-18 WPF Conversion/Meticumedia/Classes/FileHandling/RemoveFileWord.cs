@@ -132,7 +132,13 @@ namespace Meticumedia.Classes
                     }
                     
                     // Remove the word from the text
-                    text = text.Remove(match.Groups[g].Index, match.Groups[g].Length);
+                    try
+                    {
+                        text = text.Remove(match.Groups[g].Index, match.Groups[g].Length);
+                    }
+                    catch
+                    {
+                    }
                 }
                 
                 // Remove double spacing
@@ -189,7 +195,7 @@ namespace Meticumedia.Classes
                     break;
                 case Separator.Nonnumeric:
                     if(RemoveEverythingAfter)
-                        re += "(\\D.*)$";
+                        re += "(?:((\\D.*)|$)|$)";
                     else if (RemoveFollowingEndWord)
                         re += "(?:(\\W+\\w+\\W*)$|$|\\D|\\W)";
                     else

@@ -38,6 +38,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="Perform" Margin="3" VerticalAlignment="Center" />
@@ -49,12 +50,9 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                     <TextBlock Grid.Column="2" Text="on" Margin="3" VerticalAlignment="Center" />
-                    <ComboBox Grid.Column="3" x:Name="cmbScanSelection" Margin="3" ItemsSource="{Binding RunSelections}" SelectedItem="{Binding SelectedRunSelection}" />
-                    <CheckBox Grid.Column="4" Content="Fast Scan" x:Name="chkFastScan" Margin="3" VerticalAlignment="Center" >
-                        <CheckBox.ToolTip>
-                            <TextBlock Text="Skips all items that require database searching." />
-                        </CheckBox.ToolTip>
-                    </CheckBox>
+                    <ComboBox Grid.Column="3" Margin="3" ItemsSource="{Binding RunSelections}" SelectedItem="{Binding SelectedRunSelection}" />
+                    <CheckBox Grid.Column="4" Content="Fast Scan" IsChecked="{Binding Fast}" Margin="3" VerticalAlignment="Center" ToolTip="Skips all items that require database searching." />
+                    <CheckBox Grid.Column="5" Content="Reuse Results" IsChecked="{Binding ReuseResults}" Margin="3" VerticalAlignment="Center" ToolTip="Allow results from previously run scans to be reused. Only applies to scan folder check." />
                 </Grid>
 
                 <Grid Grid.Row="1">

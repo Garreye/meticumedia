@@ -70,7 +70,7 @@
                 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Show" Margin="3" VerticalAlignment="Center" />
                 <ComboBox Grid.Row="0" Grid.Column="1" Margin="3" ItemsSource="{Binding Shows}" SelectedItem="{Binding Item.TvEpisode.Show}" />
-                <Button Grid.Row="0" Grid.Column="2" Content="New..." Margin="3" Padding="10,1" VerticalAlignment="Center" />
+                <Button Grid.Row="0" Grid.Column="2" Content="New..." Margin="3" Padding="10,1" VerticalAlignment="Center" Command="{Binding NewTvShowCommand}" />
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Season" Margin="3" VerticalAlignment="Center" />
                 <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Value="{Binding SeasonNumber}" Width="50" HorizontalAlignment="Left" Margin="3" />

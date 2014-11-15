@@ -75,7 +75,7 @@ namespace Meticumedia.Classes
                         return true;
                     break;
                 case FilterType.Missing:
-                    if (ep.Missing == MissingStatus.Missing && ep.Aired)
+                    if (ep.Season > 0 && ep.Missing == MissingStatus.Missing && ep.Aired)
                         return true;
                     break;
                 case FilterType.InScanDir:

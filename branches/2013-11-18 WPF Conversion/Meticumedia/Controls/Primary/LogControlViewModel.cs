@@ -86,7 +86,7 @@ namespace Meticumedia.Controls
                     Organization.ActionLog.Remove(item);
                 this.OrgItems.Remove(item);
             }
-            Organization.SaveLog();
+            Organization.SaveActionLog();
             Organization.ActionLog.CollectionChanged += ActionLog_CollectionChanged;
         }
 

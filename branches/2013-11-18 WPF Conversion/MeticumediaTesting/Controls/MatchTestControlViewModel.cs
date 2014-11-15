@@ -121,9 +121,13 @@ namespace MeticumediaTesting
         {
             this.ScanDirPaths.Clear();
             List<OrgItem> autoMoves;
-            List<OrgPath> paths = scan.GetFolderFiles(Settings.ScanDirectories.ToList(), true, out autoMoves);
+            List<OrgPath> paths = scan.GetFolderFiles(Settings.ScanDirectories.ToList(), true, true, out autoMoves);
             foreach (OrgPath path in paths)
-                this.ScanDirPaths.Add(path);
+            {
+                FileCategory fileCat = FileHelper.CategorizeFile(path, path.Path);
+                if (fileCat == FileCategory.TvVideo || fileCat == FileCategory.MovieVideo)
+                    this.ScanDirPaths.Add(path);
+            }
 
             if (this.ScanDirPaths.Count > 0)
                 this.SelectedScanDirPath = this.ScanDirPaths[0];
@@ -168,7 +172,8 @@ namespace MeticumediaTesting
                 this.MatchProcessing.Clear();
             });
 
-            OrgItem item = scan.ProcessPath(path, false, false, false, false, 0);
+            bool fromLog;
+            OrgItem item = scan.ProcessPath(path, false, false, false, false, 0, false, out fromLog);
 
             App.Current.Dispatcher.Invoke((Action)delegate
             {

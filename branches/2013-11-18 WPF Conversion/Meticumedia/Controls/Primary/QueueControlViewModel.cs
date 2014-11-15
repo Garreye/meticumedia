@@ -15,7 +15,7 @@ using Meticumedia.WPF;
 
 namespace Meticumedia.Controls
 {
-    public class QueueControlViewModel: ProgressViewModel
+    public class QueueControlViewModel : OrgItemDisplayViewModel
     {
         #region Events
 
@@ -293,10 +293,6 @@ namespace Meticumedia.Controls
 
         #region Properties
 
-        public ObservableCollection<OrgItem> QueueItems { get; set; }
-
-        public IList SelectedQueueItems { get; set; }
-
         public enum PauseButtonStates { Pause, Resume };
 
         public PauseButtonStates PauseButtonState
@@ -324,10 +320,11 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public QueueControlViewModel()
+        public QueueControlViewModel(DataGrid grid) : base(grid)
         {
-            this.QueueItems = new ObservableCollection<OrgItem>();
-            this.QueueItems.CollectionChanged += QueueItems_CollectionChanged;
+            this.OrgItems.CollectionChanged += QueueItems_CollectionChanged;
+            this.ActionFilter = OrgAction.All;
+            this.CategoryFilter = FileCategory.All;
 
             // Initialize queue worker
             queueWorker = new BackgroundWorker();
@@ -340,7 +337,6 @@ namespace Meticumedia.Controls
 
             // Register to queuing event
             OrgItemQueueableViewModel.ItemsToQueue += HandleItemsToQueue;
-
         }       
 
         #endregion
@@ -349,7 +345,7 @@ namespace Meticumedia.Controls
 
         void QueueItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            OnQueueItemsChanged(this, this.QueueItems);
+            OnQueueItemsChanged(this, this.OrgItems);
         } 
 
         /// <summary>
@@ -409,26 +405,10 @@ namespace Meticumedia.Controls
         {
             // Add each item to end of queue
             foreach (OrgItem item in items)
-                this.QueueItems.Add(item);
+                this.OrgItems.Add(item);
 
             // Run queue
             StartQueue();
-        }
-
-
-        /// <summary>
-        /// Set queue control button enables.
-        /// </summary>
-        /// <param name="enable">Value to set enables to</param>
-        private void SetItemButtonEnables(bool enable)
-        {
-            //btnPause.Enabled = enable;
-            //btnPlay.Enabled = enable;
-            //btnCancel.Enabled = enable;
-            //btnMoveUp.Enabled = enable;
-            //btnMoveDown.Enabled = enable;
-            //btnMoveTop.Enabled = enable;
-            //btnMoveBottom.Enabled = enable;
         }
 
         /// <summary>
@@ -436,15 +416,14 @@ namespace Meticumedia.Controls
         /// </summary>
         private void PauseSelected()
         {
-            if (this.SelectedQueueItems == null)
+            if (this.SelectedOrgItems == null)
                 return;
             
-            for (int i = 0; i < this.SelectedQueueItems.Count; i++)
+            for (int i = 0; i < this.SelectedOrgItems.Count; i++)
             {
-                if (((OrgItem)this.SelectedQueueItems[i]).QueueStatus == OrgQueueStatus.Enabled)
-                    ((OrgItem)this.SelectedQueueItems[i]).QueueStatus = OrgQueueStatus.Paused;
+                if (((OrgItem)this.SelectedOrgItems[i]).QueueStatus == OrgQueueStatus.Enabled)
+                    ((OrgItem)this.SelectedOrgItems[i]).QueueStatus = OrgQueueStatus.Paused;
             }
-            //lvQueue.Focus();
         }
 
         /// <summary>
@@ -452,18 +431,15 @@ namespace Meticumedia.Controls
         /// </summary>
         private void ResumeSelected()
         {
-            if (this.SelectedQueueItems == null)
+            if (this.SelectedOrgItems == null)
                 return;
             
             // Deassert paused property on all selected items and save selection
-            for (int i = 0; i < this.SelectedQueueItems.Count; i++)
+            for (int i = 0; i < this.SelectedOrgItems.Count; i++)
             {
-                if (((OrgItem)this.SelectedQueueItems[i]).QueueStatus == OrgQueueStatus.Paused)
-                    ((OrgItem)this.SelectedQueueItems[i]).QueueStatus = OrgQueueStatus.Enabled;
+                if (((OrgItem)this.SelectedOrgItems[i]).QueueStatus == OrgQueueStatus.Paused)
+                    ((OrgItem)this.SelectedOrgItems[i]).QueueStatus = OrgQueueStatus.Enabled;
             }
-
-            // Refresh queue listview
-            //lvQueue.Focus();
 
             // Run queue
             StartQueue();
@@ -474,18 +450,15 @@ namespace Meticumedia.Controls
         /// </summary>
         private void CancelSelected()
         {
-            if (this.SelectedQueueItems == null)
+            if (this.SelectedOrgItems == null)
                 return;
             
             // Confirm cancel with user
             if (MessageBox.Show("Are you sure you want to remove the selected items from the queue?", "Sure?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 // Remove all selected items from queue
-                for (int i = 0; i < this.SelectedQueueItems.Count; i++)
-                    this.QueueItems.Remove((OrgItem)this.SelectedQueueItems[i]);
-
-                // Disable buttons
-                //SetItemButtonEnables(false);
+                for (int i = 0; i < this.SelectedOrgItems.Count; i++)
+                    this.OrgItems.Remove((OrgItem)this.SelectedOrgItems[i]);
             }
         }
 
@@ -504,20 +477,20 @@ namespace Meticumedia.Controls
 
         public void MoveUpSelectedItems()
         {
-            if (this.SelectedQueueItems == null)
+            if (this.SelectedOrgItems == null)
                 return;
             
             bool roomToMove = false;
-            for (int i = 0; i < this.QueueItems.Count; i++)
+            for (int i = 0; i < this.OrgItems.Count; i++)
             {
-                OrgItem item = this.QueueItems[i];
-                if (this.SelectedQueueItems.Contains(item))
+                OrgItem item = this.OrgItems[i];
+                if (this.SelectedOrgItems.Contains(item))
                 {
                     if (!roomToMove)
                         continue;
 
-                    this.QueueItems.Remove(item);
-                    this.QueueItems.Insert(i - 1, item);
+                    this.OrgItems.Remove(item);
+                    this.OrgItems.Insert(i - 1, item);
                 }
                 else
                     roomToMove = true;
@@ -539,20 +512,20 @@ namespace Meticumedia.Controls
 
         public void MoveSelectedItemToTop()
         {
-            if (this.SelectedQueueItems == null)
+            if (this.SelectedOrgItems == null)
                 return;
             
             int topPos = 0;
-            for (int i = 0; i < this.QueueItems.Count; i++)
+            for (int i = 0; i < this.OrgItems.Count; i++)
             {
-                OrgItem item = this.QueueItems[i];
-                if (!this.SelectedQueueItems.Contains(item))
+                OrgItem item = this.OrgItems[i];
+                if (!this.SelectedOrgItems.Contains(item))
                     continue;
 
                 if (i != topPos)
                 {
-                    this.QueueItems.Remove(item);
-                    this.QueueItems.Insert(topPos++, item);
+                    this.OrgItems.Remove(item);
+                    this.OrgItems.Insert(topPos++, item);
                 }
             }
         }
@@ -572,20 +545,20 @@ namespace Meticumedia.Controls
 
         public void MoveDownSelectedItems()
         {
-            if (this.SelectedQueueItems == null)
+            if (this.SelectedOrgItems == null)
                 return;
             
             bool roomToMove = false;
-            for (int i = this.QueueItems.Count - 1; i >= 0; i--)
+            for (int i = this.OrgItems.Count - 1; i >= 0; i--)
             {
-                OrgItem item = this.QueueItems[i];
-                if (this.SelectedQueueItems.Contains(item))
+                OrgItem item = this.OrgItems[i];
+                if (this.SelectedOrgItems.Contains(item))
                 {
                     if (!roomToMove)
                         continue;
 
-                    this.QueueItems.Remove(item);
-                    this.QueueItems.Insert(i + 1, item);
+                    this.OrgItems.Remove(item);
+                    this.OrgItems.Insert(i + 1, item);
                 }
                 else
                     roomToMove = true;
@@ -607,20 +580,20 @@ namespace Meticumedia.Controls
 
         public void MoveSelectedItemToBottom()
         {
-            if (this.SelectedQueueItems == null)
+            if (this.SelectedOrgItems == null)
                 return;
 
-            int botPos = this.QueueItems.Count - 1;
-            for (int i = this.QueueItems.Count - 1; i >= 0; i--)
+            int botPos = this.OrgItems.Count - 1;
+            for (int i = this.OrgItems.Count - 1; i >= 0; i--)
             {
-                OrgItem item = this.QueueItems[i];
-                if (!this.SelectedQueueItems.Contains(item))
+                OrgItem item = this.OrgItems[i];
+                if (!this.SelectedOrgItems.Contains(item))
                     continue;
 
                 if (i != botPos)
                 {
-                    this.QueueItems.Remove(item);
-                    this.QueueItems.Insert(botPos--, item);
+                    this.OrgItems.Remove(item);
+                    this.OrgItems.Insert(botPos--, item);
                 }
             }
         }
@@ -644,7 +617,7 @@ namespace Meticumedia.Controls
         /// </summary>
         private void ClearQueue()
         {
-            this.QueueItems.Clear();
+            this.OrgItems.Clear();
         }
 
         #endregion        
@@ -677,7 +650,7 @@ namespace Meticumedia.Controls
         private void QueueRun()
         {
             // Check if queue is empty
-            if (this.QueueItems.Count == 0)
+            if (this.OrgItems.Count == 0)
                 return;
 
             // Give some time for display to update
@@ -687,24 +660,24 @@ namespace Meticumedia.Controls
             while (true)
             {
                 // Refresh items
-                if (this.QueueItems.Count == 0)
+                if (this.OrgItems.Count == 0)
                     break;
 
                 // Check if paused
                 if (!OrgItem.QueuePaused)
                 {
                     // Get next active item
-                    OrgItem item = this.QueueItems[0];
+                    OrgItem item = this.OrgItems[0];
                     int index = -1;
 
-                    for (int i = 0; i < this.QueueItems.Count; i++)
-                        if (this.QueueItems[i].QueueStatus == OrgQueueStatus.Enabled)
+                    for (int i = 0; i < this.OrgItems.Count; i++)
+                        if (this.OrgItems[i].QueueStatus == OrgQueueStatus.Enabled)
                         {
-                            item = this.QueueItems[i];
+                            item = this.OrgItems[i];
                             index = i;
                             break;
                         }
-                        else if (RemoveQueueItemIfNeededSafe(this.QueueItems[i]))
+                        else if (RemoveQueueItemIfNeededSafe(this.OrgItems[i]))
                             i--;
 
                     // If found item is paused, sleep then retry
@@ -772,7 +745,7 @@ namespace Meticumedia.Controls
 
         private void RemoveQueueItem(OrgItem item)
         {
-            this.QueueItems.Remove(item);
+            this.OrgItems.Remove(item);
         }
 
         /// <summary>
