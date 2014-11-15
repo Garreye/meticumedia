@@ -9,50 +9,107 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Collections.ObjectModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Television show class.
     /// </summary>
     public class TvShow : Content
     {
+        public static readonly TvShow AllShows = new TvShow("All shows");
+        
         #region Properties
 
         /// <summary>
         /// Database to use for show episodes
         /// </summary>
-        public TvDataBaseSelection DataBase { get { return (TvDataBaseSelection)DatabaseSelection; } }
+        public TvDataBaseSelection Database { get { return (TvDataBaseSelection)DatabaseSelection; } }
 
-        /// <summary>
-        /// Episodes of show, indexed by season
-        /// </summary>
-        public TvSeasonCollection Seasons { get; set; }
+        public ObservableCollection<TvEpisode> Episodes
+            {
+                get { return this.episodes; }
+            set
+            {
+                this.episodes = value;
+                OnPropertyChanged("Episodes");
+            }
+        }
+
+        private ObservableCollection<TvEpisode> episodes = new ObservableCollection<TvEpisode>();
 
         /// <summary>
         /// Whether to check for missing episodes during scan
         /// </summary>
-        public bool DoMissingCheck { get; set; }
+        public bool DoMissingCheck
+        {
+            get { return this.doMissingCheck; }
+            set
+            {
+                this.doMissingCheck = value;
+                OnPropertyChanged("DoMissingCheck");
+            }
+        }
+
+        private bool doMissingCheck = true;
 
         /// <summary>
         /// Whether to include show in scehdule.
         /// </summary>
-        public bool IncludeInSchedule { get; set; }
+        public bool IncludeInSchedule
+        {
+            get { return this.includeInSchedule; }
+            set
+            {
+                this.includeInSchedule = value;
+                OnPropertyChanged("IncludeInSchedule");
+            }
+        }
 
-        /// <summary>
-        /// Determines whether or not the content is to be included in scanning.
-        /// </summary>
-        public override bool IncludeInScan { get { return this.DoRenaming || this.DoMissingCheck; } }
+        private bool includeInSchedule = true;
 
         /// <summary>
         /// List of alternative names to match to
         /// </summary>
-        public List<string> AlternativeNameMatches { get; set; }
+        public ObservableCollection<string> AlternativeNameMatches
+        {
+            get { return this.alternativeNameMatches; }
+            set
+            {
+                this.alternativeNameMatches = value;
+                OnPropertyChanged("AlternativeNameMatches");
+            }
+        }
+
+        private ObservableCollection<string> alternativeNameMatches = new ObservableCollection<string>();
+
+        public override List<int> Seasons
+        {
+            get
+            {
+                List<int> seasons = new List<int>();
+                foreach (TvEpisode ep in this.Episodes)
+                    if (!seasons.Contains(ep.Season))
+                        seasons.Add(ep.Season);
+                return seasons;
+            }
+        }
 
         /// <summary>
         /// Use DVD episode ordering
         /// </summary>
-        public bool DvdEpisodeOrder { get; set; }
+        public bool DvdEpisodeOrder
+        {
+            get { return this.dvdEpisodeOrder; }
+            set
+            {
+                this.dvdEpisodeOrder = value;
+                OnPropertyChanged("DvdEpisodeOrder");
+            }
+        }
+
+        private bool dvdEpisodeOrder = false;
 
         #endregion
 
@@ -65,35 +122,39 @@ namespace Meticumedia
         /// <param name="id">TheTvDb ID for the show</param>
         /// <param name="directory">Directory where episode for the show are contained</param>
         public TvShow(string name, int id, int year, string directory, string contentFolder)
-            : this()
+            : this(name)
         {
-            this.Name = name;
             this.Id = id;
-            this.Date = new DateTime(year > 0 ? year : 1, 1, 1);
+            this.DatabaseYear = year;
             this.Path = directory;
             this.RootFolder = contentFolder;
+        }
+
+        /// <summary>
+        /// Constructor with known name
+        /// </summary>
+        /// <param name="name">Name of the show</param>
+        /// <param name="id">TheTvDb ID for the show</param>
+        /// <param name="directory">Directory where episode for the show are contained</param>
+        public TvShow(string name)
+            : this()
+        {
+            this.DatabaseName = name;
         }
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public TvShow()
+            : base()
         {
-            this.Seasons = new TvSeasonCollection();
-            this.Name = string.Empty;
-            this.Id = 0;
-            this.Date = new DateTime();
-            this.Path = string.Empty;
-            this.RootFolder = string.Empty;
+            this.ContentType = Classes.ContentType.TvShow;
             ContentRootFolder defaultFolder;
             if (Settings.GetDefaultTvFolder(out defaultFolder))
                 this.RootFolder = defaultFolder.FullPath;
-            this.Overview = string.Empty;
-            this.DoRenaming = true;
-            this.DoMissingCheck = true;
-            this.IncludeInSchedule = true;
-            this.AlternativeNameMatches = new List<string>();
-            this.DatabaseSelection = (int)Settings.DefaultTvDatabase;
+
+            this.episodes.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(episodes_CollectionChanged);
+            this.alternativeNameMatches.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(alternativeNameMatches_CollectionChanged);
         }
 
         /// <summary>
@@ -113,7 +174,22 @@ namespace Meticumedia
         public TvShow(Content content)
             : this()
         {
-            base.Clone(content);
+            base.CloneAndHandlePath(content, true);
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void alternativeNameMatches_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("AlternativeNameMatches");
+        }
+
+        private void episodes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("Episodes");
+            OnPropertyChanged("Seasons");
         }
 
         #endregion
@@ -126,33 +202,44 @@ namespace Meticumedia
         /// <returns>string for instance</returns>
         public override string ToString()
         {
-            return this.Name == string.Empty ? "UNKNOWN" : this.Name;
+            return this.DatabaseName == string.Empty ? "UNKNOWN" : this.DatabaseName;
+        }
+
+        public new void Clone(Content content)
+        {
+            CloneAndHandlePath(content, true, false);
         }
 
         /// <summary>
-        /// Clones another instance of class 
+        /// Copies properties from another instance into this instance.
         /// </summary>
-        /// <param name="show">Show to clon</param>
-        public void Clone(TvShow show)
+        /// <param name="content">Instance to copy properties from</param>
+        /// <param name="replacePath">Whether path related properties should be cloned or not</param>
+        /// <param name="handleEmptyPath">Whether to build path if one being cloned is empty</param>
+        public override void CloneAndHandlePath(Content content, bool replacePath, bool handleEmptyPath = true)
         {
-            this.DatabaseSelection = show.DatabaseSelection;
-            this.Name = show.Name;
-            this.RootFolder = show.RootFolder;
-            this.Overview = show.Overview;
-            this.DoRenaming = show.DoRenaming;
-            this.Path = show.Path;
-            this.Found = show.Found;
+            if (!(content is TvShow))
+                throw new Exception("Content must be TvShow");
+            TvShow show = content as TvShow;
+
+            base.CloneAndHandlePath(show, replacePath, handleEmptyPath);
+
             this.IncludeInSchedule = show.IncludeInSchedule;
-            this.Genres = show.Genres;
-            this.Seasons = show.Seasons;
-            this.Id = show.Id;
-            this.Date = show.Date;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
-            foreach (TvSeason season in this.Seasons)
-                foreach (TvEpisode episode in season.Episodes)
-                    episode.Show = show.Name;
-            this.AlternativeNameMatches = new List<string>();
+
+            // TODO: this is a hack
+            App.Current.Dispatcher.Invoke((Action)delegate
+            {
+                this.Episodes.Clear();
+                foreach (TvEpisode episode in show.Episodes)
+                {
+                    TvEpisode copyEp = new TvEpisode(episode);
+                    this.Episodes.Add(copyEp);
+                    copyEp.Show = this;
+                }
+            });
+            this.AlternativeNameMatches = new ObservableCollection<string>();
             foreach (string altName in show.AlternativeNameMatches)
                 this.AlternativeNameMatches.Add(altName);
         }
@@ -163,15 +250,14 @@ namespace Meticumedia
         public override void UpdateMissing()
         {
             // Mark all as missing - TODO: check file path and check that file still exists, if so don't mark as missing!
-            foreach (TvSeason season in Seasons)
-                foreach (TvEpisode ep in season.Episodes)
-                    ep.Missing = TvEpisode.MissingStatus.Missing;
+            foreach (TvEpisode ep in this.Episodes)
+                ep.Missing = MissingStatus.Missing;
 
             // Search through TV show directory
             if (Directory.Exists(this.Path))
                 UpdateMissingRecursive(this.Path);
 
-            // Search through scan directoru
+            // Search through scan directory
             foreach (OrgItem item in TvItemInScanDirHelper.Items)
             {
                 List<TvEpisode> eps = new List<TvEpisode>();
@@ -180,12 +266,12 @@ namespace Meticumedia
 
                 foreach (TvEpisode ep in eps)
                 {
-                    if (ep.Show == this.Name)
+                    if (ep.Show.DatabaseName == this.DatabaseName)
                     {
                         TvEpisode matchEp;
-                        if (this.FindEpisode(ep.Season, ep.Number, false, out matchEp))
-                            if (matchEp.Missing == TvEpisode.MissingStatus.Missing)
-                                matchEp.Missing = TvEpisode.MissingStatus.InScanDirectory;
+                        if (this.FindEpisode(ep.Season, ep.DisplayNumber, false, out matchEp))
+                            if (matchEp.Missing == MissingStatus.Missing)
+                                matchEp.Missing = MissingStatus.InScanDirectory;
                     }
                 }
             }
@@ -201,15 +287,15 @@ namespace Meticumedia
             foreach (string file in files)
             {
                 int season, episode1, episode2;
-                if (FileHelper.GetEpisodeInfo(file, this.Name, out season, out episode1, out episode2))
+                if (FileHelper.GetEpisodeInfo(file, this.DatabaseName, out season, out episode1, out episode2))
                 {
                     // Mark episodes as not missing
                     TvEpisode ep1 = null, ep2 = null;
                     bool matched1 = FindEpisode(season, episode1, false, out ep1);
                     bool matched2 = episode2 != -1 && FindEpisode(season, episode2, false, out ep2);
 
-                    if (matched1) ep1.Missing = TvEpisode.MissingStatus.Located;
-                    if (matched2) ep2.Missing = TvEpisode.MissingStatus.Located;
+                    if (matched1) ep1.Missing = MissingStatus.Located;
+                    if (matched2) ep2.Missing = MissingStatus.Located;
 
                     // Update file info
                     if (matched1 && matched2)
@@ -235,10 +321,9 @@ namespace Meticumedia
         public List<TvEpisode> GetMissingEpisodes(bool includeIgnored)
         {
             List<TvEpisode> list = new List<TvEpisode>();
-            foreach (TvSeason season in Seasons)
-                foreach (TvEpisode ep in season.Episodes)
-                    if (ep.Missing == TvEpisode.MissingStatus.Missing && ep.Aired && (!ep.Ignored || includeIgnored))
-                        list.Add(ep);
+            foreach (TvEpisode ep in this.Episodes)
+                if (ep.Missing == MissingStatus.Missing && ep.Aired && (!ep.Ignored || includeIgnored))
+                    list.Add(ep);
             return list;
         }
 
@@ -252,13 +337,12 @@ namespace Meticumedia
         public bool FindEpisode(int seasonNumber, int episodeNumber, bool databaseNum, out TvEpisode episode)
         {
             episode = null;
-            foreach (TvSeason season in Seasons)
-                foreach (TvEpisode ep in season.Episodes)
-                    if (ep.Season == seasonNumber && ((ep.Number == episodeNumber && !databaseNum) || (ep.DatabaseNumber == episodeNumber && databaseNum)))
-                    {
-                        episode = ep;
-                        return true;
-                    }
+            foreach (TvEpisode ep in this.Episodes)
+                if (ep.Season == seasonNumber && ((ep.DisplayNumber == episodeNumber && !databaseNum) || (ep.DatabaseNumber == episodeNumber && databaseNum)))
+                {
+                    episode = ep;
+                    return true;
+                }
             return false;
         }
 
@@ -283,7 +367,7 @@ namespace Meticumedia
         public string BuildFilePath(TvEpisode episode1, TvEpisode episode2, string path)
         {
             // New season created to prevent exception if episode doesn't fall into a valid season
-            return this.Path + "\\" + (new TvSeason(episode1.Season)).ToString() + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
+            return this.Path + "\\" + episode1.SeasonName + "\\" + BuildFileName(episode1, episode2, path) + System.IO.Path.GetExtension(path).ToLower();
         }
 
         /// <summary>
@@ -293,6 +377,52 @@ namespace Meticumedia
         {
             TvDatabaseHelper.FullShowSeasonsUpdate(this);
             this.LastUpdated = DateTime.Now;
+        }
+
+        #endregion
+
+        #region Equals
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TvShow))
+                return false;
+
+            if (!base.Equals(obj))
+                return false;
+
+            TvShow show = obj as TvShow;
+
+            if (this.IncludeInSchedule != show.IncludeInSchedule ||
+                this.DoMissingCheck != show.DoMissingCheck ||
+                this.DvdEpisodeOrder != show.DvdEpisodeOrder||
+                this.Episodes.Count != show.Episodes.Count ||
+                this.AlternativeNameMatches.Count != show.AlternativeNameMatches.Count)
+            {
+                return false;
+            }
+
+            for(int i=0;i<this.Episodes.Count;i++)
+                if(!this.Episodes[i].Equals(show.Episodes[i]))
+                    return false;
+
+            for(int i=0;i<this.AlternativeNameMatches.Count;i++)
+                if(!this.AlternativeNameMatches[i].Equals(show.AlternativeNameMatches[i]))
+                    return false;
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            //int hash = 13;
+            //hash = (hash * 7) + base.GetHashCode();
+            //hash = (hash * 7) + IncludeInSchedule.GetHashCode();
+            //hash = (hash * 7) + DoMissingCheck.GetHashCode();
+            //hash = (hash * 7) + DvdEpisodeOrder.GetHashCode();
+            //hash = (hash * 7) + AlternativeNameMatches.GetHashCode();
+            //return hash;
+            return base.GetHashCode();
         }
 
         #endregion
@@ -312,7 +442,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Seasons, DoMissing, IncludeInSchedule, AlternativeNameMatches, DvdEpisodeOrder };
+        private enum XmlElements { Seasons, Episodes, DoMissing, IncludeInSchedule, AlternativeNameMatches, DvdEpisodeOrder };
 
         /// <summary>
         /// Saves instance to XML file.
@@ -332,12 +462,14 @@ namespace Meticumedia
                 switch (element)
                 {
                     case XmlElements.Seasons:
+                        // Deprecated
+                        break;
+                    case XmlElements.Episodes:
                         xw.WriteStartElement(element.ToString());
-                        foreach (TvSeason season in this.Seasons)
-                            season.Save(xw);
+                        foreach (TvEpisode episode in this.Episodes)
+                            episode.Save(xw);
                         xw.WriteEndElement();
                         break;
-
                     case XmlElements.DoMissing:
                         value = this.DoMissingCheck.ToString();
                         break;
@@ -389,13 +521,31 @@ namespace Meticumedia
                 string value = propNode.InnerText;
                 switch (element)
                 {
-                    case XmlElements.Seasons:
-                        this.Seasons = new TvSeasonCollection();
+                    case XmlElements.Seasons: // Support for older versions
+                        this.Episodes.Clear();
                         foreach (XmlNode seasNode in propNode.ChildNodes)
                         {
-                            TvSeason season = new TvSeason();
-                            if (season.Load(seasNode))
-                                this.Seasons.Add(season);
+                            foreach (XmlNode seasPropNode in seasNode.ChildNodes)
+                            {
+                                if(seasPropNode.Name == "Episodes")
+                                {
+                                    foreach(XmlNode epNode in seasPropNode.ChildNodes)
+                                    {
+                                        TvEpisode episode = new TvEpisode(this);
+                                        episode.Load(epNode);
+                                        Episodes.Add(episode);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case XmlElements.Episodes:
+                        this.Episodes.Clear();
+                        foreach(XmlNode epNode in propNode.ChildNodes)
+                        {
+                            TvEpisode episode = new TvEpisode(this);
+                            episode.Load(epNode);
+                            Episodes.Add(episode);
                         }
                         break;
                     case XmlElements.DoMissing:
@@ -409,7 +559,7 @@ namespace Meticumedia
                         this.IncludeInSchedule = include;
                         break;
                     case XmlElements.AlternativeNameMatches:
-                        this.AlternativeNameMatches = new List<string>();
+                        this.AlternativeNameMatches = new ObservableCollection<string>();
                         foreach (XmlNode matchNode in propNode.ChildNodes)
                             if (!string.IsNullOrWhiteSpace(matchNode.InnerText))
                                 this.AlternativeNameMatches.Add(matchNode.InnerText);

@@ -7,16 +7,17 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace Meticumedia
 {
-
     /// <summary>
     /// Collection of TvSeason objects. Custom object used so that
     /// seasons can be accessed by the season number. (List cannot be used because
     /// seasons may or may not be consecutive, and may or may not start at 0.)
     /// </summary>
-    public class TvSeasonCollection : ICollection<TvSeason>, ICollection
+    public class TvSeasonCollection : ICollection<TvSeason>, ICollection, INotifyCollectionChanged
     {
         #region Constructor
 
@@ -29,6 +30,28 @@ namespace Meticumedia
         }
 
          #endregion
+
+        #region Events
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        protected void OnCollectionChanged(NotifyCollectionChangedAction action)
+        {
+            if (CollectionChanged != null)
+            {
+                CollectionChanged(this, new NotifyCollectionChangedEventArgs(action));
+            }
+        }
+
+        protected void OnCollectionChanged(NotifyCollectionChangedAction action, TvSeason item)
+        {
+            if (CollectionChanged != null)
+            {
+                CollectionChanged(this, new NotifyCollectionChangedEventArgs(action, item));
+            }
+        }
+
+        #endregion
 
         #region Accessor
 
@@ -48,10 +71,7 @@ namespace Meticumedia
                         index = i;
                         break;
                     }
-                if (index >= 0)
-                    return innerList[index];
-                else
-                    return null;
+                return innerList[index];
             }
             set
             {
@@ -157,6 +177,7 @@ namespace Meticumedia
         public virtual void Add(TvSeason season)
         {
             innerList.Add(season);
+            OnCollectionChanged(NotifyCollectionChangedAction.Add, season);
         }
 
         /// <summary>
@@ -166,11 +187,13 @@ namespace Meticumedia
         /// <returns>Whether the season was removed</returns>
         public virtual bool Remove(TvSeason season) 
         {
+            
             for (int i = 0; i < innerList.Count; i++)
             {
                 if (innerList[i].Number == season.Number)
                 {
                     innerList.RemoveAt(i);
+                    OnCollectionChanged(NotifyCollectionChangedAction.Remove, season);
                     return true;
                 }
             }
@@ -231,6 +254,7 @@ namespace Meticumedia
         public virtual void Clear()
         {
             innerList.Clear();
+            OnCollectionChanged(NotifyCollectionChangedAction.Reset);
         }
 
         /// <summary>

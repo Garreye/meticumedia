@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Static helper class with methods for aiding in actions related to files.
@@ -26,51 +26,55 @@ namespace Meticumedia
         /// Categorize a file based on extension
         /// </summary>
         /// <param name="file">The file name string</param>
+        /// <param name="matchTo">String to match TV categorization to</param>
         /// <returns>The file category</returns>
-        public static FileCategory CategorizeFile(OrgPath file)
-        {
-            // Get file extension
-            string extenstion = Path.GetExtension(file.Path).ToLower();
-            
+        public static FileCategory CategorizeFile(OrgPath file, string matchTo)
+        {            
             // Check if ignored
             if (file.OrgFolder != null && file.OrgFolder.IsIgnored(file.Path))
-                return FileCategory.Ignored;
+                return FileCategory.Ignored;            
 
             // Check against each type
             foreach (string ext in Settings.VideoFileTypes)
             {
-                Regex extRe = new Regex(@"\." + ext + "$");
-                Match extMatch = extRe.Match(extenstion);
-
-                if (extMatch.Success)
+                if (FileTypeMatch(ext, file.Path))
                 {
                     // Check if sample!
-                    if (file.Path.ToLower().Contains("sample"))
+                    if (matchTo.ToLower().Contains("sample"))
                         return FileCategory.Trash;
 
-                    if (IsTvEpisode(file.Path))
+                    if (IsTvEpisode(matchTo))
                         return FileCategory.TvVideo;
                     else
-                        return FileCategory.NonTvVideo;
+                        return FileCategory.MovieVideo;
                 }
             }
             foreach (string ext in Settings.DeleteFileTypes)
             {
-                Regex extRe = new Regex(@"\." + ext + "$");
-                Match extMatch = extRe.Match(extenstion);
-                if (extMatch.Success)
+                if (FileTypeMatch(ext, file.Path))
                     return FileCategory.Trash;
             }
 
             foreach (string ext in Settings.IgnoreFileTypes)
             {
-                Regex extRe = new Regex(@"\." + ext + "$");
-                Match extMatch = extRe.Match(extenstion);
-                if (extMatch.Success)
+                if (FileTypeMatch(ext, file.Path))
                     return FileCategory.Ignored;
             }
 
             return FileCategory.Unknown;
+        }
+
+        /// <summary>
+        /// Check if a file path match an file extension pattern
+        /// </summary>
+        /// <param name="ext">File extension pattern</param>
+        /// <param name="path">File path to check</param>
+        /// <returns>Whether path matches extenstion type</returns>
+        public static bool FileTypeMatch(string ext, string path)
+        {
+            Regex extRe = new Regex(@"\." + ext.ToLower() + "$");
+            Match extMatch = extRe.Match(Path.GetExtension(path).ToLower());
+            return extMatch.Success;
         }
 
         /// <summary>
@@ -215,6 +219,40 @@ namespace Meticumedia
                 diff = set1.Except(set2).ToList();
         }
 
+        /// <summary>
+        /// Determines whether 2 paths are very similar (max 1 char difference)
+        /// </summary>
+        /// <param name="path1">First path</param>
+        /// <param name="path2">Second path</param>
+        /// <returns>True if paths are very similar</returns>
+        public static bool PathsVerySimilar(string path1, string path2)
+        {
+            char diff1, diff2;
+            return PathsVerySimilar(path1, path2, out diff1, out diff2);
+        }
+
+        public static bool PathsVerySimilar(string path1, string path2, out char diff1, out char diff2)
+        {
+            diff1 = ' ';
+            diff2 = ' ';
+            int diffCnt = 0;
+            for (int i = 0; i < Math.Max(path1.Length, path2.Length); i++)
+                if (i >= path1.Length || i >= path2.Length || path1[i] != path2[i])
+                {
+                    diffCnt++;                    
+
+                    if (i < path1.Length)
+                        diff1 = path1[i];
+                    if (i < path2.Length)
+                        diff2 = path2[i];
+
+                    if (diffCnt == 2)
+                        return false;
+                }
+
+            return diffCnt < 2;
+        }
+
         #endregion
 
         #region TV
@@ -223,12 +261,13 @@ namespace Meticumedia
         /// Array of regular expressions to match season and episode information
         /// from a file name.
         /// </summary>
-        private static string[] SeasonEpMatch = new string[4] 
+        private static string[] SeasonEpMatch = new string[] 
         {
             @"(^|\W)s(eason)?\W?(?<s>\d+)(?<sep1>.?)e(pisode)?\W?(?<e1>\d+)((?<sep2>[^e]?)(e(pisode)?)?\W?(?<e2>\d+))?(?:\W|$)", // s/e match: s01e02 or season1episode02 s01e02e03 or s01e0203 or s01.e02 or s01_e02, etc.
             @"(^|\W)e(pisode)?(?<e1>\d+).?(e(pisode)?\W?(?<e2>\d+))?\W?s(eason)?\W?(?<s>\d+)(?:\W|$)", // e/s match: e01s02 or episode02seasson02 e01e02s03 or e0102s03 or e01.s02 or e01_s02, etc.
-            @"(^|\W)(?<s>\d{1,2})(?<e1>\d{2})(?<e2>\d{2})?(?:\W|$)", // no s/e: 120203, 503, 50304            
-            @"(^|\W)(?<s>\d{1,2})(?<sep1>.)(?<e1>\d{2})((?<sep2>.)(?<e2>\d{2}))?(?:\W|$)" // no s/e with seperators: 5x03, 5_03, 5_03_04, 12x02x03 etc.
+            @"(^|\W)(e(pisode)?)?(?<s>\d{1,2})(?<e1>\d{2})(?<e2>\d{2})?(?:\W|$)", // no s/optional e: 120203, 503, 50304, e503      
+            @"(^|\W)(?<s>\d{1,2})(?<sep1>.)(?<e1>\d{2})((?<sep2>.)(?<e2>\d{2}))?(?:\W|$)", // no s/e with seperators: 5x03, 5_03, 5_03_04, 12x02x03 etc.
+            @"(^|\W)e(pisode)?\W?(?<e1>\d+)((?<sep2>[^e]?)(e(pisode)?)?\W?(?<e2>\d+))?(?:\W|$)" // e only match: e02 or episode02 e02e03 or e0203, etc.
         };
 
         /// <summary>
@@ -273,6 +312,8 @@ namespace Meticumedia
             return fileBeforeEp;
         }
 
+        public static readonly int UNKNONW_SEASON = -2;
+
         /// <summary>
         /// Attempts to retrieve the season and episode information from a file name string.
         /// </summary>
@@ -313,7 +354,8 @@ namespace Meticumedia
             // Attempt to match against eaching matching expression
             foreach (string reStr in SeasonEpMatch)
             {
-                MatchCollection matches = Regex.Matches(simpleName, reStr, RegexOptions.IgnoreCase);
+                string newRe = @"((^|\W)s(eason)?\W?\d+\W?)?" + reStr;
+                MatchCollection matches = Regex.Matches(simpleName, newRe, RegexOptions.IgnoreCase);
                 for (int i = matches.Count - 1; i >= 0; i--)
                 {
                     string matchStr = simpleName.Substring(matches[i].Index, matches[i].Length);
@@ -321,7 +363,8 @@ namespace Meticumedia
                         continue;
 
                     // Get values
-                    bool seasonParsed = int.TryParse(matches[i].Groups["s"].Value, out season);
+                    if (!int.TryParse(matches[i].Groups["s"].Value, out season))
+                        season = -1;
                     bool episode1Parsed = int.TryParse(matches[0].Groups["e1"].Value, out episode1);
                     if (!int.TryParse(matches[0].Groups["e2"].Value, out episode2))
                         episode2 = -1;
@@ -337,7 +380,7 @@ namespace Meticumedia
                     }
 
                     // Return true if values are good
-                    if (seasonParsed && episode1Parsed)
+                    if (episode1Parsed)
                     {
                         Match m = Regex.Match(simpleName, reStr);
                         if (m.Success)
@@ -381,7 +424,7 @@ namespace Meticumedia
         {
             new RemoveFileWord(Separator.None, Separator.None, "repack", FileWordType.None),
             new RemoveFileWord(Separator.None, Separator.None, "internal", FileWordType.None),
-            new RemoveFileWord(Separator.None, Separator.None, "(?:extended|final|directors)(?:\\W+cut)?", FileWordType.ContentFormat),
+            new RemoveFileWord(Separator.None, Separator.None, "(?:extended|final|directors|unrated)(?:\\W+cut)?", FileWordType.ContentFormat),
             new RemoveFileWord(Separator.None, Separator.None, "audio", FileWordType.None),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "cam", FileWordType.VideoQuality),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "dub", FileWordType.LanguageSubstitution),
@@ -425,13 +468,16 @@ namespace Meticumedia
             new RemoveFileWord(Separator.Nonnumeric, Separator.Nonnumeric, @"(?:19|20)\d{2}", FileWordType.Year, true, false),
             new RemoveFileWord(Separator.Nonnumeric, Separator.Nonnumeric, @"(?:19|20)\d{2}", FileWordType.Year, false, true),
             new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "(?:and|&)", FileWordType.None, false, false),
-            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, @"us|uk", FileWordType.None)
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, @"us|uk", FileWordType.None),
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, @"the", FileWordType.None),
+            new RemoveFileWord(Separator.Whitespace, Separator.Whitespace, "\\d", FileWordType.FilePart),
         };
 
         /// <summary>
         /// Optional remove file word types - matches OptionalRemoveWords items
         /// </summary>
-        public enum OptionalSimplifyRemoves { None = 0, Year = 1, YearAndFollowing = 2, And = 4, Country = 8 }
+        [Flags]
+        public enum OptionalSimplifyRemoves { None = 0, Year = 1, YearAndFollowing = 2, And = 4, Country = 8, The = 16, SingleDigitPart = 32 }
 
         /// <summary>
         /// Result from simplification process of a string.
@@ -526,14 +572,16 @@ namespace Meticumedia
                             continue;
 
                         // Get results
-                        SimplifyStringResults simpleRes = BuildSimplifyResults(input, (j & 1) > 0, (j & 2) > 0, options, false, i == 1, true, k == 1);
+                        bool removeFirst = (j & 1) > 0;
+                        bool removeLast = (j & 2) > 0;
+                        SimplifyStringResults simpleRes = BuildSimplifyResults(input, removeFirst, removeLast, options, false, i == 1, true, k == 1);
 
                         // Don't allow result that is only the year
                         if (Regex.IsMatch(simpleRes.SimplifiedString, @"^(19|20)\d{2}$") && !simpleRes.RemovedWords.ContainsKey(FileWordType.Year))
                             continue;
 
                         // Don't let common single words through
-                        if (!simpleRes.SimplifiedString.Contains(' ') && simpleRes.SimplifiedString.Length < 4 && WordHelper.IsWord(simpleRes.SimplifiedString))
+                        if (!simpleRes.SimplifiedString.Contains(' ') && simpleRes.SimplifiedString.Length < 3 && WordHelper.IsWord(simpleRes.SimplifiedString))
                             continue;
 
                         // Add to list of simplified strings
@@ -592,28 +640,6 @@ namespace Meticumedia
             // Initialize removed words dictionary
             Dictionary<FileWordType, List<string>> removeFileWords = new Dictionary<FileWordType, List<string>>();
 
-            // Remove first word
-            if (removeFirst)
-            {
-                Match firstWordMatch = Regex.Match(simplifiedName, @"^\W*\w+");
-                if (firstWordMatch.Success)
-                    simplifiedName = simplifiedName.Remove(firstWordMatch.Index, firstWordMatch.Length);
-                mods |= ContentSearchMod.WordsRemoved;
-            }
-
-            // Remove Last word
-            else if (removeLast)
-            {
-                Match lastWordMatch = Regex.Match(simplifiedName, @"(\w+\W*)$");
-                if (lastWordMatch.Success)
-                    simplifiedName = simplifiedName.Remove(lastWordMatch.Index, lastWordMatch.Length);
-                mods |= ContentSearchMod.WordsRemoved;
-            }
-
-            // Don't allow removal of both first and last words
-            else if (removeFirst && removeLast)
-                return null;
-
             // Process each optional remove word
             for (int j = 0; j < OptionalRemoveWords.Length; j++)
                 if (((int)options & (int)Math.Pow(2, j)) > 0)
@@ -631,7 +657,29 @@ namespace Meticumedia
 
             // Process always remove words
             foreach (RemoveFileWord remWord in AlwaysRemoveWords)
-                simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, remWord);   
+                simplifiedName = RemoveWord(disableRemAfter, simplifiedName, removeFileWords, remWord);
+
+            // Remove first word
+            if (removeFirst)
+            {
+                Match firstWordMatch = Regex.Match(simplifiedName, @"^\W*\w+");
+                if (firstWordMatch.Success)
+                    simplifiedName = simplifiedName.Remove(firstWordMatch.Index, firstWordMatch.Length);
+                mods |= ContentSearchMod.WordsRemoved;
+            }
+
+            // Remove Last word
+            if (removeLast)
+            {
+                Match lastWordMatch = Regex.Match(simplifiedName, @"(\w+\W*)$");
+                if (lastWordMatch.Success)
+                    simplifiedName = simplifiedName.Remove(lastWordMatch.Index, lastWordMatch.Length);
+                mods |= ContentSearchMod.WordsRemoved;
+            }
+
+            //// Don't allow removal of both first and last words
+            //else if (removeFirst && removeLast)
+            //    return null;
 
             // Word splitting
             if (wordSplitEn)

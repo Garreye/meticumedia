@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Json HTTP response node. Recursively parse node and child nodes.
@@ -191,7 +191,7 @@ namespace Meticumedia
                 if (!string.IsNullOrEmpty(value))
                 {
                     // Add child
-                    ChildNodes.Add(new JsonNode(name, value));
+                    ChildNodes.Add(new JsonNode(name.Trim(), value));
                 }
 
                 // Clear child build variables

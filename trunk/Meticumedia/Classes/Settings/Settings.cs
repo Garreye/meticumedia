@@ -8,69 +8,101 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Static class for storing global settings
     /// </summary>
     public static class Settings
     {
+        #region Events
+
+        /// <summary>
+        /// Setting has been modified.
+        /// </summary>
+        public static event EventHandler SettingsModified;
+
+        /// <summary>
+        /// Triggers SettingsModified event.
+        /// </summary>
+        private static void OnSettingsModified(bool initial)
+        {
+            if (SettingsModified != null)
+            {
+                SettingsModified(null, new EventArgs());
+            }
+
+            if (!initial)
+            {
+                Organization.UpdateRootFolders(ContentType.Movie);
+                Organization.UpdateRootFolders(ContentType.TvShow);
+            }
+        }
+
+        #endregion
+
         #region Properties
 
         /// <summary>
         /// List of user specified folders to scan for new files.
         /// </summary>
-        public static List<OrgFolder> ScanDirectories = new List<OrgFolder>();
+        public static ObservableCollection<OrgFolder> ScanDirectories = new ObservableCollection<OrgFolder>();
 
         /// <summary>
         /// Format for renaming TV files
         /// </summary>
-        public static FileNameFormat TvFileFormat = new FileNameFormat(false);
+        public static FileNameFormat TvFileFormat = new FileNameFormat(ContentType.TvShow);
 
         /// <summary>
         /// Format for renaming movie files
         /// </summary>
-        public static FileNameFormat MovieFileFormat = new FileNameFormat(true);
+        public static FileNameFormat MovieFileFormat = new FileNameFormat(ContentType.Movie);
 
         /// <summary>
         /// List of root folders containing movies
         /// </summary>
-        public static List<ContentRootFolder> MovieFolders = new List<ContentRootFolder>();
+        public static ObservableCollection<ContentRootFolder> MovieFolders = new ObservableCollection<ContentRootFolder>();
 
         /// <summary>
         /// List of root folders containing TV shows
         /// </summary>
-        public static List<ContentRootFolder> TvFolders = new List<ContentRootFolder>();
+        public static ObservableCollection<ContentRootFolder> TvFolders = new ObservableCollection<ContentRootFolder>();
 
         /// <summary>
         /// File types to match to video files
         /// </summary>
-        public static List<string> VideoFileTypes = new List<string>();
+        public static ObservableCollection<string> VideoFileTypes = new ObservableCollection<string>();
 
         /// <summary>
         /// File types to delete during scan
         /// </summary>
-        public static List<string> DeleteFileTypes = new List<string>();
+        public static ObservableCollection<string> DeleteFileTypes = new ObservableCollection<string>();
 
         // <summary>
         /// File types to ignored during scan
         /// </summary>
-        public static List<string> IgnoreFileTypes = new List<string>();
+        public static ObservableCollection<string> IgnoreFileTypes = new ObservableCollection<string>();
 
+        /// <summary>
+        /// Automatic file type move setups
+        /// </summary>
+        public static ObservableCollection<AutoMoveFileSetup> AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>()
+        {
+            //new AutoMoveFileSetup("mp3", @"C:\Garretts_Data\Test\Music")
+        };
+
+        /// <summary>
+        /// Persistent setting for options in UI.
+        /// </summary>
         public static GuiSettings GuiControl = new GuiSettings();
 
-#if DEBUG
-        public static int NumProcessingThreads = 10;
-        public static int NumSimultaneousSearches = 5;
-#else
-        public static int NumProcessingThreads = 10;
-        public static int NumSimultaneousSearches = 5;
-#endif
-
-        public static TvDataBaseSelection DefaultTvDatabase = TvDataBaseSelection.TheTvDb;
-
-        public static MovieDatabaseSelection DefaultMovieDatabase = MovieDatabaseSelection.TheMovieDb;
+        /// <summary>
+        /// General settings for application
+        /// </summary>
+        public static GeneralSettings General = new GeneralSettings();
 
         #endregion
 
@@ -131,7 +163,8 @@ namespace Meticumedia
         private static string[] DefaultIgnoreFileTypes = new string[]
         {
             "mp3",
-            "flac"
+            "flac",
+            "m3u"
         };
 
         #endregion
@@ -165,7 +198,7 @@ namespace Meticumedia
         /// <param name="folders">List of movie folder to look through for default</param>
         /// <param name="defaultFolder">The resulting default movie folder</param>
         /// <returns>whether default was found</returns>
-        private static bool GetDefaultFolder(List<ContentRootFolder> folders, out ContentRootFolder defaultFolder)
+        private static bool GetDefaultFolder(ObservableCollection<ContentRootFolder> folders, out ContentRootFolder defaultFolder)
         {
             foreach (ContentRootFolder folder in folders)
             {               
@@ -190,7 +223,7 @@ namespace Meticumedia
         /// <returns>whether folder was found</returns>
         public static bool GetTvFolder(string path, out ContentRootFolder folder)
         {
-            return GetContentFolder(path, TvFolders, out folder);
+            return GetContentFolder(path, TvFolders.ToList(), out folder);
         }
 
         /// <summary>
@@ -200,7 +233,7 @@ namespace Meticumedia
         /// <returns>whether folder was found</returns>
         public static bool GetMovieFolder(string path, out ContentRootFolder folder)
         {
-            return GetContentFolder(path, MovieFolders, out folder);
+            return GetContentFolder(path, MovieFolders.ToList(), out folder);
         }
 
         /// <summary>
@@ -238,7 +271,7 @@ namespace Meticumedia
                     return true;
                 }
 
-                if (GetContentFolder(folderPath, contentFolder.ChildFolders, out folder))
+                if (GetContentFolder(folderPath, contentFolder.ChildFolders.ToList(), out folder))
                     return true;
             }
 
@@ -246,6 +279,11 @@ namespace Meticumedia
             return false;
         }
 
+        /// <summary>
+        /// Get all root folder for given content type
+        /// </summary>
+        /// <param name="type">Content type of root folders to get</param>
+        /// <returns></returns>
         public static List<ContentRootFolder> GetAllRootFolders(ContentType type)
         {
             List<ContentRootFolder> allRootFolders;
@@ -253,17 +291,16 @@ namespace Meticumedia
             switch (type)
             {
                 case ContentType.Movie:
-                    allRootFolders = Settings.MovieFolders;
+                    allRootFolders = Settings.MovieFolders.ToList();
                     break;
                 case ContentType.TvShow:
-                    allRootFolders = Settings.TvFolders;
+                    allRootFolders = Settings.TvFolders.ToList();
                     break;
                 default:
                     throw new Exception("Unknown content type");
             }
             return allRootFolders;
         }
-
 
         #endregion
 
@@ -272,7 +309,7 @@ namespace Meticumedia
         /// <summary>
         /// Properties that are elements.
         /// </summary>
-        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, Gui };
+        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, AutoMoveSetups, Gui, General };
 
         /// <summary>
         /// Root element for setting XML.
@@ -287,11 +324,14 @@ namespace Meticumedia
         /// <summary>
         /// Save settings to XML.
         /// </summary>
-        public static void Save()
+        public static void Save(bool triggerModifiedEvent = true)
         {
             string path = Path.Combine(Organization.GetBasePath(true), ROOT_XML + ".xml");
 
-            using (XmlTextWriter xw = new XmlTextWriter(path, Encoding.ASCII))
+            // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
+            string tempPath = Path.Combine(Organization.GetBasePath(true), ROOT_XML + "_TEMP.xml");
+
+            using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
             {
                 xw.Formatting = Formatting.Indented;
 
@@ -333,8 +373,15 @@ namespace Meticumedia
                             foreach (string fileType in IgnoreFileTypes)
                                 xw.WriteElementString(FILE_TYPE_XML, fileType);
                             break;
+                        case XmlElements.AutoMoveSetups:
+                            foreach (AutoMoveFileSetup setup in AutoMoveSetups)
+                                setup.Save(xw);
+                            break;
                         case XmlElements.Gui:
                             GuiControl.Save(xw);
+                            break;
+                        case XmlElements.General:
+                            General.Save(xw);
                             break;
                         default:
                             throw new Exception("Unkonw element!");
@@ -344,6 +391,16 @@ namespace Meticumedia
 
                 xw.WriteEndElement();
             }
+
+            // Delete previous save data
+            if (File.Exists(path))
+                File.Delete(path);
+
+            // Move tempoarary save file to default
+            File.Move(tempPath, path);
+
+            if (triggerModifiedEvent)
+                OnSettingsModified(false);
         }
 
         /// <summary>
@@ -356,9 +413,15 @@ namespace Meticumedia
                 return;
 
             // Initialize file types to defautls
-            VideoFileTypes = DefaultVideoFileTypes.ToList<string>();
-            DeleteFileTypes = DefaultDeleteFileTypes.ToList<string>();
-            IgnoreFileTypes = DefaultIgnoreFileTypes.ToList<string>();
+            VideoFileTypes = new ObservableCollection<string>();
+            foreach (string type in DefaultVideoFileTypes)
+                VideoFileTypes.Add(type);
+            DeleteFileTypes = new ObservableCollection<string>();
+            foreach (string type in DefaultDeleteFileTypes)
+                DeleteFileTypes.Add(type);
+            IgnoreFileTypes = new ObservableCollection<string>();
+            foreach (string type in DefaultIgnoreFileTypes)
+                IgnoreFileTypes.Add(type);
 
             // Load settings XML
             string path = Path.Combine(basePath, ROOT_XML + ".xml");
@@ -379,7 +442,7 @@ namespace Meticumedia
                     switch (element)
                     {
                         case XmlElements.ScanDirectories:
-                            ScanDirectories = new List<OrgFolder>();
+                            ScanDirectories = new ObservableCollection<OrgFolder>();
                             foreach (XmlNode scanDirNode in propNode.ChildNodes)
                             {
                                 OrgFolder folder = new OrgFolder();
@@ -394,7 +457,7 @@ namespace Meticumedia
                             MovieFileFormat.Load(propNode);
                             break;
                         case XmlElements.MovieFolders:
-                            MovieFolders = new List<ContentRootFolder>();
+                            MovieFolders = new ObservableCollection<ContentRootFolder>();
                             foreach (XmlNode movieFolderNode in propNode.ChildNodes)
                             {
                                 ContentRootFolder folder = new ContentRootFolder(ContentType.Movie);
@@ -403,7 +466,7 @@ namespace Meticumedia
                             }
                             break;
                         case XmlElements.TvFolders:
-                            TvFolders = new List<ContentRootFolder>();
+                            TvFolders = new ObservableCollection<ContentRootFolder>();
                             foreach (XmlNode tvFolderNode in propNode.ChildNodes)
                             {
                                 ContentRootFolder folder = new ContentRootFolder(ContentType.TvShow);
@@ -412,27 +475,55 @@ namespace Meticumedia
                             }
                             break;
                         case XmlElements.VideoFileTypes:
-                            VideoFileTypes = new List<string>();
-                            foreach (XmlNode fielTypeNode in propNode.ChildNodes)
-                                VideoFileTypes.Add(fielTypeNode.InnerText);                            
+                            VideoFileTypes = new ObservableCollection<string>();
+                            foreach (XmlNode fileTypeNode in propNode.ChildNodes)
+                            {
+                                string videoType = fileTypeNode.InnerText;
+                                if (videoType.StartsWith("."))
+                                    videoType = videoType.Substring(1, videoType.Length - 1);
+                                VideoFileTypes.Add(videoType);
+                            }
                             break;
                         case XmlElements.DeleteFileTypes:
-                            DeleteFileTypes = new List<string>();
-                            foreach (XmlNode fielTypeNode in propNode.ChildNodes)
-                                DeleteFileTypes.Add(fielTypeNode.InnerText);
+                            DeleteFileTypes = new ObservableCollection<string>();
+                            foreach (XmlNode fileTypeNode in propNode.ChildNodes)
+                            {
+                                string delType = fileTypeNode.InnerText;
+                                if (delType.StartsWith("."))
+                                    delType = delType.Substring(1, delType.Length - 1);
+                                DeleteFileTypes.Add(delType);
+                            }
                             break;
                         case XmlElements.IgnoreFileTypes:
-                            IgnoreFileTypes = new List<string>();
-                            foreach (XmlNode fielTypeNode in propNode.ChildNodes)
-                                IgnoreFileTypes.Add(fielTypeNode.InnerText);
+                            IgnoreFileTypes = new ObservableCollection<string>();
+                            foreach (XmlNode fileTypeNode in propNode.ChildNodes)
+                            {
+                                string ignoreType = fileTypeNode.InnerText;
+                                if (ignoreType.StartsWith("."))
+                                    ignoreType = ignoreType.Substring(1, ignoreType.Length - 1);
+                                IgnoreFileTypes.Add(ignoreType);
+                            }
+                            break;
+                        case XmlElements.AutoMoveSetups:
+                            AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>();
+                            foreach (XmlNode setupNode in propNode.ChildNodes)
+                            {
+                                AutoMoveFileSetup setup = new AutoMoveFileSetup();
+                                setup.Load(setupNode);
+                                AutoMoveSetups.Add(setup);
+                            }
                             break;
                         case XmlElements.Gui:
                             GuiControl.Load(propNode);
+                            break;
+                        case XmlElements.General:
+                            General.Load(propNode);
                             break;
                     }
                 }
 
             }
+            OnSettingsModified(true);
         }
 
         #endregion

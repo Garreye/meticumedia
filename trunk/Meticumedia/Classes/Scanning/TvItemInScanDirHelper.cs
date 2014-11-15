@@ -8,11 +8,10 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Drawing;
 using System.ComponentModel;
 using System.Threading;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Helper for performing all organizational scans.
@@ -45,7 +44,7 @@ namespace Meticumedia
         public static List<OrgItem> Items = new List<OrgItem>();
 
         /// <summary>
-        /// TV item in scan directories is updated every 2 minutes
+        /// TV item in scan directories is updated periodically
         /// </summary>
         private static System.Timers.Timer updateTimer = new System.Timers.Timer(500);
 
@@ -53,11 +52,19 @@ namespace Meticumedia
         /// Update list of tv episodes currently in scan directories
         /// </summary>
         public static void StartUpdateTimer()
-        {            
+        {
+            return;
+            
+
             // Start timer to do update periodically
             updateTimer.Elapsed += new System.Timers.ElapsedEventHandler(scanDirUpdateTimer_Elapsed);
             updateTimer.Enabled = true;
         }
+
+        /// <summary>
+        /// Directory scanner
+        /// </summary>
+        private static DirectoryScan scan = new DirectoryScan(true);
 
         /// <summary>
         /// Updates list of TV episodes found in scan directories. Performs a directory scan in background that
@@ -68,8 +75,7 @@ namespace Meticumedia
             // Run scan to look for TV files
             if (dirScanSearch)
             {
-                DirectoryScan scan = new DirectoryScan(true);
-                scan.RunScan(Settings.ScanDirectories, new List<OrgItem>(), true, true, true);
+                scan.RunScan(Settings.ScanDirectories.ToList(), new List<OrgItem>(), true, true, true, true);
                 Items = scan.Items;
             }
 
@@ -91,8 +97,12 @@ namespace Meticumedia
         /// <param name="e"></param>
         static void scanDirUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            updateTimer.Interval = 120000;
+            // Disable and re-enable in case dir has lots of files and scan takes a while
+            updateTimer.Enabled = false;
+            updateTimer.Interval = 30000;
             DoUpdate(true);
+            updateTimer.Enabled = true;
+            
         }
 
         #endregion

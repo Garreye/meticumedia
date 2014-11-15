@@ -8,46 +8,139 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.ComponentModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Formatting class for TV file names.
     /// </summary>
-    public class TvEpisodeFormat
+    public class TvEpisodeFormat : INotifyPropertyChanged
     {
         #region Properties
 
         /// <summary>
         /// Header string for season
         /// </summary>
-        public string SeasonHeader { get; set; }
+        public string SeasonHeader
+        {
+            get
+            {
+                return seasonHeader;
+            }
+            set
+            {
+                seasonHeader = value;
+                OnPropertyChanged("SeasonHeader");
+            }
+        }
+
+        private string seasonHeader = "s";
 
         /// <summary>
         /// Header string for episode
         /// </summary>
-        public string EpisodeHeader { get; set; }
+        public string EpisodeHeader
+        {
+            get
+            {
+                return episodeHeader;
+            }
+            set
+            {
+                episodeHeader = value;
+                OnPropertyChanged("EpisodeHeader");
+            }
+        }
+
+        private string episodeHeader = "e";
 
         /// <summary>
         /// Indicates whether to use header for each episode in string
         /// (e.g.  s01e21e22 (when true) vs. s01e2122 (when false))
         /// </summary>
-        public bool HeaderPerEpisode { get; set; }
+        public bool HeaderPerEpisode
+        {
+            get
+            {
+                return headerPerEpisode;
+            }
+            set
+            {
+                headerPerEpisode = value;
+                OnPropertyChanged("HeaderPerEpisode");
+            }
+        }
+
+        private bool headerPerEpisode = true;
 
         /// <summary>
         /// Whether to put season number before episode number in string
         /// </summary>
-        public bool SeasonFirst { get; set; }
+        public bool SeasonFirst
+        {
+            get
+            {
+                return seasonFirst;
+            }
+            set
+            {
+                seasonFirst = value;
+                OnPropertyChanged("SeasonFirst");
+            }
+        }
+
+        private bool seasonFirst = true;
 
         /// <summary>
         /// Whether to force season number to be 2 digits in string
         /// </summary>
-        public bool ForceSeasonDoubleDigits { get; set; }
+        public bool ForceSeasonDoubleDigits
+        {
+            get
+            {
+                return forceSeasonDoubleDigits;
+            }
+            set
+            {
+                forceSeasonDoubleDigits = value;
+                OnPropertyChanged("ForceSeasonDoubleDigits");
+            }
+        }
+
+        private bool forceSeasonDoubleDigits = true;
 
         /// <summary>
         /// Whether to force episode number to be 2 digits in string
         /// </summary>
-        public bool ForceEpisodeDoubleDigits { get; set; }
+        public bool ForceEpisodeDoubleDigits
+        {
+            get
+            {
+                return forceEpisodeDoubleDigits;
+            }
+            set
+            {
+                forceEpisodeDoubleDigits = value;
+                OnPropertyChanged("ForceEpisodeDoubleDigits");
+            }
+        }
+
+        private bool forceEpisodeDoubleDigits = true;
+
+        #endregion
+
+        #region Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
         #endregion
 
@@ -67,12 +160,6 @@ namespace Meticumedia
         /// </summary>
         public TvEpisodeFormat()
         {
-            this.SeasonHeader = "s";
-            this.EpisodeHeader = "e";
-            this.HeaderPerEpisode = true;
-            this.SeasonFirst = true;
-            this.ForceEpisodeDoubleDigits = true;
-            this.ForceSeasonDoubleDigits = true;
         }
 
         /// <summary>
@@ -119,19 +206,19 @@ namespace Meticumedia
                 else
                 {
                     if (this.ForceEpisodeDoubleDigits)
-                        epStr += this.EpisodeHeader + ep1.Number.ToString("00");
+                        epStr += this.EpisodeHeader + ep1.DisplayNumber.ToString("00");
                     else
-                        epStr += this.EpisodeHeader + ep1.Number.ToString();
+                        epStr += this.EpisodeHeader + ep1.DisplayNumber.ToString();
 
-                    if (ep2 != null)
+                    if (ep2 != null && ep2.DisplayNumber > 0)
                     {
                         if (this.HeaderPerEpisode)
                             epStr += this.EpisodeHeader;
 
                         if (this.ForceEpisodeDoubleDigits)
-                            epStr += ep2.Number.ToString("00");
+                            epStr += ep2.DisplayNumber.ToString("00");
                         else
-                            epStr += ep2.Number.ToString(); 
+                            epStr += ep2.DisplayNumber.ToString(); 
                     }
                 }
             }

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class that handles threading methods for processing of a set of organization paths.
@@ -113,11 +113,22 @@ namespace Meticumedia
             // Loop through all paths
             lock (processingLock)
                 numItemProcessed = 0;
+
+            // Get order to process paths in
             int i = 0;
+            List<int> pathOrder = new List<int>();
             for (i = 0; i < paths.Count; i++)
+                if (paths[i].SimilarTo < 0)
+                    pathOrder.Add(i);
+            for (i = 0; i < paths.Count; i++)
+                if (paths[i].SimilarTo >= 0)
+                    pathOrder.Add(i);
+
+
+            for (i = 0; i < pathOrder.Count; i++)
             {
                 // Limit number of threads
-                while (i >= numItemProcessed + Settings.NumProcessingThreads && !cancel)
+                while (i >= numItemProcessed + Settings.General.NumProcessingThreads && !cancel)
                     Thread.Sleep(100);
 
                 // Check for cancellation
@@ -125,7 +136,7 @@ namespace Meticumedia
                     break;
 
                 // Create new processing thread for path
-                object[] args = { paths[i], paths.Count, i, processSpecificArgs };
+                object[] args = { paths[pathOrder[i]], paths.Count, pathOrder[i], processSpecificArgs };
                 ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessThread), args);
             }
 
@@ -143,13 +154,13 @@ namespace Meticumedia
             object[] args = (object[])stateInfo;
             OrgPath orgPath = (OrgPath)args[0];
             int totalPaths = (int)args[1];
-            int updateNumer = (int)args[2];
+            int updateNumber = (int)args[2];
             object processSpecificArgs = args[3];
 
             lock (processingLock)
                 ++numItemStarted;
 
-            process(orgPath, updateNumer, totalPaths, this.ProcessNumber, ref numItemProcessed, ref numItemStarted, processSpecificArgs);
+            process(orgPath, updateNumber, totalPaths, this.ProcessNumber, ref numItemProcessed, ref numItemStarted, processSpecificArgs);
 
             lock (processingLock)
                 ++numItemProcessed;

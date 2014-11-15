@@ -9,7 +9,7 @@ using System.Text;
 using System.IO;
 using System.Xml;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// File linked to a TV episode.

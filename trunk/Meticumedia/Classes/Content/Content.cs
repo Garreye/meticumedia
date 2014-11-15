@@ -9,86 +9,499 @@ using System.Text;
 using System.Xml;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.ComponentModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Represents a single content item (i.e. a movie or TV show) that is associated with a single directory on user's computer
     /// </summary>
-    public class Content : IComparable, ISerializable
-    {        
+    public class Content : IComparable, ISerializable, INotifyPropertyChanged
+    {
+        #region Events
+
+        /// <summary>
+        /// INotifyPropertyChanged interface event
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+
+        /// <summary>
+        /// Triggers PropertyChanged event.
+        /// </summary>
+        /// <param name="name">Name of the property that has changed value</param>
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        #endregion
+
+        #region Constants
+
+        /// <summary>
+        /// Value used for Id property when it is not matched to database.
+        /// </summary>
+        public static readonly int UNKNOWN_ID = -1;
+
+        #endregion
+
         #region Properties
+
+        /// <summary>
+        /// Type of content.
+        /// </summary>
+        public ContentType ContentType { get; protected set; }
 
         /// <summary>
         /// Database selection for content information
         /// </summary>
-        public int DatabaseSelection { get; set; }
+        public int DatabaseSelection
+        {
+            get 
+            {
+                return databaseSelection;
+            }
+            set
+            {
+                databaseSelection = value;
+                OnPropertyChanged("DatabaseSelection");
+            }
+        }
+
+        private int databaseSelection = (int)Settings.General.DefaultTvDatabase;
 
         /// <summary>
-        /// Name of the content
+        /// User-defined name for the content
         /// </summary>
-        public string Name { get; set; }
+        public string UserName
+        {
+            get 
+            {
+                return userName;
+            }
+            set
+            {
+                userName = value;
+                OnPropertyChanged("UserName");
+                OnPropertyChanged("DisplayName");
+                OnPropertyChanged("StatusColor");
+            }
+        }
+
+        private string userName = string.Empty;
 
         /// <summary>
-        /// Name of the content from online database (stored so user can change name without losing name in database)
+        /// Name of the content from online database
         /// </summary>
-        public string DatabaseName { get; set; }
+        public string DatabaseName
+        {
+            get 
+            {
+                return databaseName;
+            }
+            set
+            {
+                databaseName = value;
+                OnPropertyChanged("DatabaseName");
+                OnPropertyChanged("DisplayName");
+            }
+        }
+
+        private string databaseName = string.Empty;
 
         /// <summary>
-        /// Date content was first released
+        /// Defines if user-defined name should be used for display
         /// </summary>
-        public DateTime Date { get; set; }
+        public bool UseDatabaseName
+        {
+            get
+            {
+                return useDatabaseName;
+            }
+            set
+            {
+                useDatabaseName = value;
+                if (!useDatabaseName && string.IsNullOrWhiteSpace(this.UserName))
+                    this.UserName = this.DatabaseName;
+
+                OnPropertyChanged("UseDatabaseName");
+                OnPropertyChanged("DisplayName");
+            }
+        }
+        private bool useDatabaseName = true;
+
+        /// <summary>
+        /// Display name of the content
+        /// </summary>
+        public string DisplayName
+        {
+            get
+            {
+                if (useDatabaseName && !string.IsNullOrEmpty(databaseName))
+                    return databaseName;
+                else if (!useDatabaseName && !string.IsNullOrEmpty(userName))
+                    return userName;
+                else
+                    return "Unknown";
+            }
+            set
+            {
+                if (!useDatabaseName)
+                    this.UserName = value;
+            }
+        }
+
+        /// <summary>
+        /// Year content was first released from database
+        /// </summary>
+        public int DatabaseYear
+        {
+            get
+            {
+                return databaseYear;
+            }
+            set
+            {
+                databaseYear = value;
+                OnPropertyChanged("DatabaseYear");
+                OnPropertyChanged("DisplayYear");
+            }
+        }
+        private int databaseYear = 1;
+
+        /// <summary>
+        /// User-defined year content was first released
+        /// </summary>
+        public int UserYear
+        {
+            get
+            {
+                return userYear;
+            }
+            set
+            {
+                userYear = value;
+                OnPropertyChanged("UserYear");
+                OnPropertyChanged("DisplayYear");
+            }
+        }
+        private int userYear = 1;
+
+        /// <summary>
+        /// Defines if user-defined year should be used for display
+        /// </summary>
+        public bool UseDatabaseYear
+        {
+            get
+            {
+                return useDatabaseYear;
+            }
+            set
+            {
+                useDatabaseYear = value;
+                if (!useDatabaseYear && this.UserYear <= 1)
+                    this.UserYear = this.DatabaseYear;
+
+                OnPropertyChanged("UseDatabaseYear");
+                OnPropertyChanged("DisplayYear");
+            }
+        }
+        private bool useDatabaseYear = true;
+
+        /// <summary>
+        /// Display year of the content
+        /// </summary>
+        public int DisplayYear
+        {
+            get
+            {
+                if (useDatabaseYear)
+                    return databaseYear;
+                else
+                    return userYear;
+            }
+            set
+            {
+                if (!useDatabaseYear)
+                    this.UserYear = value;
+                OnPropertyChanged("DisplayYear");
+            }
+        }
 
         /// <summary>
         /// Overview/description of content
         /// </summary>
-        public string Overview { get; set; }
+        public string Overview
+        {
+            get 
+            {
+                return overview;
+            }
+            set
+            {
+                overview = value;
+                OnPropertyChanged("Overview");
+            }
+        }
+
+        public string OverviewConcise
+        {
+            get
+            {
+                if (overview.Length < 110)
+                    return overview;
+                else
+                    return overview.Substring(0, 107) + "...";
+            }
+        }
+
+        private string overview = string.Empty;
         
         /// <summary>
-        /// Genres of content
+        /// Genres of content from database
         /// </summary>
-        public GenreCollection Genres { get; set; }   
+        public GenreCollection DatabaseGenres
+        {
+            get 
+            {
+                return databaseGenres;
+            }
+            set
+            {
+                databaseGenres = value;
+                OnPropertyChanged("DatabaseGenres");
+                OnPropertyChanged("DisplayGenres");
+            }
+        }
+        private GenreCollection databaseGenres;
+
+        /// <summary>
+        /// User-defined genres for content
+        /// </summary>
+        public GenreCollection UserGenres
+        {
+            get
+            {
+                return userGenres;
+            }
+            set
+            {
+                userGenres = value;
+                OnPropertyChanged("UserGenres");
+                OnPropertyChanged("DisplayGenres");
+            }
+        }
+        private GenreCollection userGenres;
+
+        /// <summary>
+        /// Defines if user-defined genre should be used for display
+        /// </summary>
+        public bool UseDatabaseGenres
+        {
+            get
+            {
+                return useDatabaseGenres;
+            }
+            set
+            {
+                useDatabaseGenres = value;
+                if (!useDatabaseGenres && this.DisplayGenres.Count == 0)
+                    this.UserGenres = new GenreCollection(this.DatabaseGenres);
+                OnPropertyChanged("UseDatabaseGenres");
+                OnPropertyChanged("DisplayGenres");
+            }
+        }
+        private bool useDatabaseGenres = true;
+
+        /// <summary>
+        /// Genres of content from database
+        /// </summary>
+        public GenreCollection DisplayGenres
+        {
+            get
+            {
+                if (useDatabaseGenres)
+                    return databaseGenres;
+                else
+                    return userGenres;
+            }
+            set
+            {
+                if (!useDatabaseGenres)
+                    this.UserGenres = value;
+                OnPropertyChanged("DisplayGenres");
+            }
+        }
 
         /// <summary>
         /// Path to directory of content. Empty string if none.
         /// </summary>
-        public string Path { get; set; }
+        public string Path
+        {
+            get 
+            {
+                return path;
+            }
+            set
+            {
+                path = value;
+                OnPropertyChanged("Path");
+            }
+        }
+
+        private string path = string.Empty;
 
         /// <summary>
         /// Flag indicating content directory was found in root directory
         /// </summary>
-        public bool Found { get; set; }
+        public bool Found
+        {
+            get 
+            {
+                return found;
+            }
+            set
+            {
+                found = value;
+                OnPropertyChanged("Found");
+            }
+        }
+
+        private bool found = false;
 
         /// <summary>
         /// Path to root content folder this belongs to
         /// </summary>
-        public string RootFolder { get; set; }
+        public string RootFolder
+        {
+            get 
+            {
+                return rootFolder;
+            }
+            set
+            {
+                rootFolder = value;
+                OnPropertyChanged("RootFolder");
+            }
+        }
+
+        private string rootFolder = string.Empty;
 
         /// <summary>
         /// ID for accessing content on the online database
         /// </summary>
-        public int Id { get; set; }
+        public int Id
+        {
+            get 
+            {
+                return id;
+            }
+            set
+            {
+                id = value;
+                OnPropertyChanged("Id");
+                OnPropertyChanged("StatusColor");
+            }
+        }
+
+        private int id = UNKNOWN_ID;
+
+        public string DatabaseString
+        {
+            get
+            {
+                if (this.Id > 0)
+                    return (this.ContentType == Classes.ContentType.TvShow ? ((TvDataBaseSelection)this.DatabaseSelection).ToString() : ((MovieDatabaseSelection)this.DatabaseSelection).ToString()) + " - ID " + this.Id;
+                else if (this.DisplayName == "Unknown")
+                    return "None";
+                else
+                    return "None (user-defined)";
+            }
+        }
 
         /// <summary>
         /// Indication of whether content has been watched by user
         /// </summary>
-        public bool Watched { get; set; }
+        public bool Watched
+        {
+            get 
+            {
+                return watched;
+            }
+            set
+            {
+                watched = value;
+                OnPropertyChanged("Watched");
+                OnPropertyChanged("StatusColor");
+            }
+        }
 
-        /// <summary>
-        /// Determines whether or not the content's directory (and files within it) is to be included
-        /// in scanning of root directory for organization
-        /// </summary>
-        public virtual bool IncludeInScan { get { return this.DoRenaming; } }
+        private bool watched = false;
 
         /// <summary>
         /// Indicates whether files in content's directory are allowed to be renamed by application
         /// </summary>
-        public bool DoRenaming { get; set; }
+        public bool DoRenaming
+        {
+            get 
+            {
+                return doRenaming;
+            }
+            set
+            {
+                doRenaming = value;
+                OnPropertyChanged("DoRenaming");
+            }
+        }
+
+        private bool doRenaming = true;
 
         /// <summary>
         /// Date/time when content was last updated from database
         /// </summary>
-        public DateTime LastUpdated { get; set; }
+        public DateTime LastUpdated
+        {
+            get 
+            {
+                return lastUpdate;
+            }
+            set
+            {
+                lastUpdate = value;
+                OnPropertyChanged("LastUpdated");
+            }
+        }
+
+        private DateTime lastUpdate = new DateTime();
+
+        /// <summary>
+        /// Gets background color to use for episode based on whether
+        /// it's ignored, aired or missing.
+        /// </summary>
+        /// <returns>Color to use for background</returns>
+        public string StatusColor
+        {
+            get
+            {
+                if ((!useDatabaseName && string.IsNullOrEmpty(userName)) || (useDatabaseName && string.IsNullOrEmpty(databaseName)))
+                    return "LightCoral";
+                else if (this.id == UNKNOWN_ID)
+                    return "LightCoral";
+                else if (this.Watched)
+                    return "DarkGray";
+                else
+                    return "Black";
+            }
+        }
+
+        /// <summary>
+        /// Seasons only used by inheretance for TvShow, but used in shared control bindings
+        /// </summary>
+        public virtual List<int> Seasons { get { return new List<int>(); } }
 
         #endregion
 
@@ -97,29 +510,23 @@ namespace Meticumedia
         /// <summary>
         /// Default constructor
         /// </summary>
-        public Content()
+        protected Content()
         {
-            this.RootFolder = string.Empty;
-            this.DatabaseName = string.Empty;
-            this.Date = new DateTime();
-            this.DoRenaming = true;
-            this.Path = string.Empty;
-            this.Found = true;
-            this.Id = 0;
-            this.Name = string.Empty;
-            this.Overview = string.Empty;
-            this.Watched = false;
-            this.Genres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
-            this.LastUpdated = new DateTime(1, 1, 1);
+            this.ContentType = Classes.ContentType.Undefined;
+            this.DatabaseGenres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
+            this.UserGenres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
+            this.DatabaseGenres.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(DatabaseGenres_CollectionChanged);
+            this.UserGenres.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(UserGenres_CollectionChanged);
         }
 
         /// <summary>
         /// Constructor for cloning instance
         /// </summary>
         /// <param name="content">Instance to clone</param>
-        public Content(Content content)
+        protected Content(Content content)
+            : this()
         {
-            Clone(content);
+            CloneAndHandlePath(content, true);
         }
 
         #endregion
@@ -127,26 +534,70 @@ namespace Meticumedia
         #region Methods
 
         /// <summary>
+        /// Triggers property changed event on database genres collection change.
+        /// </summary>
+        private void DatabaseGenres_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("DatabaseGenres");
+            if(useDatabaseGenres)
+                OnPropertyChanged("DisplayGenres");
+        }
+
+        /// <summary>
+        /// Triggers property changed event on user genres collection change.
+        /// </summary>
+        private void UserGenres_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("UserGenres");
+            if (!useDatabaseGenres)
+                OnPropertyChanged("DisplayGenres");
+        }
+
+        public virtual void Clone(Content content)
+        {
+            CloneAndHandlePath(content, true, false);
+        }
+
+        /// <summary>
         /// Copies properties from another instance into this instance.
         /// </summary>
         /// <param name="content">Instance to copy properties from</param>
-        protected void Clone(Content content)
+        /// <param name="replacePath">Whether path related properties should be cloned or not</param>
+        /// <param name="handleEmptyPath">Whether to build path if one being cloned is empty</param>
+        public virtual void CloneAndHandlePath(Content content, bool replacePath, bool handleEmptyPath = true)
         {
-            this.Name = content.Name;
-            this.DatabaseSelection = content.DatabaseSelection;
+            this.ContentType = content.ContentType;
+            this.UserName = content.UserName;
+            this.UseDatabaseName = content.UseDatabaseName;
             this.DatabaseName = content.DatabaseName;
-            this.Date = content.Date;
+            this.DatabaseSelection = content.DatabaseSelection;
+            this.UserYear = content.UserYear;
+            this.UseDatabaseYear = content.UseDatabaseYear;
+            this.DatabaseYear = content.DatabaseYear;
             this.Overview = content.Overview;
-            this.Genres = content.Genres;
+            this.UseDatabaseGenres = content.UseDatabaseGenres;
+            this.DatabaseGenres = new GenreCollection(content.DatabaseGenres);
+            this.UserGenres = new GenreCollection(content.UserGenres);
             this.Found = content.Found;
 
-            if (!string.IsNullOrEmpty(content.RootFolder))
-                this.RootFolder = content.RootFolder;
+            if (replacePath)
+            {
+                if (handleEmptyPath)
+                {
+                    if (!string.IsNullOrEmpty(content.RootFolder))
+                        this.RootFolder = content.RootFolder;
 
-            if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
-                this.Path = content.Path;
-            else
-                this.Path = this.BuildFolderPath();
+                    if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
+                        this.Path = content.Path;
+                    else
+                        this.Path = this.BuildFolderPath();
+                }
+                else
+                {
+                    this.RootFolder = content.RootFolder;
+                    this.Path = content.Path;
+                }
+            }
 
             this.Id = content.Id;
             this.Watched = content.Watched;
@@ -160,7 +611,7 @@ namespace Meticumedia
         /// <returns>Resulting built path</returns>
         public virtual string BuildFolderPath()
         {
-            return System.IO.Path.Combine(this.RootFolder, this.Name);
+            return System.IO.Path.Combine(this.RootFolder, this.DatabaseName);
         }
 
         /// <summary>
@@ -171,7 +622,7 @@ namespace Meticumedia
         {
             // Add each genre name, followed by semicolon and space
             string genreStr = string.Empty;
-            foreach (string genre in this.Genres)
+            foreach (string genre in this.DatabaseGenres)
                 genreStr += genre + "; ";
 
             // Return string with last semicolon and space removed
@@ -186,7 +637,7 @@ namespace Meticumedia
         public MatchCollection MatchFileToContent(string fileName)
         {
             List<string> names = new List<string>();
-            names.Add(this.Name);
+            names.Add(this.DatabaseName);
 
             // Load in alternate name for TV shows
             if (this is TvShow)
@@ -231,11 +682,11 @@ namespace Meticumedia
         ///     -The name without consonents (e.g. "BttlstrGlctc")
         /// "and"/"&" are set to optional for expression
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Regular expresion string for matching to content</returns>
         private string BuildNameRegularExpresionString(bool removeWhitespace, string showname)
         {
             // Initialize string
-            string showReStr = string.Empty;
+            string showReStr = @"(?:^|\W+)";
 
             // Get simplified name
             showname = FileHelper.SimplifyFileName(showname, true, removeWhitespace, true);
@@ -280,7 +731,10 @@ namespace Meticumedia
                         if (showWords.Length > 2)
                             showReStr += @")?";
 
-                        showReStr += @"\W*";
+                        if (i == showWords.Length - 1)
+                            showReStr += @"(?:\W+|$)";
+                        else
+                            showReStr += @"\W*";
                     }
 
                 }
@@ -303,7 +757,7 @@ namespace Meticumedia
         public virtual void UpdateInfoFromDatabase()
         {
             throw new NotImplementedException();
-        }        
+        }
 
         #endregion
 
@@ -312,7 +766,13 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML
         /// </summary>
-        private enum XmlElements { DatabaseSelection, Name, DataBaseName, Date, Overview, Genres, Folder, RootFolder, Id, Watched, DoRenaming, LastUpdated };
+        private enum XmlElements
+        {
+            DatabaseSelection, UserName, UseDatabaseName, DataBaseName, UserYear, UseDatabaseYear, DatabaseYear, Overview, UserGenres, UseDatabaseGenres, DataseGenres, Folder, RootFolder, Id, Watched, DoRenaming, LastUpdated,
+
+            // Deprecated
+            Name, Date, Genres
+        };
 
         /// <summary>
         /// XML element name for a single genre
@@ -335,21 +795,39 @@ namespace Meticumedia
                     case XmlElements.DatabaseSelection:
                         value = this.DatabaseSelection.ToString();
                         break;
-                    case XmlElements.Name:
-                        value = this.Name;
+                    case XmlElements.UserName:
+                        value = this.UserName;
+                        break;
+                    case XmlElements.UseDatabaseName:
+                        value = this.UseDatabaseName.ToString();
                         break;
                     case XmlElements.DataBaseName:
                         value = this.DatabaseName;
                         break;
-                    case XmlElements.Date:
-                        value = this.Date.ToString();
+                    case XmlElements.UseDatabaseYear:
+                        value = this.UseDatabaseYear.ToString();
+                        break;
+                    case XmlElements.DatabaseYear:
+                        value = this.DatabaseYear.ToString();
+                        break;
+                    case XmlElements.UserYear:
+                        value = this.UserYear.ToString();
                         break;
                     case XmlElements.Overview:
                         value = this.Overview;
                         break;
-                    case XmlElements.Genres:
+                    case XmlElements.UseDatabaseGenres:
+                        value = this.UseDatabaseGenres.ToString();
+                        break;
+                    case XmlElements.DataseGenres:
                         xw.WriteStartElement(element.ToString());
-                        foreach (string genre in this.Genres)
+                        foreach (string genre in this.DatabaseGenres)
+                            xw.WriteElementString(GENRE_XML, genre);
+                        xw.WriteEndElement();
+                        break;
+                    case XmlElements.UserGenres:
+                        xw.WriteStartElement(element.ToString());
+                        foreach (string genre in this.UserGenres)
                             xw.WriteElementString(GENRE_XML, genre);
                         xw.WriteEndElement();
                         break;
@@ -370,6 +848,11 @@ namespace Meticumedia
                         break;
                     case XmlElements.LastUpdated:
                         value = this.LastUpdated.ToString();
+                        break;
+                    // Deprecated elements - for loading old XML only
+                    case XmlElements.Name:
+                    case XmlElements.Genres:
+                    case XmlElements.Date:
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -404,23 +887,59 @@ namespace Meticumedia
                         this.DatabaseSelection = dbSel;
                         break;
                     case XmlElements.Name:
-                        this.Name = value;
+                        if (!string.IsNullOrEmpty(value))
+                            this.DatabaseName = value;
+                        break;
+                    case XmlElements.UseDatabaseName:
+                        bool useDbName;
+                        if (bool.TryParse(value, out useDbName))
+                            this.UseDatabaseName = useDbName;
                         break;
                     case XmlElements.DataBaseName:
-                        this.DatabaseName = value;
+                        if (!string.IsNullOrEmpty(value))
+                            this.DatabaseName = value;
+                        break;
+                    case XmlElements.UserName:
+                        this.UserName = value;
+                        break;
+                    case XmlElements.UseDatabaseYear:
+                        bool useDbYear;
+                        if (bool.TryParse(value, out useDbYear))
+                            this.UseDatabaseYear = useDbYear;
+                        break;
+                    case XmlElements.DatabaseYear:
+                        int dbYear;
+                        if (int.TryParse(value, out dbYear))
+                            this.DatabaseYear = dbYear;
+                        break;
+                    case XmlElements.UserYear:
+                        int userYear;
+                        if (int.TryParse(value, out userYear))
+                            this.UserYear = userYear;
                         break;
                     case XmlElements.Date:
                         DateTime date;
                         DateTime.TryParse(value, out date);
-                        this.Date = date;
+                        this.DatabaseYear = date.Year;
                         break;
                     case XmlElements.Overview:
-                        this.Overview = value;
+                        this.Overview = value.Trim();
+                        break;
+                    case XmlElements.UseDatabaseGenres:
+                        bool useDbGenres;
+                        if (bool.TryParse(value, out useDbGenres))
+                            this.UseDatabaseGenres = useDbGenres;
                         break;
                     case XmlElements.Genres:
-                        this.Genres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
+                    case XmlElements.DataseGenres:
+                        this.DatabaseGenres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
                         foreach (XmlNode genreNode in propNode.ChildNodes)
-                            this.Genres.Add(genreNode.InnerText);
+                            this.DatabaseGenres.Add(genreNode.InnerText);
+                        break;
+                    case XmlElements.UserGenres:
+                        this.UserGenres = new GenreCollection(this is Movie ? GenreCollection.CollectionType.Movie : GenreCollection.CollectionType.Tv);
+                        foreach (XmlNode genreNode in propNode.ChildNodes)
+                            this.UserGenres.Add(genreNode.InnerText);
                         break;
                     case XmlElements.Folder:
                         this.Path = value;
@@ -447,6 +966,11 @@ namespace Meticumedia
                         DateTime lastUpdated;
                         DateTime.TryParse(value, out lastUpdated);
                         this.LastUpdated = lastUpdated;
+                        break;
+                    default:
+#if DEBUG
+                        throw new Exception("Unknown XML element loading Content");
+#endif
                         break;
                 }
             }
@@ -482,9 +1006,9 @@ namespace Meticumedia
         /// <param name="context"></param>
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("Name", this.Name);
+            info.AddValue("Name", this.DatabaseName);
             info.AddValue("DatabaseName", this.DatabaseName);
-            info.AddValue("Date", this.Date.ToString());
+            info.AddValue("DatabaseYear", this.DatabaseYear.ToString());
             info.AddValue("Overview", this.Overview);
             //info.AddValue("Genres", this.Genres);
             info.AddValue("Folder", this.Path);
@@ -493,7 +1017,6 @@ namespace Meticumedia
             info.AddValue("ContentFolder", this.RootFolder);
             info.AddValue("Id", this.Id);
             info.AddValue("Watched", this.Watched);
-            info.AddValue("IncludeInScan", this.IncludeInScan);
             info.AddValue("DoRenaming", this.DoRenaming);
             info.AddValue("LastUpdated", this.LastUpdated.ToString());
 
@@ -514,12 +1037,12 @@ namespace Meticumedia
             {
                 Content t2 = (Content)obj;
 
-                if (string.IsNullOrEmpty(t2.Name) && !string.IsNullOrEmpty(this.Name))
+                if (string.IsNullOrEmpty(t2.DatabaseName) && !string.IsNullOrEmpty(this.DatabaseName))
                     return -1;
-                else if (!string.IsNullOrEmpty(t2.Name) && string.IsNullOrEmpty(this.Name))
+                else if (!string.IsNullOrEmpty(t2.DatabaseName) && string.IsNullOrEmpty(this.DatabaseName))
                     return 1;
 
-                return this.Name.CompareTo(t2.Name);
+                return this.DatabaseName.CompareTo(t2.DatabaseName);
             }
             else
                 throw new ArgumentException("Object is not a content type.");
@@ -626,7 +1149,7 @@ namespace Meticumedia
                 if (y == null)
                     sortResult = -1;
                 else
-                    sortResult = y.Date.CompareTo(x.Date);
+                    sortResult = y.DatabaseYear.CompareTo(x.DatabaseYear);
             }
 
             return SetSort(sortResult);
@@ -655,16 +1178,96 @@ namespace Meticumedia
                 else
                 {
                     string genreX = string.Empty, genreY = string.Empty;
-                    if (x.Genres != null && x.Genres.Count > 0)
-                        genreX = x.Genres[0].ToString();
-                    if (y.Genres != null && y.Genres.Count > 0)
-                        genreY = y.Genres[0].ToString();
+                    if (x.DatabaseGenres != null && x.DatabaseGenres.Count > 0)
+                        genreX = x.DatabaseGenres[0].ToString();
+                    if (y.DatabaseGenres != null && y.DatabaseGenres.Count > 0)
+                        genreY = y.DatabaseGenres[0].ToString();
 
                     sortResult = genreX.CompareTo(genreY);
                 }
             }
 
             return SetSort(sortResult);
+        }
+
+        #endregion
+
+        #region Equals
+
+        /// <summary>
+        /// Check if two instance of content object are equal (all properties are equal).
+        /// </summary>
+        /// <param name="obj">Instance to compare to</param>
+        /// <returns>Whether obj instance is equal to this instance</returns>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Content))
+                return false;
+
+            Content contentObj = obj as Content;
+
+            if (this.ContentType != contentObj.ContentType)
+                return false;
+            if (this.UseDatabaseName != contentObj.UseDatabaseName)
+                return false;
+            if (!this.UseDatabaseName && this.UserName != contentObj.UserName)
+                return false;
+            if (this.UseDatabaseName && this.DatabaseName != contentObj.DatabaseName)
+                return false;
+            if (this.DatabaseSelection != contentObj.DatabaseSelection)
+                return false;
+            if (this.UseDatabaseYear != contentObj.UseDatabaseYear)
+                return false;
+            if (!this.UseDatabaseYear && this.UserYear != contentObj.UserYear)
+                return false;
+            if (this.UseDatabaseYear && this.DatabaseYear != contentObj.DatabaseYear)
+                return false;
+            if (this.Overview != contentObj.Overview)
+                return false;
+            if (this.Found != contentObj.Found)
+                return false;
+            if (this.RootFolder != contentObj.RootFolder)
+                return false;
+            if (this.Path != contentObj.Path)
+                return false;
+            if (this.Id != contentObj.Id)
+                return false;
+            if (this.Watched != contentObj.Watched)
+                return false;
+            if (this.DoRenaming != contentObj.DoRenaming)
+                return false;
+            if (!this.LastUpdated.Equals(contentObj.LastUpdated))
+                return false;
+            if (this.UseDatabaseGenres != contentObj.UseDatabaseGenres)
+                return false;
+            if (this.UseDatabaseGenres && !this.DatabaseGenres.Equals(contentObj.DatabaseGenres))
+                return false;
+            if (!this.UseDatabaseGenres && !this.UserGenres.Equals(contentObj.UserGenres))
+                return false;
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+            //    int hash = 13;
+            //    hash = (hash * 7) + ContentType.GetHashCode();
+            //    hash = (hash * 7) + UseDatabaseName.GetHashCode();
+            //    hash = (hash * 7) + DatabaseSelection.GetHashCode();
+            //    hash = (hash * 7) + UseDatabaseYear.GetHashCode();
+            //    hash = (hash * 7) + UserYear.GetHashCode();
+            //    hash = (hash * 7) + DatabaseYear.GetHashCode();
+            //    hash = (hash * 7) + Overview.GetHashCode();
+            //    hash = (hash * 7) + RootFolder.GetHashCode();
+            //    hash = (hash * 7) + Path.GetHashCode();
+            //    hash = (hash * 7) + Id.GetHashCode();
+            //    hash = (hash * 7) + DoRenaming.GetHashCode();
+            //    hash = (hash * 7) + LastUpdated.GetHashCode();
+            //    hash = (hash * 7) + UseDatabaseGenres.GetHashCode();
+            //    hash = (hash * 7) + DatabaseGenres.GetHashCode();
+            //    hash = (hash * 7) + UserGenres.GetHashCode();
+            //    return hash;
         }
 
         #endregion

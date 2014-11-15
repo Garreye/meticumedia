@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Helper class for accessing TV databases.
@@ -84,7 +84,7 @@ namespace Meticumedia
         /// <param name="show">Show to load episode information into</param>
         public static void FullShowSeasonsUpdate(TvShow show)
         {
-            GetDataBaseAccess(show.DataBase).FullUpdate(show);
+            GetDataBaseAccess(show.Database).FullUpdate(show);
             show.LastUpdated = DateTime.Now;
         }
 
