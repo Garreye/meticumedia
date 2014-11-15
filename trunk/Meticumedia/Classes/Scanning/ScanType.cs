@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {    
     /// <summary>
     /// Portions of scan processing that can be running
@@ -21,9 +21,9 @@ namespace Meticumedia
         TvMissing,
         [Description("TV Episode Rename Check")]
         TvRename,
-        [Description("TV Root Folder Check")]
+        [Description("TV Folder Organization")]
         TvFolder,
-        [Description("Movie Root Check")]
+        [Description("Movie Folder Organization")]
         MovieFolder 
     };
 }

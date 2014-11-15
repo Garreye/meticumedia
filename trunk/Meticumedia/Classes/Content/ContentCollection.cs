@@ -9,14 +9,16 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.ComponentModel;
-using System.Windows.Forms;
+using System.Windows;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
-    /// List of content with added properties.
+    /// List of content with added properties. (Inheriting list to have sorting methods)
     /// </summary>
-    public class ContentCollection : List<Content>
+    public class ContentCollection : List<Content>, INotifyCollectionChanged
     {
         #region Properties
 
@@ -54,6 +56,29 @@ namespace Meticumedia
 
         #region Events
 
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        public void OnCollectionChanged(NotifyCollectionChangedAction action)
+        {
+            if (CollectionChanged != null)
+                CollectionChanged(this, new NotifyCollectionChangedEventArgs(action));
+        }
+
+        public void OnCollectionChanged(NotifyCollectionChangedAction action, Content item)
+        {
+            if (CollectionChanged != null)
+                CollectionChanged(this, new NotifyCollectionChangedEventArgs(action, item));
+        }
+
+        public void OnCollectionChanged(List<Content> items)
+        {
+            if (CollectionChanged != null)
+            {
+                NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items);
+                CollectionChanged(this, args);
+            }
+        }
+
         /// <summary>
         /// Static event that fires when show loading progress changes
         /// </summary>
@@ -87,24 +112,6 @@ namespace Meticumedia
         /// Indication of whether loading is complete
         /// </summary>
         private bool loaded = false;
-
-        /// <summary>
-        /// Static event that fires when content is added to the collection
-        /// </summary>
-        public event EventHandler ContentAdded;
-
-        /// <summary>
-        /// Triggers ContentAdded event
-        /// </summary>
-        public void OnContentAdded()
-        {
-            loaded = true;
-            if (!loaded)
-                return;
-
-            if (ContentAdded != null)
-                ContentAdded(this, new EventArgs());
-        }
 
         /// <summary>
         /// Indicates that contents have been saved.
@@ -156,55 +163,60 @@ namespace Meticumedia
 
         #region New base methods with locking
 
+        private void AddMultiple(List<Content> items)
+        {
+            lock (ContentLock)
+            {
+               foreach(Content item in items)
+                base.Add(item);
+            }
+            OnCollectionChanged(items);
+        }
+
         public new void Add(Content item)
         {
             lock (ContentLock)
             {
-                //Console.WriteLine(this.ToString() + " lock add");
                 base.Add(item);
             }
-            OnContentAdded();
-            //Console.WriteLine(this.ToString() + " release add");
+            OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
         }
 
         public new void Remove(Content item)
         {
             lock (ContentLock)
             {
-                //Console.WriteLine(this.ToString() + " lock remove");
                 base.Remove(item);
             }
-            //Console.WriteLine(this.ToString() + " release remove");
+            OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
         }
 
         public new void RemoveAt(int index)
         {
+            Content item = this[index];
             lock (ContentLock)
             {
-                //Console.WriteLine(this.ToString() + " lock removeAt");
                 base.RemoveAt(index);
             }
-            //Console.WriteLine(this.ToString() + " release removeAt");
-        }
-
-        public new void Sort()
-        {
-            lock (ContentLock)
-            {
-                //Console.WriteLine(this.ToString() + " lock sort");
-                base.Sort();
-            }
-            //Console.WriteLine(this.ToString() + " release sort");
+            OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
         }
 
         public new void Clear()
         {
             lock (ContentLock)
             {
-                //Console.WriteLine(this.ToString() + " lock clear");
                 base.Clear();
             }
-            //Console.WriteLine(this.ToString() + " release clear");
+            OnCollectionChanged(NotifyCollectionChangedAction.Reset);
+        }
+
+        public new void Sort()
+        {
+            lock (ContentLock)
+            {
+                base.Sort();
+            }
+            OnCollectionChanged(NotifyCollectionChangedAction.Reset);
         }
 
         #endregion
@@ -214,7 +226,7 @@ namespace Meticumedia
         /// <summary>
         /// Load collection from saved XML file
         /// </summary>
-        public void Load()
+        public void Load(bool doUpdating)
         {
             XmlTextReader reader = null;
             XmlDocument xmlDoc = new XmlDocument();
@@ -252,7 +264,8 @@ namespace Meticumedia
                                         if (show.Load(contentNodes[i]))
                                         {
                                             loadContent.Add(show);
-                                            show.UpdateMissing();
+                                            if (doUpdating)
+                                                show.UpdateMissing();
                                         }
                                         break;
                                     case ContentType.Movie:
@@ -275,8 +288,7 @@ namespace Meticumedia
                         //Console.WriteLine(this.ToString() + " lock load");
                         this.LastUpdate = loadContent.LastUpdate;
                         this.Clear();
-                        foreach (Content content in loadContent)
-                            base.Add(content);
+                        AddMultiple(loadContent);
                     }
                     //Console.WriteLine(this.ToString() + " release load");
                 }
@@ -292,7 +304,7 @@ namespace Meticumedia
             }
 
             // Start updating of TV episode in scan dirs.
-            if (this.ContentType == ContentType.TvShow)
+            if (this.ContentType == ContentType.TvShow && doUpdating)
             {
                 TvItemInScanDirHelper.DoUpdate(false);
                 TvItemInScanDirHelper.StartUpdateTimer();
@@ -322,7 +334,7 @@ namespace Meticumedia
                     using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
                     {
                         xw.Formatting = Formatting.Indented;
-
+                        
                         xw.WriteStartElement(XML_ROOT);
                         xw.WriteElementString("LastUpdate", this.LastUpdate);
 
@@ -353,31 +365,45 @@ namespace Meticumedia
         {
             lock (this.ContentLock)
             {
-                //Console.WriteLine(this.ToString() + " lock removeMissing");
                 for (int i = this.Count - 1; i >= 0; i--)
-                    if (!this[i].Found && this[i].RootFolder.StartsWith(rootFolder.FullPath))
-                        base.RemoveAt(i);
+                    if (!this[i].Found && rootFolder.ContainsContent(this[i], true))
+                        RemoveAt(i);
             }
-            //Console.WriteLine(this.ToString() + " release removeMissing");
         }
 
         /// <summary>
-        /// Get a lists of content that are set to be included in scanning (by IncludeInScan property)
+        /// Get a lists of content that are set to be included in scanning
         /// </summary>
         /// <returns>List of show that are included in scanning</returns>
-        public List<Content> GetScannableContent(bool updateMissing)
+        public List<Content> GetScannableContent(bool updateMissing, ScanType scanType)
         {
             List<Content> includeShow = new List<Content>();
             for (int i = 0; i < this.Count; i++)
-                if (this[i].IncludeInScan && !string.IsNullOrEmpty(this[i].Name))
+            {
+                bool include = true;
+                switch (scanType)
+                {
+                    case ScanType.TvMissing:
+                        include = (this[i] as TvShow).DoMissingCheck;
+                        break;
+                    case ScanType.TvRename:
+                    case ScanType.TvFolder:
+                    case ScanType.MovieFolder:
+                        include = this[i].DoRenaming;
+                        break;
+                }
+
+                if (include && !string.IsNullOrEmpty(this[i].DatabaseName))
                 {
                     if (updateMissing)
                         this[i].UpdateMissing();
                     includeShow.Add(this[i]);
                 }
+            }
             return includeShow;
         }
 
         #endregion
+
     }
 }

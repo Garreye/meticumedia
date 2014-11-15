@@ -7,124 +7,501 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Windows.Forms;
 using System.ComponentModel;
 using System.Threading;
 using System.Xml;
+using Ookii.Dialogs.Wpf;
+using System.Windows;
+using System.Windows.Media;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// An organization item. Stores information about a single organization of a path and handles the action related to organization.
     /// </summary>
-    public class OrgItem
+    public class OrgItem : INotifyPropertyChanged
     {
-        #region Properties
+        #region Events
 
-        /// <summary>
-        /// The status of the item for a TV rename/missing check
-        /// </summary>
-        public OrgStatus Status { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// The action to be performed on the file
-        /// </summary>
-        public OrgAction Action { get; set; }
+        private void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
-        /// <summary>
-        /// Replacing of destination files has been confirmed by user
-        /// </summary>
-        public bool Replace { get; set; }
+        #endregion
 
-        /// <summary>
-        /// Notes to be displayed to user about item
-        /// </summary>
-        public string Notes { get; set; }
-
-        /// <summary>
-        /// Path of the source file
-        /// </summary>
-        public string SourcePath { get; set; }
-
-        /// <summary>
-        /// Path where the source file will be sent to for a copy/move action.
-        /// </summary>
-        public string DestinationPath { get; set; }
-
-        /// <summary>
-        /// TV epsiode that the file is associated with.
-        /// </summary>
-        public TvEpisode TvEpisode { get; set; }
-
-        /// <summary>
-        /// 2nd TV episode that the file is assocatied with. Used for multi-episode files only.
-        /// </summary>
-        public TvEpisode TvEpisode2 { get; set; }
-
-        /// <summary>
-        /// Movie that file is associated with.
-        /// </summary>
-        public Movie Movie { get; set; }
-
-        /// <summary>
-        /// Tv Show
-        /// </summary>
-        public TvShow Show { get; set; }
-
-        /// <summary>
-        /// Flag indicating TV episode(s) associated with item are for a newly found show.
-        /// </summary>
-        public TvShow NewShow { get; set; }
-
-        /// <summary>
-        /// Scan Directory where source comes from
-        /// </summary>
-        public OrgFolder ScanDirectory { get; set; }
-
-        /// <summary>
-        /// The file categarization.
-        /// </summary>
-        public FileCategory Category { get; set; }
-
-        /// <summary>
-        /// The state of the check for the item in the list of item to be organized (scan).
-        /// </summary>
-        public CheckState Check { get; set; }
-
-        /// <summary>
-        /// Action progress percentage.
-        /// </summary>
-        public int Progress { get; set; }
-
-        /// <summary>
-        /// Item paused
-        /// </summary>
-        public OrgQueueStatus QueueStatus { get; set; }
+        #region Static Properties
 
         /// <summary>
         /// Global pause for all items.
         /// </summary>
         public static bool QueuePaused { get; set; }
 
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// The status of the item for a TV rename/missing check
+        /// </summary>
+        public OrgStatus Status
+        {
+            get
+            {
+                return status;
+            }
+            set
+            {
+                status = value;
+                OnPropertyChanged("Status");
+            }
+        }
+        private OrgStatus status = OrgStatus.Missing;
+
+        /// <summary>
+        /// The action to be performed on the file
+        /// </summary>
+        public OrgAction Action
+            {
+            get
+            {
+                return action;
+            }
+            set
+            {
+                action = value;
+                OnPropertyChanged("Action");
+                OnPropertyChanged("ActionColor");
+                OnPropertyChanged("CanEnable");
+            }
+        }
+        private OrgAction action = OrgAction.None;
+
+        public SolidColorBrush ActionColor
+        {
+            get
+            {
+                return new SolidColorBrush(GetActionColor(action));
+            }
+        }
+
+        /// <summary>
+        /// Replacing of destination files has been confirmed by user
+        /// </summary>
+        public bool Replace
+            {
+            get
+            {
+                return replace;
+            }
+            set
+            {
+                replace = value;
+                OnPropertyChanged("Replace");
+            }
+        }
+        private bool replace = false;
+
+        /// <summary>
+        /// Notes to be displayed to user about item
+        /// </summary>
+        public string Notes
+            {
+            get
+            {
+                return notes;
+            }
+            set
+            {
+                notes = value;
+                OnPropertyChanged("Notes");
+            }
+        }
+        private string notes = string.Empty;
+
+        /// <summary>
+        /// Path of the source file
+        /// </summary>
+        public string SourcePath
+        {
+            get
+            {
+                return sourcePath;
+            }
+            set
+            {
+                sourcePath = value;
+                OnPropertyChanged("SourcePath");
+                OnPropertyChanged("SourcePathFileName");
+                OnPropertyChanged("SourcePathDirectory");
+            }
+        }
+        public string sourcePath = string.Empty;
+
+        /// <summary>
+        /// File name of source file
+        /// </summary>
+        public string SourcePathFileName
+        {
+            get
+            {
+                return string.IsNullOrEmpty(sourcePath) ? "" : Path.GetFileName(sourcePath);
+            }
+        }
+
+        /// <summary>
+        /// Directory of source file
+        /// </summary>
+        public string SourcePathDirectory
+        {
+            get
+            {
+                return string.IsNullOrEmpty(sourcePath) ? "" : Path.GetDirectoryName(sourcePath);
+            }
+        }
+
+        /// <summary>
+        /// Path where the source file will be sent to for a copy/move action.
+        /// </summary>
+        public string DestinationPath
+        {
+            get
+            {
+                return destinationPath;
+            }
+            set
+            {
+                destinationPath = value;
+                OnPropertyChanged("DestinationPath");
+                OnPropertyChanged("DestinationPathFileName");
+                OnPropertyChanged("DestinationPathDirectory");
+            }
+        }
+        private string destinationPath = string.Empty;
+
+        /// <summary>
+        /// File name of destination file
+        /// </summary>
+        public string DestinationPathFileName
+        {
+            get
+            {
+                return string.IsNullOrEmpty(destinationPath) ? "" : Path.GetFileName(destinationPath);
+            }
+        }
+
+        /// <summary>
+        /// Directory of destination file
+        /// </summary>
+        public string DestinationPathDirectory
+        {
+            get
+            {
+                return string.IsNullOrEmpty(destinationPath) ? "" : Path.GetDirectoryName(destinationPath);
+            }
+        }
+
+        /// <summary>
+        /// TV epsiode that the file is associated with.
+        /// </summary>
+        public TvEpisode TvEpisode
+            {
+            get
+            {
+                return tvEpisode;
+            }
+            set
+            {
+                tvEpisode = value;
+                tvEpisode.PropertyChanged += tvEpisode_PropertyChanged;
+                OnPropertyChanged("TvEpisode");
+            }
+        }
+        private TvEpisode tvEpisode;
+
+        void tvEpisode_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Show")
+                this.tvEpisode2.Show = this.tvEpisode.Show;
+        }
+
+        /// <summary>
+        /// 2nd TV episode that the file is assocatied with. Used for multi-episode files only.
+        /// </summary>
+        public TvEpisode TvEpisode2
+        {
+            get
+            {
+                return tvEpisode2;
+            }
+            set
+            {
+                tvEpisode2 = value;
+                OnPropertyChanged("TvEpisode2");
+            }
+        }
+        private TvEpisode tvEpisode2;
+
+        public bool IsNewShow { get; set; }
+
+        /// <summary>
+        /// Whether item is for multiple TV episodes
+        /// </summary>
+        public bool MultiEpisode
+        {
+            get
+            {
+                return multiEpisode;
+            }
+            set
+            {
+                multiEpisode = value;
+                OnPropertyChanged("MultiEpisode");
+            }
+        }
+        private bool multiEpisode = false;
+
+        /// <summary>
+        /// Movie that file is associated with.
+        /// </summary>
+        public Movie Movie
+        {
+            get
+            {
+                return movie;
+            }
+            set
+            {
+                movie = value;
+                OnPropertyChanged("Movie");
+            }
+        }
+        private Movie movie;
+
+        public AutoMoveFileSetup AutoMoveSetup
+        {
+            get
+            {
+                return autoMoveSetup;
+            }
+            set
+            {
+                autoMoveSetup = value;
+                OnPropertyChanged("AutoMoveSetup");
+            }
+        }
+        private AutoMoveFileSetup autoMoveSetup;
+
+        /// <summary>
+        /// Scan Directory where source comes from
+        /// </summary>
+        public OrgFolder ScanDirectory
+            {
+            get
+            {
+                return scanDirectory;
+            }
+            set
+            {
+                scanDirectory = value;
+                OnPropertyChanged("ScanDirectory");
+            }
+        }
+        private OrgFolder scanDirectory;
+
+        /// <summary>
+        /// The file categarization.
+        /// </summary>
+        public FileCategory Category
+            {
+            get
+            {
+                return category;
+            }
+            set
+            {
+                category = value;
+                OnPropertyChanged("Category");
+            }
+        }
+        private FileCategory category = FileCategory.Unknown;
+
+        /// <summary>
+        /// Enable for the item in the list of item to be organized.
+        /// </summary>
+        public bool Enable
+        {
+            get
+            {
+                return enable;
+            }
+            set
+            {
+                enable = value;
+                OnPropertyChanged("Enable");
+            }
+        }
+        private bool enable;
+
+        public bool CanEnable
+        {
+            get
+            {
+                switch (this.Action)
+                {
+                    case OrgAction.Move:
+                    case OrgAction.Copy:
+                    case OrgAction.Rename:
+                    case OrgAction.Delete:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Action progress percentage.
+        /// </summary>
+        public int Progress
+        {
+            get
+            {
+                return progress;
+            }
+            set
+            {
+                progress = value;
+                OnPropertyChanged("Progress");
+                OnPropertyChanged("QueueStatusString");
+            }
+        }
+        private int progress;
+
+        /// <summary>
+        /// Item paused
+        /// </summary>
+        public OrgQueueStatus QueueStatus
+            {
+            get
+            {
+                return queueStatus;
+            }
+            set
+            {
+                queueStatus = value;
+                OnPropertyChanged("QueueStatus");
+                OnPropertyChanged("QueueStatusString");
+            }
+        }
+        private OrgQueueStatus queueStatus = OrgQueueStatus.Enabled;
+
+        public string QueueStatusString
+        {
+            get
+            {
+                string status = string.Empty;
+                switch (this.QueueStatus)
+                {
+                    case OrgQueueStatus.Enabled:
+
+                        if (this.Progress > 0)
+                            status =  this.Progress.ToString() + "%";
+                        else
+                            status = "Queued";
+                        break;
+                    case OrgQueueStatus.Paused:
+                        status = "Paused";
+                        if (this.Progress > 0)
+                            status += " - " + this.Progress.ToString() + "%";
+                        break;
+                    case OrgQueueStatus.Failed:
+                        status = "Failed";
+                        break;
+                    case OrgQueueStatus.Completed:
+                        status = "Completed";
+                        break;
+                    case OrgQueueStatus.Cancelled:
+                        status = "Cancelled";
+                        break;
+                }
+
+                return status;
+            }
+        }
+
         /// <summary>
         /// State of whether the action has been completed or not. Used for queuing.
         /// </summary>
-        public bool ActionComplete { get; set; }
+        public bool ActionComplete
+            {
+            get
+            {
+                return actionComplete;
+            }
+            set
+            {
+                actionComplete = value;
+                OnPropertyChanged("ActionComplete");
+            }
+        }
+        private bool actionComplete = false;
 
         /// <summary>
         /// State of whether the action was finished due to completing action or cancellation (user chose not to override destination).
         /// </summary>
-        public bool ActionSucess { get; set; }
+        public bool ActionSucess
+            {
+            get
+            {
+                return actionSucess;
+            }
+            set
+            {
+                actionSucess = value;
+                OnPropertyChanged("ActionSucess");
+            }
+        }
+        private bool actionSucess = false;
 
         /// <summary>
         /// Date/time when the action was performed. Only valid is ActionComplete is true.
         /// </summary>
-        public DateTime ActionTime { get; set; }
+        public DateTime ActionTime
+            {
+            get
+            {
+                return actionTime;
+            }
+            set
+            {
+                actionTime = value;
+                OnPropertyChanged("ActionTime");
+            }
+        }
+        private DateTime actionTime;
 
         /// <summary>
         /// Item number in scan. To be processed in same order as scanned to prevent conflicts.
         /// </summary>
-        public int Number { get; set; }
+        public int Number
+        {
+            get
+            {
+                return number;
+            }
+            set
+            {
+                number = value;
+                OnPropertyChanged("Number");
+            }
+        }
+        private int number = -1;
 
         #endregion
 
@@ -158,19 +535,18 @@ namespace Meticumedia
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir, TvShow newShow)
+        public OrgItem(OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
+            : this()
         {
-            this.Status = OrgStatus.Found;
             this.Action = action;
             this.SourcePath = file;
             this.DestinationPath = destination;
-            this.TvEpisode = episode;
+            this.TvEpisode = new TvEpisode(episode);
             this.Category = category;
-            this.TvEpisode2 = episode2;
-            this.Check = CheckState.Indeterminate;
+            if (episode2 != null)
+                this.TvEpisode2 = new TvEpisode(episode2);
+            this.Enable = false;
             this.ScanDirectory = scanDir;
-            this.NewShow = newShow;
-            this.Replace = false;
             this.Number = 0;
         }
 
@@ -185,7 +561,7 @@ namespace Meticumedia
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
         public OrgItem(OrgStatus status, OrgAction action, string file, string destination, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
-            : this(action, file, destination, episode, episode2, category, scanDir, null)
+            : this(action, file, destination, episode, episode2, category, scanDir)
         {
             this.Status = status;
             this.Progress = 0;
@@ -199,7 +575,7 @@ namespace Meticumedia
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir)
+        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir) : this()
         {
             this.Status = status;
             this.Progress = 0;
@@ -209,13 +585,12 @@ namespace Meticumedia
                 this.DestinationPath = FileHelper.DELETE_DIRECTORY;
             else
                 this.DestinationPath = string.Empty;
-            this.TvEpisode = episode;
-            this.TvEpisode2 = episode2;
+            this.TvEpisode = new TvEpisode(episode);
+            if (episode2 != null)
+                this.TvEpisode2 = new TvEpisode(episode2);
             this.Category = category;
-            this.Check = CheckState.Indeterminate;
+            this.Enable = false;
             this.ScanDirectory = scanDir;
-            this.NewShow = null;
-            this.Replace = false;
             this.Number = 0;
         }
 
@@ -226,8 +601,8 @@ namespace Meticumedia
         /// <param name="file">source path</param>
         /// <param name="category">file category</param>
         public OrgItem(OrgAction action, string file, FileCategory category, OrgFolder scanDir)
+            : this()
         {
-            this.Status = OrgStatus.Found;
             this.Progress = 0;
             this.Action = action;
             this.SourcePath = file;
@@ -235,13 +610,32 @@ namespace Meticumedia
                 this.DestinationPath = FileHelper.DELETE_DIRECTORY;
             else
                 this.DestinationPath = string.Empty;
-            this.TvEpisode = null;
             this.Category = category;
-            this.Check = CheckState.Indeterminate;
+            this.Enable = false;
             this.ScanDirectory = scanDir;
-            this.NewShow = null;
-            this.Replace = false;
             this.Number = 0;
+        }
+
+        /// <summary>
+        /// Constructor for directory scan for file that is unknown.
+        /// </summary>
+        /// <param name="action">action to be performed</param>
+        /// <param name="file">source path</param>
+        /// <param name="category">file category</param>
+        public OrgItem(string file, AutoMoveFileSetup autoMoveSetup, OrgFolder scanDir, bool folder)
+            : this()
+        {
+            this.Progress = 0;
+            this.Action = scanDir.CopyFrom ? OrgAction.Copy : OrgAction.Move;
+            this.AutoMoveSetup = autoMoveSetup;
+            this.SourcePath = file;
+            this.Category = FileCategory.AutoMove;
+            if (folder)
+                this.Category |= FileCategory.Folder;
+            this.Enable = true;
+            this.ScanDirectory = scanDir;
+            this.Number = 0;
+            this.BuildDestination();
         }
 
         /// <summary>
@@ -253,20 +647,16 @@ namespace Meticumedia
         /// <param name="movie">Movie object related to file</param>
         /// <param name="destination">destination path</param>
         /// <param name="scanDir">path to content folder of movie</param>
-        public OrgItem(OrgAction action, string sourceFile, FileCategory category, Movie movie, string destination, OrgFolder scanDir)
+        public OrgItem(OrgAction action, string sourceFile, FileCategory category, Movie movie, string destination, OrgFolder scanDir) : this()
         {
-            this.Status = OrgStatus.Found;
             this.Progress = 0;
             this.Action = action;
             this.SourcePath = sourceFile;
             this.Movie = movie;
             this.ScanDirectory = scanDir;
             this.DestinationPath = destination;
-            this.TvEpisode = null;
             this.Category = category;
-            this.Check = CheckState.Indeterminate;
-            this.NewShow = null;
-            this.Replace = false;
+            this.Enable = false;
             this.Number = 0;
         }
 
@@ -276,7 +666,7 @@ namespace Meticumedia
         /// <param name="item">item to be copied</param>
         public OrgItem(OrgItem item)
         {
-            UpdateInfo(item);
+            Clone(item);
         }
 
         /// <summary>
@@ -286,13 +676,16 @@ namespace Meticumedia
         {
             this.Status = OrgStatus.Found;
             this.Replace = false;
+            this.Movie = new Movie();
+            this.TvEpisode = new TvEpisode(new TvShow());
+            this.TvEpisode2 = new TvEpisode(new TvShow());
         }
 
         /// <summary>
         /// Update current update from another item's data
         /// </summary>
         /// <param name="item">item to be copied</param>
-        public void UpdateInfo(OrgItem item)
+        public void Clone(OrgItem item)
         {
             this.Status = item.Status;
             this.Progress = 0;
@@ -302,11 +695,9 @@ namespace Meticumedia
             this.TvEpisode = item.TvEpisode;
             this.TvEpisode2 = item.TvEpisode2;
             this.Category = item.Category;
-            this.Check = item.Check;
+            this.Enable = item.Enable;
             this.Movie = item.Movie;
             this.ScanDirectory = item.ScanDirectory;
-            this.NewShow = item.NewShow;
-            this.Show = item.Show;
             this.Replace = item.Replace;
             this.Number = item.Number;
             this.QueueStatus = item.QueueStatus;
@@ -613,7 +1004,7 @@ namespace Meticumedia
                 if (y == null)
                     sortResult = 1;
                 else
-                    sortResult = Path.GetDirectoryName(x.Movie.Name).CompareTo(Path.GetDirectoryName(y.Movie.Name));
+                    sortResult = Path.GetDirectoryName(x.Movie.DatabaseName).CompareTo(Path.GetDirectoryName(y.Movie.DatabaseName));
             }
 
             if (sortResult == 0)
@@ -643,7 +1034,7 @@ namespace Meticumedia
                 if (y == null)
                     sortResult = 1;
                 else
-                    sortResult = x.TvEpisode.Number.CompareTo(y.TvEpisode.Number);
+                    sortResult = x.TvEpisode.DisplayNumber.CompareTo(y.TvEpisode.DisplayNumber);
             }
 
             if (sortResult == 0)
@@ -830,8 +1221,6 @@ namespace Meticumedia
             if (!actionStarted)
                 OnProgressChange(0);
 
-            
-
             // Set running property
             this.actionRunning = true;
             this.ActionSucess = true;
@@ -846,23 +1235,21 @@ namespace Meticumedia
                     case OrgAction.Copy:
                     case OrgAction.Move:
                     case OrgAction.Rename:
-                        if (this.Category == FileCategory.Folder)
+                        if ((this.Category & FileCategory.Folder) > 0)
                         {
                             this.ActionComplete = CopyMoveFolder();
-
                             if (this.ActionComplete)
                             {
-                                if (this.Movie != null)
-                                    this.Movie.Path = this.DestinationPath;
-                                else if (this.Show != null)
-                                    this.Show.Path = this.DestinationPath;
+                                this.Movie.Path = this.DestinationPath;
+                                this.TvEpisode.Show.Path = this.DestinationPath;
                             }
                         }
                         else
                             this.ActionComplete = CopyMoveFile(this.SourcePath, this.DestinationPath, 0, 100);
+
                         break;
                     case OrgAction.Delete:
-                        if (this.Category == FileCategory.Folder)
+                        if ((this.Category & FileCategory.Folder) > 0)
                             DeleteDirectory(this.SourcePath);
                         else
                             File.Delete(this.SourcePath);
@@ -889,14 +1276,18 @@ namespace Meticumedia
 
                 // Pause here if needed to make queue not go crazy with refreshes
                 int time = (int)(DateTime.Now - startTime).TotalMilliseconds;
-                if (time < 25)
-                    Thread.Sleep(25 - time);
+                if (time < 5)
+                    Thread.Sleep(5 - time);
 
-                // Check if sucessful
+                // Check if successful
                 if (this.ActionSucess)
                 {
+                    // Log action
+                    Organization.ActionLog.Add(new OrgItem(this));
+                    Organization.SaveActionLog();
+                    
                     // Cleanup folder (delete empty sub-folders)
-                    if (this.Category != FileCategory.Folder)
+                    if ((this.Category & FileCategory.Folder) == 0)
                         CleanupFolder();
 
                     // Add current file to ignore if copy action
@@ -904,6 +1295,45 @@ namespace Meticumedia
                         foreach (OrgFolder sd in Settings.ScanDirectories)
                             if (this.ScanDirectory != null && sd.FolderPath == this.ScanDirectory.FolderPath)
                                 sd.AddIgnoreFile(this.SourcePath);
+
+                    // Check if we need to update Shows/Movies
+                    if ((this.Action == OrgAction.Copy || this.Action == OrgAction.Move) && (this.Category & FileCategory.Folder | FileCategory.AutoMove) == 0)
+                    {
+                        this.Movie.Path = this.Movie.BuildFolderPath();
+                        if (this.Category == FileCategory.MovieVideo && Directory.Exists(this.Movie.Path))
+                        {
+                            bool movieExists = false;
+                            foreach (Movie movie in Organization.Movies)
+                                if (movie.DatabaseName == this.Movie.DatabaseName && movie.Path == this.Movie.Path)
+                                {
+                                    movieExists = true;
+                                    break;
+                                }
+                            if (!movieExists)
+                            {
+                                Organization.Movies.Add(this.Movie);
+                                Organization.Save();
+                            }
+                        }
+
+                        if (this.Category == FileCategory.TvVideo && Directory.Exists(this.TvEpisode.Show.Path))
+                        {
+                            bool showExists = false;
+                            foreach (TvShow show in Organization.Shows)
+                                if (show.DatabaseName == this.TvEpisode.Show.DatabaseName && show.Path == this.TvEpisode.Show.Path)
+                                {
+                                    showExists = true;
+                                    break;
+                                }
+                            if (!showExists)
+                            {
+                                Organization.Shows.Add(this.TvEpisode.Show);
+                                Organization.Save();
+                            }
+
+                        }
+                            
+                    }
 
                     // Set Completed status
                     this.QueueStatus = OrgQueueStatus.Completed;
@@ -913,8 +1343,6 @@ namespace Meticumedia
             // Clear action running
             actionRunning = false;
         }
-
-        
 
         /// <summary>
         /// Delete all empty directories from scan folder item belongs to if it is enabled
@@ -981,7 +1409,10 @@ namespace Meticumedia
                 else
                 {
                     // Check if user wants to override it
-                    if (!this.Replace && MessageBox.Show("Destination file '" + destinationPath + "' already existst. Queue action will overwrite it, would you like to continue?", "Overwrite destination file?", MessageBoxButtons.YesNo) == DialogResult.No)
+                    string ask = "Destination file '" + destinationPath + "' already existst. Queue action will overwrite it, would you like to continue?";
+                    TaskDialog diag = new TaskDialog(); // TODO!
+                    diag.VerificationText = ask;
+                    if (!this.Replace && diag.Show().ButtonType == ButtonType.Yes)
                     {
                         this.ActionSucess = false;
                         this.QueueStatus = OrgQueueStatus.Cancelled;
@@ -1080,12 +1511,12 @@ namespace Meticumedia
             // Check for directory already exists condition
             if (!actionStarted && Directory.Exists(this.DestinationPath))
             {
-                DialogResult results = MessageBox.Show("Destination folder '" + this.DestinationPath + "' already existst. Folder rename action will merge the two folder (source files will replace destination files), would you like to continue?", "Merge destination folder?", MessageBoxButtons.YesNo);
-                if (results == DialogResult.No)
+                MessageBoxResult results = MessageBox.Show("Destination folder '" + this.DestinationPath + "' already existst. " + this.Category.Description() + " action from source " + this.SourcePath + " will merge the two folder (source files will replace destination files). Would you like to continue?", "Merge destination folder?", MessageBoxButton.YesNo);
+                if (results != MessageBoxResult.Yes)
                 {
                     this.ActionSucess = false;
                     this.QueueStatus = OrgQueueStatus.Cancelled;
-                    return true;
+                    return true; 
                 }
             }
             
@@ -1230,6 +1661,113 @@ namespace Meticumedia
 
         #endregion
 
+        #region Methods
+
+        /// <summary>
+        /// Build destination path based on form
+        /// </summary>
+        /// <returns></returns>
+        public void BuildDestination()
+        {
+            // Build destination file based on category
+            switch (this.Category)
+            {
+                case FileCategory.Unknown:
+                case FileCategory.Ignored:
+                    this.DestinationPath = string.Empty;
+                    return;
+                case FileCategory.Custom:
+                    this.DestinationPath = this.DestinationPath;
+                    return;
+                case FileCategory.Trash:
+                    this.DestinationPath = FileHelper.DELETE_DIRECTORY;
+                    return;
+                case FileCategory.TvVideo:
+                    string fileName = this.TvEpisode.Show.BuildFilePath(this.TvEpisode, this.TvEpisode2, string.Empty);
+
+                    this.DestinationPath = fileName + Path.GetExtension(this.SourcePath);
+                    return;
+                case FileCategory.MovieVideo:
+                    // TODO: don't use default path if already in movies folder!
+                    this.DestinationPath = this.Movie.BuildFilePath(this.SourcePath);
+                    return;
+                case FileCategory.AutoMove:
+                case FileCategory.AutoMove | FileCategory.Folder:
+                    this.DestinationPath = Path.Combine(this.AutoMoveSetup.DestinationPath, Path.GetFileName(this.SourcePath));
+                    break;
+                case FileCategory.Empty:
+                    this.DestinationPath = string.Empty;
+                    break;
+                default:
+                    throw new Exception("Unknown file category!");
+            }
+        }
+
+        /// <summary>
+        /// Gets string for item.
+        /// </summary>
+        /// <returns>Item source, action, and destination string</returns>
+        public override string ToString()
+        {
+            string str = this.SourcePath + " (" + this.Category + ")" + " - Action: " + this.Action;
+
+            switch (this.Action)
+            {
+                case OrgAction.Empty:
+                    break;
+                case OrgAction.None:
+                    break;
+                case OrgAction.AlreadyExists:
+                    str += " (" + this.DestinationPath + ")";
+                    break;
+                case OrgAction.Move:
+                case OrgAction.Copy:
+                case OrgAction.Rename:
+                    str += " to " + this.DestinationPath;
+                    break;
+                default:
+                    break;
+            }
+
+            return str;
+        }
+
+        #endregion
+
+        #region Colors
+
+        private static Color GetActionColor(OrgAction action)
+        {            
+            switch (action)
+            {
+                case OrgAction.Empty:
+                    return Colors.LightGray;
+                case OrgAction.None:
+                    return Colors.Gray;
+                case OrgAction.AlreadyExists:
+                    return Colors.Gray;
+                case OrgAction.Move:
+                case OrgAction.Copy:
+                    return Colors.DarkGreen;
+                case OrgAction.Rename:
+                    return Colors.DarkBlue;
+                case OrgAction.Delete:
+                    return Colors.Red;
+                case OrgAction.Queued:
+                    return Colors.Goldenrod;
+                case OrgAction.NoRootFolder:
+                    return Colors.Black;
+                case OrgAction.TBD:
+                    return Colors.LightGray;
+                case OrgAction.Processing:
+                    return Colors.DarkOrange;
+                default:
+                    return Colors.Black;
+            }
+        }
+
+        #endregion
+
         #region XML
 
         /// <summary>
@@ -1240,13 +1778,13 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Action, SourcePath, DestinationPath, Category, ActionTime };
+        private enum XmlElements { Action, SourcePath, DestinationPath, Category, ActionTime, TvEpisode1, TvEpisode2, TvShow, Movie };
 
         /// <summary>
         /// Adds OrgItem properties to XML file.
         /// </summary>
         /// <param name="xw">XML writer to add to</param>
-        public void Save(XmlWriter xw)
+        public void Save(XmlWriter xw, bool fullDetails)
         {
             // Start item
             xw.WriteStartElement(ROOT_XML);
@@ -1271,6 +1809,38 @@ namespace Meticumedia
                         break;
                     case XmlElements.ActionTime:
                         value = this.ActionTime.ToString();
+                        break;
+                    case XmlElements.TvEpisode1:
+                        if (fullDetails && this.TvEpisode != null)
+                        {
+                            xw.WriteStartElement(element.ToString());
+                            this.TvEpisode.Save(xw);
+                            xw.WriteEndElement();
+                        }
+                        else
+                            continue;
+                        break;
+                    case XmlElements.TvEpisode2:
+                        if (fullDetails && this.TvEpisode2 != null)
+                        {
+                            xw.WriteStartElement(element.ToString());
+                            this.TvEpisode2.Save(xw);
+                            xw.WriteEndElement();
+                        }
+                        else
+                            continue;
+                        break;
+                    case XmlElements.TvShow:
+                        if (fullDetails && this.TvEpisode != null && this.TvEpisode.Show != null)
+                            this.TvEpisode.Show.Save(xw);
+                        else
+                            continue;
+                        break;
+                    case XmlElements.Movie:
+                        if (fullDetails && this.Movie != null)
+                            this.Movie.Save(xw);
+                        else
+                            continue;
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -1330,6 +1900,35 @@ namespace Meticumedia
                         DateTime.TryParse(value, out actionTime);
                         this.ActionTime = actionTime;
                         break;
+                    case XmlElements.TvEpisode1:
+                        this.TvEpisode.Load(propNode.ChildNodes[0]);
+                        break;
+                    case XmlElements.TvEpisode2:
+                        this.TvEpisode2.Load(propNode.ChildNodes[0]);
+                        break;
+                    case XmlElements.TvShow:
+                        if (this.TvEpisode != null)
+                        {
+                            this.TvEpisode.Show.Load(propNode);
+
+                            bool showMatch = false;
+                            foreach(TvShow show in Organization.Shows)
+                                if (show.DatabaseSelection == this.TvEpisode.Show.DatabaseSelection && show.Id == this.TvEpisode.Show.Id)
+                                {
+                                    this.TvEpisode.Show = show;
+                                    showMatch = true;
+                                    break;
+                                }
+
+                            if (!showMatch)
+                                this.IsNewShow = true;
+
+                            this.TvEpisode2.Show = this.TvEpisode.Show;
+                        }
+                        break;
+                    case XmlElements.Movie:
+                        this.Movie.Load(propNode);
+                        break;
                 }
             }
 
@@ -1338,5 +1937,6 @@ namespace Meticumedia
         }
 
         #endregion
+        
     }
 }

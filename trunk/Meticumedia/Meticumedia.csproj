@@ -5,16 +5,16 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}</ProjectGuid>
+    <ProjectGuid>{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Meticumedia</RootNamespace>
     <AssemblyName>Meticumedia</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -27,6 +27,7 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -39,6 +40,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -48,6 +50,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>meticumedia-icon-small.ico</ApplicationIcon>
@@ -56,322 +59,425 @@
     <Reference Include="Ionic.Zip">
       <HintPath>..\Libraries\Ionic.Zip.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Ookii.Dialogs.Wpf">
+      <HintPath>..\Libraries\Ookii.Dialogs.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Wpf.Toolkit">
+      <HintPath>..\Libraries\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Classes\Organization\OrgItemCollection.cs" />
+    <Compile Include="Classes\Scanning\DebugNotificationArgs.cs" />
+    <Compile Include="Classes\Settings\AutoMoveFileSetup.cs" />
+    <Compile Include="Classes\Settings\CaseOptionType.cs" />
+    <Compile Include="Classes\Settings\GeneralSettings.cs" />
+    <Compile Include="Classes\Tv\MissingStatus.cs" />
+    <Compile Include="Classes\Tv\TvGroupingType.cs" />
+    <Compile Include="Controls\Editors\ContentEditorControl.xaml.cs">
+      <DependentUpon>ContentEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Editors\ContentEditorControlViewModel.cs" />
+    <Compile Include="Controls\Primary\ContentCollectionControlViewModel.cs" />
+    <Compile Include="Controls\Primary\ContentControl.xaml.cs">
+      <DependentUpon>ContentControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\ContentControlViewModel.cs" />
+    <Compile Include="Controls\Primary\OrgItemQueueableViewModel.cs" />
+    <Compile Include="Controls\Primary\EpisodeCollectionControl.xaml.cs">
+      <DependentUpon>EpisodeCollectionControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\EpisodeCollectionControlViewModel.cs" />
+    <Compile Include="Controls\Primary\LogControl.xaml.cs">
+      <DependentUpon>LogControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\LogControlViewModel.cs" />
+    <Compile Include="Controls\Primary\MovieCollectionControl.cs" />
+    <Compile Include="Controls\Primary\OrgItemDisplayViewModel.cs" />
+    <Compile Include="Controls\Primary\QueueControl.xaml.cs">
+      <DependentUpon>QueueControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\QueueControlViewModel.cs" />
+    <Compile Include="Controls\Primary\ScheduleControlViewModel.cs" />
+    <Compile Include="Controls\Primary\TvCollectionControl.cs" />
+    <Compile Include="Controls\Settings\AutoMoveSetupControl.xaml.cs">
+      <DependentUpon>AutoMoveSetupControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\AutoMoveSetupControlViewModel.cs" />
+    <Compile Include="Controls\Settings\AutoMoveSetupsControl.xaml.cs">
+      <DependentUpon>AutoMoveSetupsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\AutoMoveSetupsControlViewModel.cs" />
+    <Compile Include="Controls\Settings\FileNameControlViewModel.cs" />
+    <Compile Include="Controls\Settings\FileTypesControlViewModel.cs" />
+    <Compile Include="Controls\Settings\FileTypeSettingsControl.xaml.cs">
+      <DependentUpon>FileTypeSettingsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\FileTypeSettingsControlViewModel.cs" />
+    <Compile Include="Controls\Settings\GeneralSettingsControl.xaml.cs">
+      <DependentUpon>GeneralSettingsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\GeneralSettingsControlViewModel.cs" />
+    <Compile Include="Controls\Settings\RootFolderControlViewModel.cs" />
+    <Compile Include="Controls\Settings\ScanFoldersControlViewModel.cs" />
+    <Compile Include="Windows\ContentEditorWindowViewModel.cs" />
+    <Compile Include="Windows\ContentEditorWindow.xaml.cs">
+      <DependentUpon>ContentEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EpisodeEditorWindow.xaml.cs">
+      <DependentUpon>EpisodeEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\EpisodeEditorWindowViewModel.cs" />
+    <Compile Include="Windows\OrgItemEditorWindow.xaml.cs">
+      <DependentUpon>OrgItemEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\OrgItemEditorWindowViewModel.cs" />
+    <Compile Include="Windows\SettingsWindowViewModel.cs" />
+    <Compile Include="WPF\BindableMultiSelectDataGrid.cs" />
+    <Compile Include="WPF\Commands.cs" />
+    <Compile Include="WPF\Converters\EnumInverseVisibilityConverter.cs" />
+    <Compile Include="WPF\Converters\EnumInverseBooleanConverter.cs" />
+    <Compile Include="WPF\Converters\EnumBooleanConverter.cs" />
+    <Compile Include="WPF\Converters\EnumVisibilityConverter.cs" />
+    <Compile Include="WPF\Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="WPF\BindableMultiSelectListBox.cs" />
+    <Compile Include="WPF\BindableSelectTreeView.cs" />
+    <Compile Include="WPF\OkCancelWindowViewModel.cs" />
+    <Compile Include="WPF\ProgressViewModel.cs" />
+    <Compile Include="WPF\RelayCommand.cs" />
+    <Compile Include="Controls\Primary\ContentCollectionControl.xaml.cs">
+      <DependentUpon>ContentCollectionControl.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controls\Primary\ScanControl.xaml.cs">
+      <DependentUpon>ScanControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Primary\ScanControlViewModel.cs" />
+    <Compile Include="Controls\Primary\ScheduleControl.xaml.cs">
+      <DependentUpon>ScheduleControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WPF\ViewModel.cs" />
+    <Compile Include="Controls\Settings\FileTypesControl.xaml.cs">
+      <DependentUpon>FileTypesControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\RootFolderControl.xaml.cs">
+      <DependentUpon>RootFolderControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\ScanFoldersControl.xaml.cs">
+      <DependentUpon>ScanFoldersControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Settings\FileNameControl.xaml.cs">
+      <DependentUpon>FileNameControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WPF\Converters\BoolInverterConverter.cs" />
+    <Compile Include="WPF\Converters\OrgActionConverters.cs" />
+    <Compile Include="WPF\Converters\DefaultColorConverter.cs" />
+    <Compile Include="WPF\Converters\EnumDescriptionConverter.cs" />
+    <Compile Include="WPF\Converters\StringToHeightConverter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Windows\SelectionWindow.xaml.cs">
+      <DependentUpon>SelectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\SettingsWindow.xaml.cs">
+      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Controls\Editors\ContentEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\ContentCollectionControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\ContentControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\EpisodeCollectionControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\LogControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\QueueControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\ScanControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Primary\ScheduleControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\AutoMoveSetupControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\AutoMoveSetupsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\FileTypesControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\FileTypeSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\GeneralSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\RootFolderControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\ScanFoldersControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Settings\FileNameControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Classes\Content\Content.cs" />
+    <Compile Include="Classes\Content\ContentCollection.cs" />
+    <Compile Include="Classes\Content\ContentRootFolder.cs" />
     <Compile Include="Classes\Content\ContentSearch.cs" />
     <Compile Include="Classes\Content\ContentSearchMod.cs" />
     <Compile Include="Classes\Content\ContentType.cs" />
     <Compile Include="Classes\Content\GenreCollection.cs" />
-    <Compile Include="Classes\Databases\DatabaseAccess.cs" />
-    <Compile Include="Classes\Databases\HttpGetParameter.cs" />
-    <Compile Include="Classes\Databases\JsonNode.cs" />
-    <Compile Include="Classes\Databases\Movies\MovieDatabaseHelper.cs" />
-    <Compile Include="Classes\Databases\Movies\MovieDatabaseSelection.cs" />
-    <Compile Include="Classes\Databases\Movies\RottenTomatoesAccess.cs" />
-    <Compile Include="Classes\Databases\TV\TheTvDbAccess.cs" />
-    <Compile Include="Classes\Databases\TV\TvDatabaseAccess.cs" />
-    <Compile Include="Classes\Databases\TV\TvDataBaseSelection.cs" />
-    <Compile Include="Classes\EnumExtensions.cs" />
-    <Compile Include="Classes\FileHandling\FileCategory.cs" />
-    <Compile Include="Classes\Organization\OrgItemColumnSetup.cs" />
-    <Compile Include="Classes\Organization\OrgListItem.cs" />
-    <Compile Include="Classes\Scanning\MovieFolderScan.cs" />
-    <Compile Include="Classes\Scanning\ScanProcess.cs" />
-    <Compile Include="Classes\Scanning\TvFolderScan.cs" />
-    <Compile Include="Classes\Scanning\TvRenameScan.cs" />
-    <Compile Include="Classes\Scanning\DirectoryScan.cs" />
-    <Compile Include="Classes\Scanning\Scan.cs" />
-    <Compile Include="Classes\Scanning\ScanType.cs" />
-    <Compile Include="Classes\Scanning\SearchHelper.cs" />
-    <Compile Include="Classes\Databases\TV\TvDatabaseHelper.cs" />
-    <Compile Include="Classes\Databases\TV\TvRageAccess.cs" />
-    <Compile Include="Classes\Movies\MovieSearch.cs" />
-    <Compile Include="Classes\Scanning\TvMissingScan.cs" />
-    <Compile Include="Classes\Settings\FileNamePortion.cs" />
-    <Compile Include="Classes\Settings\FileWordType.cs" />
-    <Compile Include="Classes\Databases\Movies\TheMovieDbAccess.cs" />
-    <Compile Include="Classes\FileHandling\WordHelper.cs" />
-    <Compile Include="Classes\Movies\Movie.cs" />
-    <Compile Include="Classes\Content\ContentRootFolder.cs" />
-    <Compile Include="Classes\Settings\FileNameFormat.cs" />
-    <Compile Include="Classes\Organization\OrgAction.cs" />
-    <Compile Include="Classes\Organization\OrgColumn.cs" />
-    <Compile Include="Classes\Organization\OrgColumnType.cs" />
-    <Compile Include="Classes\Organization\OrgFile.cs" />
-    <Compile Include="Classes\Organization\OrgFolder.cs" />
-    <Compile Include="Classes\Organization\OrgItem.cs" />
-    <Compile Include="Classes\Organization\OrgProcessing.cs" />
-    <Compile Include="Classes\Organization\OrgProcessingArgs.cs" />
-    <Compile Include="Classes\Organization\OrgProgressChangesEventArgs.cs" />
-    <Compile Include="Classes\Organization\OrgQueueStatus.cs" />
-    <Compile Include="Classes\Organization\OrgStatus.cs" />
-    <Compile Include="Classes\FileHandling\RemoveFileWord.cs" />
-    <Compile Include="Classes\FileHandling\Separator.cs" />
-    <Compile Include="Classes\Settings\GuiSettings.cs" />
-    <Compile Include="Classes\Settings\Settings.cs" />
-    <Compile Include="Classes\Tv\TvEpisodeFilter.cs" />
+    <Compile Include="Classes\Databases\DatabaseAccess.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\HttpGetParameter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\JsonNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\Movies\MovieDatabaseHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\Movies\MovieDatabaseSelection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\Movies\RottenTomatoesAccess.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\Movies\TheMovieDbAccess.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\TV\TheTvDbAccess.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\TV\TvDatabaseAccess.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\TV\TvDatabaseHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\TV\TvDataBaseSelection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Databases\TV\TvRageAccess.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controls\Primary\EnumExtensions.cs" />
+    <Compile Include="Classes\FileHandling\FileCategory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\FileHandling\FileHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\FileHandling\RemoveFileWord.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\FileHandling\Separator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\FileHandling\WordHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Movies\Movie.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Movies\MovieSearch.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\ItemsToQueueArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgAction.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\Organization.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgColumnType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgPath.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgFolder.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgProcessing.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgProcessingArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgProgressChangesEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgQueueStatus.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Organization\OrgStatus.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\DirectoryScan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\MovieFolderScan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\Scan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\ScanProcess.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\ScanType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\SearchHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\TvFolderScan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\TvItemInScanDirHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\TvMissingScan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Scanning\TvRenameScan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Settings\FileNameFormat.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Settings\FileNamePortion.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Settings\FileWordType.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Settings\GuiSettings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Settings\Settings.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Tv\TvEpisode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Tv\TvEpisodeFilter.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Classes\Tv\TvEpisodeFormat.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\Tv\TvScheduleType.cs" />
-    <Compile Include="Classes\Tv\TvFile.cs" />
-    <Compile Include="Classes\Tv\TvSeasonCollection.cs" />
-    <Compile Include="Classes\Organization\Organization.cs" />
-    <Compile Include="Classes\Tv\TvSeason.cs" />
-    <Compile Include="Classes\Tv\TvShow.cs" />
-    <Compile Include="Classes\Tv\TvEpisode.cs" />
-    <Compile Include="Classes\Content\ContentCollection.cs" />
-    <Compile Include="Classes\Tv\TvShowSearch.cs" />
-    <Compile Include="Controls\Common\ItemsToQueueArgs.cs" />
-    <Compile Include="Controls\Content\ContentListView.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Classes\Tv\TvFile.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\Content\ContentControl.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="Classes\Tv\TvScheduleType.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\Content\ContentControl.Designer.cs">
-      <DependentUpon>ContentControl.cs</DependentUpon>
+    <Compile Include="Classes\Tv\TvShow.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\Common\DoubleBufferedListView.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Classes\Tv\TvShowSearch.cs">
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\Content\ContentEditControl.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\Content\ContentEditControl.Designer.cs">
-      <DependentUpon>ContentEditControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Content\EpisodeEditControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Content\EpisodeEditControl.Designer.cs">
-      <DependentUpon>EpisodeEditControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Content\SearchControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Content\SearchControl.Designer.cs">
-      <DependentUpon>SearchControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Primary\EpisodesControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\EpisodesControl.Designer.cs">
-      <DependentUpon>EpisodesControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Common\LegendBoxControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Common\LegendBoxControl.Designer.cs">
-      <DependentUpon>LegendBoxControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Primary\MovieControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\MovieControl.Designer.cs">
-      <DependentUpon>MovieControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Organization\OrgItemListView.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\ScheduleControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\ScheduleControl.Designer.cs">
-      <DependentUpon>ScheduleControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Primary\LogControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\LogControl.Designer.cs">
-      <DependentUpon>LogControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Primary\QueueControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\QueueControl.Designer.cs">
-      <DependentUpon>QueueControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Primary\ScanControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\ScanControl.Designer.cs">
-      <DependentUpon>ScanControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Settings\ContentFoldersControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Settings\ContentFoldersControl.Designer.cs">
-      <DependentUpon>ContentFoldersControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Settings\FileNameFormatControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Settings\FileNameFormatControl.Designer.cs">
-      <DependentUpon>FileNameFormatControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Settings\FileTypeControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Settings\FileTypeControl.Designer.cs">
-      <DependentUpon>FileTypeControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Settings\FileTypesControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Settings\FileTypesControl.Designer.cs">
-      <DependentUpon>FileTypesControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Settings\ScanFolderControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Settings\ScanFolderControl.Designer.cs">
-      <DependentUpon>ScanFolderControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Primary\ShowsControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\Primary\ShowsControl.Designer.cs">
-      <DependentUpon>ShowsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\Common\TextProgressBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Forms\ContentEditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ContentEditorForm.Designer.cs">
-      <DependentUpon>ContentEditorForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\EpisodeEditorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\EpisodeEditorForm.Designer.cs">
-      <DependentUpon>EpisodeEditorForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\SearchForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\SearchForm.Designer.cs">
-      <DependentUpon>SearchForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\OrgItemEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\OrgItemEditor.Designer.cs">
-      <DependentUpon>OrgItemEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\SelectionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\SelectionForm.Designer.cs">
-      <DependentUpon>SelectionForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\SettingsForm.Designer.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MeticumediaForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MeticumediaForm.Designer.cs">
-      <DependentUpon>MeticumediaForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Classes\FileHandling\FileHelper.cs" />
-    <Compile Include="Classes\Scanning\TvItemInScanDirHelper.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Controls\Content\ContentControl.resx">
-      <DependentUpon>ContentControl.cs</DependentUpon>
+    <Page Include="Windows\ContentEditorWindow.xaml">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Content\ContentEditControl.resx">
-      <DependentUpon>ContentEditControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Content\EpisodeEditControl.resx">
-      <DependentUpon>EpisodeEditControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Content\SearchControl.resx">
-      <DependentUpon>SearchControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Primary\EpisodesControl.resx">
-      <DependentUpon>EpisodesControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Common\LegendBoxControl.resx">
-      <DependentUpon>LegendBoxControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Primary\ScheduleControl.resx">
-      <DependentUpon>ScheduleControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Primary\LogControl.resx">
-      <DependentUpon>LogControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Primary\QueueControl.resx">
-      <DependentUpon>QueueControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Primary\ScanControl.resx">
-      <DependentUpon>ScanControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Settings\ContentFoldersControl.resx">
-      <DependentUpon>ContentFoldersControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Settings\FileNameFormatControl.resx">
-      <DependentUpon>FileNameFormatControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Settings\FileTypeControl.resx">
-      <DependentUpon>FileTypeControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Settings\FileTypesControl.resx">
-      <DependentUpon>FileTypesControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\Settings\ScanFolderControl.resx">
-      <DependentUpon>ScanFolderControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ContentEditorForm.resx">
-      <DependentUpon>ContentEditorForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\EpisodeEditorForm.resx">
-      <DependentUpon>EpisodeEditorForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SearchForm.resx">
-      <DependentUpon>SearchForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\OrgItemEditor.resx">
-      <DependentUpon>OrgItemEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SelectionForm.resx">
-      <DependentUpon>SelectionForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\SettingsForm.resx">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MeticumediaForm.resx">
-      <DependentUpon>MeticumediaForm.cs</DependentUpon>
-    </EmbeddedResource>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\EpisodeEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\OrgItemEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\SelectionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\SettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <None Include="app.config" />
     <None Include="meticumedia-installation.iss">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -380,16 +486,25 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
+    <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+    <Resource Include="meticumedia-icon-small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wordsEn.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="license.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -402,20 +517,11 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
       <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
+      <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="license.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="meticumedia-icon-small.ico" />
-    <Content Include="wordsEn.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -14,7 +14,7 @@ using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Ionic.Zip;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class for accesing TheTvDb online TV database and related functions.
@@ -243,11 +243,11 @@ namespace Meticumedia
                     switch (subNode.Name.ToLower())
                     {
                         case "seriesname":
-                            searchResult.Name = subNode.InnerText;
+                            searchResult.DatabaseName = subNode.InnerText;
                             char[] invalidChars = { '\\', '/', ':', '*', '?', '<', '>', '|' };
                             foreach (char c in invalidChars)
-                                if (searchResult.Name.Contains(c))
-                                    searchResult.Name = searchResult.Name.Replace(c.ToString(), " ");
+                                if (searchResult.DatabaseName.Contains(c))
+                                    searchResult.DatabaseName = searchResult.DatabaseName.Replace(c.ToString(), " ");
                             break;
                         case "seriesid":
                             int id;
@@ -260,7 +260,7 @@ namespace Meticumedia
                         case "firstaired":
                             DateTime airDate;
                             DateTime.TryParse(subNode.InnerText, out airDate);
-                            searchResult.Date = airDate;
+                            searchResult.DatabaseYear = airDate.Year;
                             break;
                     }
 
@@ -326,15 +326,15 @@ namespace Meticumedia
                                 case "Genre":
                                     string[] genres = subNode.InnerText.Split('|');
                                     foreach(string genre in genres)
-                                        if(!string.IsNullOrWhiteSpace(genre) && !show.Genres.Contains(genre))
-                                            show.Genres.Add(genre);
+                                        if(!string.IsNullOrWhiteSpace(genre) && !show.DatabaseGenres.Contains(genre))
+                                            show.DatabaseGenres.Add(genre);
                                     break;
                             }
                         }
                     }
                     else if (node.Name == "Episode")
                     {
-                        TvEpisode ep = new TvEpisode(show.Name);
+                        TvEpisode ep = new TvEpisode(show);
                         int season = -1;
 
                         XmlNodeList subNodes = node.ChildNodes;
@@ -362,31 +362,28 @@ namespace Meticumedia
                                 case "FirstAired":
                                     DateTime airData;
                                     DateTime.TryParse(subNode.InnerText, out airData);
-                                    ep.AirDate = airData;
+                                    ep.DatabaseAirDate = airData;
                                     break;
                                 case "Overview":
-                                    ep.Overview = subNode.InnerText;
+                                    ep.DatabaseOverview = subNode.InnerText;
                                     break;
                             }
                         }
                         ep.InDatabase = true;
 
-                        if (ep.Number > -1 && season > -1)
+                        if (ep.DisplayNumber > -1 && season > -1)
                         {
-                            if (!show.Seasons.Contains(season))
-                                show.Seasons.Add(new TvSeason(season));
-
                             // If episode already exists just update it, else add it
                             TvEpisode existingMatch;
                             if (show.FindEpisode(ep.Season, ep.DatabaseNumber, true, out existingMatch))
                             {
                                 existingMatch.DatabaseName = ep.DatabaseName;
-                                existingMatch.AirDate = ep.AirDate;
-                                existingMatch.Overview = ep.Overview;
+                                existingMatch.DatabaseAirDate = ep.DatabaseAirDate;
+                                existingMatch.DatabaseOverview = ep.DatabaseOverview;
                                 existingMatch.InDatabase = true;
                             }
                             else
-                                show.Seasons[season].Episodes.Add(ep);
+                                show.Episodes.Add(ep);
                         }
                     }
                 }

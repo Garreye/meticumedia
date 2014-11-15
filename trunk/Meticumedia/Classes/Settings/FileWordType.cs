@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {    
     /// <summary>
     /// Words (or portions) of file name - used for identifying substring of a file name and rebuilding it

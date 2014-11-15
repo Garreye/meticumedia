@@ -7,54 +7,121 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.ComponentModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class representing portion of a file name - multiple instances used to specify how a file name show be built
     /// </summary>
-    public class FileNamePortion
+    public class FileNamePortion : INotifyPropertyChanged
     {
-        #region Enum
-
-        /// <summary>
-        /// Types of options that can be applied to case of portion
-        /// </summary>
-        public enum CaseOptionType { None, LowerCase, UpperCase }
-
-        #endregion
 
         #region Properties
 
         /// <summary>
         /// The word type contained in the portion
         /// </summary>
-        public FileWordType Type { get; set; }
+        public FileWordType Type
+        {
+            get
+            {
+                return type;
+            }
+            set
+            {
+                type = value;
+                OnPropertyChanged("Type");
+            }
+        }
 
-        /// <summary>
-        /// The string value of the portion - for user strings
-        /// </summary>
-        public string Value { get; set; }
+        private FileWordType type = FileWordType.None;
 
         /// <summary>
         /// String to put in front of portion
         /// </summary>
-        public string Header { get; set; }
+        public string Header
+        {
+            get
+            {
+                return header;
+            }
+            set
+            {
+                header = value;
+                OnPropertyChanged("Header");
+            }
+        }
+
+        private string header = string.Empty;
 
         /// <summary>
         /// String to put at end of portion
         /// </summary>
-        public string Footer { get; set; }
+        public string Footer
+        {
+            get
+            {
+                return footer;
+            }
+            set
+            {
+                footer = value;
+                OnPropertyChanged("Footer");
+            }
+        }
+
+        private string footer = string.Empty;
 
         /// <summary>
         /// Option for portion.
         /// </summary>
-        public CaseOptionType CaseOption { get; set; }
+        public CaseOptionType CaseOption
+        {
+            get
+            {
+                return caseOption;
+            }
+            set
+            {
+                caseOption = value;
+                OnPropertyChanged("CaseOption");
+            }
+        }
+
+        private CaseOptionType caseOption = CaseOptionType.None;
 
         /// <summary>
         /// Replacement for whitespace in portion.
         /// </summary>
-        public string Whitespace { get; set; }
+        public string Whitespace
+        {
+            get
+            {
+                return whitespace;
+            }
+            set
+            {
+                whitespace = value;
+                OnPropertyChanged("Whitespace");
+            }
+        }
+
+        private string whitespace = " ";
+
+        #endregion
+
+        #region Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
         #endregion
 
@@ -66,7 +133,6 @@ namespace Meticumedia
         public FileNamePortion()
         {
             this.Type = FileWordType.None;
-            this.Value = string.Empty;
             this.Header = string.Empty;
             this.Footer = " ";
             this.CaseOption = CaseOptionType.None;
@@ -80,7 +146,6 @@ namespace Meticumedia
         public FileNamePortion(FileNamePortion portion)
         {
             this.Type = portion.Type;
-            this.Value = portion.Value;
             this.Header = portion.Header;
             this.Footer = portion.Footer;
             this.CaseOption = portion.CaseOption;
@@ -95,29 +160,13 @@ namespace Meticumedia
         /// <param name="header">string to be placed before portion</header>
         /// <param name="footer">string to be placed after portion</header>
         /// <param name="option">Option to be applied to case of portion</param>
-        public FileNamePortion(FileWordType type, string value, string header, string footer, CaseOptionType caseOption, string whitespace)
+        public FileNamePortion(FileWordType type, string header, string footer, CaseOptionType caseOption, string whitespace)
         {
             this.Type = type;
-            this.Value = value;
             this.Header = header;
             this.Footer = footer;
             this.CaseOption = caseOption;
             this.Whitespace = whitespace;
-        }
-
-        /// <summary>
-        /// Constructor specifying type and value - default container used (whitespace)
-        /// </summary>
-        /// <param name="type">The word type contained in the portion</param>
-        /// <param name="value"></param>
-        public FileNamePortion(FileWordType type, string value)
-        {
-            this.Type = type;
-            this.Value = value;
-            this.Header = string.Empty;
-            this.Footer = " ";
-            this.CaseOption = CaseOptionType.None;
-            this.Whitespace = " ";
         }
 
         /// <summary>
@@ -130,7 +179,6 @@ namespace Meticumedia
         public FileNamePortion(FileWordType type, string header, string footer, CaseOptionType caseOption)
         {
             this.Type = type;
-            this.Value = string.Empty;
             this.Header = header;
             this.Footer = footer;
             this.CaseOption = CaseOptionType.None;
@@ -149,7 +197,7 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Type, Value, Container, Header, Footer, CaseOption, Whitespace };
+        private enum XmlElements { Type, Container, Header, Footer, CaseOption, Whitespace };
 
         /// <summary>
         /// Saves instance properties to XML file.
@@ -168,9 +216,6 @@ namespace Meticumedia
                 {
                     case XmlElements.Type:
                         value = this.Type.ToString();
-                        break;
-                    case XmlElements.Value:
-                        value = this.Value;
                         break;
                     case XmlElements.Container: // deprecated, left in for loading existing formats
                         break;
@@ -208,7 +253,7 @@ namespace Meticumedia
             // Checks that node is valid type
             if (fileNameNode.Name != ROOT_XML)
                 return false;
-            
+
             // Loop through sub-nodes
             foreach (XmlNode propNode in fileNameNode.ChildNodes)
             {
@@ -227,10 +272,6 @@ namespace Meticumedia
                         FileWordType type;
                         if (Enum.TryParse<FileWordType>(value, out type))
                             this.Type = type;
-                        break;
-                    case XmlElements.Value:
-                        if (!string.IsNullOrEmpty(value))
-                            this.Value = value;
                         break;
                     case XmlElements.Container: // deprecated, converts from container type to header/footer values
                         //None, Whitespace, Underscores, Dashes, Brackets, SquareBrackets, SquigglyBrackets, Period, Custom
@@ -263,10 +304,6 @@ namespace Meticumedia
                                 break;
                             case "Period":
                                 this.Header = ".";
-                                break;
-                            case "Custom":
-                                this.Header = this.Value;
-                                this.Value = string.Empty;
                                 break;
                         }
                         break;

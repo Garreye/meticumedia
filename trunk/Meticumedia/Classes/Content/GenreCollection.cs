@@ -6,13 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.Specialized;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Collection of genres
     /// </summary>
-    public class GenreCollection : List<string>
+    public class GenreCollection : List<string>, INotifyCollectionChanged
     {
         #region Type
 
@@ -40,23 +41,39 @@ namespace Meticumedia
         /// </summary>
         public object AccessLock { get; set; }
 
+        public string GenresString
+        {
+            get
+            {
+                string genresString = string.Empty;
+                foreach (string genre in this)
+                    genresString += genre + ", ";
+                if (genresString.Length > 0)
+                    genresString = genresString.Remove(genresString.Length - 2);
+                return genresString;
+            }
+        }
+
         #endregion
 
         #region Events
 
-        /// <summary>
-        /// Event indicating that a new item has been added to list (for global type only)
-        /// </summary>
-        public event EventHandler GenresUpdated;
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         /// <summary>
-        /// Triggers ItemsToQueue event
+        /// Triggers CollectionChanged event
         /// </summary>
         /// <param name="items"></param>
-        protected void OnGenresUpdated()
+        protected void OnCollectionChanged(NotifyCollectionChangedAction action, string item)
         {
-            if (GenresUpdated != null)
-                GenresUpdated(null, new EventArgs());
+            if (CollectionChanged != null)
+                CollectionChanged(null, new NotifyCollectionChangedEventArgs(action, item));
+        }
+
+        protected void OnCollectionReset()
+        {
+            if (CollectionChanged != null)
+                CollectionChanged(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         #endregion
@@ -83,6 +100,12 @@ namespace Meticumedia
             this.AccessLock = new object();
         }
 
+        public GenreCollection(GenreCollection toClone) : this(toClone.genreType)
+        {
+            foreach (string genre in toClone)
+                this.Add(genre);
+        }
+
         #endregion
 
         #region Methods
@@ -101,22 +124,22 @@ namespace Meticumedia
 
                 // Add to list
                 base.Add(item);
-                Sort();
+                OnCollectionChanged(NotifyCollectionChangedAction.Add, item);
 
-                // Add to global list for content type
-                switch (this.genreType)
+                // Keep global list of genres for content types
+                if ((this.genreType & CollectionType.Global) == 0)
                 {
-                    case CollectionType.Global:
-                        OnGenresUpdated();
-                        break;
-                    case CollectionType.Tv:
+                    if ((this.genreType & CollectionType.Tv) > 0)
+                    {
                         if (!Organization.AllTvGenres.Contains(item))
                             Organization.AllTvGenres.Add(item);
-                        break;
-                    case CollectionType.Movie:
+                    }
+                    if ((this.genreType & CollectionType.Movie) > 0)
+                    {
                         if (!Organization.AllMovieGenres.Contains(item))
                             Organization.AllMovieGenres.Add(item);
-                        break;
+                    }
+
                 }
             }
         }
@@ -129,6 +152,7 @@ namespace Meticumedia
         {
             lock (AccessLock)
                 base.Remove(item);
+            OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
         }
 
         /// <summary>
@@ -137,8 +161,13 @@ namespace Meticumedia
         /// <param name="index">Index of item to remove</param>
         public new void RemoveAt(int index)
         {
+            string item = string.Empty;
             lock (AccessLock)
+            {
+                item = this[index];
                 base.RemoveAt(index);
+            }
+            OnCollectionChanged(NotifyCollectionChangedAction.Remove, item);
         }
 
         /// <summary>
@@ -148,6 +177,7 @@ namespace Meticumedia
         {
             lock (AccessLock)
                 base.Sort();
+            OnCollectionReset();
         }
 
         /// <summary>
@@ -157,6 +187,29 @@ namespace Meticumedia
         {
             lock (AccessLock)
                 base.Clear();
+            OnCollectionReset();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is GenreCollection))
+                return false;
+
+            GenreCollection collObj = obj as GenreCollection;
+
+            if (this.Count != collObj.Count)
+                return false;
+
+            for (int i = 0; i < this.Count; i++)
+                if (this[i] != collObj[i])
+                    return false;
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         #endregion

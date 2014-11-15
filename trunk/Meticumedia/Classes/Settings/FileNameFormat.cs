@@ -9,25 +9,69 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class used for formatting file names
     /// </summary>
-    public class FileNameFormat
+    public class FileNameFormat : INotifyPropertyChanged
     {
         #region Properties
 
         /// <summary>
         /// Definition of how file name should be formatted - specified as set of file name portions
         /// </summary>
-        public List<FileNamePortion> Format { get; set; }
+        public ObservableCollection<FileNamePortion> Format
+        {
+            get
+            {
+                return format;
+            }
+            set
+            {
+                format = value;
+                OnPropertyChanged("Format");
+            }
+        }
+
+        private ObservableCollection<FileNamePortion> format = new ObservableCollection<FileNamePortion>();
 
         /// <summary>
         /// Format for episode string portion of file name (if any)
         /// </summary>
-        public TvEpisodeFormat EpisodeFormat { get; set; }
+        public TvEpisodeFormat EpisodeFormat
+        {
+            get
+            {
+                return episodeFormat;
+            }
+            set
+            {
+                episodeFormat = value;
+                OnPropertyChanged("EpisodeFormat");
+            }
+        }
+
+        private TvEpisodeFormat episodeFormat = new TvEpisodeFormat();
+
+        public ContentType ContentType {get;set;}
+
+        #endregion
+
+        #region Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
         #endregion
 
@@ -37,43 +81,70 @@ namespace Meticumedia
         /// Constructor that specifies whether it's for a movie or not
         /// </summary>
         /// <param name="movie">Whether file name formating will be for movie - for default format setup</param>
-        public FileNameFormat(bool movie)
+        public FileNameFormat(ContentType type)
         {
-            // Init format
-            this.Format = new List<FileNamePortion>();
-
             // Default formats
-            if (movie)
+            if (type == Classes.ContentType.Movie)
             {
-                Format.Add(new FileNamePortion(FileWordType.MovieName, string.Empty, " ", FileNamePortion.CaseOptionType.None));
-                Format.Add(new FileNamePortion(FileWordType.Year, "[", "]", FileNamePortion.CaseOptionType.None));
-                Format.Add(new FileNamePortion(FileWordType.VideoResolution, "[", "]", FileNamePortion.CaseOptionType.None));
-                Format.Add(new FileNamePortion(FileWordType.FilePart, "[", "]", FileNamePortion.CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.MovieName, string.Empty, " ", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.Year, "[", "]", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.VideoResolution, "[", "]", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.FilePart, "[", "]", CaseOptionType.None));
             }
             else
             {
-                Format.Add(new FileNamePortion(FileWordType.ShowName, string.Empty, " - ", FileNamePortion.CaseOptionType.None));
-                Format.Add(new FileNamePortion(FileWordType.EpisodeNumber, string.Empty, " - ", FileNamePortion.CaseOptionType.None));
-                Format.Add(new FileNamePortion(FileWordType.EpisodeName, string.Empty, string.Empty, FileNamePortion.CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.ShowName, string.Empty, " - ", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.EpisodeNumber, string.Empty, " - ", CaseOptionType.None));
+                format.Add(new FileNamePortion(FileWordType.EpisodeName, string.Empty, string.Empty, CaseOptionType.None));
             }
-            this.EpisodeFormat = new TvEpisodeFormat();
+
+            foreach (FileNamePortion fnp in format)
+                fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
+            this.format.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(format_CollectionChanged);
+            this.episodeFormat.PropertyChanged += new PropertyChangedEventHandler(episodeFormat_PropertyChanged);
+        }
+
+        void episodeFormat_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged("EpisodeFormat");
+        }
+
+        void format_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("Format");
+
+            if(e.NewItems != null)
+                foreach (FileNamePortion fnp in e.NewItems)
+                {
+                    fnp.PropertyChanged += new PropertyChangedEventHandler(fnp_PropertyChanged);
+                }
+        }
+
+        void fnp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged("Format");
         }
 
         /// <summary>
         /// Constructor for copying instance
         /// </summary>
         /// <param name="format"></param>
-        public FileNameFormat(FileNameFormat format)
+        public FileNameFormat(FileNameFormat format) : this(format.ContentType)
         {
-            this.Format = new List<FileNamePortion>();
-            foreach (FileNamePortion portion in format.Format)
-                this.Format.Add(new FileNamePortion(portion));
-            this.EpisodeFormat = new TvEpisodeFormat(format.EpisodeFormat);
+            Clone(format);
         }
 
         #endregion
 
         #region Methods
+
+        public void Clone(FileNameFormat format)
+        {
+            this.Format.Clear();
+            foreach (FileNamePortion portion in format.Format)
+                this.Format.Add(new FileNamePortion(portion));
+            this.EpisodeFormat = new TvEpisodeFormat(format.EpisodeFormat);
+        }
 
         /// <summary>
         /// Builds formatted file name for movie from an existing file path.
@@ -132,7 +203,7 @@ namespace Meticumedia
             }
             
             // Build file name
-            string buildName = BuildFileName(movie.Name, movie.Date, simpleResult, differentiator);
+            string buildName = BuildFileName(movie.DisplayName, movie.DisplayYear, simpleResult, differentiator);
             
             // Remove unsafe file characters and add extension
             return FileHelper.GetSafeFileName(buildName) + fileExt;
@@ -169,9 +240,9 @@ namespace Meticumedia
         /// <param name="simplifyResults">File name simplifying results</param>
         /// <param name="differentiator">String that differentiates file from other similar files in same directory</param>
         /// <returns>Resulting formatted file name string</returns>
-        private string BuildFileName(string movieName, DateTime date, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
+        private string BuildFileName(string movieName, int year, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
         {
-            return BuildFileName(movieName, null, null, date, simplifyResults, differentiator);
+            return BuildFileName(movieName, null, null, year, simplifyResults, differentiator);
         }
 
         /// <summary>
@@ -183,7 +254,7 @@ namespace Meticumedia
         /// <returns>Resulting formatted file name string</returns>
         private string BuildFileName(TvEpisode episode1, TvEpisode episode2, FileHelper.SimplifyStringResults simplifyResults)
         {
-            return BuildFileName(string.Empty, episode1, episode2, new DateTime(), simplifyResults, string.Empty);
+            return BuildFileName(string.Empty, episode1, episode2, 1, simplifyResults, string.Empty);
         }
 
         /// <summary>
@@ -196,7 +267,7 @@ namespace Meticumedia
         /// <param name="simplifyResults">File name simplifying results</param>
         /// <param name="differentiator"></param>
         /// <returns></returns>
-        private string BuildFileName(string movieName, TvEpisode episode1, TvEpisode episode2, DateTime date, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
+        private string BuildFileName(string movieName, TvEpisode episode1, TvEpisode episode2, int year, FileHelper.SimplifyStringResults simplifyResults, string differentiator)
         {
             // Init file name
             string fileName = string.Empty;
@@ -212,7 +283,7 @@ namespace Meticumedia
                         value = movieName;
                         break;
                     case FileWordType.ShowName:
-                        value = episode1.Show;
+                        value = episode1.Show.DatabaseName;
                         break;
                     case FileWordType.EpisodeName:
                         value = BuildEpisodeName(episode1, episode2);
@@ -220,11 +291,8 @@ namespace Meticumedia
                     case FileWordType.EpisodeNumber:
                         value = EpisodeFormat.BuildEpisodeString(episode1, episode2);
                         break;
-                    case FileWordType.CustomString:
-                        value = portion.Value;
-                        break;
                     case FileWordType.Year:
-                        value = date.Year.ToString();
+                        value = year.ToString();
                         break;
                     case FileWordType.FilePart:
                         if (!GetFileWord(simplifyResults, portion.Type, out value))
@@ -244,12 +312,12 @@ namespace Meticumedia
                     // Apply case options
                     switch (portion.CaseOption)
                     {
-                        case FileNamePortion.CaseOptionType.None:
+                        case CaseOptionType.None:
                             break;
-                        case FileNamePortion.CaseOptionType.LowerCase:
+                        case CaseOptionType.LowerCase:
                             value = value.ToLower();
                             break;
-                        case FileNamePortion.CaseOptionType.UpperCase:
+                        case CaseOptionType.UpperCase:
                             value = value.ToUpper();
                             break;
                     }
@@ -311,35 +379,48 @@ namespace Meticumedia
         public string BuildEpisodeName(TvEpisode episode1, TvEpisode episode2)
         {
             string epName;
-            if (episode2 != null && !string.IsNullOrEmpty(episode2.Name))
+            if (episode2 != null && !string.IsNullOrEmpty(episode2.DisplayName) && episode2.DatabaseNumber > 0)
             {
-                char[] ep1Chars = episode1.Name.ToCharArray();
-                char[] ep2Chars = episode2.Name.ToCharArray();
+                char[] ep1Chars = episode1.DisplayName.ToCharArray();
+                char[] ep2Chars = episode2.DisplayName.ToCharArray();
 
-                List<char> name1Build = ep1Chars.ToList();
-                List<char> name2Build = ep2Chars.ToList();
-
-                // Go through characters of episode names and remove identicals
-                bool closingBracketFound = false;
-                for (int i = Math.Min(ep1Chars.Length, ep2Chars.Length) - 1; i >= 0; i--)
+                // Check if name have any similarities at start
+                int matchLen = 0;
+                for (int i = 0; i < Math.Min(ep1Chars.Length, ep2Chars.Length); i++)
                     if (ep1Chars[i] == ep2Chars[i])
-                    {
-                        if (ep1Chars[i] == ')' && !closingBracketFound)
+                        matchLen++;
+                    else
+                        break;
+
+                if (matchLen > 3)
+                {
+                    List<char> name1Build = ep1Chars.ToList();
+                    List<char> name2Build = ep2Chars.ToList();
+
+                    // Go through characters of episode names and remove identicals
+                    bool closingBracketFound = false;
+                    for (int i = Math.Min(ep1Chars.Length, ep2Chars.Length) - 1; i >= 0; i--)
+                        if (ep1Chars[i] == ep2Chars[i])
                         {
-                            closingBracketFound = true;
-                            name1Build.RemoveAt(i);
+                            if (ep1Chars[i] == ')' && !closingBracketFound)
+                            {
+                                closingBracketFound = true;
+                                name1Build.RemoveAt(i);
+                            }
+
+                            name2Build.RemoveAt(i);
                         }
 
-                        name2Build.RemoveAt(i);
-                    }
+                    epName = new String(name1Build.ToArray()) + " & " + new String(name2Build.ToArray());
 
-                epName = new String(name1Build.ToArray()) + " & " + new String(name2Build.ToArray());
-
-                if (closingBracketFound)
-                    epName += ")";
+                    if (closingBracketFound)
+                        epName += ")";
+                }
+                else
+                    epName = episode1.DisplayName + " & " + episode2.DisplayName;
             }
             else
-                epName = episode1.Name;
+                epName = episode1.DisplayName;
 
             return epName.Trim();
         }
@@ -410,7 +491,7 @@ namespace Meticumedia
                 switch (element)
                 {
                     case XmlElements.Format:
-                        this.Format = new List<FileNamePortion>();
+                        this.Format = new ObservableCollection<FileNamePortion>();
                         foreach(XmlNode formatNode in propNode.ChildNodes)
                         {
                             FileNamePortion portion = new FileNamePortion();

@@ -8,8 +8,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml;
+using System.Diagnostics;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class defining a movie.
@@ -30,7 +31,7 @@ namespace Meticumedia
         /// <summary>
         /// Database to use for movie
         /// </summary>
-        public MovieDatabaseSelection DataBase { get { return (MovieDatabaseSelection)DatabaseSelection; } }
+        public MovieDatabaseSelection Database { get { return (MovieDatabaseSelection)DatabaseSelection; } }
 
         #endregion
 
@@ -41,6 +42,7 @@ namespace Meticumedia
         /// </summary>
         public Movie() : base()
         {
+            this.ContentType = Classes.ContentType.Movie;
         }
 
         /// <summary>
@@ -49,13 +51,13 @@ namespace Meticumedia
         /// <param name="name"></param>
         public Movie(string name) : this()
         {
-            this.Name = name;
+            this.DatabaseName = name;
         }
 
         public Movie(string name, int id, int year, string directory, string contentFolder) : this(name)
         {
             this.Id = id;
-            this.Date = new DateTime(year > 0 ? year : 1, 1, 1);
+            this.DatabaseYear = year;
             this.Path = directory;
             this.RootFolder = contentFolder;
         }
@@ -67,8 +69,6 @@ namespace Meticumedia
         public Movie(Movie movie) : this()
         {
             Clone(movie);
-            this.RootFolder = movie.RootFolder;
-            this.Path = movie.Path;
         }
 
         /// <summary>
@@ -77,30 +77,30 @@ namespace Meticumedia
         /// <param name="content"></param>
         public Movie(Content content) : this()
         {
-            base.Clone(content);
+            base.CloneAndHandlePath(content, true);
         }
 
         #endregion
 
         #region Methods
 
-        /// <summary>
-        /// Updates this movie with properties from another instance.
-        /// </summary>
-        /// <param name="movie"></param>
-        public void Clone(Movie movie)
+        public void PlayMovieFle()
         {
-            this.Name = movie.Name;
-            this.DatabaseName = movie.DatabaseName;
-            this.Overview = movie.Overview;
-            this.Date = movie.Date;
-            this.Found = movie.Found;
-            this.Id = movie.Id;
-            this.DatabaseSelection = movie.DatabaseSelection;
-            this.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
-            if (movie.Genres != null)
-                foreach (string genre in movie.Genres)
-                    this.Genres.Add(genre);
+            PlayVideoFiles(this.Path);            
+        }
+
+        private void PlayVideoFiles(string path)
+        {
+            string[] files = Directory.GetFiles(path);
+            foreach (string file in files)
+            {
+                if (FileHelper.CategorizeFile(new OrgPath(file, false, false, null, null), file) == FileCategory.MovieVideo)
+                    Process.Start(file);
+            }
+
+            string[] subDirs = Directory.GetDirectories(path);
+            foreach (string subDir in subDirs)
+                PlayVideoFiles(subDir);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Meticumedia
         /// <returns></returns>
         public override string ToString()
         {
-            return this.Name == string.Empty ? Unknown : this.Name;
+            return this.DatabaseName == string.Empty ? Unknown : this.DatabaseName;
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Meticumedia
                     this.RootFolder = defaultContent.FullPath;
             }
 
-            return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.Name + " (" + this.Date.Year.ToString() + ")"));
+            return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.DisplayName + " (" + this.DisplayYear.ToString() + ")"));
         }
 
         /// <summary>

@@ -1,18 +1,40 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticumedia", "Meticumedia\Meticumedia.csproj", "{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meticumedia", "Meticumedia\Meticumedia.csproj", "{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeticumediaTesting", "MeticumediaTesting\MeticumediaTesting.csproj", "{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Debug|x86.ActiveCfg = Debug|x86
-		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Debug|x86.Build.0 = Debug|x86
-		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Release|x86.ActiveCfg = Release|x86
-		{AB99C6C1-5D61-4276-BAF5-C050CDE954EC}.Release|x86.Build.0 = Release|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Debug|x86.ActiveCfg = Debug|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Debug|x86.Build.0 = Debug|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Release|Any CPU.ActiveCfg = Release|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Release|Mixed Platforms.Build.0 = Release|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Release|x86.ActiveCfg = Release|x86
+		{9ACDEE1A-B7BF-43AE-AF27-9C478D871D94}.Release|x86.Build.0 = Release|x86
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D6B7A78D-E178-4537-9D86-A0F7F1DEBC4A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

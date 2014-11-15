@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     public class MovieFolderScan : Scan
     {
@@ -174,12 +174,11 @@ namespace Meticumedia
                 OnProgressChange(ScanProcess.Movie, files[i].Path, (int)Math.Round((double)i / files.Count * 70));
 
                 // Categorize the file
-                FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
+                FileCategory fileCat = FileHelper.CategorizeFile(files[i], files[i].Path);
 
                 // Check that video file (tv is okay, may match incorrectly)
-                if (fileCat != FileCategory.NonTvVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
+                if (fileCat != FileCategory.MovieVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
                     continue;
-
 
                 // Check that file is not already in the queue
                 bool alreadyQueued = false;
@@ -207,18 +206,18 @@ namespace Meticumedia
                 // Try to match file to movie
                 string search = Path.GetFileNameWithoutExtension(files[i].Path);
                 Movie searchResult;
-                bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, files[i].RootFolder.FullPath, string.Empty, false, out searchResult);
+                bool searchSucess = SearchHelper.MovieSearch.ContentMatch(search, files[i].RootFolder.FullPath, string.Empty, false, true, out searchResult, null);
 
                 // Add closest match item
                 OrgItem item = new OrgItem(OrgAction.None, files[i].Path, fileCat, files[i].OrgFolder);
                 item.Number = number++;
-                if (searchSucess && !string.IsNullOrEmpty(searchResult.Name))
+                if (searchSucess && !string.IsNullOrEmpty(searchResult.DatabaseName))
                 {
                     item.Action = OrgAction.Move;
                     item.DestinationPath = searchResult.BuildFilePath(files[i].Path);
                     searchResult.Path = searchResult.BuildFolderPath();
                     item.Movie = searchResult;
-                    item.Check = System.Windows.Forms.CheckState.Checked;
+                    item.Enable = true;
                 }
                 scanResults.Add(item);
             }
@@ -237,16 +236,15 @@ namespace Meticumedia
                 OnProgressChange(ScanProcess.Movie, files[i].Path, (int)Math.Round((double)i / files.Count * 20) + 70);
 
                 // Categorize the file
-                FileCategory fileCat = FileHelper.CategorizeFile(files[i]);
-
+                FileCategory fileCat = FileHelper.CategorizeFile(files[i], files[i].Path);
 
                 // Check that video file (tv is okay, may match incorrectly)
-                if (fileCat != FileCategory.NonTvVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
+                if (fileCat != FileCategory.MovieVideo && fileCat != FileCategory.TvVideo && fileCat != FileCategory.Trash)
                     continue;
 
                 // Check that movie is valide
                 Movie movie = (Movie)files[i].Content;
-                if (movie == null || string.IsNullOrEmpty(movie.Name))
+                if (movie == null || string.IsNullOrEmpty(movie.DatabaseName))
                     continue;
 
                 // Check that file is not already in the queue
@@ -273,14 +271,14 @@ namespace Meticumedia
                 if (newPath != files[i].Path && !File.Exists(newPath))
                 {
                     // Add rename to results
-                    OrgItem item = new OrgItem(OrgAction.Rename, files[i].Path, FileCategory.NonTvVideo, files[i].OrgFolder);
+                    OrgItem item = new OrgItem(OrgAction.Rename, files[i].Path, FileCategory.MovieVideo, files[i].OrgFolder);
                     item.Number = number++;
                     if (Path.GetDirectoryName(newPath) != Path.GetDirectoryName(files[i].Path))
                         item.Action = OrgAction.Move;
 
                     item.DestinationPath = newPath;
                     item.Movie = movie;
-                    item.Check = System.Windows.Forms.CheckState.Checked;
+                    item.Enable = true;
                     scanResults.Add(item);
                 }
             }
@@ -288,10 +286,10 @@ namespace Meticumedia
             // Check if any movie folders need to be renamed!
             foreach (Movie movie in Organization.GetContentFromRootFolders(folders))
             {
-                if (!string.IsNullOrEmpty(movie.Name) && movie.Path != movie.BuildFolderPath())
+                if (!string.IsNullOrEmpty(movie.DatabaseName) && movie.Path != movie.BuildFolderPath())
                 {
                     OrgItem item = new OrgItem(OrgAction.Rename, movie.Path, FileCategory.Folder, movie, movie.BuildFolderPath(), null);
-                    item.Check = System.Windows.Forms.CheckState.Checked;
+                    item.Enable = true;
                     item.Number = number++;
                     scanResults.Add(item);
                 }

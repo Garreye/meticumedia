@@ -13,7 +13,7 @@ using System.Xml;
 using System.Threading;
 using System.Net;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Helper class for accessing TheMovieDb online movie database.
@@ -116,18 +116,18 @@ namespace Meticumedia
                         baseMovie.Id = id2;
                         break;
                     case "title":
-                        baseMovie.Name = resultPropNode.Value;
+                        baseMovie.DatabaseName = resultPropNode.Value;
                         break;
                     case "original_title":
-                        if (string.IsNullOrEmpty(baseMovie.Name))
-                            baseMovie.Name = resultPropNode.Value;
+                        if (string.IsNullOrEmpty(baseMovie.DatabaseName))
+                            baseMovie.DatabaseName = resultPropNode.Value;
                         break;
                     case "year":
-                        if (baseMovie.Date.Year < 1900)
+                        if (baseMovie.DatabaseYear < 1900)
                         {
                             int year;
                             if (int.TryParse(resultPropNode.Value, out year))
-                                baseMovie.Date = new DateTime(year, 1, 1);
+                                baseMovie.DatabaseYear = year;
                         }
                         break;
                     //case "release_dates":
@@ -141,14 +141,14 @@ namespace Meticumedia
                         
                     //    break;
                     case "genres":
-                        baseMovie.Genres = new GenreCollection(GenreCollection.CollectionType.Movie);
+                        baseMovie.DatabaseGenres = new GenreCollection(GenreCollection.CollectionType.Movie);
                         string[] genres = resultPropNode.Value.Split(',');
                         foreach (string genre in genres)
                         {
                             string noQuotesGenre = genre.Replace("\"", "");
                             string[] multiGenre = noQuotesGenre.Split('&');
                             foreach (string g in multiGenre)
-                                baseMovie.Genres.Add(g.Trim());
+                                baseMovie.DatabaseGenres.Add(g.Trim());
                         }
                         break;
                     case "synopsis":

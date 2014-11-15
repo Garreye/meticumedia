@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     class MovieDatabaseHelper
     {
@@ -81,7 +81,7 @@ namespace Meticumedia
         /// <param name="movie"></param>
         public static void UpdateMovieInfo(Movie movie)
         {
-            GetDataBaseAccess(movie.DataBase).Update(movie);
+            GetDataBaseAccess(movie.Database).Update(movie);
         }
 
         #endregion

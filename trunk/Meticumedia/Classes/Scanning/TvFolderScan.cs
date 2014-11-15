@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     public class TvFolderScan : Scan
     {
@@ -42,7 +42,7 @@ namespace Meticumedia
             // Do directory scan on all TV folders
             DirectoryScan dirScan = new DirectoryScan(false);
             dirScan.ProgressChange += dirScan_ProgressChange;
-            dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false, fast);
+            dirScan.RunScan(tvFoldersAsOrgFolders, queuedItems, 90, true, false, fast, true);
             List<OrgItem> results = dirScan.Items;
 
             // Check if show folder needs to be renamed!
@@ -55,13 +55,12 @@ namespace Meticumedia
                     if (show.RootFolder != tvFolder.FullPath)
                         continue;
 
-                    string builtFolder = Path.Combine(show.RootFolder, FileHelper.GetSafeFileName(show.Name));
+                    string builtFolder = Path.Combine(show.RootFolder, FileHelper.GetSafeFileName(show.DatabaseName));
                     if (show.Path != builtFolder)
                     {
-                        OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, show.Path, builtFolder, new TvEpisode("", show.Name, -1, -1, "", ""), null, FileCategory.Folder, null);
-                        newItem.Check = System.Windows.Forms.CheckState.Checked;
+                        OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, show.Path, builtFolder, new TvEpisode("", show, -1, -1, "", ""), null, FileCategory.Folder, null);
+                        newItem.Enable = true;
                         newItem.Number = number++;
-                        newItem.Show = show;
                         results.Add(newItem);
                     }
                 }

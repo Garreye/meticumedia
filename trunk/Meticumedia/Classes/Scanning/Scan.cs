@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     public abstract class Scan
     {
@@ -79,7 +79,7 @@ namespace Meticumedia
         /// </summary>
         public void OnItemsInitialized(ScanProcess process, List<OrgItem> items)
         {
-            if (ProgressChange != null)
+            if (ItemsInitialized != null)
                 ItemsInitialized(process, new ItemsInitializedArgs(items));
         }
 
@@ -96,7 +96,19 @@ namespace Meticumedia
             }
         }
 
+        /// <summary>
+        /// Debug noitification message event
+        /// </summary>
+        public event EventHandler<DebugNotificationArgs> DebugNotification;
 
+        /// <summary>
+        /// Triggers DebugNotification event
+        /// </summary>
+        protected void OnDebugNotificationd(string message)
+        {
+            if (DebugNotification != null)
+                DebugNotification(this, new DebugNotificationArgs(message) );
+        }
 
         #endregion
 

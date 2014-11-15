@@ -18,11 +18,6 @@ namespace Meticumedia
         #region Properties
 
         /// <summary>
-        /// List of episodes contained within the season
-        /// </summary>
-        public List<TvEpisode> Episodes { get; set; }
-
-        /// <summary>
         /// The season's number
         /// </summary>
         public int Number { get; set; }
@@ -31,22 +26,7 @@ namespace Meticumedia
         /// Gets whether the season it ignored based on whether
         /// all its episodes are ignored
         /// </summary>
-        public bool Ignored
-        {
-            get
-            {
-                // If any episode not ignored then whole season is not ignored
-                foreach (TvEpisode ep in this.Episodes)
-                    if (!ep.Ignored)
-                        return false;
-                return true;
-            }
-            set
-            {
-                foreach (TvEpisode ep in this.Episodes)
-                    ep.Ignored = true;
-            }
-        }
+        public bool Ignored { get; set; }
 
         #endregion
 
@@ -59,6 +39,7 @@ namespace Meticumedia
         public TvSeason(int number) : this()
         {
             this.Number = number;
+            this.Ignored = false;
         }
 
         /// <summary>
@@ -67,7 +48,6 @@ namespace Meticumedia
         public TvSeason()
         {
             this.Number = -1;
-            this.Episodes = new List<TvEpisode>();
         }
 
         #endregion
@@ -117,12 +97,12 @@ namespace Meticumedia
                     case XmlElements.Number:
                         value = this.Number.ToString();
                         break;
-                    case XmlElements.Episodes:
-                        xw.WriteStartElement(element.ToString());
-                        foreach (TvEpisode episode in this.Episodes)
-                            episode.Save(xw);
-                        xw.WriteEndElement();
-                        break;
+                    //case XmlElements.Episodes:
+                    //    xw.WriteStartElement(element.ToString());
+                    //    foreach (TvEpisode episode in this.Episodes)
+                    //        episode.Save(xw);
+                    //    xw.WriteEndElement();
+                    //    break;
                     default:
                         throw new Exception("Unkonw element!");
                 }

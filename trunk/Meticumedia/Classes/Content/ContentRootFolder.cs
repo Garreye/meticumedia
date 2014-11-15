@@ -8,51 +8,148 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Represents a root directory that contains directories that are each linked to content (TV show or movies)
     /// </summary>
-    public class ContentRootFolder
+    public class ContentRootFolder : INotifyPropertyChanged
     {
+        public static readonly ContentRootFolder AllTvFolders = new ContentRootFolder(ContentType.TvShow, "All TV Folders", "All TV Folders");
+        public static readonly ContentRootFolder AllMoviesFolders = new ContentRootFolder(ContentType.Movie, "All Movie Folders", "All Movie Folders");
+        
         #region Properties
 
         /// <summary>
         /// Path to folder relative to parent content root folder
         /// </summary>
-        public string SubPath { get; set; }
+        public string SubPath
+        {
+            get
+            {
+                return subPath;
+            }
+            set
+            {
+                subPath = value;
+                OnPropertyChanged("SubPath");
+            }
+        }
+
+        private string subPath = string.Empty;
 
         /// <summary>
         /// File directory path to folder
         /// </summary>
-        public string FullPath { get; set; }
+        public string FullPath
+        {
+            get
+            {
+                return fullPath;
+            }
+            set
+            {
+                fullPath = value;
+                OnPropertyChanged("FullPath");
+            }
+        }
+
+        private string fullPath = string.Empty;
 
         /// <summary>
         /// Specifies whether the software is allowed to make changes to existing
         /// files/subfolders contained within this folder
         /// </summary>
-        public bool AllowOrganizing { get; set; }
+        public bool AllowOrganizing
+        {
+            get
+            {
+                return allowOrganizing;
+            }
+            set
+            {
+                allowOrganizing = value;
+                OnPropertyChanged("AllowOrganizing");
+            }
+        }
+
+        private bool allowOrganizing = true;
 
         /// <summary>
         /// Specifies whether this is the default folder to move/copy 
         /// content to during a scan
         /// </summary>
-        public bool Default { get; set; }
+        public bool Default
+        {
+            get
+            {
+                return isDefault;
+            }
+            set
+            {
+                isDefault = value;
+                OnPropertyChanged("Default");
+            }
+        }
+
+        private bool isDefault = false;
 
         /// <summary>
         /// List of child root folders.
         /// </summary>
-        public List<ContentRootFolder> ChildFolders { get; set; }
+        public ObservableCollection<ContentRootFolder> ChildFolders
+        {
+            get
+            {
+                return childFolders;
+            }
+            set
+            {
+                childFolders = value;
+                OnPropertyChanged("ChildFolders");
+            }
+        }
+
+        private ObservableCollection<ContentRootFolder> childFolders = new ObservableCollection<ContentRootFolder>();
 
         /// <summary>
         /// Type of content contained in folder
         /// </summary>
-        public ContentType ContentType { get; set; }
+        public ContentType ContentType
+        {
+            get
+            {
+                return contentType;
+            }
+            set
+            {
+                contentType = value;
+                OnPropertyChanged("ContentType");
+            }
+        }
+
+        private ContentType contentType;
+
+        public int Id { get; private set; }
+
+        private static int idCnt = 0;
 
         #endregion
 
         #region Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
         /// <summary>
         /// Static event that fires when folder updating progress changes
@@ -78,11 +175,8 @@ namespace Meticumedia
         public ContentRootFolder(ContentType type)
         {
             this.ContentType = type;
-            this.SubPath = string.Empty;
-            this.FullPath = string.Empty;
-            this.AllowOrganizing = true;
-            this.Default = false;
-            this.ChildFolders = new List<ContentRootFolder>();
+            childFolders.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(childFolders_CollectionChanged);
+            this.Id = idCnt++;
         }
 
         /// <summary>
@@ -90,13 +184,10 @@ namespace Meticumedia
         /// </summary>
         /// <param name="path"></param>
         public ContentRootFolder(ContentType type, string path, string fullPath)
+            : this(type)
         {
-            this.ContentType = type;
             this.SubPath = path;
             this.FullPath = fullPath;
-            this.AllowOrganizing = true;
-            this.Default = false;
-            this.ChildFolders = new List<ContentRootFolder>();
         }
 
         /// <summary>
@@ -104,20 +195,26 @@ namespace Meticumedia
         /// </summary>
         /// <param name="folder">instance to clone</param>
         public ContentRootFolder(ContentRootFolder folder)
+            : this(folder.ContentType)
         {
-            this.ContentType = folder.ContentType;
             this.SubPath = folder.SubPath;
             this.FullPath = folder.FullPath;
             this.AllowOrganizing = folder.AllowOrganizing;
             this.Default = folder.Default;
-            this.ChildFolders = new List<ContentRootFolder>();
+            this.ChildFolders.Clear();
             foreach (ContentRootFolder subFolder in folder.ChildFolders)
                 this.ChildFolders.Add(new ContentRootFolder(subFolder));
+            this.Id = folder.Id;
         }
 
         #endregion
 
         #region Methods
+
+        private void childFolders_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged("ChildFolders");
+        }
 
         /// <summary>
         /// Return path as string.
@@ -136,8 +233,8 @@ namespace Meticumedia
         /// <returns>List of sub-directories in this content folder</returns>
         public List<OrgPath> BuildSubDirectories(ContentType contentType)
         {
-            bool clearMoviesFound = contentType == Meticumedia.ContentType.Movie;
-            bool clearShowsFound = contentType == Meticumedia.ContentType.TvShow;
+            bool clearMoviesFound = contentType == ContentType.Movie;
+            bool clearShowsFound = contentType == ContentType.TvShow;
             List<OrgPath> subFolders = new List<OrgPath>();
             BuildSubDirectories(this, subFolders, clearMoviesFound, clearShowsFound);
             return subFolders;
@@ -207,15 +304,15 @@ namespace Meticumedia
 
             switch (this.ContentType)
             {
-                case Meticumedia.ContentType.Movie:
+                case ContentType.Movie:
                     foreach (Content content in Organization.Movies)
-                        foreach (string genre in content.Genres)
+                        foreach (string genre in content.DatabaseGenres)
                             if (!genres.Contains(genre))
                                 genres.Add(genre);
                     break;
-                case Meticumedia.ContentType.TvShow:
+                case ContentType.TvShow:
                     foreach (Content content in Organization.Shows)
-                        foreach (string genre in content.Genres)
+                        foreach (string genre in content.DatabaseGenres)
                             if (!genres.Contains(genre))
                                 genres.Add(genre);
                     break;
@@ -243,6 +340,22 @@ namespace Meticumedia
                 //Console.WriteLine(contentCollection.ToString() + " lock get");
                 foreach (Content content in contentCollection)
                 {
+                    // Apply genre filter
+                    bool genreMatch = false;
+                    if (content.DatabaseGenres != null && !genreMatch)
+                        foreach (string contentGenre in content.DatabaseGenres)
+                            if (genre.Contains(contentGenre))
+                            {
+                                genreMatch = true;
+                                break;
+                            }
+
+                    // Apply year filter
+                    bool yearMatch = !yearFilter || (content.DatabaseYear >= minYear && content.DatabaseYear <= maxYear);
+
+                    // Apply text filter
+                    bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.DatabaseName.ToLower().Contains(nameFilter.ToLower());
+
                     // Check if movie is in the folder
                     if (ContainsContent(content, recursive) && ApplyContentFilter(content, genreEnable, genre, yearFilter, minYear, maxYear, nameFilter))
                         contents.Add(content);
@@ -265,8 +378,8 @@ namespace Meticumedia
         {
             // Apply genre filter
             bool genreMatch = !genreEnable;
-            if (content.Genres != null && !genreMatch)
-                foreach (string contentGenre in content.Genres)
+            if (content.DatabaseGenres != null && !genreMatch)
+                foreach (string contentGenre in content.DatabaseGenres)
                     if (genre.Contains(contentGenre))
                     {
                         genreMatch = true;
@@ -274,10 +387,10 @@ namespace Meticumedia
                     }
 
             // Apply year filter
-            bool yearMatch = !yearFilter || (content.Date.Year >= minYear && content.Date.Year <= maxYear);
+            bool yearMatch = !yearFilter || (content.DatabaseYear >= minYear && content.DatabaseYear <= maxYear);
 
             // Apply text filter
-            bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.Name.ToLower().Contains(nameFilter.ToLower());
+            bool nameMatch = string.IsNullOrEmpty(nameFilter) || content.DatabaseName.ToLower().Contains(nameFilter.ToLower());
 
             bool test = genreMatch && yearMatch && nameMatch;
             if (!test)
@@ -305,6 +418,31 @@ namespace Meticumedia
                         return true;
 
             // No match
+            return false;
+        }
+
+        /// <summary>
+        /// Get root folder that matches path string, recursive search
+        /// </summary>
+        /// <param name="path">Path to match to</param>
+        /// <param name="baseFolder">Current root folder being searches</param>
+        /// <param name="matchedFolder">Resulting matched root folder</param>
+        /// <returns>Whether match was found</returns>
+        public static bool GetMatchingRootFolder(string path, ContentRootFolder baseFolder, out ContentRootFolder matchedFolder)
+        {
+            if (path == baseFolder.FullPath)
+            {
+                matchedFolder = baseFolder;
+                return true;
+            }
+            else
+                foreach (ContentRootFolder child in baseFolder.ChildFolders)
+                {
+                    if (GetMatchingRootFolder(path, child, out matchedFolder))
+                        return true;
+                }
+
+            matchedFolder = null;
             return false;
         }
 
@@ -362,12 +500,12 @@ namespace Meticumedia
                 content.RemoveMissing(this);
 
             // Save changes
-            content.Sort();
+            //content.Sort();
             content.Save();
 
             // Set progress to completed
             progressMsg = "Update of '" + this.FullPath + "' complete!";
-            OnUpdateProgressChange(this, false, 0, progressMsg);
+            OnUpdateProgressChange(this, false, 100, progressMsg);
 
             // Return whether update was completed without cancelation
             return !cancel;
@@ -406,11 +544,11 @@ namespace Meticumedia
             Content newContent = null;
             int index = 0;
             for (int j = 0; j < content.Count; j++)
-                if (orgPath.Path == content[j].Path)
+                if (Path.Equals(orgPath.Path, content[j].Path))
                 {
                     contentExists = true;
                     content[j].Found = true;
-                    if (!string.IsNullOrEmpty(content[j].Name))
+                    if (!string.IsNullOrEmpty(content[j].DatabaseName))
                         contentComplete = true;
                     newContent = content[j];
                     index = j;
@@ -441,12 +579,12 @@ namespace Meticumedia
             {
                 case ContentType.TvShow:
                     TvShow showMatch;
-                    matchSucess = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, out showMatch);
+                    matchSucess = SearchHelper.TvShowSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, true, out showMatch);
                     match = showMatch;
                     break;
-                case Meticumedia.ContentType.Movie:
+                case ContentType.Movie:
                     Movie movieMatch;
-                    matchSucess = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, out movieMatch);
+                    matchSucess = SearchHelper.MovieSearch.PathMatch(orgPath.RootFolder.FullPath, orgPath.Path, firstPass, true, out movieMatch);
                     match = movieMatch;
                     break;
                 default:
@@ -464,11 +602,11 @@ namespace Meticumedia
                 switch (this.ContentType)
                 {
                     case ContentType.TvShow:
-                        ((TvShow)newContent).Clone((TvShow)match);
+                        ((TvShow)newContent).CloneAndHandlePath((TvShow)match, true);
                         ((TvShow)newContent).UpdateMissing();
                         break;
-                    case Meticumedia.ContentType.Movie:
-                        ((Movie)newContent).Clone((Movie)match);
+                    case ContentType.Movie:
+                        ((Movie)newContent).CloneAndHandlePath((Movie)match, true);
                         break;
                     default:
                         throw new Exception("unknown content type");
@@ -483,7 +621,7 @@ namespace Meticumedia
                     case ContentType.TvShow:
                         newContent = new TvShow(string.Empty, 0, 0, orgPath.Path, orgPath.RootFolder.FullPath);
                         break;
-                    case Meticumedia.ContentType.Movie:
+                    case ContentType.Movie:
                         newContent = new Movie(string.Empty, 0, 0, orgPath.Path, orgPath.RootFolder.FullPath);
                         break;
                     default:
@@ -525,7 +663,7 @@ namespace Meticumedia
                 case ContentType.TvShow:
                     content = Organization.Shows;
                     break;
-                case Meticumedia.ContentType.Movie:
+                case ContentType.Movie:
                     content = Organization.Movies;
                     break;
                 default:
@@ -633,7 +771,7 @@ namespace Meticumedia
                             this.Default = def;
                         break;
                     case XmlElements.ChildFolders:
-                        this.ChildFolders = new List<ContentRootFolder>();
+                        this.ChildFolders = new ObservableCollection<ContentRootFolder>();
                         foreach(XmlNode subContentNode in propNode.ChildNodes)
                         {
                             ContentRootFolder subFolder = new ContentRootFolder(this.ContentType);

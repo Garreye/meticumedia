@@ -9,7 +9,7 @@ using System.Net;
 using System.Text;
 using System.Xml;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class for accesing TVRage online TV database and related functions.
@@ -126,7 +126,7 @@ namespace Meticumedia
                 {
                     case "showname":
                     case "name":
-                        show.Name = subNode.InnerText;
+                        show.DatabaseName = subNode.InnerText;
                         break;
                     case "showid":
                         int id;
@@ -137,13 +137,12 @@ namespace Meticumedia
                         int year;
                         int.TryParse(subNode.InnerText, out year);
                         if (year == 0) year = 1;
-                        DateTime airDate = new DateTime(year, 1, 1);
-                        show.Date = airDate;
+                        show.DatabaseYear = year;
                         break;
                     case "genres":
-                        show.Genres = new GenreCollection(GenreCollection.CollectionType.Tv);
+                        show.DatabaseGenres = new GenreCollection(GenreCollection.CollectionType.Tv);
                         foreach (XmlNode genreNode in subNode.ChildNodes)
-                            show.Genres.Add(genreNode.InnerText);
+                            show.DatabaseGenres.Add(genreNode.InnerText);
                         break;
                     case "summary":
                         show.Overview = subNode.InnerText.Replace('\n', ' ');
@@ -199,13 +198,10 @@ namespace Meticumedia
                                     string seasonNoStr = seasonNode.Attributes["no"].Value;
                                     int seasonNo;
                                     int.TryParse(seasonNoStr, out seasonNo);
-                                    if (!show.Seasons.Contains(seasonNo))
-                                        show.Seasons.Add(new TvSeason(seasonNo));
-                                    TvSeason season = show.Seasons[seasonNo];
 
                                     foreach (XmlNode epNode in seasonNode.ChildNodes)
                                     {
-                                        TvEpisode ep = new TvEpisode(show.Name);
+                                        TvEpisode ep = new TvEpisode(show);
                                         ep.Season = seasonNo;
                                         foreach (XmlNode epPropNode in epNode.ChildNodes)
                                             switch (epPropNode.Name.ToLower())
@@ -218,13 +214,13 @@ namespace Meticumedia
                                                 case "airdate":
                                                     DateTime airDate;
                                                     DateTime.TryParse(epPropNode.InnerText, out airDate);
-                                                    ep.AirDate = airDate;
+                                                    ep.DatabaseAirDate = airDate;
                                                     break;
                                                 case "title":
                                                     ep.DatabaseName = epPropNode.InnerText;
                                                     break;
                                                 case "summary":
-                                                    ep.Overview = epPropNode.InnerText.Replace('\n', ' ');
+                                                    ep.DatabaseOverview = epPropNode.InnerText.Replace('\n', ' ');
                                                     break;
                                             }
                                         ep.InDatabase = true;
@@ -236,14 +232,13 @@ namespace Meticumedia
                                             if (!existingMatch.PreventDatabaseUpdates)
                                             {
                                                 existingMatch.DatabaseName = ep.DatabaseName;
-                                                existingMatch.AirDate = ep.AirDate;
-                                                existingMatch.Overview = ep.Overview;
+                                                existingMatch.DatabaseAirDate = ep.DatabaseAirDate;
+                                                existingMatch.DatabaseOverview = ep.DatabaseOverview;
                                                 existingMatch.InDatabase = true;
-                                                existingMatch.UserDefined = false;
                                             }
                                         }
                                         else
-                                            season.Episodes.Add(ep);
+                                            show.Episodes.Add(ep);
                                     }
                                 }
 

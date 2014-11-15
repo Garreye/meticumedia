@@ -7,19 +7,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Drawing;
-using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Windows.Media;
+using Ookii.Dialogs.Wpf;
+using System.ComponentModel;
+using Meticumedia.Windows;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// An episode of a TV show.
     /// </summary>
-    public class TvEpisode : IComparable
+    public class TvEpisode : IComparable, INotifyPropertyChanged
     {
         #region Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
         /// <summary>
         /// Static event that fires when static background color properties are changed.
@@ -96,61 +108,159 @@ namespace Meticumedia
         #region Properties
 
         /// <summary>
-        /// The name of the episode
+        /// User-defined name for the episode
         /// </summary>
-        public string Name 
+        public string UserName
         {
             get
             {
-                if(!string.IsNullOrEmpty(userDefinedName))
-                    return userDefinedName;
-                else
-                    return databaseName;
+                return userName;
+            }
+            set
+            {
+                userName = value;
+                OnPropertyChanged("UserName");
+                if (!this.UseDatabaseName)
+                {
+                    OnPropertyChanged("DisplayName");
+                    OnPropertyChanged("StatusColor");
+                }
+            }
+        }
+        private string userName = string.Empty;
+
+        /// <summary>
+        /// Name of the episode from online database
+        /// </summary>
+        public string DatabaseName
+        {
+            get
+            {
+                return databaseName;
+            }
+            set
+            {
+                databaseName = value;
+                OnPropertyChanged("DatabaseName");
+                if (this.UseDatabaseName)
+                {
+                    OnPropertyChanged("DisplayName");
+                    OnPropertyChanged("StatusColor");
+                }
             }
         }
 
-        /// <summary>
-        /// The database name of the episode
-        /// </summary>
-        public string DatabaseName 
-        {
-            get { return databaseName; }
-            set { databaseName = value; } 
-        }
+        private string databaseName = string.Empty;
 
         /// <summary>
-        /// The user defined name of the episode
+        /// Defines if database name should be used for display
         /// </summary>
-        public string UserDefinedName
+        public bool UseDatabaseName
         {
-            get { return userDefinedName; }
-            set { userDefinedName = value; }
-        }
+            get
+            {
+                return useDatabaseName;
+            }
+            set
+            {
+                useDatabaseName = value;
+                if (!useDatabaseName && string.IsNullOrWhiteSpace(this.UserName))
+                    this.UserName = this.DatabaseName;
 
+                OnPropertyChanged("UseDatabaseName");
+            }
+        }
+        private bool useDatabaseName = true;
+
+        /// <summary>
+        /// Display name of the episode
+        /// </summary>
+        public string DisplayName
+        {
+            get
+            {
+                if (useDatabaseName)
+                    return databaseName;
+                else
+                    return userName;
+            }
+            set
+            {
+                if (!useDatabaseName)
+                    this.UserName = value;
+            }
+        }
         
         /// <summary>
         /// Name of the show the episode belongs to
         /// </summary>
-        public string Show { get; set; }
+        public TvShow Show
+        {
+            get
+            {
+                return show;
+            }
+            set
+            {
+                show = value;
+                OnPropertyChanged("Show");
+            }
+        }
+        private TvShow show = new TvShow();
 
         /// <summary>
         /// Season number the episode belongs to
         /// </summary>
-        public int Season { get; set; }
+        public int Season
+        {
+            get
+            {
+                return season;
+            }
+            set
+            {
+                season = value;
+                OnPropertyChanged("Season");
+                OnPropertyChanged("SeasonName");
+            }
+        }
+        private int season = -1;
+
+        /// <summary>
+        /// Name of seardon the episode belongs to
+        /// </summary>
+        public string SeasonName
+        {
+            get
+            {
+                if (this.Season == 0)
+                    return "Specials";
+                else
+                    return "Season " + this.Season;
+            }
+        }
 
         /// <summary>
         /// The episode's number within the season
         /// </summary>
-        public int Number 
+        public int DisplayNumber 
         {
             get
             {
-                if (userDefinedNumber >= 0)
-                    return userDefinedNumber;
-                else if (databaseDvdNumber >= 0 && this.GetShow() != null && this.GetShow().DvdEpisodeOrder)
-                    return databaseDvdNumber;
+                if (this.UseDatabaseNumber)
+                {
+                    if (this.Show.DvdEpisodeOrder)
+                        return this.DatabaseDvdNumber;
+                    else
+                        return this.DatabaseNumber;
+                }
                 else
-                    return databaseNumber;
+                    return this.UserNumber;
+            }
+            set
+            {
+                if (!this.UseDatabaseNumber)
+                    this.UserNumber = value;
             }
         }
         
@@ -160,7 +270,13 @@ namespace Meticumedia
         public int DatabaseNumber
         {
             get { return databaseNumber; }
-            set { databaseNumber = value; }
+            set
+            {
+                databaseNumber = value;
+                OnPropertyChanged("DatabaseNumber");
+                if (userNumber < 0)
+                    OnPropertyChanged("Number");
+            }
         }
 
         /// <summary>
@@ -169,90 +285,395 @@ namespace Meticumedia
         public int DatabaseDvdNumber
         {
             get { return databaseDvdNumber; }
-            set { databaseDvdNumber = value; }
+            set
+            {
+                databaseDvdNumber = value;
+                OnPropertyChanged("DatabaseDvdNumber");
+                if (this.Show.DvdEpisodeOrder && this.UseDatabaseNumber)
+                    OnPropertyChanged("DisplayNumber");
+            }
         }
 
         /// <summary>
         /// The database's user defined number for the episode within the season 
         /// </summary>
-        public int UserDefinedNumber
+        public int UserNumber
         {
-            get { return userDefinedNumber; }
-            set { userDefinedNumber = value; }
+            get { return userNumber; }
+            set
+            {
+                userNumber = value;
+                OnPropertyChanged("UserNumber");
+                if (!UseDatabaseNumber)
+                    OnPropertyChanged("DisplayNumber");
+            }
         }
 
         /// <summary>
-        /// Date when the episode first aired
+        /// Defines if user-defined name should be used for display
         /// </summary>
-        public DateTime AirDate { get; set; }
+        public bool UseDatabaseNumber
+        {
+            get
+            {
+                return useDatabaseNumber;
+            }
+            set
+            {
+                useDatabaseNumber = value;
+
+
+                OnPropertyChanged("UseDatabaseNumber");
+                OnPropertyChanged("DisplayNumber");
+            }
+        }
+        private bool useDatabaseNumber = true;
+
+
+        /// <summary>
+        /// Date when the episode first aired from database
+        /// </summary>
+        public DateTime DatabaseAirDate
+        {
+            get
+            {
+                return databaseAirDate;
+            }
+            set
+            {
+                databaseAirDate = value;
+                OnPropertyChanged("DatabaseAirDate");
+                if (this.UseDatabaseAirDate)
+                {
+                    OnPropertyChanged("DisplayAirDate");
+                    OnPropertyChanged("Aired");
+                    OnPropertyChanged("StatusColor");
+                }
+            }
+        }
+        private DateTime databaseAirDate = new DateTime();
+
+        /// <summary>
+        /// Date when the episode first aired from database
+        /// </summary>
+        public DateTime UserAirDate
+        {
+            get
+            {
+                return userAirDate;
+            }
+            set
+            {
+                userAirDate = value;
+                OnPropertyChanged("UserAirDate");
+                if (this.UseDatabaseAirDate)
+                {
+                    OnPropertyChanged("DisplayAirDate");
+                    OnPropertyChanged("Aired");
+                    OnPropertyChanged("StatusColor");
+                }
+            }
+        }
+        private DateTime userAirDate = new DateTime();
+
+        public DateTime DisplayAirDate
+        {
+            get
+            {
+                if (this.UseDatabaseAirDate)
+                    return this.DatabaseAirDate;
+                else
+                    return this.UserAirDate;
+            }
+            set
+            {
+
+                if (!this.UseDatabaseAirDate)
+                    this.UserAirDate = value;
+            }
+        }
+
+        /// <summary>
+        /// Defines if database defined air date should be used for display
+        /// </summary>
+        public bool UseDatabaseAirDate
+        {
+            get
+            {
+                return useDatabaseAirDate;
+            }
+            set
+            {
+                useDatabaseAirDate = value;
+
+                if (!useDatabaseAirDate && this.UserAirDate.Equals(new DateTime()))
+                    this.UserAirDate = this.DatabaseAirDate;
+
+                OnPropertyChanged("UseDatabaseAirDate");
+                OnPropertyChanged("DisplayAirDate");
+                OnPropertyChanged("Aired");
+                OnPropertyChanged("StatusColor");
+            }
+        }
+        private bool useDatabaseAirDate = true;
 
         /// <summary>
         /// Gets whether or not the episode has aired yet (invalid dates will return false)
         /// </summary>
         public bool Aired
         {
-            get { return this.AirDate.Subtract(DateTime.Now).Days < 0 && this.AirDate.Year > 1900; }
+            get { return this.DisplayAirDate.Subtract(DateTime.Now).Days < 0 && this.DisplayAirDate.Year > 1900; }
         }
 
         /// <summary>
-        /// Overview/description of the episode
+        /// Overview/description of the episode from database
         /// </summary>
-        public string Overview { get; set; }
+        public string DatabaseOverview
+        {
+            get
+            {
+                return databseOverview.Replace(Environment.NewLine, " ").Trim();
+            }
+            set
+            {
+                databseOverview = value;
+                OnPropertyChanged("DatabaseOverview");
+            }
+        }
+        private string databseOverview = string.Empty;
+
+        /// <summary>
+        /// Overview/description of the episode from user
+        /// </summary>
+        public string UserOverview
+        {
+            get
+            {
+                return userOverview.Replace(Environment.NewLine, " ").Trim();
+            }
+            set
+            {
+                userOverview = value;
+                OnPropertyChanged("UserOverview");
+            }
+        }
+        private string userOverview = string.Empty;
+
+        /// <summary>
+        /// Defines if database defined overview should be used for display
+        /// </summary>
+        public bool UseDatabaseOverview
+        {
+            get
+            {
+                return useDatabaseOverview;
+            }
+            set
+            {
+                useDatabaseOverview = value;
+                if(!useDatabaseOverview && string.IsNullOrEmpty(this.UserOverview))
+                    this.UserOverview = this.DatabaseOverview;
+
+                OnPropertyChanged("UseDatabaseOverview");
+                OnPropertyChanged("DisplayOverview");
+            }
+        }
+        private bool useDatabaseOverview = true;
+
+        public string DisplayOverview
+        {
+            get
+            {
+                if (this.UseDatabaseOverview)
+                    return this.DatabaseOverview;
+                else
+                    return this.UserOverview;
+            }
+            set
+            {
+
+                if (!this.UseDatabaseOverview)
+                    this.UserOverview = value;
+            }
+        }
         
         /// <summary>
         /// Sets whether the episode is ignored from display and scans
         /// </summary>
-        public bool Ignored { get; set; }
+        public bool Ignored
+        {
+            get
+            {
+                return ignored;
+            }
+            set
+            {
+                ignored = value;
+                OnPropertyChanged("Ignored");
+                OnPropertyChanged("Status");
+                OnPropertyChanged("StatusColor");
+            }
+        }
+
+        private bool ignored = false;
 
         /// <summary>
         /// Indicates if the episode is missing from the file directory
         /// </summary>
-        public MissingStatus Missing { get; set; }
+        public MissingStatus Missing
+        {
+            get
+            {
+                return missing;
+            }
+            set
+            {
+                missing = value;
+                OnPropertyChanged("Missing");
+                OnPropertyChanged("Status");
+                OnPropertyChanged("StatusColor");
+            }
+        }
+
+        private MissingStatus missing = MissingStatus.Missing;
 
         /// <summary>
         /// Indicated whether the file has been watched or not (for future use)
         /// </summary>
-        public bool Watched { get; set; }
+        public bool Watched
+        {
+            get
+            {
+                return watched;
+            }
+            set
+            {
+                watched = value;
+                OnPropertyChanged("Watched");
+            }
+        }
+
+        private bool watched = false;
 
         /// <summary>
         /// The file associated with the episode (if any)
         /// </summary>
-        public TvFile File { get; set; }
+        public TvFile File
+        {
+            get
+            {
+                return file;
+            }
+            set
+            {
+                file = value;
+                OnPropertyChanged("File");
+            }
+        }
+
+        private TvFile file = new TvFile();
       
         /// <summary>
         /// Indicates whether the episode is found in TheTvDb database.
         /// TODO: this is hacky!
         /// </summary>
-        public bool InDatabase { get; set; }
+        public bool InDatabase
+        {
+            get
+            {
+                return inDatabase;
+            }
+            set
+            {
+                inDatabase = value;
+                OnPropertyChanged("InDatabase");
+            }
+        }
 
-        /// <summary>
-        /// Whether episode was added to show by user (vs. automatically added from database)
-        /// </summary>
-        public bool UserDefined { get; set; }
+        private bool inDatabase = false;
+
+        public bool UserDefined
+        {
+            get
+            {
+                return userNumber >= 0 && databaseNumber <= 0;
+            }
+        }
+
 
         /// <summary>
         /// Prevent database from updating properties
         /// </summary>
-        public bool PreventDatabaseUpdates { get; set; }
+        public bool PreventDatabaseUpdates
+        {
+            get
+            {
+                return preventDatabaseUpdates;
+            }
+            set
+            {
+                preventDatabaseUpdates = value;
+                OnPropertyChanged("PreventDatabaseUpdates");
+            }
+        }
+
+        private bool preventDatabaseUpdates = false;
+
+        /// <summary>
+        /// Gets background color to use for episode based on whether
+        /// it's ignored, aired or missing.
+        /// </summary>
+        /// <returns>Color to use for background</returns>
+        public string StatusColor
+        {
+            get
+            {
+                if (this.Ignored)
+                    return "LightSlateGray";
+                else if (!this.Aired)
+                    return "Gray";
+                else if (this.Missing == MissingStatus.Missing)
+                    return "DarkRed";
+                else if (this.Missing == MissingStatus.InScanDirectory)
+                    return "MediumSeaGreen";
+                else if (this.Watched)
+                    return "LightSlateGray";
+                else
+                    return "Black";
+            }
+        }
+
+        public string AirDateString
+        {
+            get
+            {
+                if (this.DisplayAirDate.Year == 1)
+                    return string.Empty;
+                else
+                    return " - " + this.DisplayAirDate.ToString("MMMM dd, yyyy");
+            }
+        }
+
+        public string Status
+        {
+            get
+            {                
+                if (this.Ignored)
+                    return "(Ignored)";
+                else if (!this.Aired && this.DisplayAirDate.Year > 1)
+                    return "(Upcoming)";
+                else if (this.Missing == MissingStatus.Missing)
+                    return "(Missing)";
+                else if (this.Missing == MissingStatus.InScanDirectory)
+                    return "(In Scan Directory)";
+                else
+                    return "";
+            }
+        }
 
         #endregion
 
         #region Variables
-
-        /// <summary>
-        /// Missing status of episode in show folder or scan dir.
-        /// </summary>
-        public enum MissingStatus { Located, Missing, InScanDirectory }
-
-        /// <summary>
-        /// Private variable for storing DatabaseName property
-        /// </summary>
-        private string databaseName = string.Empty;
-
-        /// <summary>
-        /// Private variable for storing UserDefinedName property
-        /// </summary>
-        private string userDefinedName = string.Empty;
 
         /// <summary>
         /// Private variable for storing DatabaseNumber property
@@ -267,27 +688,27 @@ namespace Meticumedia
         /// <summary>
         /// Private variable for storing UserDefinedNumber property
         /// </summary>
-        private int userDefinedNumber = -1;
+        private int userNumber = -1;
 
         /// <summary>
         /// Private variable for storing MissingBackColor property
         /// </summary>
-        private static Color missingBackColor = Color.LightSkyBlue;
+        private static Color missingBackColor = Colors.LightSkyBlue;
 
         /// <summary>
         /// Private variable for storing InScanDirectoryColor property
         /// </summary>
-        private static Color inScanDirectoryColor = Color.LightGray;
+        private static Color inScanDirectoryColor = Colors.LightGray;
 
         /// <summary>
         /// Variable for storing IgnoredBackColor property
         /// </summary>
-        private static Color ignoredBackColor = Color.LightCoral;
+        private static Color ignoredBackColor = Colors.LightCoral;
 
         /// <summary>
         /// Variable for storing UnairedBackColor property
         /// </summary>
-        private static Color unairedBackColor = Color.LightYellow;
+        private static Color unairedBackColor = Colors.LightGray;
         
         #endregion
         
@@ -302,43 +723,24 @@ namespace Meticumedia
         /// <param name="number">Number of the episode within the season</param>
         /// <param name="air">Air data string</param>
         /// <param name="overview">Episdoe overview/description</param>
-        public TvEpisode(String name, string show, int season, int number, string air, string overview) : this(show)
+        public TvEpisode(String name, TvShow show, int season, int number, string air, string overview) : this(show)
         {
             this.DatabaseName = name;
             this.Season = season;
             this.DatabaseNumber = number;
             DateTime airDate;
             DateTime.TryParse(air, out airDate);
-            this.AirDate = airDate;
-            this.Overview = overview;
+            this.DatabaseAirDate = airDate;
+            this.DatabaseOverview = overview;
         }
 
         /// <summary>
         /// Constructor for episode with know show name only.
         /// </summary>
         /// <param name="show">Name of show the episode belongs to</param>
-        public TvEpisode(string show) : this()
+        public TvEpisode(TvShow show)
         {
             this.Show = show;
-        }
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public TvEpisode()
-        {
-            this.DatabaseName = string.Empty;
-            this.Show = string.Empty;
-            this.Season = -1;
-            this.AirDate = new DateTime();
-            this.File = new TvFile();
-            this.Ignored = false;
-            this.InDatabase = false;
-            this.Missing = MissingStatus.Missing;
-            this.Overview = string.Empty;
-            this.Watched = false;
-            this.UserDefined = false;
-            this.PreventDatabaseUpdates = false;
         }
 
         /// <summary>
@@ -347,7 +749,7 @@ namespace Meticumedia
         /// <param name="episode">Instance to clone</param>
         public TvEpisode(TvEpisode episode)
         {
-            this.UpdateInfo(episode);
+            this.Clone(episode);
         }
 
         #endregion
@@ -358,23 +760,28 @@ namespace Meticumedia
         /// Updates this instance with information from another instance
         /// </summary>
         /// <param name="episode"></param>
-        public void UpdateInfo(TvEpisode episode)
+        public void Clone(TvEpisode episode)
         {
-            this.UserDefinedName = episode.UserDefinedName;
+            this.UseDatabaseName = episode.UseDatabaseName;
+            this.UserName = episode.UserName;
             this.DatabaseName = episode.DatabaseName;
             this.Show = episode.Show;
             this.Season = episode.Season;
+            this.UseDatabaseNumber = episode.UseDatabaseNumber;
+            this.UserNumber = episode.UserNumber;
             this.DatabaseNumber = episode.DatabaseNumber;
             this.DatabaseDvdNumber = episode.DatabaseDvdNumber;
-            this.UserDefinedNumber = episode.UserDefinedNumber;
-            this.AirDate = episode.AirDate;
+            this.UseDatabaseAirDate = episode.UseDatabaseAirDate;
+            this.DatabaseAirDate = episode.DatabaseAirDate;
+            this.UserAirDate = episode.UserAirDate;
             this.File = new TvFile(episode.File);
             this.Ignored = episode.Ignored;
             this.InDatabase = episode.InDatabase;
             this.Missing = episode.Missing;
-            this.Overview = episode.Overview;
+            this.UseDatabaseOverview = episode.UseDatabaseOverview;
+            this.DatabaseOverview = episode.DatabaseOverview;
+            this.UserOverview = episode.UserOverview;
             this.Watched = episode.Watched;
-            this.UserDefined = episode.UserDefined;
             this.PreventDatabaseUpdates = episode.PreventDatabaseUpdates;
         }
 
@@ -384,7 +791,7 @@ namespace Meticumedia
         /// <returns></returns>
         public string BuildEpString()
         {
-            string epInfo = this.Show + " s" + this.Season.ToString("00") + "e" + this.Number.ToString("00");
+            string epInfo = this.Show + " s" + this.Season.ToString("00") + "e" + this.DisplayNumber.ToString("00");
             return FileHelper.SimplifyFileName(epInfo);
         }
 
@@ -401,17 +808,14 @@ namespace Meticumedia
             items = new List<OrgItem>();
             
             // Open file dialog
-            OpenFileDialog ofd = new OpenFileDialog();
+            VistaOpenFileDialog ofd = new VistaOpenFileDialog();
             ofd.Filter = "All Files|*.*";
-            if (ofd.ShowDialog() != DialogResult.OK)
+            if (!(bool)ofd.ShowDialog())
                 return false;
             
             // Try to get episode information from file
             int fileEpSeason, fileEpNumber1, fileEpNumber2;
-            bool fileInfoFound = FileHelper.GetEpisodeInfo(ofd.FileName, this.Show, out fileEpSeason, out fileEpNumber1, out fileEpNumber2);
-
-            // Get this episode's show object
-            TvShow show = GetShow();
+            bool fileInfoFound = FileHelper.GetEpisodeInfo(ofd.FileName, this.Show.DatabaseName, out fileEpSeason, out fileEpNumber1, out fileEpNumber2);
 
             // Assign episodes
             TvEpisode ep1 = this;
@@ -420,14 +824,14 @@ namespace Meticumedia
             // Locate could be for double episode file, only taken if one of the episode from file matches selected
             if (fileInfoFound && fileEpSeason == this.Season)
             {
-                if (fileEpNumber1 == this.Number)
+                if (fileEpNumber1 == this.DisplayNumber)
                 {
                     if (fileEpNumber2 > 0)
                         show.FindEpisode(ep1.Season, fileEpNumber2, false, out ep2);
                     else
                         ep2 = null;
                 }
-                else if (fileEpNumber2 == this.Number)
+                else if (fileEpNumber2 == this.DisplayNumber)
                 {
                     if (fileEpNumber1 > 0 && show.FindEpisode(this.Season, fileEpNumber1, false, out ep1))
                         ep2 = this;
@@ -437,21 +841,21 @@ namespace Meticumedia
             }
 
             // Build org item
-            OrgAction action = copyAction ? OrgAction.Move : OrgAction.Copy;
+            OrgAction action = copyAction ? OrgAction.Copy : OrgAction.Move;
             string destination = show.BuildFilePath(ep1, ep2, Path.GetExtension(ofd.FileName));
             OrgItem item = new OrgItem(OrgStatus.Found, action, ofd.FileName, destination, ep1, ep2, FileCategory.TvVideo, null);
 
             // Display modifier
             if (showActionModifer)
             {
-                OrgItemEditor oie = new OrgItemEditor(item);
-                oie.ShowDialog();
+                OrgItemEditorWindow editor = new OrgItemEditorWindow(item);
+                editor.ShowDialog();
 
                 // Add results if valid
-                if (oie.Result == null)
+                if (editor.Results == null)
                     return false;
 
-                items.Add(oie.Result);
+                items.Add(editor.Results);
                 return true;
             }
 
@@ -465,8 +869,8 @@ namespace Meticumedia
         public void PlayEpisodeFile()
         {
             // File is in TV show folder
-            if (this.Missing == TvEpisode.MissingStatus.Located && !string.IsNullOrEmpty(this.File.FilePath) && System.IO.File.Exists(this.File.FilePath))
-                Process.Start(this.File.FilePath); // TODO: if 2nd part of multi-part then notify!
+            if (this.Missing == MissingStatus.Located && !string.IsNullOrEmpty(this.File.FilePath) && System.IO.File.Exists(this.File.FilePath))
+                Process.Start(this.File.FilePath);
             
             // File is in scan directory
             else if (this.Missing == MissingStatus.InScanDirectory)
@@ -480,7 +884,7 @@ namespace Meticumedia
 
                     foreach (TvEpisode ep in eps)
                     {
-                        if (ep.Show == this.Show && ep.Season == this.Season && ep.Number == this.Number)
+                        if (ep.Show == this.Show && ep.Season == this.Season && ep.DisplayNumber == this.DisplayNumber)
                             Process.Start(item.SourcePath);
                     }
                 }
@@ -502,7 +906,7 @@ namespace Meticumedia
             TvEpisode ep = (TvEpisode)obj;
 
             // Compare is on season and episode number only (show name may not be set yet)
-            return ep.Season == this.Season && ep.Number == this.Number;
+            return ep.Season == this.Season && ep.DisplayNumber == this.DisplayNumber && ep.DisplayName == this.DisplayName;
         }
 
         /// <summary>
@@ -513,39 +917,12 @@ namespace Meticumedia
         {
             return base.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return this.Show.DisplayName + " season " + this.Season + " episode " + this.DisplayNumber;
+        }
         
-        /// <summary>
-        /// Gets background color to use for episode based on whether
-        /// it's ignored, aired or missing.
-        /// </summary>
-        /// <returns>Color to use for background</returns>
-        public Color GetBackColor()
-        {
-            if (this.Ignored)
-                return TvEpisode.IgnoredBackColor;
-            else if (!this.Aired)
-                return TvEpisode.UnairedBackColor;
-            else if (this.Missing == MissingStatus.Missing)
-                return TvEpisode.MissingBackColor;
-            else if (this.Missing == MissingStatus.InScanDirectory)
-                return TvEpisode.InScanDirectoryColor;
-            else
-                return Color.Transparent;
-        }
-
-        /// <summary>
-        /// Get show episode belongs to
-        /// </summary>
-        /// <returns></returns>
-        public TvShow GetShow()
-        {
-            for (int i = 0; i < Organization.Shows.Count; i++)
-                if (Organization.Shows[i].Name == this.Show)
-                    return (TvShow)Organization.Shows[i];
-
-            return null;
-        }
-
         #endregion
 
         #region Comparsions
@@ -560,7 +937,11 @@ namespace Meticumedia
             if (obj is TvEpisode)
             {
                 TvEpisode t2 = (TvEpisode)obj;
-                return this.Number.CompareTo(t2.Number);
+
+                if (this.Season == t2.Season && this.DisplayNumber == t2.DisplayNumber)
+                    return this.DisplayName.CompareTo(t2.DisplayName);
+                else
+                    return (this.Season * 1000 + this.DisplayNumber).CompareTo(t2.Season * 1000 + t2.DisplayNumber);
             }
             else
                 throw new ArgumentException("Object is not a TvShow.");
@@ -586,7 +967,7 @@ namespace Meticumedia
                 if (y == null)
                     return 1;
                 else
-                    return x.AirDate.CompareTo(y.AirDate);
+                    return x.DisplayAirDate.CompareTo(y.DisplayAirDate);
             }
         }
 
@@ -597,7 +978,14 @@ namespace Meticumedia
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Name, NameIsUderDefined, DatabaseName, UserDefinedName, Show, Season, DatabaseNumber, DatabaseDvdNumber, UserDefinedNumber, AirDate, Overview, Ignored, Missing, Watched, File, UserDefined, PreventDatabaseUpdates };
+        private enum XmlElements
+        {
+            DatabaseName, UserDefinedName, UseDatabaseName, Season, DatabaseNumber, UserDefinedNumber, UseDatabaseNumber, DatabaseDvdNumber, Ignored, Missing, Watched, File, PreventDatabaseUpdates,
+            DatabaseOverview, UserOverview, UseDatabaseOverview, DatabaseAirDate, UserAirDate, UseDatabaseAirDate,
+
+            // Deprecated
+             Name, NameIsUderDefined, AirDate, Overview, Number
+        }
 
         /// <summary>
         /// Root XML element for saving instance to file.
@@ -619,19 +1007,14 @@ namespace Meticumedia
                 string value = null;
                 switch (element)
                 {
-                    // Deprecated
-                    case XmlElements.Name:
-                    case XmlElements.NameIsUderDefined:
-                        break;
-
                     case XmlElements.DatabaseName:
                         value = this.DatabaseName;
                         break;
                     case XmlElements.UserDefinedName:
-                        value = this.UserDefinedName;
+                        value = this.UserName;
                         break;
-                    case XmlElements.Show:
-                        value = this.Show;
+                    case XmlElements.UseDatabaseName:
+                        value = this.UseDatabaseName.ToString();
                         break;
                     case XmlElements.Season:
                         value = this.Season.ToString();
@@ -643,13 +1026,28 @@ namespace Meticumedia
                         value = this.DatabaseDvdNumber.ToString();
                         break;
                     case XmlElements.UserDefinedNumber:
-                        value = this.UserDefinedNumber.ToString();
+                        value = this.UserNumber.ToString();
                         break;
-                    case XmlElements.AirDate:
-                        value = this.AirDate.ToString();
+                    case XmlElements.UseDatabaseNumber:
+                        value = this.UseDatabaseNumber.ToString();
                         break;
-                    case XmlElements.Overview:
-                        value = this.Overview;
+                    case XmlElements.DatabaseOverview:
+                        value = this.DatabaseOverview;
+                        break;
+                    case XmlElements.UserOverview:
+                        value = this.UserOverview;
+                        break;
+                    case XmlElements.UseDatabaseOverview:
+                        value = this.UseDatabaseOverview.ToString();
+                        break;
+                    case XmlElements.DatabaseAirDate:
+                        value = this.DatabaseAirDate.ToString();
+                        break;
+                    case XmlElements.UserAirDate:
+                        value = this.UserAirDate.ToString();
+                        break;
+                    case XmlElements.UseDatabaseAirDate:
+                        value = this.UseDatabaseAirDate.ToString();
                         break;
                     case XmlElements.Ignored:
                         value = this.Ignored.ToString();
@@ -665,11 +1063,16 @@ namespace Meticumedia
                         this.File.Save(xw);
                         xw.WriteEndElement();
                         break;
-                    case XmlElements.UserDefined:
-                        value = this.UserDefined.ToString();
-                        break;
                     case XmlElements.PreventDatabaseUpdates:
                         value = this.PreventDatabaseUpdates.ToString();
+                        break;
+
+                    // Deprecated
+                    case XmlElements.Name:
+                    case XmlElements.NameIsUderDefined:
+                    case XmlElements.AirDate:
+                    case XmlElements.Overview:
+                    case XmlElements.Number:
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -712,20 +1115,17 @@ namespace Meticumedia
                 // Load value into appropriate property
                 switch (element)
                 {
-                    case XmlElements.Name:
-                        name = value;
-                        break;
-                    case XmlElements.NameIsUderDefined:
-                        bool.TryParse(value, out nameIsUserDefined);
-                        break;
+                    
                     case XmlElements.DatabaseName:
                         this.DatabaseName = value;
                         break;
                     case XmlElements.UserDefinedName:
-                        this.UserDefinedName = value;
+                        this.UserName = value;
                         break;
-                    case XmlElements.Show:
-                        this.Show = value;
+                    case XmlElements.UseDatabaseName:
+                        bool useDbName;
+                        if (bool.TryParse(value, out useDbName))
+                            this.UseDatabaseName = useDbName;
                         break;
                     case XmlElements.Season:
                         int season;
@@ -735,6 +1135,8 @@ namespace Meticumedia
                     case XmlElements.DatabaseNumber:
                         int dbNumber;
                         int.TryParse(value, out dbNumber);
+                        if (dbNumber < 0)
+                            dbNumber = 0;
                         this.DatabaseNumber = dbNumber;
                         break;
                     case XmlElements.DatabaseDvdNumber:
@@ -745,16 +1147,41 @@ namespace Meticumedia
                     case XmlElements.UserDefinedNumber:
                         int udNumber;
                         int.TryParse(value, out udNumber);
-                        this.UserDefinedNumber = udNumber;
+                        this.UserNumber = udNumber;
                         break;
-                    case XmlElements.AirDate:
-                        DateTime airDate;
-                        DateTime.TryParse(value, out airDate);
-                        this.AirDate = airDate;
+                    case XmlElements.UseDatabaseNumber:
+                        bool useDbNum;
+                        if (bool.TryParse(value, out useDbNum))
+                            this.UseDatabaseNumber = useDbNum;
                         break;
-                    case XmlElements.Overview:
-                        this.Overview = value;
+                    case XmlElements.DatabaseOverview:
+                        this.DatabaseOverview = value;
                         break;
+                    case XmlElements.UserOverview:
+                        this.UserOverview = value;
+                        break;
+                    case XmlElements.UseDatabaseOverview:
+                        bool useDbOverview;
+                        if (bool.TryParse(value, out useDbOverview))
+                            this.UseDatabaseOverview = useDbOverview;
+                        break;
+                    
+                    case XmlElements.DatabaseAirDate:
+                        DateTime dbAirDate;
+                        DateTime.TryParse(value, out dbAirDate);
+                        this.DatabaseAirDate = dbAirDate;
+                        break;
+                    case XmlElements.UserAirDate:
+                        DateTime userAirDate;
+                        DateTime.TryParse(value, out userAirDate);
+                        this.UserAirDate = userAirDate;
+                        break;
+                    case XmlElements.UseDatabaseAirDate:
+                        bool useDbAirDate;
+                        bool.TryParse(value, out useDbAirDate);
+                        this.UseDatabaseAirDate = useDbAirDate;
+                        break;
+                        
                     case XmlElements.Ignored:
                         bool ignored;
                         bool.TryParse(value, out ignored);
@@ -773,22 +1200,38 @@ namespace Meticumedia
                     case XmlElements.File:
                         this.File.Load(propNode);
                         break;
-                    case XmlElements.UserDefined:
-                        bool userDef;
-                        bool.TryParse(value, out userDef);
-                        this.UserDefined = userDef;
-                        break;
                     case XmlElements.PreventDatabaseUpdates:
                         bool prevent;
                         bool.TryParse(value, out prevent);
                         this.PreventDatabaseUpdates = prevent;
+                        break;
+
+                    // Deprecated
+                    case XmlElements.Name:
+                        name = value;
+                        break;
+                    case XmlElements.NameIsUderDefined:
+                        bool.TryParse(value, out nameIsUserDefined);
+                        break;
+                    case XmlElements.AirDate:
+                        DateTime airDate;
+                        DateTime.TryParse(value, out airDate);
+                        this.DatabaseAirDate = airDate;
+                        break;
+                    case XmlElements.Overview:
+                        this.DatabaseOverview = value;
+                        break;
+                    case XmlElements.Number:
+                        int num;
+                        if (int.TryParse(value, out num))
+                            this.DatabaseNumber = num;
                         break;
                 }
             }
 
             // Previous version support
             if (nameIsUserDefined && !string.IsNullOrEmpty(name))
-                this.userDefinedName = name;
+                this.userName = name;
 
             // Sucess
             return true;

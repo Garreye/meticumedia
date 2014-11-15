@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     public class TvRenameScan : Scan
     {
@@ -43,87 +43,76 @@ namespace Meticumedia
                 if (cancelRequested)
                     break;
 
-                OnProgressChange(ScanProcess.TvRename, shows[i].Name, (int)Math.Round((double)i / (shows.Count) * 30) + 70);
+                OnProgressChange(ScanProcess.TvRename, shows[i].DatabaseName, (int)Math.Round((double)i / (shows.Count) * 30) + 70);
 
                 // Go each show
-                foreach (TvSeason season in show.Seasons)
+                foreach (TvEpisode ep in show.Episodes)
                 {
                     // Check for cancellation
                     if (cancelRequested)
                         break;
 
-                    foreach (TvEpisode ep in season.Episodes)
+                    // Skipped ignored episodes
+                    if (ep.Ignored)
+                        continue;
+
+                    // Init found flag
+                    bool found = false;
+
+                    // Rename check
+                    if (ep.Missing == MissingStatus.Located)
                     {
-                        // Check for cancellation
-                        if (cancelRequested)
-                            break;
-
-                        // Skipped ignored episodes
-                        if (ep.Ignored)
-                            continue;
-
-                        // Init found flag
-                        bool found = false;
-
-                        // Rename check
-                        if (ep.Missing == TvEpisode.MissingStatus.Located)
+                        if (shows[i].DoRenaming)
                         {
-                            if (shows[i].DoRenaming)
+                            found = true;
+                            TvEpisode ep2 = null;
+
+                            if (ep.File.MultiPart)
                             {
-                                found = true;
-                                TvEpisode ep2 = null;
-
-                                if (ep.File.MultiPart)
+                                if (ep.File.Part == 1)
                                 {
-                                    if (ep.File.Part == 1)
-                                    {
-                                        // TODO: Need episode collection for addressing episodes like seasons, so I can do the following:
-                                        // TvEpisode ep2 = show.Seasons[ep.Season].Episodes[ep.Number + 1];
-                                        // instead of the below:
-                                        foreach (TvEpisode epEnumerated in show.Seasons[ep.Season].Episodes)
-                                            if (epEnumerated.Number == ep.Number + 1)
-                                            {
-                                                ep2 = epEnumerated;
-                                                break;
-                                            }
-                                    }
-                                    else
-                                        continue;
+                                    foreach (TvEpisode epEnumerated in show.Episodes)
+                                        if (epEnumerated.Season == ep.Season && epEnumerated.DisplayNumber == ep.DisplayNumber + 1)
+                                        {
+                                            ep2 = epEnumerated;
+                                            break;
+                                        }
                                 }
-
-                                // Build desired path
-                                string builtPath = show.BuildFilePath(ep, ep2, Path.GetExtension(ep.File.FilePath));
-
-                                // Check if rename needed (or move within folder)
-                                if (ep.File.FilePath != builtPath)
-                                {
-                                    OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, ep.File.FilePath, builtPath, ep, ep2, FileCategory.TvVideo, null);
-                                    newItem.Check = System.Windows.Forms.CheckState.Checked;
-                                    if (!shows[i].IncludeInScan)
-                                        newItem.Category = FileCategory.Ignored;
-                                    newItem.Number = number++;
-                                    newItem.Show = show;
-                                    missingCheckItem.Add(newItem);
-                                }
+                                else
+                                    continue;
                             }
-                            else
-                                continue;
+
+                            // Build desired path
+                            string builtPath = show.BuildFilePath(ep, ep2, Path.GetExtension(ep.File.FilePath));
+
+                            // Check if rename needed (or move within folder)
+                            if (ep.File.FilePath != builtPath)
+                            {
+                                OrgItem newItem = new OrgItem(OrgStatus.Organization, OrgAction.Rename, ep.File.FilePath, builtPath, ep, ep2, FileCategory.TvVideo, null);
+                                newItem.Enable = true;
+                                if (!show.DoRenaming)
+                                    newItem.Category = FileCategory.Ignored;
+                                newItem.Number = number++;
+                                missingCheckItem.Add(newItem);
+                            }
                         }
                         else
                             continue;
+                    }
+                    else
+                        continue;
 
-                        // Add empty item for missing
-                        if (!found && ep.Aired && show.DoMissingCheck)
-                        {
-                            OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
-                            if (!shows[i].IncludeInScan)
-                                newItem.Category = FileCategory.Ignored;
-                            newItem.Number = number++;
-                            newItem.Show = show;
-                            missingCheckItem.Add(newItem);
-                        }
+                    // Add empty item for missing
+                    if (!found && ep.Aired && show.DoMissingCheck)
+                    {
+                        OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
+                        if (!show.DoRenaming)
+                            newItem.Category = FileCategory.Ignored;
+                        newItem.Number = number++;
+                        missingCheckItem.Add(newItem);
                     }
                 }
+
             }
 
             // Convert all TV folders to org folders
