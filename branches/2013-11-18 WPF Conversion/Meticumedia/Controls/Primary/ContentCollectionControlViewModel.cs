@@ -443,13 +443,18 @@ namespace Meticumedia.Controls
             if (contentLoaded)
                 UpdateGenresComboBoxSafe();
 
-            if (App.Current.Dispatcher.CheckAccess())
-                UpdateContents(e);
-            else
-                App.Current.Dispatcher.Invoke((Action)delegate
-                {
+            // Invoke can result in dead-lock if another app thread if waiting for collection.ContentLock
+            ContentCollection collection = sender as ContentCollection;
+            lock (collection.ContentLock)
+            {
+                if (App.Current.Dispatcher.CheckAccess())
                     UpdateContents(e);
-                });
+                else
+                    App.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        UpdateContents(e);
+                    });
+            }
         }
 
         private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -508,12 +513,12 @@ namespace Meticumedia.Controls
             {
                 if (this.SelectedContent is Movie)
                 {
-                    (this.SelectedContent as Movie).Clone(cew.Results as Movie, false);
+                    (this.SelectedContent as Movie).CloneAndHandlePath(cew.Results as Movie, false);
                     Organization.Movies.Save();
                 }
                 else
                 {
-                    (this.SelectedContent as TvShow).Clone(cew.Results as TvShow, false);
+                    (this.SelectedContent as TvShow).CloneAndHandlePath(cew.Results as TvShow, false);
                     Organization.Shows.Save();
                 }
             }

@@ -27,8 +27,14 @@ Store previous scan results to be reused if needed (reuse if category the same)
 
 Periodically check for changes to folder structure in root folder for changes
 
-Check that file part not in move name (e.g. rush hour 2 destination is rush hour 2 [2001][2])
+Check that file part not in movie name (e.g. rush hour 2 destination is rush hour 2 [2001][2])
 
-log control need live sorting
+log control needs live sorting
 
-queue context menu
+queue context menu & button images..
+
+minimum time in queue in general settings
+
+logs saving to temp file then copied?
+
+setup wizard

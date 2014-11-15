@@ -328,7 +328,7 @@ namespace Meticumedia.Classes
                             }
 
                         // If doesn't exist add it to searches
-                        if (!exists)
+                        if (!exists && !string.IsNullOrWhiteSpace(results.SimplifiedString))
                             searches.Add(results);
                     }
                 }
@@ -495,7 +495,7 @@ namespace Meticumedia.Classes
                     result.Mods = baseMods;
 
                     // Verify year in result matches year from folder (if any)
-                    if (year != -1 && Math.Abs(year - searchResult.DatabaseYear) > 3)
+                    if (year != -1 && Math.Abs(year - searchResult.DatabaseYear) > 2)
                         continue;
 
                     // Check if search string match results string

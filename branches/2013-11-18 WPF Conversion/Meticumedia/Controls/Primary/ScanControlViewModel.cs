@@ -305,6 +305,20 @@ namespace Meticumedia.Controls
         }
         private bool fast = false;
 
+        public bool ReuseResults
+        {
+            get
+            {
+                return reuseResults;
+            }
+            set
+            {
+                reuseResults = value;
+                OnPropertyChanged(this, "ReuseResults");
+            }
+        }
+        private bool reuseResults = true;
+
         public ScanType RunType
         {
             get
@@ -560,7 +574,7 @@ namespace Meticumedia.Controls
             switch (scanType)
             {
                 case ScanType.Directory:
-                    directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false, (bool)args[2]);
+                    directoryScan.RunScan((List<OrgFolder>)args[1], queuedItems, false, false, (bool)args[2], (bool)args[3]);
                     return;
                 case ScanType.TvMissing:
                     scanResults = tvMissingScan.RunScan((List<Content>)args[1], queuedItems, (bool)args[2]);
@@ -580,7 +594,6 @@ namespace Meticumedia.Controls
 
             App.Current.Dispatcher.Invoke((Action)delegate
             {
-                this.OrgItems.Clear();
                 foreach (OrgItem item in scanResults)
                     this.OrgItems.Add(item);
             });
@@ -645,10 +658,8 @@ namespace Meticumedia.Controls
         {
             if (!scanRunning)
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
-                {
-                    this.RunButtonText = "Stop";
-                });
+                this.RunButtonText = "Stop";
+                this.OrgItems.Clear();
             }
             else
             {
@@ -716,7 +727,7 @@ namespace Meticumedia.Controls
             if (!scanWorker.IsBusy)
             {
                 currentScan = this.RunType;
-                scanWorker.RunWorkerAsync(new object[] { currentScan, list, fast });
+                scanWorker.RunWorkerAsync(new object[] { currentScan, list, this.Fast, this.ReuseResults });
                 lastRunScan = currentScan;
             }
             else

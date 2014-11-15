@@ -526,7 +526,7 @@ namespace Meticumedia.Classes
         protected Content(Content content)
             : this()
         {
-            Clone(content, true);
+            CloneAndHandlePath(content, true);
         }
 
         #endregion
@@ -553,12 +553,18 @@ namespace Meticumedia.Classes
                 OnPropertyChanged("DisplayGenres");
         }
 
+        public virtual void Clone(Content content)
+        {
+            CloneAndHandlePath(content, true, false);
+        }
+
         /// <summary>
         /// Copies properties from another instance into this instance.
         /// </summary>
         /// <param name="content">Instance to copy properties from</param>
         /// <param name="replacePath">Whether path related properties should be cloned or not</param>
-        protected void Clone(Content content, bool replacePath)
+        /// <param name="handleEmptyPath">Whether to build path if one being cloned is empty</param>
+        public virtual void CloneAndHandlePath(Content content, bool replacePath, bool handleEmptyPath = true)
         {
             this.ContentType = content.ContentType;
             this.UserName = content.UserName;
@@ -576,13 +582,21 @@ namespace Meticumedia.Classes
 
             if (replacePath)
             {
-                if (!string.IsNullOrEmpty(content.RootFolder))
-                    this.RootFolder = content.RootFolder;
+                if (handleEmptyPath)
+                {
+                    if (!string.IsNullOrEmpty(content.RootFolder))
+                        this.RootFolder = content.RootFolder;
 
-                if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
-                    this.Path = content.Path;
+                    if (!string.IsNullOrEmpty(content.Path) && content.RootFolder != content.Path)
+                        this.Path = content.Path;
+                    else
+                        this.Path = this.BuildFolderPath();
+                }
                 else
-                    this.Path = this.BuildFolderPath();
+                {
+                    this.RootFolder = content.RootFolder;
+                    this.Path = content.Path;
+                }
             }
 
             this.Id = content.Id;
@@ -672,7 +686,7 @@ namespace Meticumedia.Classes
         private string BuildNameRegularExpresionString(bool removeWhitespace, string showname)
         {
             // Initialize string
-            string showReStr = string.Empty;
+            string showReStr = @"(?:^|\W+)";
 
             // Get simplified name
             showname = FileHelper.SimplifyFileName(showname, true, removeWhitespace, true);
@@ -717,7 +731,10 @@ namespace Meticumedia.Classes
                         if (showWords.Length > 2)
                             showReStr += @")?";
 
-                        showReStr += @"\W*";
+                        if (i == showWords.Length - 1)
+                            showReStr += @"(?:\W+|$)";
+                        else
+                            showReStr += @"\W*";
                     }
 
                 }
@@ -870,9 +887,8 @@ namespace Meticumedia.Classes
                         this.DatabaseSelection = dbSel;
                         break;
                     case XmlElements.Name:
-                        this.DatabaseName = value;
-                        if (!string.IsNullOrWhiteSpace(value))
-                            this.UseDatabaseName = false;
+                        if (!string.IsNullOrEmpty(value))
+                            this.DatabaseName = value;
                         break;
                     case XmlElements.UseDatabaseName:
                         bool useDbName;
@@ -880,7 +896,8 @@ namespace Meticumedia.Classes
                             this.UseDatabaseName = useDbName;
                         break;
                     case XmlElements.DataBaseName:
-                        this.DatabaseName = value;
+                        if (!string.IsNullOrEmpty(value))
+                            this.DatabaseName = value;
                         break;
                     case XmlElements.UserName:
                         this.UserName = value;

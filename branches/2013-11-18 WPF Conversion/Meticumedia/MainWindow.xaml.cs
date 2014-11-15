@@ -45,7 +45,7 @@ namespace Meticumedia
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("meticumedia v0.9.0 (alpha)\nCopyright © 2013", "About", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("meticumedia v0.9.1 (alpha)\nCopyright © 2013", "About", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void Donate_Click(object sender, RoutedEventArgs e)

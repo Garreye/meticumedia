@@ -184,6 +184,21 @@ namespace Meticumedia.Windows
             }
         }
 
+        private ICommand newTvShowCommand;
+        public ICommand NewTvShowCommand
+        {
+            get
+            {
+                if (newTvShowCommand == null)
+                {
+                    newTvShowCommand = new RelayCommand(
+                        param => this.NewTvShow()
+                    );
+                }
+                return newTvShowCommand;
+            }
+        }
+
         #endregion
 
         #region Constructor
@@ -202,6 +217,19 @@ namespace Meticumedia.Windows
             // Create view model for movie content editor
             this.MovieViewModel = new ContentEditorControlViewModel(this.Item.Movie, true);
             this.MovieViewModel.Content.PropertyChanged += ItemSubProperty_PropertyChanged;
+            ContentRootFolder movieFolder;
+            if (string.IsNullOrEmpty(this.Item.Movie.RootFolder) && Settings.GetDefaultMovieFolder(out movieFolder))
+                this.Item.Movie.RootFolder = movieFolder.FullPath;
+
+            // tv number update
+            int season, episode1, episode2;
+            if (this.Item.TvEpisode.DatabaseNumber == -1 && FileHelper.GetEpisodeInfo(item.SourcePath, string.Empty, out season, out episode1, out episode2))
+            {
+                this.Item.TvEpisode.Season = season;
+                this.Item.TvEpisode.DatabaseNumber = episode1;
+                this.Item.TvEpisode2.Season = season;
+                this.Item.TvEpisode2.DatabaseNumber = episode2;
+            }
 
             // Setup avilable shows
             this.Shows = new ObservableCollection<TvShow>();
@@ -263,6 +291,25 @@ namespace Meticumedia.Windows
                 return;
 
             this.Item.DestinationPath = ofd.FileName;
+        }
+
+        private void NewTvShow()
+        {
+            ContentEditorWindow cew = new ContentEditorWindow(new TvShow());
+            cew.ShowDialog();
+
+            if (cew.Results != null)
+            {
+                TvShow show = cew.Results as TvShow;
+                show.UpdateInfoFromDatabase();
+                ContentRootFolder folder;
+                Settings.GetDefaultTvFolder(out folder);
+                show.RootFolder = folder.FullPath;
+                show.Path = show.BuildFolderPath();
+                this.Shows.Add(show);
+                this.Item.TvEpisode.Show = show; 
+            }
+            
         }
 
         #endregion

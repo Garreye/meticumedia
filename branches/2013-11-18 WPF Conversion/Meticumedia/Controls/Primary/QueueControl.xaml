@@ -53,7 +53,13 @@
             <Button Grid.Column="9" Content="Clear" MinWidth="80" Padding="3" Margin="3" Command="{Binding ClearCommand}"/>
         </Grid>
 
-        <wpfr:BindableMultiSelectDataGrid Grid.Row="2" ItemsSource="{Binding QueueItems}" SelectedItems="{Binding Path=SelectedQueueItems, Mode=OneWayToSource}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" >
+        <wpfr:BindableMultiSelectDataGrid x:Name="dgQueue" Grid.Row="2" ItemsSource="{Binding OrgItemsCollection}" SelectedItems="{Binding Path=SelectedOrgItems, Mode=OneWayToSource}" AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" >
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Foreground" Value="{Binding ActionColor}"/>
+                </Style>
+            </DataGrid.RowStyle>
+            
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Source" Binding="{Binding SourcePath}" />
                 <DataGridTextColumn Header="Action" Binding="{Binding Action}" />

@@ -52,7 +52,10 @@ namespace Meticumedia.Classes
         /// Update list of tv episodes currently in scan directories
         /// </summary>
         public static void StartUpdateTimer()
-        {            
+        {
+            return;
+            
+
             // Start timer to do update periodically
             updateTimer.Elapsed += new System.Timers.ElapsedEventHandler(scanDirUpdateTimer_Elapsed);
             updateTimer.Enabled = true;
@@ -72,7 +75,7 @@ namespace Meticumedia.Classes
             // Run scan to look for TV files
             if (dirScanSearch)
             {
-                scan.RunScan(Settings.ScanDirectories.ToList(), new List<OrgItem>(), true, true, true);
+                scan.RunScan(Settings.ScanDirectories.ToList(), new List<OrgItem>(), true, true, true, true);
                 Items = scan.Items;
             }
 
@@ -94,8 +97,12 @@ namespace Meticumedia.Classes
         /// <param name="e"></param>
         static void scanDirUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            updateTimer.Interval = 120000;
+            // Disable and re-enable in case dir has lots of files and scan takes a while
+            updateTimer.Enabled = false;
+            updateTimer.Interval = 30000;
             DoUpdate(true);
+            updateTimer.Enabled = true;
+            
         }
 
         #endregion

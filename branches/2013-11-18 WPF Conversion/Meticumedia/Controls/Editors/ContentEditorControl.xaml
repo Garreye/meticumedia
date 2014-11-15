@@ -78,17 +78,21 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" Text="{Binding SearchString}" Margin="3" />
+                    <TextBox Grid.Column="0" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}" Margin="3" >
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding DatabaseSearchCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
                     <Button Grid.Column="1" Content="Search" Command="{Binding DatabaseSearchCommand}" Padding="5,0" Margin="3" />
                     <Button Grid.Column="2" Content="Simplify" Command="{Binding SearchStringSimplifyCommand}" Padding="5,0" Margin="3" />
                 </Grid>
 
-                <DataGrid Grid.Row="2" ItemsSource="{Binding SearchResults}" SelectedItem="{Binding SelectedSearchContent}" AutoGenerateColumns="False" Visibility="{Binding SearchResultsVisibility}">
+                <DataGrid Grid.Row="2" ItemsSource="{Binding SearchResults}" SelectedItem="{Binding SelectedSearchContent}" AutoGenerateColumns="False" Visibility="{Binding SearchResultsVisibility}" wpfr:Commands.DataGridDoubleClickCommand="{Binding ApplyDatabaseIdCommand}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
-                        <DataGridTextColumn Header="Year" Binding="{Binding DisplayYear}" />
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" />
-                        <DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
+                        <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Year" Binding="{Binding DisplayYear}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Overview" Binding="{Binding Overview}" IsReadOnly="True" />
                     </DataGrid.Columns>
                 </DataGrid>
 

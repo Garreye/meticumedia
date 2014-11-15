@@ -322,18 +322,16 @@ namespace Meticumedia.Classes
         private static readonly string FILE_TYPE_XML = "FileType";
 
         /// <summary>
-        /// Name for auto file move setup XML element.
-        /// </summary>
-        private static readonly string AUTO_MOVE_SETUP_XML = "FileType";
-
-        /// <summary>
         /// Save settings to XML.
         /// </summary>
         public static void Save(bool triggerModifiedEvent = true)
         {
             string path = Path.Combine(Organization.GetBasePath(true), ROOT_XML + ".xml");
 
-            using (XmlTextWriter xw = new XmlTextWriter(path, Encoding.ASCII))
+            // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
+            string tempPath = Path.Combine(Organization.GetBasePath(true), ROOT_XML + "_TEMP.xml");
+
+            using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
             {
                 xw.Formatting = Formatting.Indented;
 
@@ -393,6 +391,14 @@ namespace Meticumedia.Classes
 
                 xw.WriteEndElement();
             }
+
+            // Delete previous save data
+            if (File.Exists(path))
+                File.Delete(path);
+
+            // Move tempoarary save file to default
+            File.Move(tempPath, path);
+
             if (triggerModifiedEvent)
                 OnSettingsModified(false);
         }

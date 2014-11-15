@@ -984,7 +984,7 @@ namespace Meticumedia.Classes
             DatabaseOverview, UserOverview, UseDatabaseOverview, DatabaseAirDate, UserAirDate, UseDatabaseAirDate,
 
             // Deprecated
-             Name, NameIsUderDefined, AirDate, Overview
+             Name, NameIsUderDefined, AirDate, Overview, Number
         }
 
         /// <summary>
@@ -1072,6 +1072,7 @@ namespace Meticumedia.Classes
                     case XmlElements.NameIsUderDefined:
                     case XmlElements.AirDate:
                     case XmlElements.Overview:
+                    case XmlElements.Number:
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -1219,6 +1220,11 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.Overview:
                         this.DatabaseOverview = value;
+                        break;
+                    case XmlElements.Number:
+                        int num;
+                        if (int.TryParse(value, out num))
+                            this.DatabaseNumber = num;
                         break;
                 }
             }

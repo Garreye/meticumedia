@@ -191,7 +191,7 @@ namespace Meticumedia.Classes
                 if (!string.IsNullOrEmpty(value))
                 {
                     // Add child
-                    ChildNodes.Add(new JsonNode(name, value));
+                    ChildNodes.Add(new JsonNode(name.Trim(), value));
                 }
 
                 // Clear child build variables

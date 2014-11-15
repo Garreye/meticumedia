@@ -329,7 +329,7 @@ namespace Meticumedia.Classes
                 OnPropertyChanged("Category");
             }
         }
-        private FileCategory category;
+        private FileCategory category = FileCategory.Unknown;
 
         /// <summary>
         /// Enable for the item in the list of item to be organized.
@@ -1276,15 +1276,15 @@ namespace Meticumedia.Classes
 
                 // Pause here if needed to make queue not go crazy with refreshes
                 int time = (int)(DateTime.Now - startTime).TotalMilliseconds;
-                if (time < 25)
-                    Thread.Sleep(25 - time);
+                if (time < 5)
+                    Thread.Sleep(5 - time);
 
                 // Check if successful
                 if (this.ActionSucess)
                 {
                     // Log action
                     Organization.ActionLog.Add(new OrgItem(this));
-                    Organization.SaveLog();
+                    Organization.SaveActionLog();
                     
                     // Cleanup folder (delete empty sub-folders)
                     if ((this.Category & FileCategory.Folder) == 0)
@@ -1695,6 +1695,9 @@ namespace Meticumedia.Classes
                 case FileCategory.AutoMove | FileCategory.Folder:
                     this.DestinationPath = Path.Combine(this.AutoMoveSetup.DestinationPath, Path.GetFileName(this.SourcePath));
                     break;
+                case FileCategory.Empty:
+                    this.DestinationPath = string.Empty;
+                    break;
                 default:
                     throw new Exception("Unknown file category!");
             }
@@ -1775,13 +1778,13 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Action, SourcePath, DestinationPath, Category, ActionTime };
+        private enum XmlElements { Action, SourcePath, DestinationPath, Category, ActionTime, TvEpisode1, TvEpisode2, TvShow, Movie };
 
         /// <summary>
         /// Adds OrgItem properties to XML file.
         /// </summary>
         /// <param name="xw">XML writer to add to</param>
-        public void Save(XmlWriter xw)
+        public void Save(XmlWriter xw, bool fullDetails)
         {
             // Start item
             xw.WriteStartElement(ROOT_XML);
@@ -1806,6 +1809,38 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.ActionTime:
                         value = this.ActionTime.ToString();
+                        break;
+                    case XmlElements.TvEpisode1:
+                        if (fullDetails && this.TvEpisode != null)
+                        {
+                            xw.WriteStartElement(element.ToString());
+                            this.TvEpisode.Save(xw);
+                            xw.WriteEndElement();
+                        }
+                        else
+                            continue;
+                        break;
+                    case XmlElements.TvEpisode2:
+                        if (fullDetails && this.TvEpisode2 != null)
+                        {
+                            xw.WriteStartElement(element.ToString());
+                            this.TvEpisode2.Save(xw);
+                            xw.WriteEndElement();
+                        }
+                        else
+                            continue;
+                        break;
+                    case XmlElements.TvShow:
+                        if (fullDetails && this.TvEpisode != null && this.TvEpisode.Show != null)
+                            this.TvEpisode.Show.Save(xw);
+                        else
+                            continue;
+                        break;
+                    case XmlElements.Movie:
+                        if (fullDetails && this.Movie != null)
+                            this.Movie.Save(xw);
+                        else
+                            continue;
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -1864,6 +1899,35 @@ namespace Meticumedia.Classes
                         DateTime actionTime;
                         DateTime.TryParse(value, out actionTime);
                         this.ActionTime = actionTime;
+                        break;
+                    case XmlElements.TvEpisode1:
+                        this.TvEpisode.Load(propNode.ChildNodes[0]);
+                        break;
+                    case XmlElements.TvEpisode2:
+                        this.TvEpisode2.Load(propNode.ChildNodes[0]);
+                        break;
+                    case XmlElements.TvShow:
+                        if (this.TvEpisode != null)
+                        {
+                            this.TvEpisode.Show.Load(propNode);
+
+                            bool showMatch = false;
+                            foreach(TvShow show in Organization.Shows)
+                                if (show.DatabaseSelection == this.TvEpisode.Show.DatabaseSelection && show.Id == this.TvEpisode.Show.Id)
+                                {
+                                    this.TvEpisode.Show = show;
+                                    showMatch = true;
+                                    break;
+                                }
+
+                            if (!showMatch)
+                                this.IsNewShow = true;
+
+                            this.TvEpisode2.Show = this.TvEpisode.Show;
+                        }
+                        break;
+                    case XmlElements.Movie:
+                        this.Movie.Load(propNode);
                         break;
                 }
             }

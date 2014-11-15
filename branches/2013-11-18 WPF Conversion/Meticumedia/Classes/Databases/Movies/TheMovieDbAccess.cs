@@ -30,7 +30,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// URL for accessing database
         /// </summary>
-        private string BASE_API_URL = "http://private-b13e-themoviedb.apiary.io/3/";
+        private string BASE_API_URL = "https://api.themoviedb.org/3/";
 
         protected override DatabaseAccess.MirrorType SearchMirrorType { get { return MirrorType.Json; } }
 

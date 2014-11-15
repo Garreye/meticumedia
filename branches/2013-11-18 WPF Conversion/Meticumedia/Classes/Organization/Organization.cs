@@ -43,6 +43,16 @@ namespace Meticumedia.Classes
         public static object ActionLogLock = new object();
 
         /// <summary>
+        /// Contains previously suggested actions for directory scan.
+        /// </summary>
+        public static ObservableCollection<OrgItem> DirScanLog = new ObservableCollection<OrgItem>();
+
+        /// <summary>
+        /// Lock for accessing DirScanLog
+        /// </summary>
+        public static object DirScanLogLock = new object();
+
+        /// <summary>
         /// All available TV genres
         /// </summary>
         public static GenreCollection AllTvGenres = new GenreCollection(GenreCollection.CollectionType.Global | GenreCollection.CollectionType.Tv);
@@ -67,6 +77,16 @@ namespace Meticumedia.Classes
         /// Action Log XML root element string
         /// </summary>
         private static readonly string ACTION_LOG_XML = "ActionLog";
+
+        /// <summary>
+        /// Lock for accessing scan dir log save file
+        /// </summary>
+        public static object DirScanLogFileLock = new object();
+
+        /// <summary>
+        /// Scan dir log XML root element string
+        /// </summary>
+        private static readonly string DIR_SCAN_LOG_XML = "DirScanLog";
 
         #endregion
 
@@ -139,23 +159,76 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Saves action log to XML
         /// </summary>
-        public static void SaveLog()
+        public static void SaveActionLog()
         {
             // Action Logs
             string path = Path.Combine(GetBasePath(true), ACTION_LOG_XML + ".xml");
+
+            // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
+            string tempPath = Path.Combine(Organization.GetBasePath(true), ACTION_LOG_XML + "_TEMP.xml");
+
             lock (ActionLogLock)
             {
                 lock (ActionLogFileLock)
-                    using (XmlTextWriter xw = new XmlTextWriter(path, Encoding.ASCII))
+                {
+                    using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
                     {
                         xw.Formatting = Formatting.Indented;
 
                         xw.WriteStartElement(ACTION_LOG_XML);
 
                         foreach (OrgItem action in ActionLog)
-                            action.Save(xw);
+                            action.Save(xw, false);
                         xw.WriteEndElement();
                     }
+
+                    // Delete previous save data
+                    if (File.Exists(path))
+                        File.Delete(path);
+
+                    // Move tempoarary save file to default
+                    File.Move(tempPath, path);
+                }
+            }
+        }
+
+         /// <summary>
+        /// Saves directory scan log to XML
+        /// </summary>
+        public static void SaveDirScanLog()
+        {
+            // Directory scan Logs
+            string path = Path.Combine(GetBasePath(true), DIR_SCAN_LOG_XML + ".xml");
+
+            // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
+            string tempPath = Path.Combine(Organization.GetBasePath(true), ACTION_LOG_XML + "_TEMP.xml");
+
+            lock (DirScanLogLock)
+            {
+                lock (DirScanLogFileLock)
+                {
+                    using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
+                    {
+                        xw.Formatting = Formatting.Indented;
+
+                        xw.WriteStartElement(DIR_SCAN_LOG_XML);
+
+                        foreach (OrgItem action in DirScanLog)
+                            action.Save(xw, true);
+                        xw.WriteEndElement();
+                    }
+
+                    // Delete previous save data
+                    if (File.Exists(path))
+                        File.Delete(path);
+
+                    // Move tempoarary save file to default
+                    try
+                    {
+                        File.Move(tempPath, path);
+                    }
+                    catch { }
+                }
             }
         }
 
@@ -178,6 +251,9 @@ namespace Meticumedia.Classes
 
             // Action Log
             LoadActionLogAsync();
+
+            // Dir scan log
+            LoadScanDirLogAsync();
         }
 
         private static bool DoUpdating = true;
@@ -291,6 +367,59 @@ namespace Meticumedia.Classes
             catch { }
 
             OnActionLogLoadComplete();
+        }
+
+                /// <summary>
+        /// Asynchronously load action log from XML
+        /// </summary>
+        private static void LoadScanDirLogAsync()
+        {
+            BackgroundWorker scanDirLogLoadWorker = new BackgroundWorker();
+            scanDirLogLoadWorker.DoWork += new DoWorkEventHandler(LoadScanDirLog);
+            scanDirLogLoadWorker.RunWorkerAsync();
+        }
+
+        /// <summary>
+        /// Action log loading work
+        /// </summary>
+        public static void LoadScanDirLog(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                string path = Path.Combine(GetBasePath(false), DIR_SCAN_LOG_XML + ".xml");
+                List<OrgItem> loadScanDirLog = new List<OrgItem>();
+                if (File.Exists(path))
+                {
+                    lock (DirScanLogFileLock)
+                    {
+                        // Load XML
+                        XmlTextReader reader = new XmlTextReader(path);
+                        XmlDocument xmlDoc = new XmlDocument();
+                        xmlDoc.Load(reader);
+
+                        // Load movies data
+
+                        XmlNodeList logNodes = xmlDoc.DocumentElement.ChildNodes;
+                        for (int i = 0; i < logNodes.Count; i++)
+                        {
+                            OrgItem item = new OrgItem();
+                            if (item.Load(logNodes[i]))
+                                loadScanDirLog.Add(item);
+                        }
+
+                        reader.Close();
+                    }
+
+                    lock (DirScanLogLock)
+                    {
+                        DirScanLog.Clear();
+                        foreach (OrgItem item in loadScanDirLog)
+                            DirScanLog.Add(item);
+                    }
+                }
+                
+            }
+            catch { }
         }
 
         #endregion
@@ -520,22 +649,44 @@ namespace Meticumedia.Classes
         /// Adds item to log.
         /// </summary>
         /// <param name="item"></param>
-        public static void AddLogItem(OrgItem item)
+        public static void AddActionLogItem(OrgItem item)
         {
             lock (ActionLogLock)
                 ActionLog.Insert(0, item);
-            SaveLog();
+            SaveActionLog();
         }
 
         /// <summary>
         /// Removes item from log.
         /// </summary>
         /// <param name="index"></param>
-        public static void RemoveLogItem(int index)
+        public static void RemoveActionLogItem(int index)
         {
             lock (ActionLogLock)
                 ActionLog.RemoveAt(index);
-            SaveLog();
+            SaveActionLog();
+        }
+
+        /// <summary>
+        /// Adds item to log.
+        /// </summary>
+        /// <param name="item"></param>
+        public static void AddDirScanLogItem(OrgItem item)
+        {
+            lock (DirScanLogLock)
+                DirScanLog.Insert(0, item);
+            SaveDirScanLog();
+        }
+
+        /// <summary>
+        /// Removes item from log.
+        /// </summary>
+        /// <param name="index"></param>
+        public static void RemoveDirScanLogItem(int index)
+        {
+            lock (DirScanLogLock)
+                DirScanLog.RemoveAt(index);
+            SaveDirScanLog();
         }
 
         #endregion
