@@ -52,7 +52,7 @@ namespace Meticumedia.Controls
         /// <summary>
         /// Items that are currently in the queue
         /// </summary>
-        private List<OrgItem> queuedItems;
+        private List<OrgItem> queuedItems = new List<OrgItem>();
 
         /// <summary>
         /// Last run scan type.

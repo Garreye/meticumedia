@@ -212,6 +212,17 @@ namespace Meticumedia.Classes
             return base.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            // Add each genre name, followed by semicolon and space
+            string genreStr = string.Empty;
+            foreach (string genre in this)
+                genreStr += genre + "; ";
+
+            // Return string with last semicolon and space removed
+            return genreStr.TrimEnd(';', ' ');
+        }
+
         #endregion
     }
 }

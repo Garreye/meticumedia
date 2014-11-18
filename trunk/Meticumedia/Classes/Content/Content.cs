@@ -25,7 +25,6 @@ namespace Meticumedia.Classes
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-
         /// <summary>
         /// Triggers PropertyChanged event.
         /// </summary>
@@ -71,7 +70,6 @@ namespace Meticumedia.Classes
                 OnPropertyChanged("DatabaseSelection");
             }
         }
-
         private int databaseSelection = (int)Settings.General.DefaultTvDatabase;
 
         /// <summary>
@@ -245,9 +243,14 @@ namespace Meticumedia.Classes
             {
                 overview = value;
                 OnPropertyChanged("Overview");
+                OnPropertyChanged("OverviewConcise");
             }
         }
+        private string overview = string.Empty;
 
+        /// <summary>
+        /// Overview with limited length for displaying in UI
+        /// </summary>
         public string OverviewConcise
         {
             get
@@ -258,8 +261,6 @@ namespace Meticumedia.Classes
                     return overview.Substring(0, 107) + "...";
             }
         }
-
-        private string overview = string.Empty;
         
         /// <summary>
         /// Genres of content from database
@@ -410,6 +411,9 @@ namespace Meticumedia.Classes
 
         private int id = UNKNOWN_ID;
 
+        /// <summary>
+        /// Name of database for display in UI
+        /// </summary>
         public string DatabaseString
         {
             get
@@ -553,6 +557,10 @@ namespace Meticumedia.Classes
                 OnPropertyChanged("DisplayGenres");
         }
 
+        /// <summary>
+        /// Create clone of another instance.
+        /// </summary>
+        /// <param name="content"></param>
         public virtual void Clone(Content content)
         {
             CloneAndHandlePath(content, true, false);
@@ -615,21 +623,6 @@ namespace Meticumedia.Classes
         }
 
         /// <summary>
-        /// Builds list of genres into a single concatonated string.
-        /// </summary>
-        /// <returns>All genres in single string</returns>
-        public string GetGenresString()
-        {
-            // Add each genre name, followed by semicolon and space
-            string genreStr = string.Empty;
-            foreach (string genre in this.DatabaseGenres)
-                genreStr += genre + "; ";
-
-            // Return string with last semicolon and space removed
-            return genreStr.TrimEnd(';', ' ');
-        }
-
-        /// <summary>
         /// Attempts to find matches between a file name and name of this instance
         /// </summary>
         /// <param name="fileName">File name to match to</param>
@@ -682,6 +675,8 @@ namespace Meticumedia.Classes
         ///     -The name without consonents (e.g. "BttlstrGlctc")
         /// "and"/"&" are set to optional for expression
         /// </summary>
+        /// <param name="removeWhitespace">Whether to remove whitespace from expresion</param>
+        /// <param name="showname">Name of show to build expression for</param>
         /// <returns>Regular expresion string for matching to content</returns>
         private string BuildNameRegularExpresionString(bool removeWhitespace, string showname)
         {

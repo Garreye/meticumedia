@@ -52,10 +52,7 @@ namespace Meticumedia.Classes
         /// Update list of tv episodes currently in scan directories
         /// </summary>
         public static void StartUpdateTimer()
-        {
-            return;
-            
-
+        {         
             // Start timer to do update periodically
             updateTimer.Elapsed += new System.Timers.ElapsedEventHandler(scanDirUpdateTimer_Elapsed);
             updateTimer.Enabled = true;

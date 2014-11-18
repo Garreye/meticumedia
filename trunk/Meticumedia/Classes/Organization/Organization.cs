@@ -165,7 +165,7 @@ namespace Meticumedia.Classes
             string path = Path.Combine(GetBasePath(true), ACTION_LOG_XML + ".xml");
 
             // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
-            string tempPath = Path.Combine(Organization.GetBasePath(true), ACTION_LOG_XML + "_TEMP.xml");
+            string tempPath = Path.Combine(Organization.GetBasePath(true), ACTION_LOG_XML + "_TEMP" + Guid.NewGuid().ToString() + ".xml");
 
             lock (ActionLogLock)
             {
@@ -557,6 +557,7 @@ namespace Meticumedia.Classes
                 if (!results)
                     break;
             }
+            
 
             // Clear cancel flag
             SetUpdateCancel(contentType, false);            
@@ -569,7 +570,7 @@ namespace Meticumedia.Classes
         public static void UpdateRootFolders(ContentType type)
         {
             // Update each selected movie folder
-            List<ContentRootFolder> rootFolders = Settings.GetAllRootFolders(type);
+            List<ContentRootFolder> rootFolders = Settings.GetAllRootFolders(type, false);
             Organization.UpdateRootFolderContents(rootFolders, false);
         }
 

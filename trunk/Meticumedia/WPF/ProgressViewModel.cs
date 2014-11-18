@@ -71,32 +71,32 @@ namespace Meticumedia.Controls
 
         protected void UpdateProgressSafe(int progress, string msg, bool visible = true)
         {
-            lock (progLock)
+            try
             {
-                try
-                {
-                    if (App.Current == null)
-                        return;
+                if (App.Current == null)
+                    return;
 
-                    if (App.Current.Dispatcher.CheckAccess())
+                if (App.Current.Dispatcher.CheckAccess())
+                    UpdateProgress(progress, msg, visible);
+                else
+                    App.Current.Dispatcher.Invoke((Action)delegate
+                    {
                         UpdateProgress(progress, msg, visible);
-                    else
-                        App.Current.Dispatcher.Invoke((Action)delegate
-                        {
-                            UpdateProgress(progress, msg, visible);
-                        });
-                }
-                catch { }
+                    });
             }
+            catch { }
         }
 
         private object progLock = new object();
 
         private void UpdateProgress(int progress, string msg, bool visible)
         {
-            this.Progress = Math.Min(progress, 100);
-            this.ProgressMessage = msg + " (" + progress + "%)";
-            this.ProgressVisibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            lock (progLock)
+            {
+                this.Progress = Math.Min(progress, 100);
+                this.ProgressMessage = msg + " (" + progress + "%)";
+                this.ProgressVisibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         #endregion

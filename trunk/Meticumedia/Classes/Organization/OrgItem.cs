@@ -33,6 +33,14 @@ namespace Meticumedia.Classes
             }
         }
 
+        public event EventHandler ActionCompleted;
+
+        private void OnActionCompleted()
+        {
+            if (ActionCompleted != null)
+                ActionCompleted(this, new EventArgs());
+        }
+
         #endregion
 
         #region Static Properties
@@ -661,6 +669,31 @@ namespace Meticumedia.Classes
         }
 
         /// <summary>
+        /// Constructor for content folder move item.
+        /// </summary>
+        /// <param name="action">action to be performed</param>
+        /// <param name="sourceFile">the source path</param>
+        /// <param name="category">file's category</param>
+        /// <param name="movie">Movie object related to file</param>
+        /// <param name="destination">destination path</param>
+        /// <param name="scanDir">path to content folder of movie</param>
+        public OrgItem(OrgAction action, string sourceFile, Content content, string destination)
+            : this()
+        {
+            this.Progress = 0;
+            this.Action = action;
+            this.SourcePath = sourceFile;
+            if (content is Movie)
+                this.Movie = movie;
+            else
+                this.TvEpisode = new TvEpisode(content as TvShow);
+            this.DestinationPath = destination;
+            this.Category = FileCategory.Folder;
+            this.Enable = false;
+            this.Number = 0;
+        }
+
+        /// <summary>
         /// Constructor for copying item.
         /// </summary>
         /// <param name="item">item to be copied</param>
@@ -1240,8 +1273,12 @@ namespace Meticumedia.Classes
                             this.ActionComplete = CopyMoveFolder();
                             if (this.ActionComplete)
                             {
-                                this.Movie.Path = this.DestinationPath;
-                                this.TvEpisode.Show.Path = this.DestinationPath;
+                                Content content = GetContent();
+                                if (content != null)
+                                {
+                                    content.RootFolder = Path.GetDirectoryName(this.DestinationPath);
+                                    content.Path = this.DestinationPath;
+                                }
                             }
                         }
                         else
@@ -1250,7 +1287,26 @@ namespace Meticumedia.Classes
                         break;
                     case OrgAction.Delete:
                         if ((this.Category & FileCategory.Folder) > 0)
+                        {
                             DeleteDirectory(this.SourcePath);
+
+                            Content content = GetContent();
+                            if (content != null)
+                            {
+                                switch (content.ContentType)
+                                {
+                                    case ContentType.Movie:
+                                        Organization.Movies.Remove(content);
+                                        break;
+                                    case ContentType.TvShow:
+                                        Organization.Shows.Remove(content);
+                                        break;
+                                    default:
+                                        throw new Exception("Unknown content type");
+                                }
+                            }
+
+                        }
                         else
                             File.Delete(this.SourcePath);
                         this.ActionComplete = true;
@@ -1342,6 +1398,17 @@ namespace Meticumedia.Classes
 
             // Clear action running
             actionRunning = false;
+        }
+
+        private Content GetContent()
+        {
+            Content content = null;
+            if (this.Movie != null && !string.IsNullOrEmpty(this.Movie.DatabaseName))
+                content = this.Movie;
+            else if (this.TvEpisode != null && this.TvEpisode.Show != null && !string.IsNullOrEmpty(this.TvEpisode.Show.DatabaseName))
+                content = this.TvEpisode.Show;
+
+            return content;
         }
 
         /// <summary>

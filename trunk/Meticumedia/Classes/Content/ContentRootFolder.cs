@@ -98,6 +98,28 @@ namespace Meticumedia.Classes
         private bool isDefault = false;
 
         /// <summary>
+        /// Specified whether all sub directories should automatically be set as child root folder
+        /// </summary>
+        public bool AllSubFoldersChildRootFolder
+        {
+            get
+            {
+                return allSubFoldersChildRootFolder;
+            }
+            set
+            {
+                allSubFoldersChildRootFolder = value;
+                OnPropertyChanged("AllSubFoldersChildRootFolder");
+
+                if (value)
+                    SetAllSubDirsAsChildren();
+            }
+        }
+
+        private bool allSubFoldersChildRootFolder = false;
+
+
+        /// <summary>
         /// List of child root folders.
         /// </summary>
         public ObservableCollection<ContentRootFolder> ChildFolders
@@ -305,14 +327,14 @@ namespace Meticumedia.Classes
             switch (this.ContentType)
             {
                 case ContentType.Movie:
-                    foreach (Content content in Organization.Movies)
-                        foreach (string genre in content.DatabaseGenres)
+                    for(int i=0;i<Organization.Movies.Count;i++)
+                        foreach (string genre in Organization.Movies[i].DatabaseGenres)
                             if (!genres.Contains(genre))
                                 genres.Add(genre);
                     break;
                 case ContentType.TvShow:
-                    foreach (Content content in Organization.Shows)
-                        foreach (string genre in content.DatabaseGenres)
+                    for (int i = 0; i < Organization.Shows.Count; i++)
+                        foreach (string genre in Organization.Shows[i].DatabaseGenres)
                             if (!genres.Contains(genre))
                                 genres.Add(genre);
                     break;
@@ -321,6 +343,7 @@ namespace Meticumedia.Classes
             
             return genres;
         }
+
 
         /// <summary>
         /// Builds a list of content matching filter that is contained within a root folder
@@ -446,6 +469,80 @@ namespace Meticumedia.Classes
             return false;
         }
 
+        public void SetAllSubDirsAsChildren()
+        {
+            // Get sub-dirs
+            List<string> subDirs = GetFolderSubDirectoryNamesThatArentChildren();
+
+            // Remove child folders that no longer exists
+            for (int i = this.ChildFolders.Count - 1; i >= 0; i--)
+            {
+                bool exists = false;
+                foreach (string subDir in subDirs)
+                    if (System.IO.Path.Combine(this.FullPath, subDir) == this.ChildFolders[i].fullPath)
+                    {
+                        exists = true;
+                        break;
+                    }
+
+                if (!exists)
+                    this.ChildFolders.RemoveAt(i);
+            }
+
+            // Add all sub-dirs as children
+            foreach (string subDir in subDirs)
+            {
+                string newPath =  System.IO.Path.Combine(this.FullPath, subDir);
+                
+                bool exists = false;
+                foreach(ContentRootFolder child in this.ChildFolders)
+                   if(child.FullPath == newPath)
+                   {
+                       exists = true;
+                       break;
+                   }
+
+                if(!exists)
+                {
+                    ContentRootFolder newChild = new ContentRootFolder(this.ContentType, subDir, newPath);
+                    this.ChildFolders.Add(newChild);
+                }
+            }
+            
+        }
+
+        /// <summary>
+        /// Build sub-directories of content folder as string array of the paths.
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetFolderSubDirectoryNamesThatArentChildren()
+        {
+            if (!System.IO.Directory.Exists(this.FullPath))
+                return new List<string>();
+
+
+            List<string> nonChildSubDirs = new List<string>();
+            string[] subDirs = System.IO.Directory.GetDirectories(this.FullPath);
+            for (int i = 0; i < subDirs.Length; i++)
+            {                
+                bool exists = false;
+                foreach(ContentRootFolder child in this.ChildFolders)
+                    if (child.FullPath == subDirs[i])
+                   {
+                       exists = true;
+                       break;
+                   }
+
+                if (!exists)
+                {
+                    string[] dirs = subDirs[i].Split('\\');
+                    nonChildSubDirs.Add(dirs[dirs.Length - 1]);
+                }
+            }
+
+            return nonChildSubDirs;
+        }
+
         #endregion
 
         #region Updating
@@ -497,7 +594,7 @@ namespace Meticumedia.Classes
 
             // Remove shows that no longer exists
             if (!cancel)
-                content.RemoveMissing(this);
+                content.RemoveMissing();
 
             // Save changes
             //content.Sort();

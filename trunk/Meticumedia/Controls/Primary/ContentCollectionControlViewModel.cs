@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -25,6 +26,8 @@ namespace Meticumedia.Controls
         private ContentType contentType;
 
         private DateTime lastRefresh = DateTime.Now;
+
+        private ListBox contentListBox;
 
         #endregion
 
@@ -265,6 +268,22 @@ namespace Meticumedia.Controls
             }
         }
 
+        public Visibility MoveToVisibility
+        {
+            get
+            {
+                return moveToVisibility;
+            }
+            set
+            {
+                moveToVisibility = value;
+                OnPropertyChanged(this, "MoveToVisibility");
+            }
+        }
+        private Visibility moveToVisibility = Visibility.Collapsed;
+
+        public ObservableCollection<MenuItem> MoveRootFolderItems { get; set; }
+
         #endregion
 
         #region Commands
@@ -329,15 +348,34 @@ namespace Meticumedia.Controls
             }
         }
 
+        private ICommand deleteCommand;
+        public ICommand DeleteCommand
+        {
+            get
+            {
+                if (deleteCommand == null)
+                {
+                    deleteCommand = new RelayCommand(
+                        param => this.DeleteContent()
+                    );
+                }
+                return deleteCommand;
+            }
+        }
+
         #endregion
 
         #region Constructor
 
-        public ContentCollectionControlViewModel(ContentType contentType)
+        public ContentCollectionControlViewModel(ContentType contentType, ListBox contentListBox)
         {
             this.contentType = contentType;
+            this.contentListBox = contentListBox;
             this.FolderFilters = new ObservableCollection<string>();
             this.GenreFilters = new ObservableCollection<string>();
+            this.MoveRootFolderItems = new ObservableCollection<MenuItem>();
+
+            this.contentListBox.SelectionChanged += listView_SelectionChanged;
 
             this.ContentType = contentType;
             ContentCollection contentCollection = contentType == ContentType.TvShow ? Organization.Shows : Organization.Movies;
@@ -358,6 +396,7 @@ namespace Meticumedia.Controls
             this.Contents = new ObservableCollection<Content>();
             this.ContentsCollectionView = CollectionViewSource.GetDefaultView( this.Contents);
             this.ContentsCollectionView.Filter = new Predicate<object>(ContentFilter);
+            this.ContentsCollectionView.SortDescriptions.Add(new SortDescription("DisplayName", ListSortDirection.Ascending));
 
             // Set properties to trigger live updating
             ICollectionViewLiveShaping liveCollection = this.ContentsCollectionView as ICollectionViewLiveShaping;
@@ -367,11 +406,22 @@ namespace Meticumedia.Controls
             liveCollection.LiveFilteringProperties.Add("DisplayName");
             liveCollection.LiveFilteringProperties.Add("Watched");
             liveCollection.IsLiveFiltering = true;
+
+            liveCollection.IsLiveSorting = true;
+            liveCollection.LiveSortingProperties.Add("DisplayName");
         }
+
+        
 
         #endregion
 
         #region Event Handlers
+
+        private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            OnPropertyChanged(this, "SingleItemSelectionVisibility");
+            UpdateRootFolderItems();
+        }
 
         /// <summary>
         /// When settings are modified the folders are updated
@@ -445,38 +495,40 @@ namespace Meticumedia.Controls
 
             // Invoke can result in dead-lock if another app thread if waiting for collection.ContentLock
             ContentCollection collection = sender as ContentCollection;
-            lock (collection.ContentLock)
-            {
-                if (App.Current.Dispatcher.CheckAccess())
-                    UpdateContents(e);
-                else
-                    App.Current.Dispatcher.Invoke((Action)delegate
-                    {
-                        UpdateContents(e);
-                    });
-            }
+            
+            if (App.Current.Dispatcher.CheckAccess())
+                UpdateContents(e, collection);
+            else
+                App.Current.Dispatcher.Invoke((Action)delegate
+                {
+                    UpdateContents(e, collection);
+                });
+            
         }
 
-        private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e, ContentCollection collection)
         {
-            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+            lock (collection.ContentLock)
             {
-                Contents.Clear();
-                contentViewModels.Clear();
-            }
+                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+                {
+                    Contents.Clear();
+                    contentViewModels.Clear();
+                }
 
-            if (e.OldItems != null)
-                foreach (Content remItem in e.OldItems)
-                {
-                    Contents.Remove(remItem);
-                    contentViewModels.Remove(remItem);
-                }
-            if (e.NewItems != null)
-                foreach (Content addItem in e.NewItems)
-                {
-                    Contents.Add(addItem);
-                    //contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
-                }
+                if (e.OldItems != null)
+                    foreach (Content remItem in e.OldItems)
+                    {
+                        Contents.Remove(remItem);
+                        contentViewModels.Remove(remItem);
+                    }
+                if (e.NewItems != null)
+                    foreach (Content addItem in e.NewItems)
+                    {
+                        Contents.Add(addItem);
+                        //contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
+                    }
+            }
 
         }
 
@@ -500,6 +552,39 @@ namespace Meticumedia.Controls
         #endregion
 
         #region Methods
+
+        private void UpdateRootFolderItems()
+        {
+            if (this.SelectedContents == null)
+                return;
+            
+            List<string> rootFolderOfSelected = new List<string>();
+            foreach (Content content in this.SelectedContents)
+                if (!rootFolderOfSelected.Contains(content.RootFolder))
+                    rootFolderOfSelected.Add(content.RootFolder);
+
+            // Exclude root folder if all selections are the same
+            string excludeRootFolder = string.Empty;
+            if (rootFolderOfSelected.Count == 1)
+                excludeRootFolder = rootFolderOfSelected[0];
+            
+            List<ContentRootFolder> rootFolders = Settings.GetAllRootFolders(this.ContentType, true);
+
+            this.MoveRootFolderItems.Clear();
+            foreach (ContentRootFolder folder in rootFolders)
+            {
+                if (folder.FullPath == excludeRootFolder)
+                    continue;
+                
+                MenuItem item = new MenuItem();
+                item.Header = folder.FullPath;
+                item.Command = new RelayCommand(param => this.MoveContent(folder.FullPath));
+
+                this.MoveRootFolderItems.Add(item);
+            }
+
+            this.MoveToVisibility = this.MoveRootFolderItems.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         /// <summary>
         /// Open content editor window
@@ -547,6 +632,41 @@ namespace Meticumedia.Controls
             }
             Settings.Save();
             Organization.UpdateRootFolders(this.ContentType);
+        }
+
+        private void MoveContent(string destinationFolder)
+        {
+            if (!string.IsNullOrEmpty(destinationFolder))
+            {
+                List<OrgItem> items = new List<OrgItem>();
+                foreach (Content content in this.SelectedContents)
+                {
+                    // Check that move is necessary
+                    if (content.RootFolder == destinationFolder)
+                        continue;
+
+                    // Format path
+                    string currentPath = Path.GetFullPath(content.Path).TrimEnd(Path.DirectorySeparatorChar);
+                    string endFolder = Path.GetFileName(currentPath);
+                    string newPath = Path.Combine(destinationFolder, endFolder);
+                    items.Add(new OrgItem(OrgAction.Move, currentPath, content, newPath));
+                }
+                OnItemsToQueue(items);
+            }
+        }
+
+        private void DeleteContent()
+        {
+            if (MessageBox.Show("Are you want to delete the selected items? This operation cannot be undone", "Sure?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                List<OrgItem> items = new List<OrgItem>();
+                foreach (Content content in this.SelectedContents)
+                {
+                   OrgItem item = new OrgItem(OrgAction.Delete, content.Path, content, null);
+                   items.Add(item);
+                }
+                OnItemsToQueue(items);
+            }
         }
 
         private void RefreshContentsSafe(bool limitRate)
@@ -710,7 +830,7 @@ namespace Meticumedia.Controls
         public List<ContentRootFolder> GetSelectedRootFolders()
         {
             // Get all root folder
-            List<ContentRootFolder> allRootFolders = Settings.GetAllRootFolders(this.contentType);
+            List<ContentRootFolder> allRootFolders = Settings.GetAllRootFolders(this.contentType, false);
 
             // Get selection string
             if (this.SelectedFolder == null)

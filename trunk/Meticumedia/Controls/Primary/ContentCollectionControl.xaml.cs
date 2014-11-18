@@ -27,7 +27,7 @@ namespace Meticumedia.Controls
         public ContentCollectionControl(ContentType contentType)
         {
             InitializeComponent();
-            this.DataContext = new ContentCollectionControlViewModel(contentType);
+            this.DataContext = new ContentCollectionControlViewModel(contentType, lbContents);
         }
 
         #endregion

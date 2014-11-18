@@ -282,15 +282,9 @@ namespace Meticumedia.Classes
                     // Update progress
                     OnLoadProgressChange(100);
 
-                    // Lock collection and load content items from dummy collection
-                    lock (ContentLock)
-                    {
-                        //Console.WriteLine(this.ToString() + " lock load");
-                        this.LastUpdate = loadContent.LastUpdate;
-                        this.Clear();
-                        AddMultiple(loadContent);
-                    }
-                    //Console.WriteLine(this.ToString() + " release load");
+                    this.LastUpdate = loadContent.LastUpdate;
+                    this.Clear();
+                    AddMultiple(loadContent);
                 }
             }
             catch (Exception e)
@@ -361,14 +355,11 @@ namespace Meticumedia.Classes
         /// Remove all content that no longer exist in a root folder
         /// </summary>
         /// <param name="rootFolder">Root folder to remove missing content from</param>
-        public void RemoveMissing(ContentRootFolder rootFolder)
+        public void RemoveMissing()
         {
-            lock (this.ContentLock)
-            {
-                for (int i = this.Count - 1; i >= 0; i--)
-                    if (!this[i].Found && rootFolder.ContainsContent(this[i], true))
-                        RemoveAt(i);
-            }
+            for (int i = this.Count - 1; i >= 0; i--)
+                if (!this[i].Found) // && rootFolder.ContainsContent(this[i], true)) - This was here before, but if a root folder was removed it's content stayed in collection forever..
+                    RemoveAt(i);
         }
 
         /// <summary>

@@ -58,7 +58,7 @@ namespace Meticumedia.Classes
         public bool PathMatch(string rootFolder, string path, bool fast, bool threaded, out Movie match)
         {
             Content contentMatch;
-            bool results = base.PathMatch(rootFolder, path, fast, threaded, out contentMatch, null);
+            bool results = base.PathMatch(rootFolder, path, threaded, fast, out contentMatch, null);
             match = new Movie(contentMatch);
             if (match.Id > 0)
                 MovieDatabaseHelper.UpdateMovieInfo(match);

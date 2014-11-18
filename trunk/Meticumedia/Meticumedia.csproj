@@ -81,6 +81,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\Content\ContentRootFolderCollection.cs" />
+    <Compile Include="Classes\Content\ContentRootFolderMatchRule.cs" />
+    <Compile Include="Classes\Content\ContentRootFolderMatchRuleProperty.cs" />
+    <Compile Include="Classes\Content\ContentRootFolderMatchRuleType.cs" />
+    <Compile Include="Classes\Content\ContentRootFolderGenreMatchType.cs" />
+    <Compile Include="Classes\Content\ContentRootFolderSelectionType.cs" />
     <Compile Include="Classes\Organization\OrgItemCollection.cs" />
     <Compile Include="Classes\Scanning\DebugNotificationArgs.cs" />
     <Compile Include="Classes\Settings\AutoMoveFileSetup.cs" />
