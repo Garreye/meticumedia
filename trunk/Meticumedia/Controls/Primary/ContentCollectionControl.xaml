@@ -86,13 +86,15 @@
                     </StackPanel>
                 </Grid>
 
-                <wpfr:BindableMultiSelectListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" ItemTemplate="{StaticResource showItemTemplate}" ItemsSource="{Binding ContentsCollectionView}" SelectedItem="{Binding SelectedContent}" BindableSelectedItems="{Binding SelectedContents, Mode=OneWayToSource}"  SelectionMode="Extended" >
+                <wpfr:BindableMultiSelectListBox x:Name="lbContents" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" ItemTemplate="{StaticResource showItemTemplate}" ItemsSource="{Binding ContentsCollectionView}" SelectedItem="{Binding SelectedContent}" BindableSelectedItems="{Binding SelectedContents, Mode=OneWayToSource}"  SelectionMode="Extended" >
                     <ListBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Edit" Command="{Binding EditCommand}" Visibility="{Binding SingleItemSelectionVisibility}" />
-                            <MenuItem Header="Mark as Watched" Command="{Binding MarkAsWatchedCommand}"/>
-                            <MenuItem Header="Unmark as Watched" Command="{Binding UnmarkAsWatchedCommand}"/>
-                            <MenuItem Header="Set as Child Root Folder" Command="{Binding SetFolderToRootCommand}"/>
+                            <MenuItem Header="Mark as Watched" Command="{Binding MarkAsWatchedCommand}" />
+                            <MenuItem Header="Unmark as Watched" Command="{Binding UnmarkAsWatchedCommand}" />
+                            <MenuItem Header="Set as Child Root Folder" Command="{Binding SetFolderToRootCommand}" />
+                            <MenuItem Header="Move To" ItemsSource="{Binding MoveRootFolderItems}" Visibility="{Binding MoveToVisibility}" />
+                            <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>

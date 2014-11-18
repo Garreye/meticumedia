@@ -284,7 +284,7 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="type">Content type of root folders to get</param>
         /// <returns></returns>
-        public static List<ContentRootFolder> GetAllRootFolders(ContentType type)
+        public static List<ContentRootFolder> GetAllRootFolders(ContentType type, bool recursive)
         {
             List<ContentRootFolder> allRootFolders;
 
@@ -299,7 +299,22 @@ namespace Meticumedia.Classes
                 default:
                     throw new Exception("Unknown content type");
             }
-            return allRootFolders;
+            if (recursive)
+            {
+                List<ContentRootFolder> recursiveFolders = new List<ContentRootFolder>();
+                foreach (ContentRootFolder folder in allRootFolders)
+                    BuildFolderList(recursiveFolders, folder);
+                return recursiveFolders;
+            }
+            else
+                return allRootFolders;
+        }
+
+        private static void BuildFolderList(List<ContentRootFolder> folderList, ContentRootFolder folder)
+        {
+            folderList.Add(folder);
+            foreach (ContentRootFolder subFolder in folder.ChildFolders)
+                BuildFolderList(folderList, subFolder);
         }
 
         #endregion

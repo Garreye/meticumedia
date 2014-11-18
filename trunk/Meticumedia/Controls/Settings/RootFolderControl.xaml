@@ -46,11 +46,13 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <CheckBox Grid.Row="0" IsChecked="{Binding SelectedRootFolder.Default}" IsEnabled="{Binding SelectedRootFolder.Default, Converter={StaticResource boolInverter}}" Content="Default (Directory scan will move/copy new items to here by default)" Margin="5" />
             <CheckBox Grid.Row="1" IsChecked="{Binding SelectedRootFolder.AllowOrganizing}" Content="Allow meticumedia to organize files/folders" Margin="5" />
-            <StackPanel Grid.Row="2" Orientation="Horizontal" >
+            <CheckBox Grid.Row="2" IsChecked="{Binding SelectedRootFolder.AllSubFoldersChildRootFolder}" Content="Automatically set all sub-folders as child root folders" Margin="5" />
+            <StackPanel Grid.Row="3" Orientation="Horizontal" >
                 <Button Content="Set a Sub-Folder as Child Root Folder" Margin="5" Command="{Binding AddChildCommand}" />
                 <Button Content="Set All Sub-Folders as Child Root Folders" Margin="0,5,5,5" Command="{Binding SetAllSubFoldersAsChildrenCommand}" />
             </StackPanel>

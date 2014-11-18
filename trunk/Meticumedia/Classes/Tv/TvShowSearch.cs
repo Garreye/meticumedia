@@ -32,7 +32,7 @@ namespace Meticumedia.Classes
         }
 
         /// <summary>
-        /// Create lsit of searches bases for matching to a TV show from base search string:
+        /// Create list of searches bases for matching to a TV show from base search string:
         ///   - no changes to base
         ///   - everything trimmed after episode number (e.g. "seinfeld." from "seinfeld.s01e01.pilot")
         ///   - with episode number removed

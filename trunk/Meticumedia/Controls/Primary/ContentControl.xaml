@@ -9,6 +9,7 @@
              d:DesignHeight="300" d:DesignWidth="400">
     <UserControl.Resources>
         <wpfr:NullToVisibilityConverter x:Key="nullToVisConverter" />
+        <wpfr:EnumVisibilityConverter x:Key="enumToVisConverter" />
     </UserControl.Resources>
     
     <Grid Name="grdEpisodes" Grid.Column="2">
@@ -62,11 +63,11 @@
                     <TextBlock Text="Year: " FontWeight="Bold" Padding="1" />
                     <TextBlock Text="{Binding Content.DisplayYear}" Padding="1" />
                 </StackPanel>
-                <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal" Margin="3">
+                <StackPanel Grid.Column="0" Grid.Row="4" Orientation="Horizontal" Margin="3" >
                     <TextBlock Text="Seasons: " FontWeight="Bold" Padding="1" />
                     <TextBlock Text="{Binding Content.Seasons.Count}" Padding="1" />
                 </StackPanel>
-                <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="3">
+                <StackPanel Grid.Column="0" Grid.Row="5" Orientation="Horizontal" Margin="3" Visibility="{Binding Content.ContentType, Converter={StaticResource enumToVisConverter}, ConverterParameter=TvShow}">
                     <TextBlock Text="Genres: " FontWeight="Bold" Padding="1" />
                     <TextBlock Text="{Binding Content.DisplayGenres.GenresString}" Padding="1" />
                 </StackPanel>

@@ -654,14 +654,10 @@ namespace Meticumedia.Classes
                 case OrgAction.Copy:
                     if (reuseItem.Category == FileCategory.MovieVideo)
                     {
-                        OrgItem movieItem = new OrgItem(reuseItem);
-                        movieItem.SourcePath = orgPath.Path;
-                        movieItem.BuildDestination();
-
                         OrgItem item;
                         CreateMovieAction(orgPath, orgPath.Path, out item, threaded, fast, skipMatching, reuseItem.Movie);
 
-                        return movieItem;
+                        return item;
                     }
                     else if (reuseItem.Category == FileCategory.TvVideo)
                     {

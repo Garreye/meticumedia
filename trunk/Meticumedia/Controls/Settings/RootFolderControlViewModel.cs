@@ -249,7 +249,7 @@ namespace Meticumedia.Controls
             if (this.SelectedRootFolder != null)
             {
                 // Get list of sub-directories in content folder
-                string[] subDirs = GetFolderSubDirectories(this.SelectedRootFolder);
+                string[] subDirs = this.SelectedRootFolder.GetFolderSubDirectoryNamesThatArentChildren().ToArray();
 
                 // open selection form to allow user to chose a sub-folder
                 SelectionWindow selForm = new SelectionWindow("Select Folder", subDirs);
@@ -269,33 +269,11 @@ namespace Meticumedia.Controls
         {
             if (this.SelectedRootFolder != null)
             {
-                string[] subDirs = GetFolderSubDirectories(this.SelectedRootFolder);
-                foreach (string subDir in subDirs)
-                {
-                    ContentRootFolder newChild = new ContentRootFolder(this.ContentType, subDir, System.IO.Path.Combine(this.SelectedRootFolder.FullPath, subDir));
-                    newChild.PropertyChanged += cloneFolder_PropertyChanged;
-                    this.SelectedRootFolder.ChildFolders.Add(newChild);
-                }
+                this.SelectedRootFolder.SetAllSubDirsAsChildren();
             }
         }
 
-        /// <summary>
-        /// Build sub-directories of content folder as string array of the paths.
-        /// </summary>
-        /// <returns></returns>
-        private string[] GetFolderSubDirectories(ContentRootFolder folder)
-        {
-            if (!System.IO.Directory.Exists(folder.FullPath))
-                return new string[0];
 
-            string[] subDirs = System.IO.Directory.GetDirectories(folder.FullPath);
-            for (int i = 0; i < subDirs.Length; i++)
-            {
-                string[] dirs = subDirs[i].Split('\\');
-                subDirs[i] = dirs[dirs.Length - 1];
-            }
-            return subDirs;
-        }
 
         #endregion
 
