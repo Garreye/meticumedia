@@ -446,11 +446,13 @@ namespace Meticumedia.Controls
             switch (this.contentType)
             {
                 case ContentType.TvShow:
-                    foreach (ContentRootFolder folder in Settings.TvFolders)
+                    List<ContentRootFolder> allTvFolders = Settings.TvFolders.GetFolders(true);
+                    foreach (ContentRootFolder folder in allTvFolders)
                         Folders.Add(new ContentRootFolder(folder));
                     break;
                 case ContentType.Movie:
-                    foreach (ContentRootFolder folder in Settings.MovieFolders)
+                    List<ContentRootFolder> allMovieFolders = Settings.MovieFolders.GetFolders(true);
+                    foreach (ContentRootFolder folder in allMovieFolders)
                         Folders.Add(new ContentRootFolder(folder));
                     break;
             }
@@ -626,7 +628,7 @@ namespace Meticumedia.Controls
 
                 // Get content folder for content
                 ContentRootFolder folder;
-                if (Settings.GetContentFolder(cnt.RootFolder, out folder))
+                if (Settings.GetContentFolderFromPath(cnt.RootFolder, out folder))
                     // Convert movie folder as sub-folder
                     folder.ChildFolders.Add(new ContentRootFolder(this.ContentType, path, fullPath));
             }
@@ -755,8 +757,9 @@ namespace Meticumedia.Controls
         {
              this.FolderFilters.Clear();
              this.FolderFilters.Add("Recursive");
-            if (this.SelectedFolder != null)
-                AddRootFolderFilterItems(this.SelectedFolder);
+             this.FolderFilters.Add("Non-Recursive");
+            //if (this.SelectedFolder != null)
+            //    AddRootFolderFilterItems(this.SelectedFolder);
             this.SelectedFolderFilter = this.FolderFilters[0];
         }
 
@@ -801,8 +804,6 @@ namespace Meticumedia.Controls
             bool recursive;
             List<ContentRootFolder> selRootFolders = GetFilteredRootFolders(out recursive);
 
-            // Watched filter
-
             // Check if content is in the folder
             bool contentInSelFolder = false;
             if (selRootFolders.Count == 0)
@@ -830,7 +831,7 @@ namespace Meticumedia.Controls
         public List<ContentRootFolder> GetSelectedRootFolders()
         {
             // Get all root folder
-            List<ContentRootFolder> allRootFolders = Settings.GetAllRootFolders(this.contentType, false);
+            List<ContentRootFolder> allRootFolders = Settings.GetAllRootFolders(this.contentType, true);
 
             // Get selection string
             if (this.SelectedFolder == null)
@@ -864,22 +865,19 @@ namespace Meticumedia.Controls
             if (this.SelectedFolderFilter == null)
                 return new List<ContentRootFolder>();
 
-            if (this.SelectedFolderFilter == "Recursive")
-            {
-                recursive = true;
-                return baseRootFolders;
-            }
-
-            string rootFolderPath = this.SelectedFolderFilter.Replace("Non-recursive: ", "");
-            ContentRootFolder filteredFolder;
-            if (baseRootFolders.Count > 0 && ContentRootFolder.GetMatchingRootFolder(rootFolderPath, baseRootFolders[0], out filteredFolder))
-            {
-                List<ContentRootFolder> filteredList = new List<ContentRootFolder>();
-                filteredList.Add(filteredFolder);
-                return filteredList;
-            }
-
+            recursive = this.SelectedFolderFilter == "Recursive";
             return baseRootFolders;
+
+            //string rootFolderPath = this.SelectedFolderFilter.Replace("Non-recursive: ", "");
+            //ContentRootFolder filteredFolder;
+            //if (baseRootFolders.Count > 0 && ContentRootFolder.GetMatchingRootFolder(rootFolderPath, baseRootFolders[0], out filteredFolder))
+            //{
+            //    List<ContentRootFolder> filteredList = new List<ContentRootFolder>();
+            //    filteredList.Add(filteredFolder);
+            //    return filteredList;
+            //}
+
+            //return baseRootFolders;
         }
 
         /// <summary>

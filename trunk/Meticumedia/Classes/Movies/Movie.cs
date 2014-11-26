@@ -140,9 +140,9 @@ namespace Meticumedia.Classes
         {
             if (string.IsNullOrEmpty(this.RootFolder))
             {
-                ContentRootFolder defaultContent;
-                if (Settings.GetDefaultMovieFolder(out defaultContent))
-                    this.RootFolder = defaultContent.FullPath;
+                ContentRootFolder rootFolder;
+                if (Settings.GetMovieFolderForContent(this, out rootFolder))
+                    this.RootFolder = rootFolder.FullPath;
             }
 
             return System.IO.Path.Combine(this.RootFolder, FileHelper.GetSafeFileName(this.DisplayName + " (" + this.DisplayYear.ToString() + ")"));

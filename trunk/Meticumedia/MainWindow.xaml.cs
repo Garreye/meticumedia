@@ -45,13 +45,12 @@ namespace Meticumedia
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("meticumedia v0.9.2 (alpha)\nCopyright © 2013", "About", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("meticumedia v0.9.3 (alpha)\nCopyright © 2013", "About", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void Donate_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=NE42NQGGL8Q9C&lc=CA&item_name=meticumedia&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted");
-
         }
     }
 }

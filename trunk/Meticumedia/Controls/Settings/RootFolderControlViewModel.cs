@@ -16,7 +16,7 @@ namespace Meticumedia.Controls
     {
         #region Properties
 
-        public ObservableCollection<ContentRootFolder> RootFolders { get; set; }
+        public ContentRootFolderCollection RootFolders { get; set; }
 
         public ContentRootFolder SelectedRootFolder
         {
@@ -31,6 +31,22 @@ namespace Meticumedia.Controls
             }
         }
         private ContentRootFolder selectedRootFolder;
+
+        public ObservableCollection<string> AvailableFolders { get; set; }
+
+        public ContentRootFolderMatchRule SelectedRule
+        {
+            get
+            {
+                return selectedRule;
+            }
+            set
+            {
+                selectedRule = value;
+                OnPropertyChanged(this, "SelectedRule");
+            }
+        }
+        private ContentRootFolderMatchRule selectedRule;
 
         public ContentType ContentType { get; set; }
 
@@ -113,21 +129,92 @@ namespace Meticumedia.Controls
             }
         }
 
+        private ICommand addRuleCommand;
+        public ICommand AddRuleCommand
+        {
+            get
+            {
+                if (addRuleCommand == null)
+                {
+                    addRuleCommand = new RelayCommand(
+                        param => this.AddRule()
+                    );
+                }
+                return addRuleCommand;
+            }
+        }
+
+        private ICommand removeRuleCommand;
+        public ICommand RemoveRuleCommand
+        {
+            get
+            {
+                if (removeRuleCommand == null)
+                {
+                    removeRuleCommand = new RelayCommand(
+                        param => this.RemoveRule()
+                    );
+                }
+                return removeRuleCommand;
+            }
+        }
+
+        private ICommand clearRulesCommand;
+        public ICommand ClearRulesCommand
+        {
+            get
+            {
+                if (clearRulesCommand == null)
+                {
+                    clearRulesCommand = new RelayCommand(
+                        param => this.ClearRules()
+                    );
+                }
+                return clearRulesCommand;
+            }
+        }
+
         #endregion
 
         #region Constructor
 
-        public RootFolderControlViewModel(ObservableCollection<ContentRootFolder> folders, ContentType type)
+        public RootFolderControlViewModel(ContentRootFolderCollection folders, ContentType type)
         {
             this.ContentType = type;
-            this.RootFolders = new ObservableCollection<ContentRootFolder>();
-            foreach (ContentRootFolder folder in folders)
-            {
-                ContentRootFolder cloneFolder = new ContentRootFolder(folder);
-                this.RootFolders.Add(cloneFolder);
-            }
+            this.RootFolders = new ContentRootFolderCollection(folders);
             AttachPropChangedEvent(this.RootFolders);
+
+            this.AvailableFolders = new ObservableCollection<string>();
+            UpdateAvailableFolders();
         }
+
+        private void UpdateAvailableFolders()
+        {
+            // Get all folders
+            List<ContentRootFolder> recursiveFolders = this.RootFolders.GetFolders(true);
+
+            // Remove extras in available
+            for (int i = this.AvailableFolders.Count - 1; i >= 0; i--)
+            {
+                bool found = false;
+                foreach (ContentRootFolder folder in recursiveFolders)
+                    if (!this.AvailableFolders.Contains(folder.FullPath))
+                    {
+                        found = true;
+                        break;
+                    }
+
+                if (!found)
+                    this.AvailableFolders.RemoveAt(i);
+
+            }
+
+            // Add any missing in available
+            foreach (ContentRootFolder folder in recursiveFolders)
+                if (!this.AvailableFolders.Contains(folder.FullPath))
+                    this.AvailableFolders.Add(folder.FullPath);
+        }
+
 
         #endregion
 
@@ -185,6 +272,8 @@ namespace Meticumedia.Controls
                     folder.Default = true;
                 folder.PropertyChanged += cloneFolder_PropertyChanged;
                 RootFolders.Add(folder);
+
+                UpdateAvailableFolders();
             }
         }
 
@@ -195,6 +284,7 @@ namespace Meticumedia.Controls
 
             if (this.RootFolders.Count > 0 && !CheckForDefault(this.RootFolders))
                 this.RootFolders[0].Default = true;
+            UpdateAvailableFolders();
                 
         }
 
@@ -242,6 +332,7 @@ namespace Meticumedia.Controls
             foreach(ContentRootFolder folder in this.RootFolders)
                 folder.PropertyChanged -= cloneFolder_PropertyChanged;
             this.RootFolders.Clear();
+            UpdateAvailableFolders();
         }
 
         private void AddChild()
@@ -262,6 +353,7 @@ namespace Meticumedia.Controls
                     newChild.PropertyChanged += cloneFolder_PropertyChanged;
                     this.SelectedRootFolder.ChildFolders.Add(newChild);
                 }
+                UpdateAvailableFolders();
             }
         }
 
@@ -270,10 +362,24 @@ namespace Meticumedia.Controls
             if (this.SelectedRootFolder != null)
             {
                 this.SelectedRootFolder.SetAllSubDirsAsChildren();
+                UpdateAvailableFolders();
             }
         }
 
+        private void AddRule()
+        {
+            this.RootFolders.MatchRules.Add(new ContentRootFolderMatchRule());
+        }
 
+        private void RemoveRule()
+        {
+            this.RootFolders.MatchRules.Remove(this.SelectedRule);
+        }
+
+        private void ClearRules()
+        {
+            this.RootFolders.MatchRules.Clear();
+        }
 
         #endregion
 

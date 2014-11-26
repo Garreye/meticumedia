@@ -159,6 +159,8 @@ namespace Meticumedia.Classes
 
         private static int idCnt = 0;
 
+        public bool Temporary { get; set; }
+
         #endregion
 
         #region Events
@@ -199,6 +201,7 @@ namespace Meticumedia.Classes
             this.ContentType = type;
             childFolders.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(childFolders_CollectionChanged);
             this.Id = idCnt++;
+            this.Temporary = false;
         }
 
         /// <summary>
@@ -227,12 +230,17 @@ namespace Meticumedia.Classes
             foreach (ContentRootFolder subFolder in folder.ChildFolders)
                 this.ChildFolders.Add(new ContentRootFolder(subFolder));
             this.Id = folder.Id;
+            this.Temporary = folder.Temporary;
+            this.AllSubFoldersChildRootFolder = folder.AllSubFoldersChildRootFolder;
         }
 
         #endregion
 
         #region Methods
 
+        /// <summary>
+        /// Child folders collection change chained up to property changed of this.
+        /// </summary>
         private void childFolders_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged("ChildFolders");
@@ -343,7 +351,6 @@ namespace Meticumedia.Classes
             
             return genres;
         }
-
 
         /// <summary>
         /// Builds a list of content matching filter that is contained within a root folder
@@ -469,10 +476,15 @@ namespace Meticumedia.Classes
             return false;
         }
 
+        /// <summary>
+        /// Set all sub directories to child root folders
+        /// </summary>
         public void SetAllSubDirsAsChildren()
         {
             // Get sub-dirs
-            List<string> subDirs = GetFolderSubDirectoryNamesThatArentChildren();
+            string[] subDirs = System.IO.Directory.GetDirectories(this.FullPath);
+            for (int i = 0; i < subDirs.Length; i++)
+                subDirs[i] = Path.GetFileName(subDirs[i]);
 
             // Remove child folders that no longer exists
             for (int i = this.ChildFolders.Count - 1; i >= 0; i--)
@@ -776,7 +788,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Properties of this class that are saved/loaded in XML elements
         /// </summary>
-        private enum XmlElements { SubPath, FullPath, AllowOrganizing, Default, ChildFolders };
+        private enum XmlElements { SubPath, FullPath, AllowOrganizing, Default, ChildFolders, Temporary, AllSubFoldersChildRootFolder };
 
         /// <summary>
         /// Root XML element string for this class.
@@ -816,6 +828,12 @@ namespace Meticumedia.Classes
                             subFolder.Save(xw);
                         xw.WriteEndElement();
                         break;
+                    case XmlElements.Temporary:
+                        value = this.Temporary.ToString();
+                        break;
+                    case XmlElements.AllSubFoldersChildRootFolder:
+                        value = this.AllSubFoldersChildRootFolder.ToString();
+                        break;
                     default:
                         throw new Exception("Unkonw element!");
                 }
@@ -833,14 +851,14 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="showNode">The XML node containt property elements</param>
         /// <returns>Whether XML was loaded properly</returns>
-        public bool Load(XmlNode seasonNode)
+        public bool Load(XmlNode foldersNode)
         {
             // Check that we're on the right node
-            if (seasonNode.Name != ROOT_XML)
+            if (foldersNode.Name != ROOT_XML)
                 return false;
 
             // Go through elements of node
-            foreach (XmlNode propNode in seasonNode.ChildNodes)
+            foreach (XmlNode propNode in foldersNode.ChildNodes)
             {
                 // Match the current node to a known element name
                 XmlElements element;
@@ -869,12 +887,22 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.ChildFolders:
                         this.ChildFolders = new ObservableCollection<ContentRootFolder>();
-                        foreach(XmlNode subContentNode in propNode.ChildNodes)
+                        foreach (XmlNode subContentNode in propNode.ChildNodes)
                         {
                             ContentRootFolder subFolder = new ContentRootFolder(this.ContentType);
                             subFolder.Load(subContentNode);
                             this.ChildFolders.Add(subFolder);
                         }
+                        break;
+                    case XmlElements.Temporary:
+                        bool temp;
+                        if (bool.TryParse(value, out temp))
+                            this.Temporary = temp;
+                        break;
+                    case XmlElements.AllSubFoldersChildRootFolder:
+                        bool allSubsChild;
+                        if (bool.TryParse(value, out allSubsChild))
+                            this.AllSubFoldersChildRootFolder = allSubsChild;
                         break;
                 }
             }

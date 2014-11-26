@@ -18,7 +18,6 @@ namespace Meticumedia.Classes
 {
     /// <summary>
     /// Class for accesing TheTvDb online TV database and related functions.
-    /// TODO: currently not in use, TVRage always used...
     /// </summary>
     public class TheTvDbAccess : TvDatabaseAccess
     {

@@ -12,9 +12,6 @@ namespace Meticumedia.Classes
         [Description("Use Default Folder")]
         Default,
 
-        [Description("Prompt to Select")]
-        Prompt,
-
         [Description("Automatically Create")]
         AutoCreate
     }

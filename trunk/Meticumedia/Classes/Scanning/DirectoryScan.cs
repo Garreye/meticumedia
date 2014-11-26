@@ -523,15 +523,14 @@ namespace Meticumedia.Classes
                             // Setup search string
                             string showFile = Path.GetFileNameWithoutExtension(matchString);
 
-                            // Setup path for resulting content
-                            ContentRootFolder defaultTvFolder;
-                            string path = NO_TV_FOLDER;
-                            if (Settings.GetDefaultTvFolder(out defaultTvFolder))
-                                path = defaultTvFolder.FullPath;
-
                             // Perform search for matching TV show
-                            if (SearchHelper.TvShowSearch.ContentMatch(showFile, path, string.Empty, fast, threaded, out bestMatch))
+                            if (SearchHelper.TvShowSearch.ContentMatch(showFile, string.Empty, string.Empty, fast, threaded, out bestMatch))
                             {
+                                ContentRootFolder defaultTvFolder;
+                                string path = NO_TV_FOLDER;
+                                if (Settings.GetTvFolderForContent(bestMatch, out defaultTvFolder))
+                                    path = defaultTvFolder.FullPath;
+
                                 bestMatch.RootFolder = path;
 
                                 // Save show in temporary shows list (in case there are more files that may match to it during scan)
@@ -744,27 +743,27 @@ namespace Meticumedia.Classes
             // Try to match file to movie
             string search = Path.GetFileNameWithoutExtension(matchString);
 
-            // Get root folder
-            ContentRootFolder defaultMovieFolder;
-            string path;
-            if (Settings.GetDefaultMovieFolder(out defaultMovieFolder))
-                path = defaultMovieFolder.FullPath;
-            else
-            {
-                path = NO_MOVIE_FOLDER;
-                item.Action = OrgAction.NoRootFolder;
-            }
-
             // Search for match to movie
             Movie searchResult = null;
             bool searchSucess = false;
             if (!skipMatching)
-                searchSucess = SearchHelper.MovieSearch.ContentMatch(search, path, string.Empty, fast, threaded, out searchResult, knownMovie);
+                searchSucess = SearchHelper.MovieSearch.ContentMatch(search, string.Empty, string.Empty, fast, threaded, out searchResult, knownMovie);
 
 
             // Add closest match item
             if (searchSucess)
             {
+                // Get root folder
+                ContentRootFolder rootFolder;
+                string path;
+                if (Settings.GetMovieFolderForContent(searchResult, out rootFolder))
+                    searchResult.RootFolder = rootFolder.FullPath;
+                else
+                {
+                    searchResult.RootFolder = NO_MOVIE_FOLDER;
+                    item.Action = OrgAction.NoRootFolder;
+                }
+                
                 if (item.Action != OrgAction.NoRootFolder)
                     item.Action = file.Copy ? OrgAction.Copy : OrgAction.Move;
                 item.DestinationPath = searchResult.BuildFilePath(file.Path);

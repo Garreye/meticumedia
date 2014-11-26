@@ -684,7 +684,7 @@ namespace Meticumedia.Classes
             this.Action = action;
             this.SourcePath = sourceFile;
             if (content is Movie)
-                this.Movie = movie;
+                this.Movie = content as Movie;
             else
                 this.TvEpisode = new TvEpisode(content as TvShow);
             this.DestinationPath = destination;
@@ -1353,7 +1353,7 @@ namespace Meticumedia.Classes
                                 sd.AddIgnoreFile(this.SourcePath);
 
                     // Check if we need to update Shows/Movies
-                    if ((this.Action == OrgAction.Copy || this.Action == OrgAction.Move) && (this.Category & FileCategory.Folder | FileCategory.AutoMove) == 0)
+                    if ((this.Action == OrgAction.Copy || this.Action == OrgAction.Move) && (this.Category & FileCategory.Folder) > 0)
                     {
                         this.Movie.Path = this.Movie.BuildFolderPath();
                         if (this.Category == FileCategory.MovieVideo && Directory.Exists(this.Movie.Path))
@@ -1477,7 +1477,7 @@ namespace Meticumedia.Classes
                 {
                     // Check if user wants to override it
                     string ask = "Destination file '" + destinationPath + "' already existst. Queue action will overwrite it, would you like to continue?";
-                    TaskDialog diag = new TaskDialog(); // TODO!
+                    TaskDialog diag = new TaskDialog();
                     diag.VerificationText = ask;
                     if (!this.Replace && diag.Show().ButtonType == ButtonType.Yes)
                     {

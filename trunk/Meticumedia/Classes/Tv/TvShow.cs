@@ -150,7 +150,7 @@ namespace Meticumedia.Classes
         {
             this.ContentType = Classes.ContentType.TvShow;
             ContentRootFolder defaultFolder;
-            if (Settings.GetDefaultTvFolder(out defaultFolder))
+            if (Settings.GetTvFolderForContent(null, out defaultFolder))
                 this.RootFolder = defaultFolder.FullPath;
 
             this.episodes.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(episodes_CollectionChanged);
@@ -249,9 +249,12 @@ namespace Meticumedia.Classes
         /// </summary>
         public override void UpdateMissing()
         {
-            // Mark all as missing - TODO: check file path and check that file still exists, if so don't mark as missing!
+            // Mark all as missing
             foreach (TvEpisode ep in this.Episodes)
-                ep.Missing = MissingStatus.Missing;
+            {
+                if (!File.Exists(ep.File.FilePath))
+                    ep.Missing = MissingStatus.Missing;
+            }
 
             // Search through TV show directory
             if (Directory.Exists(this.Path))
