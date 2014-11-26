@@ -44,7 +44,7 @@ namespace Meticumedia.Controls
 
         #region Variables
 
-        private ObservableCollection<ContentRootFolder> folders = new ObservableCollection<ContentRootFolder>();
+        private ContentRootFolderCollection folders;
 
         private ContentType contentType = ContentType.Movie;
 
@@ -60,10 +60,10 @@ namespace Meticumedia.Controls
 
         public void LoadSettings(ContentType type)
         {
+            this.folders = new ContentRootFolderCollection(type);
             this.contentType = type;
             foreach (ContentRootFolder flder in contentType == ContentType.Movie ? Settings.MovieFolders : Settings.TvFolders)
                 folders.Add(new ContentRootFolder(flder));
-            //tvFolders.ItemsSource = folders;
         }
 
         public void SaveSettings()

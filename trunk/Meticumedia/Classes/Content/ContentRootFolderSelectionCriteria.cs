@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace Meticumedia.Classes
 {
-    public enum ContentRootFolderSelectionType
+    public enum ContentRootFolderSelectionCriteria
     {
-        [Description("Use Default")]
+        [Description("Always Use Default")]
         Default,
 
-        [Description("Child Genre Folders")]
+        [Description("Sub-Folders as Genre Folders")]
         GenreChild,
 
-        [Description("Rules Based")]
+        [Description("Rules List")]
         Rules
     }
 }

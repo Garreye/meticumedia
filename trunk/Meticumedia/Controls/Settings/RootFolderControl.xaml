@@ -5,57 +5,193 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:classes="clr-namespace:Meticumedia.Classes"
              xmlns:wpfr="clr-namespace:Meticumedia.WPF"
+             xmlns:cntrls="clr-namespace:Meticumedia.Controls"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
-             d:DesignHeight="364" d:DesignWidth="607">
+             d:DesignHeight="500" d:DesignWidth="600">
     <UserControl.Resources>
         <wpfr:BoolInverterConverter x:Key="boolInverter" />
         <wpfr:DefaultColorConverter x:Key="defaultColorConverted" />
         <wpfr:NullToVisibilityConverter x:Key="nullToVisConv" />
+        <wpfr:EnumBooleanConverter x:Key="enumBooleanConverter" />
+        <wpfr:EnumVisibilityConverter x:Key="enumVisConv" />
+        
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="CriteriaEnum">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="classes:ContentRootFolderSelectionCriteria" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="GenreMissEnum">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="classes:ContentRootFolderGenreMatchMissType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="rulePropEnum">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="classes:ContentRootFolderMatchRuleProperty" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="ruleTypesEnum">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="classes:ContentRootFolderMatchRuleType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </UserControl.Resources>
 
     <Grid>
-
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="2*" />
         </Grid.RowDefinitions>
 
-        <Grid Name="grTopButtons">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Button Content="Add" Grid.Column="0" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding AddFolderCommand}" />
-            <Button Content="Remove" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding RemoveFolderCommand}" />
-            <Button Content="Clear" Grid.Column="3" Height="23" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding ClearFoldersCommand}" />
-        </Grid>
+        <GroupBox Grid.Row="0" Header="Folders" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <wpfr:BindableSelectTreeView Grid.Row="1" ItemsSource="{Binding RootFolders}" BindableSelectedItem="{Binding SelectedRootFolder, Mode=OneWayToSource}" >
-            <TreeView.Resources>
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=ChildFolders}" DataType="{x:Type classes:ContentRootFolder}">
-                    <TextBlock Text="{Binding Path=SubPath}" Foreground="{Binding Path=Default, Converter={StaticResource defaultColorConverted}}" />
-                </HierarchicalDataTemplate>
-            </TreeView.Resources>
-        </wpfr:BindableSelectTreeView>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="Add" Grid.Column="0" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding AddFolderCommand}" />
+                    <Button Content="Remove" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding RemoveFolderCommand}" />
+                    <Button Content="Clear" Grid.Column="3" Height="23" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding ClearFoldersCommand}" />
+                </Grid>
 
-        <Grid Grid.Row="2" Visibility="{Binding SelectedRootFolder, Converter={StaticResource nullToVisConv}}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+                <wpfr:BindableSelectTreeView Grid.Row="1" ItemsSource="{Binding RootFolders}" BindableSelectedItem="{Binding SelectedRootFolder, Mode=OneWayToSource}" >
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Path=ChildFolders}" DataType="{x:Type classes:ContentRootFolder}">
+                            <TextBlock Text="{Binding Path=SubPath}" Foreground="{Binding Path=Default, Converter={StaticResource defaultColorConverted}}" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.Resources>
+                </wpfr:BindableSelectTreeView>
 
-            <CheckBox Grid.Row="0" IsChecked="{Binding SelectedRootFolder.Default}" IsEnabled="{Binding SelectedRootFolder.Default, Converter={StaticResource boolInverter}}" Content="Default (Directory scan will move/copy new items to here by default)" Margin="5" />
-            <CheckBox Grid.Row="1" IsChecked="{Binding SelectedRootFolder.AllowOrganizing}" Content="Allow meticumedia to organize files/folders" Margin="5" />
-            <CheckBox Grid.Row="2" IsChecked="{Binding SelectedRootFolder.AllSubFoldersChildRootFolder}" Content="Automatically set all sub-folders as child root folders" Margin="5" />
-            <StackPanel Grid.Row="3" Orientation="Horizontal" >
-                <Button Content="Set a Sub-Folder as Child Root Folder" Margin="5" Command="{Binding AddChildCommand}" />
-                <Button Content="Set All Sub-Folders as Child Root Folders" Margin="0,5,5,5" Command="{Binding SetAllSubFoldersAsChildrenCommand}" />
-            </StackPanel>
-        </Grid>
+                <Grid Grid.Row="2" Visibility="{Binding SelectedRootFolder, Converter={StaticResource nullToVisConv}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <CheckBox Grid.Row="0" IsChecked="{Binding SelectedRootFolder.Default}" IsEnabled="{Binding SelectedRootFolder.Default, Converter={StaticResource boolInverter}}" Content="Default (Directory scan will move/copy new items to here by default)" Margin="5" />
+                    <CheckBox Grid.Row="1" IsChecked="{Binding SelectedRootFolder.AllowOrganizing}" Content="Allow meticumedia to organize files/folders" Margin="5" />
+                    <CheckBox Grid.Row="2" IsChecked="{Binding SelectedRootFolder.AllSubFoldersChildRootFolder}" Content="Automatically set all sub-folders as child root folders" Margin="5" />
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" >
+                        <Button Content="Set a Sub-Folder as Child Root Folder" Margin="5" Command="{Binding AddChildCommand}" />
+                        <Button Content="Set All Sub-Folders as Child Root Folders" Margin="0,5,5,5" Command="{Binding SetAllSubFoldersAsChildrenCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </GroupBox>
+        
+        <GroupBox Grid.Row="1">
+            <GroupBox.Header>
+                <TextBlock Text="Folder Content Matching" ToolTip="Setup for selecting which root folder scanning should copy related content into." />
+            </GroupBox.Header>
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Criteria Type" ToolTip="Type of criteria used for determining which root folder to move content to." VerticalAlignment="Center" Margin="3" />
+                    <ComboBox Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource CriteriaEnum}}" SelectedItem="{Binding RootFolders.Criteria}" />
+                </Grid>
+
+                <Grid Grid.Row="1" Visibility="{Binding RootFolders.Criteria, Converter={StaticResource enumVisConv}, ConverterParameter=GenreChild}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="If No Existing Genre Folder" ToolTip="Type of criteria used for determining which root folder to move content to." VerticalAlignment="Center" Margin="3" />
+                    <RadioButton Grid.Column="1" Content="Use Default Folder" IsChecked="{Binding Path=RootFolders.GenreMatchMiss, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Default}" Margin="3" VerticalAlignment="Center" ToolTip="Default folder will be used." />
+                    <RadioButton Grid.Column="2" Content="Create Genre Folder" IsChecked="{Binding Path=RootFolders.GenreMatchMiss, Converter={StaticResource enumBooleanConverter}, ConverterParameter=AutoCreate}" Margin="3" VerticalAlignment="Center" ToolTip="Genre folder will automatically created as child of default folder." />
+                </Grid>
+
+                <GroupBox Grid.Row="2" Header="Rules" Visibility="{Binding RootFolders.Criteria, Converter={StaticResource enumVisConv}, ConverterParameter=Rules}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="Add" Margin="3" Width="60" Command="{Binding AddRuleCommand}" />
+                            <Button Grid.Column="1" Content="Remove" Margin="3" Width="60" Command="{Binding RemoveRuleCommand}"/>
+                            <Button Grid.Column="3" Content="Clear" Margin="3" Width="60" Command="{Binding ClearRulesCommand}" />
+                        </Grid>
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding RootFolders.MatchRules}" SelectedItem="{Binding SelectedRule}" AutoGenerateColumns="False" CanUserAddRows="False">
+                            <DataGrid.Resources>
+                                <RelativeSource x:Key="parent" AncestorType="{x:Type cntrls:RootFolderControl}" />
+                            </DataGrid.Resources>
+                            
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="Property" MinWidth="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedItem="{Binding Path=Property, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource rulePropEnum}}" ToolTip="Property of content that condition is checked on for match." />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Condition" MinWidth="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedItem="{Binding Path=Type, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ruleTypesEnum}}" ToolTip="Condition to use when comparing property to value in order to match content." />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Value" MinWidth="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBox Text="{Binding Path=Value, UpdateSourceTrigger=PropertyChanged}" ToolTip="Value to check condition against property of content." />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTemplateColumn Header="Destination Folder" MinWidth="150">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedItem="{Binding Path=Folder, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Path=DataContext.AvailableFolders, RelativeSource={StaticResource parent}}" ToolTip="Folder to move content to if rule is matched (condition on content's property meets value)." />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </GroupBox>
+
+            </Grid>
+            
+        </GroupBox>
     </Grid>
 </UserControl>

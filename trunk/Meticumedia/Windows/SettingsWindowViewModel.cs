@@ -185,13 +185,9 @@ namespace Meticumedia.Windows
             foreach (OrgFolder fldr in this.ScanFoldersViewModel.Folders)
                Settings.ScanDirectories.Add(fldr);
 
-            Settings.MovieFolders.Clear();
-            foreach (ContentRootFolder folder in this.MovieRootFoldersViewModel.RootFolders)
-                Settings.MovieFolders.Add(folder);
+            Settings.MovieFolders.Clone(this.MovieRootFoldersViewModel.RootFolders);
 
-            Settings.TvFolders.Clear();
-            foreach (ContentRootFolder folder in this.TvRootFoldersViewModel.RootFolders)
-                Settings.TvFolders.Add(folder);
+            Settings.TvFolders.Clone(this.TvRootFoldersViewModel.RootFolders);
 
             Settings.MovieFileFormat.Clone(this.MovieFileNameViewModel.FileNameFormat);
 

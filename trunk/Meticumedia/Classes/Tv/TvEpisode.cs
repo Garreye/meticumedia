@@ -575,7 +575,6 @@ namespace Meticumedia.Classes
       
         /// <summary>
         /// Indicates whether the episode is found in TheTvDb database.
-        /// TODO: this is hacky!
         /// </summary>
         public bool InDatabase
         {

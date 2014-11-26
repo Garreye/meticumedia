@@ -86,7 +86,7 @@
     <Compile Include="Classes\Content\ContentRootFolderMatchRuleProperty.cs" />
     <Compile Include="Classes\Content\ContentRootFolderMatchRuleType.cs" />
     <Compile Include="Classes\Content\ContentRootFolderGenreMatchType.cs" />
-    <Compile Include="Classes\Content\ContentRootFolderSelectionType.cs" />
+    <Compile Include="Classes\Content\ContentRootFolderSelectionCriteria.cs" />
     <Compile Include="Classes\Organization\OrgItemCollection.cs" />
     <Compile Include="Classes\Scanning\DebugNotificationArgs.cs" />
     <Compile Include="Classes\Settings\AutoMoveFileSetup.cs" />

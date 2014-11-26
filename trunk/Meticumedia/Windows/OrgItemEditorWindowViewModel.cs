@@ -218,7 +218,7 @@ namespace Meticumedia.Windows
             this.MovieViewModel = new ContentEditorControlViewModel(this.Item.Movie, true);
             this.MovieViewModel.Content.PropertyChanged += ItemSubProperty_PropertyChanged;
             ContentRootFolder movieFolder;
-            if (string.IsNullOrEmpty(this.Item.Movie.RootFolder) && Settings.GetDefaultMovieFolder(out movieFolder))
+            if (string.IsNullOrEmpty(this.Item.Movie.RootFolder) && Settings.GetMovieFolderForContent(this.Item.Movie, out movieFolder))
                 this.Item.Movie.RootFolder = movieFolder.FullPath;
 
             // tv number update
@@ -303,7 +303,7 @@ namespace Meticumedia.Windows
                 TvShow show = cew.Results as TvShow;
                 show.UpdateInfoFromDatabase();
                 ContentRootFolder folder;
-                Settings.GetDefaultTvFolder(out folder);
+                Settings.GetTvFolderForContent(show, out folder);
                 show.RootFolder = folder.FullPath;
                 show.Path = show.BuildFolderPath();
                 this.Shows.Add(show);

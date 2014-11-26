@@ -64,12 +64,12 @@ namespace Meticumedia.Classes
         /// <summary>
         /// List of root folders containing movies
         /// </summary>
-        public static ObservableCollection<ContentRootFolder> MovieFolders = new ObservableCollection<ContentRootFolder>();
+        public static ContentRootFolderCollection MovieFolders = new ContentRootFolderCollection(ContentType.Movie);
 
         /// <summary>
         /// List of root folders containing TV shows
         /// </summary>
-        public static ObservableCollection<ContentRootFolder> TvFolders = new ObservableCollection<ContentRootFolder>();
+        public static ContentRootFolderCollection TvFolders = new ContentRootFolderCollection(ContentType.TvShow);
 
         /// <summary>
         /// File types to match to video files
@@ -89,10 +89,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Automatic file type move setups
         /// </summary>
-        public static ObservableCollection<AutoMoveFileSetup> AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>()
-        {
-            //new AutoMoveFileSetup("mp3", @"C:\Garretts_Data\Test\Music")
-        };
+        public static ObservableCollection<AutoMoveFileSetup> AutoMoveSetups = new ObservableCollection<AutoMoveFileSetup>();
 
         /// <summary>
         /// Persistent setting for options in UI.
@@ -174,46 +171,22 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Gets movie folder that is set as default
         /// </summary>
-        /// <param name="defaultFolder">The resulting default movie folder</param>
+        /// <param name="rootFolder">The resulting default movie folder</param>
         /// <returns>whether default was found</returns>
-        public static bool GetDefaultMovieFolder(out ContentRootFolder defaultFolder)
+        public static bool GetMovieFolderForContent(Content content, out ContentRootFolder rootFolder)
         {
-            GetDefaultFolder(MovieFolders, out defaultFolder);
-            return defaultFolder != null;
+            rootFolder = MovieFolders.GetFolderForContent(content);
+            return rootFolder != null;
         }
 
         /// <summary>
         /// Gets TV folder that is set as default
         /// </summary>
         /// <returns></returns>
-        public static bool GetDefaultTvFolder(out ContentRootFolder defaultFolder)
+        public static bool GetTvFolderForContent(Content content, out ContentRootFolder rootFolder)
         {
-            GetDefaultFolder(TvFolders, out defaultFolder);
-            return defaultFolder != null;
-        }
-
-        /// <summary>
-        /// Gets movie folder that is set as default
-        /// </summary>
-        /// <param name="folders">List of movie folder to look through for default</param>
-        /// <param name="defaultFolder">The resulting default movie folder</param>
-        /// <returns>whether default was found</returns>
-        private static bool GetDefaultFolder(ObservableCollection<ContentRootFolder> folders, out ContentRootFolder defaultFolder)
-        {
-            foreach (ContentRootFolder folder in folders)
-            {               
-                if(folder.Default)
-                {
-                    defaultFolder = folder;
-                    return true;
-                }
-
-                if (GetDefaultFolder(folder.ChildFolders, out defaultFolder))
-                    return true;
-            }
-
-            defaultFolder = null;
-            return false;
+            rootFolder = TvFolders.GetFolderForContent(content);
+            return rootFolder != null;
         }
 
         /// <summary>
@@ -221,9 +194,9 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="path">The path of folder to match to</param>
         /// <returns>whether folder was found</returns>
-        public static bool GetTvFolder(string path, out ContentRootFolder folder)
+        public static bool GetTvFolderFromPath(string path, out ContentRootFolder folder)
         {
-            return GetContentFolder(path, TvFolders.ToList(), out folder);
+            return TvFolders.GetFolderFromPath(path, out folder);
         }
 
         /// <summary>
@@ -231,9 +204,9 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="path">The path of folder to match to</param>
         /// <returns>whether folder was found</returns>
-        public static bool GetMovieFolder(string path, out ContentRootFolder folder)
+        public static bool GetMovieFolderFromPath(string path, out ContentRootFolder folder)
         {
-            return GetContentFolder(path, MovieFolders.ToList(), out folder);
+            return MovieFolders.GetFolderFromPath(path, out folder);
         }
 
         /// <summary>
@@ -242,40 +215,15 @@ namespace Meticumedia.Classes
         /// <param name="folderPath">Path of content folder</param>
         /// <param name="folder">Resulting content folder matching path</param>
         /// <returns>True if folder was found</returns>
-        public static bool GetContentFolder(string folderPath, out ContentRootFolder folder)
+        public static bool GetContentFolderFromPath(string folderPath, out ContentRootFolder folder)
         {
-            if (GetMovieFolder(folderPath, out folder))
+            if (GetMovieFolderFromPath(folderPath, out folder))
                 return true;
 
-            if (GetTvFolder(folderPath, out folder))
+            if (GetTvFolderFromPath(folderPath, out folder))
                 return true;
 
             folder = new ContentRootFolder(ContentType.TvShow);
-            return false;
-        }
-
-        /// <summary>
-        /// Get content folder object from path string.
-        /// </summary>
-        /// <param name="folderPath">Path of content folder</param>
-        /// <param name="folders">Content folders to look through</param>
-        /// <param name="folder">Resulting content folder matching path</param>
-        /// <returns>True if folder was found</returns>
-        private static bool GetContentFolder(string folderPath, List<ContentRootFolder> folders, out ContentRootFolder folder)
-        {
-            foreach (ContentRootFolder contentFolder in folders)
-            {
-                if (contentFolder.FullPath == folderPath)
-                {
-                    folder = contentFolder;
-                    return true;
-                }
-
-                if (GetContentFolder(folderPath, contentFolder.ChildFolders.ToList(), out folder))
-                    return true;
-            }
-
-            folder = null;
             return false;
         }
 
@@ -286,35 +234,15 @@ namespace Meticumedia.Classes
         /// <returns></returns>
         public static List<ContentRootFolder> GetAllRootFolders(ContentType type, bool recursive)
         {
-            List<ContentRootFolder> allRootFolders;
-
             switch (type)
             {
                 case ContentType.Movie:
-                    allRootFolders = Settings.MovieFolders.ToList();
-                    break;
+                    return Settings.MovieFolders.GetFolders(recursive);
                 case ContentType.TvShow:
-                    allRootFolders = Settings.TvFolders.ToList();
-                    break;
+                    return Settings.TvFolders.GetFolders(recursive);
                 default:
                     throw new Exception("Unknown content type");
             }
-            if (recursive)
-            {
-                List<ContentRootFolder> recursiveFolders = new List<ContentRootFolder>();
-                foreach (ContentRootFolder folder in allRootFolders)
-                    BuildFolderList(recursiveFolders, folder);
-                return recursiveFolders;
-            }
-            else
-                return allRootFolders;
-        }
-
-        private static void BuildFolderList(List<ContentRootFolder> folderList, ContentRootFolder folder)
-        {
-            folderList.Add(folder);
-            foreach (ContentRootFolder subFolder in folder.ChildFolders)
-                BuildFolderList(folderList, subFolder);
         }
 
         #endregion
@@ -324,7 +252,13 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Properties that are elements.
         /// </summary>
-        private enum XmlElements { ScanDirectories, TvFileFormat, MovieFileFormat, MovieFolders, TvFolders, VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, AutoMoveSetups, Gui, General };
+        private enum XmlElements 
+        { 
+            ScanDirectories, TvFileFormat, MovieFileFormat,  VideoFileTypes, DeleteFileTypes, IgnoreFileTypes, AutoMoveSetups, Gui, General, MovieFolderColletion, TvFolderCollection,
+        
+            // Deprecated
+            MovieFolders, TvFolders,
+        };
 
         /// <summary>
         /// Root element for setting XML.
@@ -355,6 +289,14 @@ namespace Meticumedia.Classes
 
                 foreach (XmlElements element in Enum.GetValues(typeof(XmlElements)))
                 {
+                    // Deprecated   
+                    switch (element)
+                    {
+                        case XmlElements.MovieFolders:
+                        case XmlElements.TvFolders:
+                            continue;
+                    }
+                    
                     xw.WriteStartElement(element.ToString());
                     switch (element)
                     {
@@ -368,13 +310,11 @@ namespace Meticumedia.Classes
                         case XmlElements.MovieFileFormat:
                             MovieFileFormat.Save(xw);
                             break;
-                        case XmlElements.MovieFolders:
-                            foreach (ContentRootFolder movieFolder in MovieFolders)
-                                movieFolder.Save(xw);
+                        case XmlElements.MovieFolderColletion:
+                            MovieFolders.Save(xw);
                             break;
-                        case XmlElements.TvFolders:
-                            foreach (ContentRootFolder tvFolder in TvFolders)
-                                tvFolder.Save(xw);
+                        case XmlElements.TvFolderCollection:
+                            TvFolders.Save(xw);
                             break;
                         case XmlElements.VideoFileTypes:
                             foreach (string fileType in VideoFileTypes)
@@ -471,23 +411,11 @@ namespace Meticumedia.Classes
                         case XmlElements.MovieFileFormat:
                             MovieFileFormat.Load(propNode);
                             break;
-                        case XmlElements.MovieFolders:
-                            MovieFolders = new ObservableCollection<ContentRootFolder>();
-                            foreach (XmlNode movieFolderNode in propNode.ChildNodes)
-                            {
-                                ContentRootFolder folder = new ContentRootFolder(ContentType.Movie);
-                                folder.Load(movieFolderNode);
-                                MovieFolders.Add(folder);
-                            }
+                        case XmlElements.MovieFolderColletion:
+                            MovieFolders.Load(propNode);
                             break;
-                        case XmlElements.TvFolders:
-                            TvFolders = new ObservableCollection<ContentRootFolder>();
-                            foreach (XmlNode tvFolderNode in propNode.ChildNodes)
-                            {
-                                ContentRootFolder folder = new ContentRootFolder(ContentType.TvShow);
-                                folder.Load(tvFolderNode);
-                                TvFolders.Add(folder);
-                            }
+                        case XmlElements.TvFolderCollection:
+                            TvFolders.Load(propNode);
                             break;
                         case XmlElements.VideoFileTypes:
                             VideoFileTypes = new ObservableCollection<string>();
@@ -533,6 +461,24 @@ namespace Meticumedia.Classes
                             break;
                         case XmlElements.General:
                             General.Load(propNode);
+                            break;
+                        case XmlElements.MovieFolders:
+                            MovieFolders.Clear();
+                            foreach (XmlNode movieFolderNode in propNode.ChildNodes)
+                            {
+                                ContentRootFolder folder = new ContentRootFolder(ContentType.Movie);
+                                folder.Load(movieFolderNode);
+                                MovieFolders.Add(folder);
+                            }
+                            break;
+                        case XmlElements.TvFolders:
+                            TvFolders.Clear();
+                            foreach (XmlNode tvFolderNode in propNode.ChildNodes)
+                            {
+                                ContentRootFolder folder = new ContentRootFolder(ContentType.TvShow);
+                                folder.Load(tvFolderNode);
+                                TvFolders.Add(folder);
+                            }
                             break;
                     }
                 }

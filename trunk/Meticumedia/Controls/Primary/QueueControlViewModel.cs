@@ -702,6 +702,7 @@ namespace Meticumedia.Controls
 
             // Clear progress bar once all item completed
             this.UpdateProgressSafe(0, string.Empty);
+            
         }
 
         private bool RemoveQueueItemIfNeededSafe(OrgItem item)
