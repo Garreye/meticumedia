@@ -44,4 +44,6 @@ save schedule grouping and days
 
 content collection list sorting..
 
-force refresh..
+force 
+
+mod icon

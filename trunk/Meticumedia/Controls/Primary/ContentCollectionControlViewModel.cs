@@ -239,6 +239,7 @@ namespace Meticumedia.Controls
                 selectedContents = value;
                 OnPropertyChanged(this, "SelectedContentViewModel");
                 OnPropertyChanged(this, "SingleItemSelectionVisibility");
+                UpdateMoveToFolderMenuItems();
             }
         }
         private IList selectedContents;
@@ -367,15 +368,12 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public ContentCollectionControlViewModel(ContentType contentType, ListBox contentListBox)
+        public ContentCollectionControlViewModel(ContentType contentType)
         {
             this.contentType = contentType;
-            this.contentListBox = contentListBox;
             this.FolderFilters = new ObservableCollection<string>();
             this.GenreFilters = new ObservableCollection<string>();
             this.MoveRootFolderItems = new ObservableCollection<MenuItem>();
-
-            this.contentListBox.SelectionChanged += listView_SelectionChanged;
 
             this.ContentType = contentType;
             ContentCollection contentCollection = contentType == ContentType.TvShow ? Organization.Shows : Organization.Movies;
@@ -388,7 +386,7 @@ namespace Meticumedia.Controls
                 contentCollection.LoadComplete += Content_LoadComplete;
             }
 
-            Settings.SettingsModified += new EventHandler(Settings_SettingsModified);
+            Settings.SettingsModified +=Settings_SettingsModified;
             ContentRootFolder.UpdateProgressChange += ContentRootFolder_UpdateProgressChange;
 
             this.Folders = new ObservableCollection<ContentRootFolder>();
@@ -409,19 +407,12 @@ namespace Meticumedia.Controls
 
             liveCollection.IsLiveSorting = true;
             liveCollection.LiveSortingProperties.Add("DisplayName");
-        }
-
-        
+        }        
 
         #endregion
 
         #region Event Handlers
 
-        private void listView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            OnPropertyChanged(this, "SingleItemSelectionVisibility");
-            UpdateRootFolderItems();
-        }
 
         /// <summary>
         /// When settings are modified the folders are updated
@@ -469,6 +460,9 @@ namespace Meticumedia.Controls
             }
             else
                 this.SelectedFolder = this.Folders[0];
+            
+            // Update move to item for selected contents
+            UpdateMoveToFolderMenuItems();
         }
 
         private bool contentLoaded = false;
@@ -555,7 +549,7 @@ namespace Meticumedia.Controls
 
         #region Methods
 
-        private void UpdateRootFolderItems()
+        private void UpdateMoveToFolderMenuItems()
         {
             if (this.SelectedContents == null)
                 return;

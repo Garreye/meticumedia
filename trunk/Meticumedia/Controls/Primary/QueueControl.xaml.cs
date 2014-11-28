@@ -18,14 +18,10 @@ namespace Meticumedia.Controls
     /// Interaction logic for QueueControl.xaml
     /// </summary>
     public partial class QueueControl : UserControl
-    {
-        private QueueControlViewModel viewModel;
-        
+    {        
         public QueueControl()
         {
             InitializeComponent();
-            viewModel = new QueueControlViewModel(dgQueue);
-            this.DataContext = viewModel;
 
             OrgItemQueueableViewModel.ItemsToQueue += OrgItemQueueableViewModel_ItemsToQueue;
         }

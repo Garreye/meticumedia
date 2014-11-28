@@ -20,16 +20,12 @@ namespace Meticumedia.Controls
     /// Interaction logic for ScanControl.xaml
     /// </summary>
     public partial class ScanControl : UserControl
-    {
-        private ScanControlViewModel viewModel;
-        
+    {        
         #region Constructor
 
         public ScanControl()
         {
             InitializeComponent();
-            viewModel = new ScanControlViewModel(dgResults);
-            this.DataContext = viewModel;
         }
 
         #endregion

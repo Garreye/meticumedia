@@ -49,7 +49,7 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public LogControlViewModel(DataGrid grid) : base(grid)
+        public LogControlViewModel() : base()
         {
             Organization.ActionLog.CollectionChanged += ActionLog_CollectionChanged;
         }

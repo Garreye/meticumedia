@@ -24,7 +24,19 @@ namespace Meticumedia.Controls
             private set;
         }
 
-        public IList SelectedOrgItems { get; set; }
+        public IList SelectedOrgItems
+        {
+            get
+            {
+                return selectedOrgItems;
+            }
+            set
+            {
+                selectedOrgItems = value;
+                SelectedOrgItemsChange();
+            }
+        }
+        private IList selectedOrgItems;
 
         public ICollectionView OrgItemsCollection { get; set; }
 
@@ -295,10 +307,8 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public OrgItemDisplayViewModel(DataGrid grid)
-        {
-            this.grid = grid;
-            
+        public OrgItemDisplayViewModel()
+        {            
             this.OrgItems = new ObservableCollection<OrgItem>();
             this.OrgItemsCollection = CollectionViewSource.GetDefaultView(OrgItems);
             this.OrgItemsCollection.Filter = new Predicate<object>(FilterItem);
@@ -312,9 +322,11 @@ namespace Meticumedia.Controls
 
         #endregion
 
-        private DateTime lastRefresh = DateTime.Now;
+        protected virtual void SelectedOrgItemsChange()
+        {
+        }
 
-        protected DataGrid grid;
+        private DateTime lastRefresh = DateTime.Now;
 
         protected bool FilterItem(object obj)
         {
@@ -332,7 +344,7 @@ namespace Meticumedia.Controls
         }
 
         protected void RefreshResultsSafe(bool limitRate)
-        {
+        {            
             if (limitRate && (DateTime.Now - lastRefresh).TotalSeconds < 5)
                 return;
 
@@ -342,9 +354,7 @@ namespace Meticumedia.Controls
             {
                 if (App.Current.Dispatcher.CheckAccess())
                 {
-                    grid.CancelEdit();
                     this.OrgItemsCollection.Refresh();
-
                 }
                 else
                     App.Current.Dispatcher.Invoke((Action)delegate
