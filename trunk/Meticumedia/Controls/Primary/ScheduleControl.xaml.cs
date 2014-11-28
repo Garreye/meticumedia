@@ -25,7 +25,6 @@ namespace Meticumedia.Controls
         public ScheduleControl()
         {
             InitializeComponent();
-            this.DataContext = new ScheduleControlViewModel();
         }
 
         #endregion

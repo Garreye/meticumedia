@@ -320,7 +320,7 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public QueueControlViewModel(DataGrid grid) : base(grid)
+        public QueueControlViewModel() : base()
         {
             this.OrgItems.CollectionChanged += QueueItems_CollectionChanged;
             this.ActionFilter = OrgAction.All;

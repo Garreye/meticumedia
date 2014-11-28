@@ -23,8 +23,6 @@ namespace Meticumedia.Controls
         public LogControl()
         {
             InitializeComponent();
-            LogControlViewModel vm = new LogControlViewModel(dgResults);
-            this.DataContext = vm;
         }
     }
 }

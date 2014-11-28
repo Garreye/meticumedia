@@ -385,6 +385,8 @@ namespace Meticumedia.Controls
         }
         private bool deleteEnables = true;
 
+        public ObservableCollection<DataGridColumn> GridColumns { get; set; }
+
         #endregion
 
         #region Context Menu Related
@@ -473,9 +475,9 @@ namespace Meticumedia.Controls
 
         #region Constructor
 
-        public ScanControlViewModel(DataGrid grid) : base(grid)
+        public ScanControlViewModel() : base()
         {
-            grid.SelectionChanged += grid_SelectionChanged;
+            this.GridColumns = new ObservableCollection<DataGridColumn>();
 
             this.RunSelections = new ObservableCollection<object>();
             UpdateRunSelections();
@@ -509,12 +511,11 @@ namespace Meticumedia.Controls
             this.MovieFolderItems = new ObservableCollection<MenuItem>();
         }
 
-
         #endregion
 
         #region Event Handlers
 
-        void grid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        protected override void SelectedOrgItemsChange()
         {
             OnPropertyChanged(this, "SingleDirScanSelectionVisibility");
             OnPropertyChanged(this, "AnySelectionVisibility");
@@ -1021,7 +1022,7 @@ namespace Meticumedia.Controls
 
         private void SetupColumns()
         {
-            this.grid.Columns.Clear();
+            this.GridColumns.Clear();
 
             EnumDescriptionConverter enumConv = new EnumDescriptionConverter();
 
@@ -1065,7 +1066,7 @@ namespace Meticumedia.Controls
                 binding.Converter = converter;
 
             col.Binding = binding;
-            this.grid.Columns.Add(col);
+            this.GridColumns.Add(col);
         }
 
         private void AddCheckBoxColumn(string header, string bindingPath, string enableBindingPath = "", IValueConverter converter = null)
@@ -1093,7 +1094,7 @@ namespace Meticumedia.Controls
             cellTemp.VisualTree = checkFactory;
             col.CellTemplate = cellTemp;
 
-            this.grid.Columns.Add(col);
+            this.GridColumns.Add(col);
         }
 
         #endregion

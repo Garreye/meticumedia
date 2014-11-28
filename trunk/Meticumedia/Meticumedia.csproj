@@ -112,14 +112,12 @@
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Primary\LogControlViewModel.cs" />
-    <Compile Include="Controls\Primary\MovieCollectionControl.cs" />
     <Compile Include="Controls\Primary\OrgItemDisplayViewModel.cs" />
     <Compile Include="Controls\Primary\QueueControl.xaml.cs">
       <DependentUpon>QueueControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Primary\QueueControlViewModel.cs" />
     <Compile Include="Controls\Primary\ScheduleControlViewModel.cs" />
-    <Compile Include="Controls\Primary\TvCollectionControl.cs" />
     <Compile Include="Controls\Settings\AutoMoveSetupControl.xaml.cs">
       <DependentUpon>AutoMoveSetupControl.xaml</DependentUpon>
     </Compile>
@@ -140,6 +138,7 @@
     <Compile Include="Controls\Settings\GeneralSettingsControlViewModel.cs" />
     <Compile Include="Controls\Settings\RootFolderControlViewModel.cs" />
     <Compile Include="Controls\Settings\ScanFoldersControlViewModel.cs" />
+    <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="Windows\ContentEditorWindowViewModel.cs" />
     <Compile Include="Windows\ContentEditorWindow.xaml.cs">
       <DependentUpon>ContentEditorWindow.xaml</DependentUpon>
@@ -162,6 +161,7 @@
     <Compile Include="WPF\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="WPF\BindableMultiSelectListBox.cs" />
     <Compile Include="WPF\BindableSelectTreeView.cs" />
+    <Compile Include="WPF\DataGridColumnsBehavior.cs" />
     <Compile Include="WPF\OkCancelWindowViewModel.cs" />
     <Compile Include="WPF\ProgressViewModel.cs" />
     <Compile Include="WPF\RelayCommand.cs" />

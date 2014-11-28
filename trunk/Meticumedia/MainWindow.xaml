@@ -10,35 +10,37 @@
         </Grid.RowDefinitions>
         <Menu Height="23" Name="menu1" AllowDrop="True">
             <MenuItem Header="File">
-                <MenuItem Header="Exit" />
+                <MenuItem Header="Exit" Click="exit_Click" />
             </MenuItem>
             <MenuItem Header="Tools">
-                <MenuItem Header="Settings" Click="menuSettings_Click" />
+                <MenuItem Header="Settings" Command="{Binding OpenSettingsCommand}" />
+                <MenuItem Header="Refresh TV Shows" Command="{Binding RefreshTvShowsCommand}" />
+                <MenuItem Header="Refresh Movies" Command="{Binding RefreshMoviesCommand}" />
             </MenuItem>
             <MenuItem Header="Help" >
-                <MenuItem Header="About" Click="About_Click" />                
-                <MenuItem Header="Donate" Click="Donate_Click" />
+                <MenuItem Header="About" Command="{Binding OpenAboutCommand}" />
+                <MenuItem Header="Donate" Command="{Binding DonateCommand}" />
             </MenuItem>
         </Menu>
         
         <TabControl Grid.Row="1" Name="tabControl1" Margin="3">
             <TabItem Header="TV Shows" Name="tiShows">
-                <cntrls:TvCollectionControl />
+                <cntrls:ContentCollectionControl DataContext="{Binding TvShowViewModel}" />
             </TabItem>
             <TabItem Header="TV Schedule" Name="tiSchedule">
-                <cntrls:ScheduleControl />
+                <cntrls:ScheduleControl DataContext="{Binding ScheduleViewModel}" />
             </TabItem>
             <TabItem Header="Movies" Name="tiMovies">
-                <cntrls:MovieCollectionControl />
+                <cntrls:ContentCollectionControl DataContext="{Binding MoviesViewModel}" />
             </TabItem>
-            <TabItem Header="Scan" Name="tiScan">
-                <cntrls:ScanControl />
+            <TabItem Header="Scan" Name="tiScan" >
+                <cntrls:ScanControl DataContext="{Binding ScanViewModel}" />
             </TabItem>
-            <TabItem Header="Queue" Name="tiQueue">
-                <cntrls:QueueControl />
+            <TabItem Header="Queue" Name="tiQueue" >
+                <cntrls:QueueControl DataContext="{Binding QueueViewModel}" />
             </TabItem>
             <TabItem Header="Log" Name="tiLog">
-                <cntrls:LogControl />
+                <cntrls:LogControl DataContext="{Binding LogViewModel}" />
             </TabItem>
         </TabControl>
     </Grid>
