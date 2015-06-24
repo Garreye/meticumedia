@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="Meticumedia.Controls.ScanFoldersControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpfr="clr-namespace:Meticumedia.WPF"
+             xmlns:cntrls="clr-namespace:Meticumedia.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="358" d:DesignWidth="636">
+    <UserControl.Resources>
+        <wpfr:BoolInverterConverter x:Key="boolInvConv" />
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Name="grTopButtons">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="Add" Grid.Column="0" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding AddFolderCommand}" />
+            <Button Content="Remove" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding RemoveFolderCommand}" />
+            <Button Content="Clear" Grid.Column="3" Height="23" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Top" Width="75" Command="{Binding ClearFoldersCommand}" />
+        </Grid>
+
+        <ListBox Grid.Row="1" ItemsSource="{Binding Folders}" HorizontalContentAlignment="Stretch" SelectionMode="Single" SelectedItem="{Binding SelectedFolder}" ScrollViewer.CanContentScroll="False" >
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderThickness="1" BorderBrush="Black" Margin="5">
+                        <Grid Margin="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <TextBlock Text="Directory" Margin="5,0" VerticalAlignment="Center" />
+                                <TextBox Height="23" Text="{Binding FolderPath}" Width="250" Margin="5" VerticalAlignment="Center" />
+                                <Button Content="..." Height="23" Width="40" Margin="5" Command="{Binding DataContext.ModifyFolderPathCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <RadioButton IsChecked="{Binding CopyFrom, Converter={StaticResource boolInvConv}}" Content="Move Files From" Height="16" Name="rbMove" Margin="5" />
+                                <RadioButton IsChecked="{Binding CopyFrom}" Content="Copy Files From" Height="16" Name="rbCopy" Margin="5" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding Recursive}" Content="Recurvsive" Height="16" Margin="5"/>
+                                <CheckBox IsChecked="{Binding AllowDeleting}" Content="Allow Files to be Deletec" Height="16" Margin="5"/>
+                                <CheckBox IsChecked="{Binding AutomaticallyDeleteEmptyFolders}" Content="Automatically Delete Empty Folders" Height="16" Margin="5"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+    </Grid>
+</UserControl>
+

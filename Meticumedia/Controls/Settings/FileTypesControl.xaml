@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="Meticumedia.Controls.FileTypesControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpfr="clr-namespace:Meticumedia.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="393" d:DesignWidth="150">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBox Grid.Column="0" Text="{Binding FileTypeEntry, UpdateSourceTrigger=PropertyChanged}" Margin="5" ToolTip="Enter file type to add here, then click + button." />
+            <Button Grid.Column="1" Content="+" Width="20" Margin="0,5,5,5" Command="{Binding AddTypeCommand}" ToolTip="Add file type enter in text box to the list of types." />
+            <Button Grid.Column="2" Content="-" Width="20" Margin="0,5,5,5" Command="{Binding RemoveTypesCommand}" ToolTip="Remove file types selected in below list." />
+        </Grid>
+
+        <wpfr:BindableMultiSelectListBox Grid.Row="1" ItemsSource="{Binding FileTypes}" SelectionMode="Extended" BindableSelectedItems="{Binding SelectedTypes, Mode=OneWayToSource}" Margin="3" MinHeight="40" />
+    </Grid>
+</UserControl>

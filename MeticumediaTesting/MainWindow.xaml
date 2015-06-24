@@ -1,0 +1,19 @@
+﻿<Window x:Class="MeticumediaTesting.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:testing="clr-namespace:MeticumediaTesting"
+        Title="MainWindow" Height="350" Width="525"
+        Loaded="Window_Loaded">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <GroupBox Grid.Row="0" Header="Match Test">
+            <testing:MatchTestControl />
+        </GroupBox>
+        
+        
+    </Grid>
+</Window>
