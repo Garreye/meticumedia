@@ -7,9 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Windows.Forms;
 
-namespace Meticumedia
+namespace Meticumedia.Classes
 {
     /// <summary>
     /// Helper class for attempting to split string with no whitespace into words.
@@ -32,7 +31,7 @@ namespace Meticumedia
         public static void Initialize()
         {
             // Get all words
-            words = File.ReadAllLines(Path.Combine(Application.StartupPath, "wordsEn.txt")).ToList();
+            words = File.ReadAllLines(Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wordsEn.txt")).ToList();
 
             // Create dictionary of word list based on length
             lengthWords = new Dictionary<int, List<string>>();
