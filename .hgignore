@@ -1,8 +1,0 @@
-syntax: glob
-Meticumedia/obj/*
-Meticumedia/bin/*
-MeticumediaTesting/obj/*
-MeticumediaTesting/bin/*
-Getting Started.docx
-Push.txt
-*.bak

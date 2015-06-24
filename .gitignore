@@ -1,0 +1,12 @@
+*.user
+*.suo
+*.htm
+*.bak
+*.vsp
+*.psess
+*.dat
+*.orig
+bin
+obj
+Debug
+Release
