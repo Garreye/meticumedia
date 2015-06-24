@@ -532,6 +532,7 @@ namespace Meticumedia.Classes
                                     path = defaultTvFolder.FullPath;
 
                                 bestMatch.RootFolder = path;
+                                bestMatch.Path = bestMatch.BuildFolderPath();
 
                                 // Save show in temporary shows list (in case there are more files that may match to it during scan)
                                 lock (directoryScanLock)
