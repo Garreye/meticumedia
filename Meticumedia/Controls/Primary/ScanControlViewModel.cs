@@ -813,13 +813,18 @@ namespace Meticumedia.Controls
         {
             this.MovieFolderItems.Clear();
             foreach (ContentRootFolder folder in Settings.MovieFolders)
-            {
-                MenuItem item = new MenuItem();
-                item.Header = folder.FullPath;
-                item.Command = new RelayCommand(param => this.SetMovieFolder(folder.FullPath));
+                UpdateMovieFolderItem(folder);
+        }
 
-                this.MovieFolderItems.Add(item);
-            }
+        private void UpdateMovieFolderItem(ContentRootFolder folder)
+        {
+            MenuItem item = new MenuItem();
+            item.Header = folder.FullPath;
+            item.Command = new RelayCommand(param => this.SetMovieFolder(folder.FullPath));
+            this.MovieFolderItems.Add(item);
+
+            foreach (ContentRootFolder subFolder in folder.ChildFolders)
+                UpdateMovieFolderItem(subFolder);
         }
 
         private void QueueItems()
