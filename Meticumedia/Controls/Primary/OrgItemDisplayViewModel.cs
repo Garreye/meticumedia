@@ -318,6 +318,15 @@ namespace Meticumedia.Controls
             liveCollection.LiveFilteringProperties.Add("Category");
             liveCollection.LiveFilteringProperties.Add("Action");
             liveCollection.IsLiveFiltering = true;
+
+            liveCollection.IsLiveSorting = true;
+            liveCollection.LiveSortingProperties.Add("ActionTime");
+            liveCollection.LiveSortingProperties.Add("Action");
+            liveCollection.LiveSortingProperties.Add("Category");
+            liveCollection.LiveSortingProperties.Add("QueueStatus");
+            liveCollection.LiveSortingProperties.Add("DestinationPath");
+            liveCollection.LiveSortingProperties.Add("SourcePath");
+            liveCollection.LiveSortingProperties.Add("Status");
         }
 
         #endregion
