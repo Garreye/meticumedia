@@ -6,7 +6,7 @@ _meticumedia_ is a windows application which automates TV and movie file organiz
   * Move files from your download folder
 
 # Installation #
-Latest version is available in [Releases](https://github.com/Garreye/meticumedia/releases/)
+Latest version is available in [Releases](https://github.com/Garreye/meticumedia/releases/).
 
 See the [getting started guide](https://github.com/Garreye/meticumedia/wiki/GettingStarted) for basics on using _meticumedia_.
 
