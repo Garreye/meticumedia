@@ -187,7 +187,7 @@
                 </Grid.RowDefinitions>
 
                 <CheckBox Grid.Row="0" Content="Include in Folder Organization Scans (allows file renaming)" IsChecked="{Binding Content.DoRenaming}" Margin="3"  />
-                <CheckBox Grid.Row="1" Content="Include in Missing Epsidode Scans" IsChecked="{Binding TvShow.DoMissingCheck}" Margin="3" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}" />
+                <CheckBox Grid.Row="1" Content="Include in Missing Episode Scans" IsChecked="{Binding TvShow.DoMissingCheck}" Margin="3" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}" />
                 <CheckBox Grid.Row="2" Content="Include in Schedule" IsChecked="{Binding TvShow.IncludeInSchedule}" Margin="3" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}" />
                 <CheckBox Grid.Row="3" Content="Use DVD Episode Order (if available)" IsChecked="{Binding TvShow.DvdEpisodeOrder}" Margin="3" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}" />
 
