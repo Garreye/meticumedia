@@ -6,6 +6,7 @@
 *.psess
 *.dat
 *.orig
+*.suo
 bin
 obj
 Debug
