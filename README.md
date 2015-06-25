@@ -1,3 +1,5 @@
+![Logo](https://github.com/Garreye/meticumedia/wiki/Images/Logo.jpg)<br>
+
 _meticumedia_ is a windows application which automates TV and movie file organization:
   * Rename TV episode files to user-defined format (with handling for double episodes)
   * Rename movie files to user-defined format
