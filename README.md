@@ -1,17 +1,14 @@
-# Downloads #
-Downloads have been moved to [Google drive](https://drive.google.com/folderview?id=0B1Haz1DPaT-2NmM3SWJaVXVsbVk&usp=sharing). (Google code no longer supports downloading.)
-
-# Overview #
 _meticumedia_ is a windows application which automates TV and movie file organization:
   * Rename TV episode files to user-defined format (with handling for double episodes)
   * Rename movie files to user-defined format
-  * Manage TV/movie folder structure
+  * Organize TV/movie folder structure
   * Check for missing TV episodes
   * Move files from your download folder
 
-A [getting started guide](http://code.google.com/p/meticumedia/wiki/GettingStarted) is include in the wiki.
+# Installation #
+Downloads available at [Google drive](https://drive.google.com/folderview?id=0B1Haz1DPaT-2NmM3SWJaVXVsbVk&usp=sharing).
 
-Please visit the [forums](http://meticumedia.proboards.com) and give me feedback!
+See the [getting started guide](https://github.com/Garreye/meticumedia/wiki/GettingStarted) for basics on using _meticumedia_.
 
 # Settings #
 The settings in _meticumedia_ allow the user to specify:
@@ -30,9 +27,7 @@ _meticumedia_ has the following tabs in its interface:
   * Queue - queue of current organization action being processed (runs asynchronously, so that interface is not busy while items are being process)
   * Log - list of previously performed organization actions
 
-![http://wiki.meticumedia.googlecode.com/hg/Images/Overview.jpg](http://wiki.meticumedia.googlecode.com/hg/Images/Overview.jpg)
-
-More info on [interface wiki page](http://code.google.com/p/meticumedia/wiki/Interface)
+More info on [interface page](https://github.com/Garreye/meticumedia/wiki/Interface)
 
 # Development #
-_meticumedia_ is written in C# and developed in Visual Studio Express 2012. If you wish to contribute to the project please send me an email and we can work out how you can help.
+_meticumedia_ is written in C# and developed in Visual Studio Express 2012. If you wish to contribute to the project please contact me and we can work out how you can help.
