@@ -7,7 +7,7 @@ _meticumedia_ is a windows application which automates TV and movie file organiz
   * Check for missing TV episodes
   * Move files from your download folder
 
-# Installation #
+# Getting Started
 Latest version is available in [Releases](https://github.com/Garreye/meticumedia/releases/).
 
 See the [getting started guide](https://github.com/Garreye/meticumedia/wiki/GettingStarted) for basics on using _meticumedia_.
@@ -29,7 +29,7 @@ _meticumedia_ has the following tabs in its interface:
   * Queue - queue of current organization action being processed (runs asynchronously, so that interface is not busy while items are being process)
   * Log - list of previously performed organization actions
 
-More info on [interface page](https://github.com/Garreye/meticumedia/wiki/Interface)
+More info on [interface page](https://github.com/Garreye/meticumedia/wiki/Interface).
 
 # Development #
 _meticumedia_ is written in C# and developed in Visual Studio Express 2012. If you wish to contribute to the project please contact me and we can work out how you can help.
