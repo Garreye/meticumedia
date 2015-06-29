@@ -412,6 +412,11 @@ namespace Meticumedia.Classes
             TvDatabaseHelper.FullShowSeasonsUpdate(this);
             this.LastUpdated = DateTime.Now;
 
+            UpdateEzTvShow();
+        }
+
+        public void UpdateEzTvShow()
+        {
             if (this.EzTvShow == null)
                 EzTvAccess.GetShowId(this);
 

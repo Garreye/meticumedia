@@ -670,9 +670,12 @@ namespace Meticumedia.Classes
             // Check if content found
             if (contentExists && contentComplete)
             {
-                // Check if show needs updating
+                // Check if content needs updating
                 if ((DateTime.Now - newContent.LastUpdated).TotalDays > 7)
                     newContent.UpdateInfoFromDatabase();
+
+                if (newContent is TvShow)
+                    (newContent as TvShow).UpdateEzTvShow();
 
                 // Update progress
                 if (this.updateNumber == processNumber)
