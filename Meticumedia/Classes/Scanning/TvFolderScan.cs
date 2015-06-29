@@ -52,7 +52,7 @@ namespace Meticumedia.Classes
                 {
                     TvShow show = (TvShow)Organization.Shows[i];
 
-                    if (show.RootFolder != tvFolder.FullPath)
+                    if (show.Id <= 0 || show.RootFolder != tvFolder.FullPath)
                         continue;
 
                     string builtFolder = Path.Combine(show.RootFolder, FileHelper.GetSafeFileName(show.DatabaseName));

@@ -13,6 +13,9 @@ using System.Xml;
 using Ookii.Dialogs.Wpf;
 using System.Windows;
 using System.Windows.Media;
+using System.Net;
+using System.Diagnostics;
+using System.IO.Compression;
 
 namespace Meticumedia.Classes
 {
@@ -366,6 +369,7 @@ namespace Meticumedia.Classes
                     case OrgAction.Copy:
                     case OrgAction.Rename:
                     case OrgAction.Delete:
+                    case OrgAction.Torrent:
                         return true;
                     default:
                         return false;
@@ -597,7 +601,7 @@ namespace Meticumedia.Classes
             if (episode2 != null)
                 this.TvEpisode2 = new TvEpisode(episode2);
             this.Category = category;
-            this.Enable = false;
+            this.Enable = action == OrgAction.Torrent;
             this.ScanDirectory = scanDir;
             this.Number = 0;
         }
@@ -1311,6 +1315,9 @@ namespace Meticumedia.Classes
                             File.Delete(this.SourcePath);
                         this.ActionComplete = true;
                         break;
+                    case OrgAction.Torrent:
+                        this.ActionComplete = DownloadTorrent();
+                        break;
                     default:
                         throw new Exception("Unknown queue action");
                 }
@@ -1451,6 +1458,85 @@ namespace Meticumedia.Classes
            if (!root)
                Directory.Delete(directory);
             return;
+        }
+
+        private bool DownloadTorrent()
+        {
+            EzTvEpisode ezTvEpisode = this.TvEpisode.GetEzTvEpisode();
+
+            // Download the torrent file
+            if (ezTvEpisode != null)
+            {
+                WebClient webClient = new WebClient();
+                webClient.DownloadProgressChanged += webClient_DownloadProgressChanged;
+
+                if (!string.IsNullOrEmpty(ezTvEpisode.Magnet))
+                {
+                    Process.Start(ezTvEpisode.Magnet);
+                    return true;
+                }
+                else
+                    foreach (string mirror in ezTvEpisode.Mirrors)
+                        if (Path.GetExtension(mirror).ToLower() == ".torrent")
+                        {
+                            try
+                            {
+                                if (!Directory.Exists(Settings.General.TorrentDirectory))
+                                    Directory.CreateDirectory(Settings.General.TorrentDirectory);
+
+                                DownloadFile(mirror, this.DestinationPath);
+
+                                Process.Start(this.DestinationPath);
+                                return true;
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+            }
+
+            this.QueueStatus = OrgQueueStatus.Failed;
+            this.ActionSucess = false;
+            return true;            
+        }
+
+        private void DownloadFile(string url, string file)
+        {
+            byte[] result;
+            byte[] buffer = new byte[4096];
+
+            WebRequest wr = WebRequest.Create(url);
+            wr.ContentType = "application/x-bittorrent";
+            using (WebResponse response = wr.GetResponse())
+            {
+                bool gzip = response.Headers["Content-Encoding"] == "gzip";
+                var responseStream = gzip
+                                        ? new GZipStream(response.GetResponseStream(), CompressionMode.Decompress)
+                                        : response.GetResponseStream();
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    int count = 0;
+                    do
+                    {
+                        count = responseStream.Read(buffer, 0, buffer.Length);
+                        memoryStream.Write(buffer, 0, count);
+                    } while (count != 0);
+
+                    result = memoryStream.ToArray();
+
+                    using (BinaryWriter writer = new BinaryWriter(new FileStream(file, FileMode.Create)))
+                    {
+                        writer.Write(result);
+                    }
+                }
+            }
+        }
+
+        void webClient_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            OnProgressChange(e.ProgressPercentage);
         }
 
         /// <summary>
@@ -1736,6 +1822,13 @@ namespace Meticumedia.Classes
         /// <returns></returns>
         public void BuildDestination()
         {
+            if (this.Action == OrgAction.Torrent)
+            {
+                this.DestinationPath = Path.Combine(Settings.General.TorrentDirectory, this.TvEpisode.GetEzTvEpisode().Title + ".torrent");
+                this.SourcePath = this.DestinationPath; // For processing messages that use source path
+                return;
+            }
+            
             // Build destination file based on category
             switch (this.Category)
             {
@@ -1750,7 +1843,7 @@ namespace Meticumedia.Classes
                     this.DestinationPath = FileHelper.DELETE_DIRECTORY;
                     return;
                 case FileCategory.TvVideo:
-                    string fileName = this.TvEpisode.Show.BuildFilePath(this.TvEpisode, this.TvEpisode2, string.Empty);
+                     string fileName = this.TvEpisode.Show.BuildFilePath(this.TvEpisode, this.TvEpisode2, string.Empty);
 
                     this.DestinationPath = fileName + Path.GetExtension(this.SourcePath);
                     return;
@@ -1776,6 +1869,9 @@ namespace Meticumedia.Classes
         /// <returns>Item source, action, and destination string</returns>
         public override string ToString()
         {
+            if (this.Action == OrgAction.Torrent)
+                return "Torrent download of " + this.TvEpisode.ToString();            
+            
             string str = this.SourcePath + " (" + this.Category + ")" + " - Action: " + this.Action;
 
             switch (this.Action)

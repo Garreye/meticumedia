@@ -890,6 +890,19 @@ namespace Meticumedia.Classes
             }
         }
 
+        public EzTvEpisode GetEzTvEpisode()
+        {
+            if (show.EzTvShow == null)
+                return null;
+            
+            // Get EzTv episode
+            foreach (EzTvEpisode ezEp in show.EzTvShow.Episodes)
+                if ((!string.IsNullOrEmpty(ezEp.Magnet) || ezEp.Mirrors.Count > 0) && ezEp.Season == this.Season && ezEp.Episode == this.DisplayNumber)
+                    return ezEp;
+
+            return null;
+        }
+
         /// <summary>
         /// Equals check for this episode and another episode
         /// </summary>

@@ -92,6 +92,10 @@
     <Compile Include="Classes\Settings\AutoMoveFileSetup.cs" />
     <Compile Include="Classes\Settings\CaseOptionType.cs" />
     <Compile Include="Classes\Settings\GeneralSettings.cs" />
+    <Compile Include="Classes\Torrents\EzTvAccess.cs" />
+    <Compile Include="Classes\Torrents\EzTvEpisode.cs" />
+    <Compile Include="Classes\Torrents\EzTvShow.cs" />
+    <Compile Include="Classes\Torrents\TorrentQuality.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
     <Compile Include="Classes\Tv\TvGroupingType.cs" />
     <Compile Include="Controls\Editors\ContentEditorControl.xaml.cs">
@@ -527,6 +531,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

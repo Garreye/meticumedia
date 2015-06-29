@@ -93,6 +93,7 @@
             <ListBox.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Play" Command="{Binding PlayCommand}" Visibility="{Binding SinglePlayableItemSelectionVisibility}" ToolTip="Opens episode file." />
+                    <MenuItem Header="Get Torrent" Command="{Binding GetTorrentCommand}" ToolTip="Attempts to find torrent file for the selected episode(s)."/>
                     <MenuItem Header="Copy Episode Info to Clipboard" Command="{Binding CopyEpisodeInfoToClipboardCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Copies show name and season/episode value to clipboard. (Paste this into the search box of your download site.)"/>
                     <MenuItem Header="Exclude Show From Schedule" Command="{Binding ExcludeShowFromScheduleCommand}" Visibility="{Binding SingleItemSelectionVisibility}" ToolTip="Copies show name and season/episode value to clipboard. (Paste this into the search box of your download site.)"/>
                     <MenuItem Header="Edit" Command="{Binding EditCommand}" Visibility="{Binding SingleItemSelectionAndShowVisibility}"  />
@@ -102,8 +103,7 @@
                     <MenuItem Header="Locate and Copy" Command="{Binding LocateAndCopyEpisodeCommand}" Visibility="{Binding SingleItemSelectionAndShowVisibility}" ToolTip="Locate episode file and copy it into the show folder."/>
                     <MenuItem Header="Ignore Episode(s)" Command="{Binding IgnoreEpisodeCommand}" Visibility="{Binding IgnorableSelectionVisibility}" />
                     <MenuItem Header="Unignore Episode(s)" Command="{Binding UnignoreEpisodeCommand}" Visibility="{Binding UnignorableSelectionVisibility}" />
-                    <MenuItem Header="Delete File(s) for Episode(s)" Command="{Binding DeleteEpisodeFilesCommand}" Visibility="{Binding DeletableSelectionVisibility}" ToolTip="Delete files related to selected episodes."/>
-                    
+                    <MenuItem Header="Delete File(s) for Episode(s)" Command="{Binding DeleteEpisodeFilesCommand}" Visibility="{Binding DeletableSelectionVisibility}" ToolTip="Delete files related to selected episodes."/>                    
                 </ContextMenu>
             </ListBox.ContextMenu>
         </wpfr:BindableMultiSelectListBox>

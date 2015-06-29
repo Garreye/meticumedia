@@ -22,7 +22,7 @@ namespace MeticumediaTesting
     public partial class MainWindow : Window
     {
         public MainWindow()
-        {
+        {            
             InitializeComponent(); 
         }
 
@@ -30,6 +30,9 @@ namespace MeticumediaTesting
         {
             // Init word helper
             WordHelper.Initialize();
+
+            // Init EzTv
+            EzTvAccess.UpdateShows();
 
             // Load organization and settings from XML
             Settings.Load();

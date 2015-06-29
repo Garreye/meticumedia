@@ -2,7 +2,7 @@
 
 [Setup]
 AppName=meticumedia
-AppVersion=0.9.4
+AppVersion=0.9.5
 DefaultDirName={pf}\meticumedia
 DefaultGroupName=meticumedia
 UninstallDisplayIcon={app}\Meticumedia.exe

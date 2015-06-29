@@ -70,7 +70,7 @@ namespace Meticumedia.Classes
             bool results = base.ContentMatch(search, rootFolder, folderPath, fast, threaded, out contentMatch, null);
             match = new TvShow(contentMatch);
             if (results)
-                TvDatabaseHelper.FullShowSeasonsUpdate(match);
+                match.UpdateInfoFromDatabase();
             return results;
         }
 
@@ -85,7 +85,7 @@ namespace Meticumedia.Classes
             Content contentMatch;
             bool results = base.PathMatch(rootFolder, path, fast, threaded, out contentMatch, null);
             match = new TvShow(contentMatch);
-            TvDatabaseHelper.FullShowSeasonsUpdate(match);
+            match.UpdateInfoFromDatabase();
             return results;
         }
     }

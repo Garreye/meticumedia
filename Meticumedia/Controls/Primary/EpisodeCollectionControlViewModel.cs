@@ -236,6 +236,21 @@ namespace Meticumedia.Controls
             }
         }
 
+        private ICommand getTorrentCommand;
+        public ICommand GetTorrentCommand
+        {
+            get
+            {
+                if (getTorrentCommand == null)
+                {
+                    getTorrentCommand = new RelayCommand(
+                       param => this.GetTorrent()
+                    );
+                }
+                return getTorrentCommand;
+            }
+        }
+
         private ICommand copyEpisodeInfoToClipboardCommand;
         public ICommand CopyEpisodeInfoToClipboardCommand
         {
@@ -461,7 +476,8 @@ namespace Meticumedia.Controls
 
             TvEpisode ep = this.SelectedEpisodes[0] as TvEpisode;
             if (ep.Missing == MissingStatus.Missing)
-                CopyEpisodeInfoToClipboard();
+                if(!GetTorrent())
+                    CopyEpisodeInfoToClipboard();
             else
                 PlayEpisode();
         }
@@ -520,6 +536,68 @@ namespace Meticumedia.Controls
                 ep.PlayEpisodeFile();
         }
 
+        private bool GetTorrent()
+        {
+            List<TvEpisode> selEpisodes = new List<TvEpisode>();
+            foreach(TvEpisode episode in this.SelectedEpisodes)
+                selEpisodes.Add(episode);
+
+            List<string> unmatchedEps = new List<string>();
+
+            List<OrgItem> items = new List<OrgItem>();
+            for(int i=0;i<selEpisodes.Count;i++)
+            {
+                TvEpisode ep = selEpisodes[i];
+                
+                // Check if show needs EzTv setup
+                if (ep.Show.EzTvShow == null)
+                {
+                    if (MessageBox.Show("The show " + ep.Show + " does not have an EzTv show assigned to it. Would you like to open the editor to select one (at the bottom)?", "No EzTv Show Selected", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    {
+                        ContentEditorWindow cew = new ContentEditorWindow(ep.Show);
+                        cew.ShowDialog();
+
+                        if (cew.Results != null)
+                        {
+                            ep.Show.CloneAndHandlePath(cew.Results as TvShow, false);
+                            Organization.Shows.Save();
+                        }
+                    }
+                }                
+
+                // Check that show has EzTv setup
+                if (ep.Show.EzTvShow != null)
+                {
+                    EzTvEpisode ezEp = ep.GetEzTvEpisode();
+                    if (ezEp != null)
+                    {
+                        OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null);
+                        newItem.BuildDestination();
+                        items.Add(newItem);
+                    }
+                    else
+                        unmatchedEps.Add(ep.BuildEpString());
+                }
+            }
+            
+            if (items.Count > 0)
+                OnItemsToQueue(items);
+
+            if(unmatchedEps.Count > 0)
+            {
+                string unmatchStr = "Unable to get torrents for the following files:" + Environment.NewLine;
+                for (int i = 0; i < unmatchedEps.Count; i++)
+                {
+                    unmatchStr += "\t" + unmatchedEps[i];
+                    if (i < unmatchedEps.Count - 1)
+                        unmatchStr += Environment.NewLine;
+                }
+                MessageBox.Show(unmatchStr, "Get Torrent Failure");
+            }
+
+            return false;
+        }
+
         private void CopyEpisodeInfoToClipboard()
         {
             if (this.SelectedEpisodes == null || this.SelectedEpisodes.Count != 1)
@@ -540,7 +618,6 @@ namespace Meticumedia.Controls
                 ep.Clone(editor.Results);
                 Organization.Shows.Save();
             }
-
         }
 
         private void LocateEpisode(bool copy)

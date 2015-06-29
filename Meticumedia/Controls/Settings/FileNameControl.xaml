@@ -10,6 +10,7 @@
              d:DesignHeight="355" d:DesignWidth="512">
     <UserControl.Resources>
         <wpfr:EnumVisibilityConverter x:Key="enumVisConv" />
+        <wpfr:EnumDescriptionConverter x:Key="enumDescConv" />
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="FileWordTypeEnum">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="classes:FileWordType" />
@@ -85,7 +86,13 @@
                             <DataGridTemplateColumn Header="Case" MinWidth="60">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox SelectedItem="{Binding Path=CaseOption, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource CaseOptionTypeEnum}}" ToolTip="Use to force case of text." />
+                                        <ComboBox SelectedItem="{Binding Path=CaseOption, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource CaseOptionTypeEnum}}" ToolTip="Use to force case of text.">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Converter={StaticResource enumDescConv}}"/>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

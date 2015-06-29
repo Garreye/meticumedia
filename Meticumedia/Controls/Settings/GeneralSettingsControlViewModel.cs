@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Meticumedia.Classes;
 using Meticumedia.WPF;
+using System.Windows.Input;
+using Ookii.Dialogs.Wpf;
 
 namespace Meticumedia.Controls
 {
@@ -29,6 +31,25 @@ namespace Meticumedia.Controls
 
         #endregion
 
+        #region Commands
+
+        private ICommand setTorrentDirectoryCommand;
+        public ICommand SetTorrentDirectoryCommand
+        {
+            get
+            {
+                if (setTorrentDirectoryCommand == null)
+                {
+                    setTorrentDirectoryCommand = new RelayCommand(
+                        param => this.SetTorrentDirectory()
+                    );
+                }
+                return setTorrentDirectoryCommand;
+            }
+        }
+
+        #endregion
+
         #region Constructor
 
         public GeneralSettingsControlViewModel(GeneralSettings genSettings)
@@ -37,5 +58,17 @@ namespace Meticumedia.Controls
         }
 
         #endregion
+
+        private void SetTorrentDirectory()
+        {
+            // Open folder browser
+            VistaFolderBrowserDialog folderSel = new VistaFolderBrowserDialog();
+
+            // Add folder if valid folder selected
+            if (folderSel.ShowDialog() == true && System.IO.Directory.Exists(folderSel.SelectedPath))
+            {
+                this.GeneralSettings.TorrentDirectory = folderSel.SelectedPath;
+            }
+        }
     }
 }

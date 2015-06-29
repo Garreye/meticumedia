@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,6 +83,20 @@ namespace Meticumedia.Classes
         }
         private MovieDatabaseSelection defaultMovieDatabase;
 
+        public string TorrentDirectory
+        {
+            get
+            {
+                return torrentDirectory;
+            }
+            set
+            {
+                torrentDirectory = value;
+                OnPropertyChanged(this, "TorrentDirectory");
+            }
+        }
+        private string torrentDirectory;
+
         #endregion
 
         #region Constructors
@@ -92,6 +107,7 @@ namespace Meticumedia.Classes
             this.NumSimultaneousSearches = 5;
             this.DefaultMovieDatabase = MovieDatabaseSelection.TheMovieDb;
             this.DefaultTvDatabase = TvDataBaseSelection.TheTvDb;
+            this.TorrentDirectory = Path.Combine(Organization.GetBasePath(true), "Torrents");
         }
 
         public GeneralSettings(GeneralSettings settings)
@@ -109,6 +125,7 @@ namespace Meticumedia.Classes
             this.NumSimultaneousSearches = settings.NumSimultaneousSearches;
             this.DefaultMovieDatabase = settings.DefaultMovieDatabase;
             this.DefaultTvDatabase = settings.DefaultTvDatabase;
+            this.TorrentDirectory = settings.TorrentDirectory;
         }
 
         #endregion
@@ -118,7 +135,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { NumProcessingThreads, NumSimultaneousSearches, DefaultMovieDatabase, DefaultTvDatabase };
+        private enum XmlElements { NumProcessingThreads, NumSimultaneousSearches, DefaultMovieDatabase, DefaultTvDatabase, TorrentDirectory };
 
         /// <summary>
         /// Saves instance properties to XML file.
@@ -143,6 +160,9 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.DefaultTvDatabase:
                         value = this.DefaultTvDatabase.ToString();
+                        break;
+                    case XmlElements.TorrentDirectory:
+                        value = this.TorrentDirectory;
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -193,6 +213,9 @@ namespace Meticumedia.Classes
                         TvDataBaseSelection tvDb;
                         if (Enum.TryParse<TvDataBaseSelection>(value, out tvDb))
                             this.DefaultTvDatabase = tvDb;
+                        break;
+                    case XmlElements.TorrentDirectory:
+                        this.TorrentDirectory = value;
                         break;
                 }
             }

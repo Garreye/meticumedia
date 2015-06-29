@@ -1043,7 +1043,7 @@ namespace Meticumedia.Controls
                 AddTextColumn("Status", "Status");
                 AddTextColumn("Show", "TvEpisode.Show.DisplayName");
                 AddTextColumn("Season", "TvEpisode.Season");
-                AddTextColumn("Episode", "TvEpisode.Number");
+                AddTextColumn("Episode", "TvEpisode.DisplayNumber");
             }
 
             AddTextColumn("Destination Folder", "DestinationPathDirectory");

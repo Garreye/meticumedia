@@ -38,18 +38,22 @@ namespace Meticumedia.Classes
         [Description("Delete")]
         Delete = 32,
 
+        [Description("Get Torrent")]
+        Torrent = 64,
+
         [Description("Queued")]
-        Queued = 64,
+        Queued = 128,
 
         [Description("No root folder set in settings!")]
-        NoRootFolder = 128,
+        NoRootFolder = 256,
 
         [Description("TBD")]
-        TBD = 256,
+        TBD = 512,
 
         [Description("Processing")]
-        Processing = 512,
+        Processing = 1024,
 
         [Description("Multiple")]
-        All = 1023 };
+        All = 2047
+    };
 }
