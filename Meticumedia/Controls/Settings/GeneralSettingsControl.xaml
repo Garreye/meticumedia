@@ -10,6 +10,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
+        <wpfr:EnumDescriptionConverter x:Key="enumDescConv" />
+        
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="TvDbTypeEnum">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="mm:TvDataBaseSelection" />
@@ -21,9 +23,16 @@
                 <x:Type TypeName="mm:MovieDatabaseSelection" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="TorrentQualityEnum">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="mm:TorrentQuality" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -59,6 +68,16 @@
             <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralSettings.TorrentDirectory}" />
             <Button Grid.Column="1" Margin="3" Content="..." />
         </Grid>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Preferred Torrent Quality" Margin="3" VerticalAlignment="Center" ToolTip="Prefered quality to use for torrent files." />
+        <ComboBox Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource TorrentQualityEnum}}" SelectedItem="{Binding GeneralSettings.PreferredTorrentQuality}" >
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource enumDescConv}}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
 
     </Grid>
 </UserControl>

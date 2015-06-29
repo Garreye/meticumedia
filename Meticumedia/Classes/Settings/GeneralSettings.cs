@@ -97,6 +97,20 @@ namespace Meticumedia.Classes
         }
         private string torrentDirectory;
 
+        public TorrentQuality PreferredTorrentQuality
+        {
+            get
+            {
+                return preferredTorrentQuality;
+            }
+            set
+            {
+                preferredTorrentQuality = value;
+                OnPropertyChanged(this, "PreferredTorrentQuality");
+            }
+        }
+        private TorrentQuality preferredTorrentQuality = TorrentQuality.Sd480p;
+
         #endregion
 
         #region Constructors
@@ -126,6 +140,7 @@ namespace Meticumedia.Classes
             this.DefaultMovieDatabase = settings.DefaultMovieDatabase;
             this.DefaultTvDatabase = settings.DefaultTvDatabase;
             this.TorrentDirectory = settings.TorrentDirectory;
+            this.PreferredTorrentQuality = settings.PreferredTorrentQuality;
         }
 
         #endregion
@@ -135,7 +150,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { NumProcessingThreads, NumSimultaneousSearches, DefaultMovieDatabase, DefaultTvDatabase, TorrentDirectory };
+        private enum XmlElements { NumProcessingThreads, NumSimultaneousSearches, DefaultMovieDatabase, DefaultTvDatabase, TorrentDirectory, PreferredTorrentQuality };
 
         /// <summary>
         /// Saves instance properties to XML file.
@@ -163,6 +178,9 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.TorrentDirectory:
                         value = this.TorrentDirectory;
+                        break;
+                    case XmlElements.PreferredTorrentQuality:
+                        value = this.PreferredTorrentQuality.ToString();
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -216,6 +234,11 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.TorrentDirectory:
                         this.TorrentDirectory = value;
+                        break;
+                    case XmlElements.PreferredTorrentQuality:
+                        TorrentQuality torrentQual;
+                        if (Enum.TryParse<TorrentQuality>(value, out torrentQual))
+                            this.PreferredTorrentQuality = torrentQual;
                         break;
                 }
             }

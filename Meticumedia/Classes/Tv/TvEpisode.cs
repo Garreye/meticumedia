@@ -895,12 +895,63 @@ namespace Meticumedia.Classes
             if (show.EzTvShow == null)
                 return null;
             
-            // Get EzTv episode
+            // Get episodes with matching season/episode (sort by category/flags)
+            Dictionary<TorrentQuality, Dictionary<TorrentFlag, EzTvEpisode>> matchingEpisodes = new Dictionary<TorrentQuality, Dictionary<TorrentFlag, EzTvEpisode>>();
             foreach (EzTvEpisode ezEp in show.EzTvShow.Episodes)
                 if ((!string.IsNullOrEmpty(ezEp.Magnet) || ezEp.Mirrors.Count > 0) && ezEp.Season == this.Season && ezEp.Episode == this.DisplayNumber)
-                    return ezEp;
+                {
+                    if (!matchingEpisodes.ContainsKey(ezEp.Quality))
+                        matchingEpisodes.Add(ezEp.Quality, new Dictionary<TorrentFlag, EzTvEpisode>());
 
-            return null;
+                    if (!matchingEpisodes[ezEp.Quality].ContainsKey(ezEp.Flag))
+                        matchingEpisodes[ezEp.Quality].Add(ezEp.Flag, null);
+
+                    matchingEpisodes[ezEp.Quality][ezEp.Flag] = ezEp;
+                }
+
+            if(matchingEpisodes.Count == 0)
+                return null;
+
+            // Go through matches to find closest quality to preferred
+            TorrentQuality closestQuality = TorrentQuality.Sd480p;
+            if (matchingEpisodes.ContainsKey(Settings.General.PreferredTorrentQuality))
+                closestQuality = Settings.General.PreferredTorrentQuality;
+            else
+            {
+                switch (Settings.General.PreferredTorrentQuality)
+                {
+                    case TorrentQuality.Sd480p:
+                        if (matchingEpisodes.ContainsKey(TorrentQuality.Hd720p))
+                            closestQuality = TorrentQuality.Hd720p;
+                        else
+                            closestQuality = TorrentQuality.Hd1080p;
+                        break;
+                    case TorrentQuality.Hd720p:
+                        if (matchingEpisodes.ContainsKey(TorrentQuality.Sd480p))
+                            closestQuality = TorrentQuality.Sd480p;
+                        else
+                            closestQuality = TorrentQuality.Hd1080p;
+                        break;
+                    case TorrentQuality.Hd1080p:
+                        if (matchingEpisodes.ContainsKey(TorrentQuality.Hd720p))
+                            closestQuality = TorrentQuality.Hd720p;
+                        else
+                            closestQuality = TorrentQuality.Sd480p;
+                        break;
+                    default:
+                        throw new Exception("Unknown torrent quality");
+                }
+            }
+
+            TorrentFlag useFlag;
+            if (matchingEpisodes[closestQuality].ContainsKey(TorrentFlag.Proper))
+                useFlag = TorrentFlag.Proper;
+            else if (matchingEpisodes[closestQuality].ContainsKey(TorrentFlag.None))
+                useFlag = TorrentFlag.None;
+            else
+                useFlag = TorrentFlag.Internal;
+
+            return matchingEpisodes[closestQuality][useFlag];
         }
 
         /// <summary>

@@ -18,6 +18,10 @@ namespace Meticumedia.Classes
 
         public int Episode2 { get; set; }
 
+        public TorrentQuality Quality { get; set; }
+
+        public TorrentFlag Flag { get; set; }
+
         public List<string> Mirrors { get; set; }
 
         public string Magnet { get; set; }
@@ -27,6 +31,8 @@ namespace Meticumedia.Classes
         public EzTvEpisode()
         {
             this.Mirrors = new List<string>();
+            this.Quality = TorrentQuality.Sd480p;
+            this.Flag = TorrentFlag.None;
         }
 
         public EzTvEpisode(EzTvEpisode clone)
@@ -34,6 +40,8 @@ namespace Meticumedia.Classes
             this.Season = clone.Season;
             this.Episode = clone.Episode;
             this.Episode2 = clone.Episode2;
+            this.Quality = clone.Quality;
+            this.Flag = clone.Flag;
             this.Mirrors = new List<string>();
             foreach (string mirror in clone.Mirrors)
                 this.Mirrors.Add(mirror);

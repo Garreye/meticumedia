@@ -10,9 +10,12 @@ namespace Meticumedia.Classes
     public enum TorrentQuality
     {
         [Description("Standard (480p)")]
-        Standard,
+        Sd480p,
 
         [Description("HD (720p)")]
-        Hd720p
+        Hd720p,
+
+        [Description("HD (1080p)")]
+        Hd1080p
     }
 }

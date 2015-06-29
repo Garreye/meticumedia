@@ -95,6 +95,7 @@
     <Compile Include="Classes\Torrents\EzTvAccess.cs" />
     <Compile Include="Classes\Torrents\EzTvEpisode.cs" />
     <Compile Include="Classes\Torrents\EzTvShow.cs" />
+    <Compile Include="Classes\Torrents\TorrentFlag.cs" />
     <Compile Include="Classes\Torrents\TorrentQuality.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />
     <Compile Include="Classes\Tv\TvGroupingType.cs" />

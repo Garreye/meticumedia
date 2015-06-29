@@ -150,6 +150,19 @@ namespace Meticumedia.Classes
                     ezEpisode.Episode = ep1;
                     ezEpisode.Episode2 = ep2;
 
+                    // Get quality
+                    if (episodeString.ToLower().Contains("1080p"))
+                        ezEpisode.Quality = TorrentQuality.Hd1080p;
+                    else if (episodeString.ToLower().Contains("720p"))
+                        ezEpisode.Quality = TorrentQuality.Hd720p;
+
+                    // Get flags
+                    if (episodeString.ToLower().Contains("proper"))
+                        ezEpisode.Flag = TorrentFlag.Proper;
+                    else if (episodeString.ToLower().Contains("internal"))
+                        ezEpisode.Flag = TorrentFlag.Internal;
+
+                    // Get links
                     foreach (Capture capture in match.Groups[2].Captures)
                     {
                         if (capture.Value.StartsWith("http"))
@@ -161,6 +174,7 @@ namespace Meticumedia.Classes
                         else
                             ezEpisode.Magnet = capture.Value;
                     }
+
                     show.Episodes.Add(ezEpisode);
                 }
             }

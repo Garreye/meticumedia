@@ -1824,8 +1824,9 @@ namespace Meticumedia.Classes
         {
             if (this.Action == OrgAction.Torrent)
             {
-                this.DestinationPath = Path.Combine(Settings.General.TorrentDirectory, this.TvEpisode.GetEzTvEpisode().Title + ".torrent");
-                this.SourcePath = this.DestinationPath; // For processing messages that use source path
+                EzTvEpisode ezEp = this.TvEpisode.GetEzTvEpisode();
+                this.SourcePath = Path.Combine("EZTV", ezEp.Title + ".torrent");
+                this.DestinationPath = Path.Combine(Settings.General.TorrentDirectory, ezEp.Title + ".torrent");
                 return;
             }
             
