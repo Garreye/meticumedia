@@ -19,7 +19,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <GroupBox Grid.Row="0" Header="Database" Visibility="{Binding DatabaseStatusVisibility}">
@@ -218,19 +217,6 @@
                     </Grid>
                 </GroupBox>
                 
-            </Grid>
-        </GroupBox>
-
-        <GroupBox Grid.Row="3" Header="Torrent Setup" Visibility="{Binding ContentIsTvShow, Converter={StaticResource boolVisConverter}}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                
-                <TextBlock Grid.Column="0" Text="EzTv Show" Margin="3" />
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Source={x:Static mm:EzTvAccess.ShowsList}}" SelectedItem="{Binding TvShow.EzTvShow}"  Margin="3" />
             </Grid>
         </GroupBox>
     </Grid>

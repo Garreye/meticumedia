@@ -274,9 +274,6 @@ namespace Meticumedia.Classes
         /// </summary>
         private static void tvLoadWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            // Init EzTv
-            EzTvAccess.UpdateShows();
-
             Shows.Load(Organization.DoUpdating);
         }
 

@@ -674,9 +674,6 @@ namespace Meticumedia.Classes
                 if ((DateTime.Now - newContent.LastUpdated).TotalDays > 7)
                     newContent.UpdateInfoFromDatabase();
 
-                if (newContent is TvShow)
-                    (newContent as TvShow).UpdateEzTvShow();
-
                 // Update progress
                 if (this.updateNumber == processNumber)
                     OnUpdateProgressChange(this, false, CalcProgress(numItemsProcessed, numItemsStarted, totalPaths), progressMsg);

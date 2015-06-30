@@ -92,9 +92,8 @@
     <Compile Include="Classes\Settings\AutoMoveFileSetup.cs" />
     <Compile Include="Classes\Settings\CaseOptionType.cs" />
     <Compile Include="Classes\Settings\GeneralSettings.cs" />
-    <Compile Include="Classes\Torrents\EzTvAccess.cs" />
-    <Compile Include="Classes\Torrents\EzTvEpisode.cs" />
-    <Compile Include="Classes\Torrents\EzTvShow.cs" />
+    <Compile Include="Classes\Torrents\TorrentTvAccess.cs" />
+    <Compile Include="Classes\Torrents\TorrentTvEpisode.cs" />
     <Compile Include="Classes\Torrents\TorrentFlag.cs" />
     <Compile Include="Classes\Torrents\TorrentQuality.cs" />
     <Compile Include="Classes\Tv\MissingStatus.cs" />

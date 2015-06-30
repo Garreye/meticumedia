@@ -31,9 +31,6 @@ namespace MeticumediaTesting
             // Init word helper
             WordHelper.Initialize();
 
-            // Init EzTv
-            EzTvAccess.UpdateShows();
-
             // Load organization and settings from XML
             Settings.Load();
             Organization.Load(false);

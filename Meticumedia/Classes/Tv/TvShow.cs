@@ -111,36 +111,6 @@ namespace Meticumedia.Classes
 
         private bool dvdEpisodeOrder = false;
 
-        public int EzTvShowId
-        {
-            get { return ezTvShowId; }
-            set
-            {
-                ezTvShowId = value;
-                OnPropertyChanged("EzTvShowId");
-                OnPropertyChanged("EzTvShow");
-
-                if (this.EzTvShow != null)
-                    this.EzTvShow.UpdateEpisodes();
-            }
-        }
-        private int ezTvShowId = -1;
-
-        public EzTvShow EzTvShow
-        {
-            get
-            {
-                if (EzTvAccess.Shows.ContainsKey(this.EzTvShowId))
-                    return EzTvAccess.Shows[this.EzTvShowId];
-                return null;               
-            }
-            set
-            {
-                value.UpdateEpisodes();
-                this.EzTvShowId = value.Id;
-            }
-        }
-
         #endregion
 
         #region Constructor
@@ -257,7 +227,6 @@ namespace Meticumedia.Classes
             this.IncludeInSchedule = show.IncludeInSchedule;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
-            this.EzTvShowId = show.EzTvShowId;
 
             // TODO: this is a hack
             App.Current.Dispatcher.Invoke((Action)delegate
@@ -411,17 +380,6 @@ namespace Meticumedia.Classes
         {
             TvDatabaseHelper.FullShowSeasonsUpdate(this);
             this.LastUpdated = DateTime.Now;
-
-            UpdateEzTvShow();
-        }
-
-        public void UpdateEzTvShow()
-        {
-            if (this.EzTvShow == null)
-                EzTvAccess.GetShowId(this);
-
-            if (this.EzTvShow != null)
-                this.EzTvShow.UpdateEpisodes();
         }
 
         #endregion
@@ -442,8 +400,7 @@ namespace Meticumedia.Classes
                 this.DoMissingCheck != show.DoMissingCheck ||
                 this.DvdEpisodeOrder != show.DvdEpisodeOrder||
                 this.Episodes.Count != show.Episodes.Count ||
-                this.AlternativeNameMatches.Count != show.AlternativeNameMatches.Count||
-                this.EzTvShowId != show.EzTvShowId)
+                this.AlternativeNameMatches.Count != show.AlternativeNameMatches.Count)
             {
                 return false;
             }
@@ -488,7 +445,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { Seasons, Episodes, DoMissing, IncludeInSchedule, AlternativeNameMatches, DvdEpisodeOrder, EzTvShowId };
+        private enum XmlElements { Seasons, Episodes, DoMissing, IncludeInSchedule, AlternativeNameMatches, DvdEpisodeOrder };
 
         /// <summary>
         /// Saves instance to XML file.
@@ -530,9 +487,6 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.DvdEpisodeOrder:
                         value = this.DvdEpisodeOrder.ToString();
-                        break;
-                    case XmlElements.EzTvShowId:
-                        value = this.EzTvShowId.ToString();
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -617,12 +571,6 @@ namespace Meticumedia.Classes
                         bool dvdOrder;
                         bool.TryParse(value, out dvdOrder);
                         this.DvdEpisodeOrder = dvdOrder;
-                        break;
-                    case XmlElements.EzTvShowId:
-                        int ezId;
-                        int.TryParse(value, out ezId);
-                        this.EzTvShowId = ezId;
-
                         break;
                 }
             }

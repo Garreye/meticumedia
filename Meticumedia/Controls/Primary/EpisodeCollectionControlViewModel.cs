@@ -548,37 +548,20 @@ namespace Meticumedia.Controls
             for(int i=0;i<selEpisodes.Count;i++)
             {
                 TvEpisode ep = selEpisodes[i];
-                
-                // Check if show needs EzTv setup
-                if (ep.Show.EzTvShow == null)
-                {
-                    if (MessageBox.Show("The show " + ep.Show + " does not have an EzTv show assigned to it. Would you like to open the editor to select one (at the bottom)?", "No EzTv Show Selected", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-                    {
-                        ContentEditorWindow cew = new ContentEditorWindow(ep.Show);
-                        cew.ShowDialog();
-
-                        if (cew.Results != null)
-                        {
-                            ep.Show.CloneAndHandlePath(cew.Results as TvShow, false);
-                            Organization.Shows.Save();
-                        }
-                    }
-                }                
+                          
 
                 // Check that show has EzTv setup
-                if (ep.Show.EzTvShow != null)
+                TorrentTvEpisode ezEp = ep.GetEzTvEpisode();
+                if (ezEp != null)
                 {
-                    EzTvEpisode ezEp = ep.GetEzTvEpisode();
-                    if (ezEp != null)
-                    {
-                        OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null);
-                        newItem.BuildDestination();
-                        items.Add(newItem);
-                    }
-                    else
-                        unmatchedEps.Add(ep.BuildEpString());
+                    OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null, ezEp);
+                    newItem.BuildDestination();
+                    items.Add(newItem);
                 }
+                else
+                    unmatchedEps.Add(ep.BuildEpString());
             }
+            
             
             if (items.Count > 0)
                 OnItemsToQueue(items);

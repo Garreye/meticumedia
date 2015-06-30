@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Meticumedia.Classes
 {
-    public class EzTvEpisode
+    public class TorrentTvEpisode
     {
         #region Properties
 
@@ -28,14 +28,14 @@ namespace Meticumedia.Classes
 
         #endregion
 
-        public EzTvEpisode()
+        public TorrentTvEpisode()
         {
             this.Mirrors = new List<string>();
             this.Quality = TorrentQuality.Sd480p;
             this.Flag = TorrentFlag.None;
         }
 
-        public EzTvEpisode(EzTvEpisode clone)
+        public TorrentTvEpisode(TorrentTvEpisode clone)
         {
             this.Season = clone.Season;
             this.Episode = clone.Episode;

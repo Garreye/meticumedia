@@ -103,14 +103,14 @@ namespace Meticumedia.Classes
                     if (!found && ep.Aired && show.DoMissingCheck)
                     {
                         OrgItem newItem;
-                        EzTvEpisode ezTvEpisode = ep.GetEzTvEpisode();
+                        TorrentTvEpisode ezTvEpisode = ep.GetEzTvEpisode();
                         if (ezTvEpisode != null)
                         {
-                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null);
+                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null, ezTvEpisode);
                             newItem.BuildDestination();
                         }
                         else
-                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
+                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null, null);
 
                         newItem.Number = number++;
                         missingCheckItem.Add(newItem);
