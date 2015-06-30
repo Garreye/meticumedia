@@ -890,11 +890,6 @@ namespace Meticumedia.Classes
             }
         }
 
-        public TorrentTvEpisode GetEzTvEpisode()
-        {
-            return TorrentTvAccess.GetEpisode(this);
-        }
-
         /// <summary>
         /// Equals check for this episode and another episode
         /// </summary>

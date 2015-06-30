@@ -235,7 +235,7 @@ namespace Meticumedia.Classes
         }
         private TvEpisode tvEpisode;
 
-        public TorrentTvEpisode TorrentTvEpisode
+        public TvEpisodeTorrent TorrentTvEpisode
         {
             get
             {
@@ -247,7 +247,7 @@ namespace Meticumedia.Classes
                 OnPropertyChanged("TorrentTvEpisode");
             }
         }
-        private TorrentTvEpisode torrentTvEpisode;
+        private TvEpisodeTorrent torrentTvEpisode;
 
         void tvEpisode_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -601,7 +601,7 @@ namespace Meticumedia.Classes
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir, TorrentTvEpisode torrentEp) : this()
+        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir, TvEpisodeTorrent torrentEp) : this()
         {
             this.Status = status;
             this.Progress = 0;
@@ -746,6 +746,7 @@ namespace Meticumedia.Classes
             this.DestinationPath = item.DestinationPath;
             this.TvEpisode = item.TvEpisode;
             this.TvEpisode2 = item.TvEpisode2;
+            this.TorrentTvEpisode = item.TorrentTvEpisode;
             this.Category = item.Category;
             this.Enable = item.Enable;
             this.Movie = item.Movie;
@@ -1477,38 +1478,29 @@ namespace Meticumedia.Classes
 
         private bool DownloadTorrent()
         {
-            TorrentTvEpisode ezTvEpisode = this.TvEpisode.GetEzTvEpisode();
-
             // Download the torrent file
-            if (ezTvEpisode != null)
+            if (this.TorrentTvEpisode != null)
             {
                 WebClient webClient = new WebClient();
                 webClient.DownloadProgressChanged += webClient_DownloadProgressChanged;
 
-                if (!string.IsNullOrEmpty(ezTvEpisode.Magnet))
+                if (Settings.General.TorrentDownload == TorrentDownload.Magnet)
                 {
-                    Process.Start(ezTvEpisode.Magnet);
+                    Process.Start(this.TorrentTvEpisode.Magnet);
                     return true;
                 }
                 else
-                    foreach (string mirror in ezTvEpisode.Mirrors)
-                        if (Path.GetExtension(mirror).ToLower() == ".torrent")
-                        {
-                            try
-                            {
-                                if (!Directory.Exists(Settings.General.TorrentDirectory))
-                                    Directory.CreateDirectory(Settings.General.TorrentDirectory);
+                {
+                    if (!Directory.Exists(Settings.General.TorrentDirectory))
+                        Directory.CreateDirectory(Settings.General.TorrentDirectory);
 
-                                DownloadFile(mirror, this.DestinationPath);
+                    DownloadFile(this.TorrentTvEpisode.File, this.DestinationPath);
 
-                                Process.Start(this.DestinationPath);
-                                return true;
-                            }
-                            catch
-                            {
+                    if (Settings.General.TorrentDownload == TorrentDownload.DownloadAndOpenTorrent)
+                        Process.Start(this.DestinationPath);
 
-                            }
-                        }
+                    return true;
+                }
             }
 
             this.QueueStatus = OrgQueueStatus.Failed;
@@ -1774,7 +1766,6 @@ namespace Meticumedia.Classes
         /// <param name="files">File path list being built</param>
         private void BuildFileList(string directory, List<string> files, ref long totalSize)
         {
-           
             // Add all files in currently directory to list
             string[] currentFiles = Directory.GetFiles(directory);
             foreach (string file in currentFiles)
@@ -1787,7 +1778,6 @@ namespace Meticumedia.Classes
             string[] subDirs = Directory.GetDirectories(directory);
             foreach (string subDir in subDirs)
                 BuildFileList(subDir, files, ref totalSize);
-            
         }
 
         /// <summary>
@@ -1839,13 +1829,18 @@ namespace Meticumedia.Classes
         {
             if (this.Action == OrgAction.Torrent)
             {
-                TvEpisode ep1 = this.TvEpisode;
-                TvEpisode ep2 = null;
-                if (TorrentTvEpisode.Episode2 > 0)
-                    ep1.Show.FindEpisode(ep1.Season, TorrentTvEpisode.Episode2, false, out ep2);
-                
-                this.SourcePath = Path.Combine(TorrentTvAccess.BASE_URL, TorrentTvEpisode.Title);
-                this.DestinationPath = Path.Combine(Settings.General.TorrentDirectory, TvEpisode.Show.BuildFileName(ep1, ep2, "") + ".torrent");
+                this.SourcePath = TorrentTvEpisode.Url;
+
+                if (Settings.General.TorrentDownload == TorrentDownload.Magnet)
+                    this.DestinationPath = "Torrent Client Magnet Link/" + TorrentTvEpisode.Title;
+                else
+                {
+                    TvEpisode ep1 = this.TvEpisode;
+                    TvEpisode ep2 = null;
+                    if (TorrentTvEpisode.Episode2 > 0)
+                        ep1.Show.FindEpisode(ep1.Season, TorrentTvEpisode.Episode2, false, out ep2);
+                    this.DestinationPath = Path.Combine(Settings.General.TorrentDirectory, TvEpisode.Show.BuildFileName(ep1, ep2, "") + ".torrent");
+                }
                 return;
             }
             

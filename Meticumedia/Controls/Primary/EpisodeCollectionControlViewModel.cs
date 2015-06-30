@@ -551,7 +551,7 @@ namespace Meticumedia.Controls
                           
 
                 // Check that show has EzTv setup
-                TorrentTvEpisode ezEp = ep.GetEzTvEpisode();
+                TvEpisodeTorrent ezEp = TvTorrentHelper.GetEpisodeTorrent(ep);
                 if (ezEp != null)
                 {
                     OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null, ezEp);

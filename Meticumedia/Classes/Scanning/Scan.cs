@@ -65,7 +65,7 @@ namespace Meticumedia.Classes
         /// </summary>
         public void OnProgressChange(ScanProcess process, string info, int percent)
         {
-            if (ProgressChange != null)
+            if (ProgressChange != null && !scanCanceled)
                 ProgressChange(process, new ProgressChangedEventArgs(percent, info));
         }
 

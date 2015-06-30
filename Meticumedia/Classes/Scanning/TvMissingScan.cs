@@ -44,6 +44,8 @@ namespace Meticumedia.Classes
             // Initialize item numbers
             int number = 0;
 
+            double progressPerShow = 1D / shows.Count * 100D;
+
             // Go through each show
             for (int i = 0; i < shows.Count; i++)
             {
@@ -52,11 +54,20 @@ namespace Meticumedia.Classes
                 if (cancelRequested)
                     break;
 
-                OnProgressChange(ScanProcess.TvMissing, shows[i].DatabaseName, (int)Math.Round((double)i / (shows.Count) * 30) + 70);
+                double showsProgress = (double)i * progressPerShow;
+                OnProgressChange(ScanProcess.TvMissing, shows[i].DatabaseName, (int)Math.Round(showsProgress));
+
+                double progressPerEp = 1D / show.Episodes.Count * progressPerShow;
 
                 // Go through missing episodes
-                foreach (TvEpisode ep in show.Episodes)
+                for(int j=0;j<show.Episodes.Count;j++)
                 {
+                    // Get episode
+                    TvEpisode ep = show.Episodes[j];
+
+                    // Update progress
+                    OnProgressChange(ScanProcess.TvMissing, shows[i].DatabaseName, (int)Math.Round(showsProgress + j * progressPerEp));
+
                     // Check for cancellation
                     if (cancelRequested)
                         break;
@@ -97,13 +108,11 @@ namespace Meticumedia.Classes
                     else
                         continue;
 
-                    // TODO: loose file check - do directory scan on TV root folder with recursion off..
-
                     // Add empty item for missing
                     if (!found && ep.Aired && show.DoMissingCheck)
                     {
                         OrgItem newItem;
-                        TorrentTvEpisode ezTvEpisode = ep.GetEzTvEpisode();
+                        TvEpisodeTorrent ezTvEpisode = TvTorrentHelper.GetEpisodeTorrent(ep);
                         if (ezTvEpisode != null)
                         {
                             newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null, ezTvEpisode);

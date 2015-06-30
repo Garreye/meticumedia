@@ -83,6 +83,8 @@ namespace Meticumedia.Classes
         }
         private MovieDatabaseSelection defaultMovieDatabase;
 
+
+
         public string TorrentDirectory
         {
             get
@@ -96,6 +98,20 @@ namespace Meticumedia.Classes
             }
         }
         private string torrentDirectory;
+
+        public TorrentDownload TorrentDownload
+        {
+            get
+            {
+                return torrentDownload;
+            }
+            set
+            {
+                torrentDownload = value;
+                OnPropertyChanged(this, "TorrentDownload");
+            }
+        }
+        private TorrentDownload torrentDownload = TorrentDownload.Magnet;
 
         public TorrentQuality PreferredTorrentQuality
         {
@@ -141,6 +157,7 @@ namespace Meticumedia.Classes
             this.DefaultTvDatabase = settings.DefaultTvDatabase;
             this.TorrentDirectory = settings.TorrentDirectory;
             this.PreferredTorrentQuality = settings.PreferredTorrentQuality;
+            this.TorrentDownload = settings.TorrentDownload;
         }
 
         #endregion
@@ -150,7 +167,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { NumProcessingThreads, NumSimultaneousSearches, DefaultMovieDatabase, DefaultTvDatabase, TorrentDirectory, PreferredTorrentQuality };
+        private enum XmlElements { NumProcessingThreads, NumSimultaneousSearches, DefaultMovieDatabase, DefaultTvDatabase, TorrentDirectory, PreferredTorrentQuality, TorrentDownload };
 
         /// <summary>
         /// Saves instance properties to XML file.
@@ -181,6 +198,9 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.PreferredTorrentQuality:
                         value = this.PreferredTorrentQuality.ToString();
+                        break;
+                    case XmlElements.TorrentDownload:
+                        value = this.TorrentDownload.ToString();
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -239,6 +259,11 @@ namespace Meticumedia.Classes
                         TorrentQuality torrentQual;
                         if (Enum.TryParse<TorrentQuality>(value, out torrentQual))
                             this.PreferredTorrentQuality = torrentQual;
+                        break;
+                    case XmlElements.TorrentDownload:
+                        TorrentDownload torrentDwnld;
+                        if (Enum.TryParse<TorrentDownload>(value, out torrentDwnld))
+                            this.TorrentDownload = torrentDwnld;
                         break;
                 }
             }

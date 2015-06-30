@@ -11,7 +11,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <wpfr:EnumDescriptionConverter x:Key="enumDescConv" />
-        
+
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="TvDbTypeEnum">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="mm:TvDataBaseSelection" />
@@ -29,9 +29,16 @@
                 <x:Type TypeName="mm:TorrentQuality" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+
+        <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="TorrentDownloadEnum">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="mm:TorrentDownload" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -43,7 +50,7 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        
+
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Maximum Simultaneous Processing Threads" Margin="3" VerticalAlignment="Center"
                    ToolTip="Maximum number of threads that meticumedia is allowed to run simultaneously during scanning and folder updates. More threads may improve scan/update times, but will results in higher CPU usage."/>
         <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Value="{Binding GeneralSettings.NumProcessingThreads}" Margin="3" Minimum="1" Maximum="25" />
@@ -58,19 +65,28 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Primary Movie Database" Margin="3" VerticalAlignment="Center" ToolTip="Database that meticumedia will uses for matching to new movies during scans/updates." />
         <ComboBox Grid.Row="3" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource MovieDbTypeEnum}}" SelectedItem="{Binding GeneralSettings.DefaultMovieDatabase}" />
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="Torrent Directory" Margin="3" VerticalAlignment="Center" ToolTip="Directory where torrent files (for missing TV episodes) will be saved. It is recommended that you also add this directory to the watch folders in your Torrent application." />
-        <Grid Grid.Row="4" Grid.Column="1">
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Torrent Download Type" Margin="3" VerticalAlignment="Center" ToolTip="Method to use for downloading torrent files." />
+        <ComboBox Grid.Row="4" Grid.Column="1" Margin="0,3,3,3" ItemsSource="{Binding Source={StaticResource TorrentDownloadEnum}}" SelectedItem="{Binding GeneralSettings.TorrentDownload}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource enumDescConv}}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Torrent Directory" Margin="3" VerticalAlignment="Center" ToolTip="Directory where torrent files (for missing TV episodes) will be saved. It is recommended that you also add this directory to the watch folders in your Torrent application." />
+        <Grid Grid.Row="5" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            
+
             <TextBox Grid.Column="0" Margin="3" Text="{Binding GeneralSettings.TorrentDirectory}" />
             <Button Grid.Column="1" Margin="3" Content="..." />
         </Grid>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="Preferred Torrent Quality" Margin="3" VerticalAlignment="Center" ToolTip="Prefered quality to use for torrent files." />
-        <ComboBox Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource TorrentQualityEnum}}" SelectedItem="{Binding GeneralSettings.PreferredTorrentQuality}" >
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Preferred Torrent Quality" Margin="3" VerticalAlignment="Center" ToolTip="Prefered quality to use for torrent files." />
+        <ComboBox Grid.Row="6" Grid.Column="1" Margin="3" ItemsSource="{Binding Source={StaticResource TorrentQualityEnum}}" SelectedItem="{Binding GeneralSettings.PreferredTorrentQuality}" >
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Converter={StaticResource enumDescConv}}"/>
