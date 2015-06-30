@@ -85,8 +85,12 @@ namespace Meticumedia.Classes
                 bool matchShow = showMatches != null && showMatches.Count > 0;
 
                 int season, ep1, ep2;
-                if (matchShow && FileHelper.GetEpisodeInfo(name, episode.Show.DisplayName, out season, out ep1, out ep2) && episode.Season == season && episode.DisplayNumber == ep1)
+                if (matchShow && FileHelper.GetEpisodeInfo(name, episode.Show.DisplayName, out season, out ep1, out ep2, true) && episode.Season == season && episode.DisplayNumber == ep1)
                 {
+                    // Don't want to get torrent with a bunch of episodes (double is okay)
+                    if (ep2 > 0 && ep2 - ep1 > 1)
+                        continue;
+                    
                     TorrentQuality quality = TorrentQuality.Sd480p;
                     if (name.ToLower().Contains("720p"))
                         quality = TorrentQuality.Hd720p;

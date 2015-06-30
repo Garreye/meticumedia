@@ -278,10 +278,10 @@ namespace Meticumedia.Classes
         /// <param name="episode1">The episode number</param>
         /// <param name="episode2">The 2nd episode number for multipart files</param>
         /// <returns>true if episode information is found</returns>
-        public static bool GetEpisodeInfo(string file, string showName, out int season, out int episode1, out int episode2)
+        public static bool GetEpisodeInfo(string file, string showName, out int season, out int episode1, out int episode2, bool allowDifferentSeparators = false)
         {
             string unused, unused2;
-            return GetEpisodeInfo(file, showName, out season, out episode1, out episode2, out unused, out unused2);
+            return GetEpisodeInfo(file, showName, out season, out episode1, out episode2, out unused, out unused2, allowDifferentSeparators);
         }
 
         /// <summary>
@@ -324,7 +324,7 @@ namespace Meticumedia.Classes
         /// <param name="fileWithoutEp">File name string with season/episode part removed</param>
         /// <param name="fileBeforeEp">Portion of file name string that came before the season/episode</param>
         /// <returns>true if episode information is found</returns>
-        private static bool GetEpisodeInfo(string file, string showName, out int season, out int episode1, out int episode2, out string fileWithoutEp, out string fileBeforeEp)
+        private static bool GetEpisodeInfo(string file, string showName, out int season, out int episode1, out int episode2, out string fileWithoutEp, out string fileBeforeEp, bool allowDifferentSeparators = false)
         {
             // Default value to empty string
             season = -1;
@@ -370,7 +370,7 @@ namespace Meticumedia.Classes
                         episode2 = -1;
 
                     // Don't match 2nd episode if seperators don't match
-                    if (episode2 >= 0)
+                    if (episode2 >= 0 && !allowDifferentSeparators)
                     {
                         string sep1 = matches[0].Groups["sep1"].Value;
                         string sep2 = matches[0].Groups["sep2"].Value;
