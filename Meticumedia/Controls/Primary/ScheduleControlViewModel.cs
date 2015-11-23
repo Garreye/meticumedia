@@ -156,10 +156,11 @@ namespace Meticumedia.Controls
             if (App.Current.Dispatcher.CheckAccess())
                 UpdateShows();
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
-                {
-                    UpdateShows();
-                });
+                lock (Organization.Shows.ContentLock)
+                    App.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        UpdateShows();
+                    });
         }
 
         /// <summary>

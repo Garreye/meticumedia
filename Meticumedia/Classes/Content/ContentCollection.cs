@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Threading;
 
 namespace Meticumedia.Classes
 {
@@ -139,6 +140,11 @@ namespace Meticumedia.Classes
         {
             this.ContentType = type;
             this.Name = name;
+
+            saveWorker = new BackgroundWorker();
+            saveWorker.WorkerSupportsCancellation = true;
+            saveWorker.DoWork += saveWorker_DoWork;
+            saveWorker.RunWorkerCompleted += saveWorker_RunWorkerCompleted;
         }
 
         /// <summary>
@@ -158,6 +164,10 @@ namespace Meticumedia.Classes
         /// Root string from XML
         /// </summary>
         private string XML_ROOT { get { return this.ContentType.ToString() + "s"; } }
+
+        private BackgroundWorker saveWorker = new BackgroundWorker();
+
+        private bool reSaveRequired = false;
 
         #endregion
 
@@ -263,6 +273,14 @@ namespace Meticumedia.Classes
                                         TvShow show = new TvShow();
                                         if (show.Load(contentNodes[i]))
                                         {
+                                            bool rootFolderExists = false;
+                                            foreach (ContentRootFolder folder in Settings.GetAllRootFolders(this.ContentType, true))
+                                                if (folder.FullPath == show.RootFolder)
+                                                    rootFolderExists = true;
+
+                                            if (!rootFolderExists || !Directory.Exists(show.Path))
+                                                continue;
+                                            
                                             loadContent.Add(show);
                                             if (doUpdating)
                                                 show.UpdateMissing();
@@ -308,10 +326,32 @@ namespace Meticumedia.Classes
             OnLoadComplete();
         }
 
+       
+
         /// <summary>
         /// Saves collection to XML file
         /// </summary>
         public void Save()
+        {
+            if (saveWorker.IsBusy)
+            {
+                reSaveRequired = true;
+                saveWorker.CancelAsync();
+            }
+            else
+                saveWorker.RunWorkerAsync();
+        }
+
+        void saveWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (reSaveRequired)
+            {
+                reSaveRequired = false;
+                Save();
+            }
+        }
+
+        void saveWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             // Get path to xml file
             string path = Path.Combine(Organization.GetBasePath(true), XML_ROOT + ".xml");
@@ -319,12 +359,13 @@ namespace Meticumedia.Classes
             // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
             string tempPath = Path.Combine(Organization.GetBasePath(true), XML_ROOT + "_TEMP.xml");
 
-            // Lock content and file
-            lock (ContentLock)
+            //Console.WriteLine(this.ToString() + " lock save");
+            lock (XmlLock)
             {
-                //Console.WriteLine(this.ToString() + " lock save");
-                lock (XmlLock)
+                // Lock content and file
+                lock (ContentLock)
                 {
+
                     using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
                     {
                         xw.Formatting = Formatting.Indented;
@@ -333,9 +374,17 @@ namespace Meticumedia.Classes
                         xw.WriteElementString("LastUpdate", this.LastUpdate);
 
                         foreach (Content content in this)
+                        {
                             content.Save(xw);
+
+                            if (saveWorker.CancellationPending)
+                                return;
+                        }
                         xw.WriteEndElement();
                     }
+
+                    if (saveWorker.CancellationPending)
+                        return;
 
                     // Delete previous save data
                     if (File.Exists(path))

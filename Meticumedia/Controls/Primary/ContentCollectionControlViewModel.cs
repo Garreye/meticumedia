@@ -491,41 +491,39 @@ namespace Meticumedia.Controls
 
             // Invoke can result in dead-lock if another app thread if waiting for collection.ContentLock
             ContentCollection collection = sender as ContentCollection;
-            
+
             if (App.Current.Dispatcher.CheckAccess())
-                UpdateContents(e, collection);
-            else
-                App.Current.Dispatcher.Invoke((Action)delegate
-                {
+                lock (collection.ContentLock)
                     UpdateContents(e, collection);
-                });
+            else
+                lock (collection.ContentLock)
+                    App.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        UpdateContents(e, collection);
+                    });
             
         }
 
         private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e, ContentCollection collection)
         {
-            lock (collection.ContentLock)
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
             {
-                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
-                {
-                    Contents.Clear();
-                    contentViewModels.Clear();
-                }
-
-                if (e.OldItems != null)
-                    foreach (Content remItem in e.OldItems)
-                    {
-                        Contents.Remove(remItem);
-                        contentViewModels.Remove(remItem);
-                    }
-                if (e.NewItems != null)
-                    foreach (Content addItem in e.NewItems)
-                    {
-                        Contents.Add(addItem);
-                        //contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
-                    }
+                Contents.Clear();
+                contentViewModels.Clear();
             }
 
+            if (e.OldItems != null)
+                foreach (Content remItem in e.OldItems)
+                {
+                    Contents.Remove(remItem);
+                    contentViewModels.Remove(remItem);
+                }
+            if (e.NewItems != null)
+                foreach (Content addItem in e.NewItems)
+                {
+                    Contents.Add(addItem);
+                    //contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
+                }
         }
 
         /// <summary>
