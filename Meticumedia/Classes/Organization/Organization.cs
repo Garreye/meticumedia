@@ -529,15 +529,8 @@ namespace Meticumedia.Classes
         /// </summary>
         /// <param name="folders">Root folders to update from</param>
         /// <param name="fastUpdate">Whether to do fast update (skips episodes updating for TV shows)</param> 
-        private static void UpdateContentsFromRootFolders(List<ContentRootFolder> folders, bool fastUpdate)
+        private static void UpdateContentsFromRootFolders(List<ContentRootFolder> folders, bool fastUpdate, ContentType contentType)
         {
-            // Check that there's root folders to update
-            if (folders.Count == 0)
-                return;
-
-            // Get content type
-            ContentType contentType = folders[0].ContentType;
-
             // Update each folder in list
             foreach (ContentRootFolder folder in folders)
             {
@@ -571,16 +564,16 @@ namespace Meticumedia.Classes
         {
             // Update each selected movie folder
             List<ContentRootFolder> rootFolders = Settings.GetAllRootFolders(type, false);
-            Organization.UpdateRootFolderContents(rootFolders, false);
+            Organization.UpdateRootFolderContents(rootFolders, false, type);
         }
 
-        public static void UpdateRootFolderContents(List<ContentRootFolder> folders, bool fastUpdate)
+        public static void UpdateRootFolderContents(List<ContentRootFolder> folders, bool fastUpdate, ContentType contentType)
         {
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
 
-            object[] args = new object[] { folders, fastUpdate};
+            object[] args = new object[] { folders, fastUpdate, contentType };
             worker.RunWorkerAsync(args);
         }
 
@@ -594,8 +587,9 @@ namespace Meticumedia.Classes
             object[] args = (object[])e.Argument;
             List<ContentRootFolder> folders = (List<ContentRootFolder>)args[0];
             bool fastUpdate = (bool)args[1];
+            ContentType contentType = (ContentType)args[2];
 
-            UpdateContentsFromRootFolders(folders, fastUpdate);
+            UpdateContentsFromRootFolders(folders, fastUpdate, contentType);
         }
 
         #endregion

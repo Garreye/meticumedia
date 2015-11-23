@@ -108,7 +108,7 @@ namespace Meticumedia.Classes
         /// <param name="cancel">Cancellation variable</param>
         /// <param name="background">Whether processing is run in background</param>
         /// <param name="subSearch">Whether processing is sub-search type</param>
-        public void Run(List<OrgPath> paths, ref bool cancel, object processSpecificArgs)
+        public void Run(List<OrgPath> paths, ref bool cancel, object processSpecificArgs, int numProcessingThreads)
         {
             // Loop through all paths
             lock (processingLock)
@@ -128,7 +128,7 @@ namespace Meticumedia.Classes
             for (i = 0; i < pathOrder.Count; i++)
             {
                 // Limit number of threads
-                while (i >= numItemProcessed + Settings.General.NumProcessingThreads && !cancel)
+                while (i >= numItemProcessed + numProcessingThreads && !cancel)
                     Thread.Sleep(100);
 
                 // Check for cancellation

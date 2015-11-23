@@ -239,10 +239,10 @@ namespace Meticumedia.Classes
             if (this.background)
             {
                 bool cancel = false;
-                processing.Run(paths, ref cancel, args);
+                processing.Run(paths, ref cancel, args, 1);
             }
             else
-                processing.Run(paths, ref cancelRequested, args);
+                processing.Run(paths, ref cancelRequested, args, Settings.General.NumProcessingThreads);
 
             // Second pass
             if(!fast && !skipDatabaseMatching && !scanCanceled)
@@ -254,10 +254,10 @@ namespace Meticumedia.Classes
                 if (this.background)
                 {
                     bool cancel = false;
-                    processing.Run(paths, ref cancel, args);
+                    processing.Run(paths, ref cancel, args, 1);
                 }
                 else
-                    processing.Run(paths, ref cancelRequested, args);
+                    processing.Run(paths, ref cancelRequested, args, Settings.General.NumProcessingThreads);
 
             }
 
@@ -469,7 +469,7 @@ namespace Meticumedia.Classes
                             foreach (TvShow show in temporaryShows)
                             {
                                 MatchCollection match = show.MatchFileToContent(matchString);
-                                if (match != null && match.Count > 0)
+                                if (match != null && match.Count > 0 && !matches.ContainsKey(show))
                                     matches.Add(show, match);
                             }
 

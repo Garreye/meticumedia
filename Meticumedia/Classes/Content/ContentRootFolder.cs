@@ -590,7 +590,7 @@ namespace Meticumedia.Classes
             updateNumber = firstPass.ProcessNumber;
 
             // Run 1st pass (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
-            firstPass.Run(BuildSubDirectories(this.ContentType), ref cancel, true);
+            firstPass.Run(BuildSubDirectories(this.ContentType), ref cancel, true, Settings.General.NumProcessingThreads);
             updateCancelled = cancel;
 
             // Initialize processing - Second pass
@@ -598,7 +598,7 @@ namespace Meticumedia.Classes
             updateNumber = secondPass.ProcessNumber;
 
             // Run 2nd pass (build of sub-dirs is recursive, so all child root folder sub-dirs will be included)
-            secondPass.Run(BuildSubDirectories(this.ContentType), ref cancel, false); 
+            secondPass.Run(BuildSubDirectories(this.ContentType), ref cancel, false, Settings.General.NumProcessingThreads); 
             updateCancelled = cancel;
 
             // Get content collection to add content to
