@@ -791,7 +791,7 @@ namespace Meticumedia.Classes
         public string BuildEpString()
         {
             string epInfo = this.Show + " s" + this.Season.ToString("00") + "e" + this.DisplayNumber.ToString("00");
-            return FileHelper.SimplifyFileName(epInfo);
+            return FileHelper.SimplifyFileName(epInfo, FileHelper.OptionalSimplifyRemoves.Year | FileHelper.OptionalSimplifyRemoves.Country);
         }
 
         /// <summary>
