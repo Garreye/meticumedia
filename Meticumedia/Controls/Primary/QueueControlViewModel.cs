@@ -457,7 +457,7 @@ namespace Meticumedia.Controls
             if (MessageBox.Show("Are you sure you want to remove the selected items from the queue?", "Sure?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 // Remove all selected items from queue
-                for (int i = 0; i < this.SelectedOrgItems.Count; i++)
+                for (int i = this.SelectedOrgItems.Count - 1; i >= 0; i--)
                     this.OrgItems.Remove((OrgItem)this.SelectedOrgItems[i]);
             }
         }
