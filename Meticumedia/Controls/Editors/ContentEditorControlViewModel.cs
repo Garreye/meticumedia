@@ -635,7 +635,7 @@ namespace Meticumedia.Controls
 
         void searchUpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {
                 if (this.SearchStatus.Length == 0 || this.SearchStatus.Length > 16)
                     this.SearchStatus = "Searching";

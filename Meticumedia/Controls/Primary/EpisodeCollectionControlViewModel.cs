@@ -500,7 +500,7 @@ namespace Meticumedia.Controls
             if (App.Current.Dispatcher.CheckAccess())
                 this.UpdateGrouping();
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     this.UpdateGrouping();
                 });

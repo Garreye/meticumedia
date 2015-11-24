@@ -493,11 +493,9 @@ namespace Meticumedia.Controls
             ContentCollection collection = sender as ContentCollection;
 
             if (App.Current.Dispatcher.CheckAccess())
-                lock (collection.ContentLock)
                     UpdateContents(e, collection);
             else
-                lock (collection.ContentLock)
-                    App.Current.Dispatcher.Invoke((Action)delegate
+                    App.Current.Dispatcher.BeginInvoke((Action)delegate
                     {
                         UpdateContents(e, collection);
                     });
@@ -506,24 +504,27 @@ namespace Meticumedia.Controls
 
         private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e, ContentCollection collection)
         {
-            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+            lock (collection.ContentLock)
             {
-                Contents.Clear();
-                contentViewModels.Clear();
-            }
+                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+                {
+                    Contents.Clear();
+                    contentViewModels.Clear();
+                }
 
-            if (e.OldItems != null)
-                foreach (Content remItem in e.OldItems)
-                {
-                    Contents.Remove(remItem);
-                    contentViewModels.Remove(remItem);
-                }
-            if (e.NewItems != null)
-                foreach (Content addItem in e.NewItems)
-                {
-                    Contents.Add(addItem);
-                    //contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
-                }
+                if (e.OldItems != null)
+                    foreach (Content remItem in e.OldItems)
+                    {
+                        Contents.Remove(remItem);
+                        contentViewModels.Remove(remItem);
+                    }
+                if (e.NewItems != null)
+                    foreach (Content addItem in e.NewItems)
+                    {
+                        Contents.Add(addItem);
+                        //contentViewModels.Add(addItem, new ContentControlViewModel(addItem));
+                    }
+            }
         }
 
         /// <summary>
@@ -675,7 +676,7 @@ namespace Meticumedia.Controls
                 if (App.Current.Dispatcher.CheckAccess())
                     this.ContentsCollectionView.Refresh();
                 else
-                    App.Current.Dispatcher.Invoke((Action)delegate
+                    App.Current.Dispatcher.BeginInvoke((Action)delegate
                     {
                         this.ContentsCollectionView.Refresh();
                     });
@@ -688,7 +689,7 @@ namespace Meticumedia.Controls
             if (App.Current.Dispatcher.CheckAccess())
                 UpdateGenresComboBox();
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate // // and deadlocked with here
                 {
                     UpdateGenresComboBox();
                 });
