@@ -203,33 +203,31 @@ namespace Meticumedia.Classes
             // Save data into temporary file, so that if application crashes in middle of saving XML is not corrupted!
             string tempPath = Path.Combine(Organization.GetBasePath(true), ACTION_LOG_XML + "_TEMP.xml");
 
-            lock (DirScanLogLock)
+            lock (DirScanLogFileLock)
             {
-                lock (DirScanLogFileLock)
+                using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
                 {
-                    using (XmlTextWriter xw = new XmlTextWriter(tempPath, Encoding.ASCII))
-                    {
-                        xw.Formatting = Formatting.Indented;
+                    xw.Formatting = Formatting.Indented;
 
-                        xw.WriteStartElement(DIR_SCAN_LOG_XML);
+                    xw.WriteStartElement(DIR_SCAN_LOG_XML);
 
-                        foreach (OrgItem action in DirScanLog)
-                            action.Save(xw, true);
-                        xw.WriteEndElement();
-                    }
-
-                    // Delete previous save data
-                    if (File.Exists(path))
-                        File.Delete(path);
-
-                    // Move tempoarary save file to default
-                    try
-                    {
-                        File.Move(tempPath, path);
-                    }
-                    catch { }
+                    for (int i = 0; i < DirScanLog.Count; i++)
+                        DirScanLog[i].Save(xw, true);
+                    xw.WriteEndElement();
                 }
+
+                // Delete previous save data
+                if (File.Exists(path))
+                    File.Delete(path);
+
+                // Move tempoarary save file to default
+                try
+                {
+                    File.Move(tempPath, path);
+                }
+                catch { }
             }
+            
         }
 
         /// <summary>
@@ -404,7 +402,7 @@ namespace Meticumedia.Classes
                         {
                             OrgItem item = new OrgItem();
                             if (item.Load(logNodes[i]))
-                                loadScanDirLog.Add(item);
+                                            loadScanDirLog.Add(item);
                         }
 
                         reader.Close();
