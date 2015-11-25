@@ -653,7 +653,7 @@ namespace Meticumedia.Controls
 
         void searchWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {            
                 this.SearchResults.Clear();
             });
@@ -672,7 +672,7 @@ namespace Meticumedia.Controls
                     throw new Exception("Unknown content type");
             }
             if (results != null)
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     foreach (Content result in results)
                         this.SearchResults.Add(result);

@@ -366,7 +366,7 @@ namespace Meticumedia.Controls
                     this.OrgItemsCollection.Refresh();
                 }
                 else
-                    App.Current.Dispatcher.Invoke((Action)delegate
+                    App.Current.Dispatcher.BeginInvoke((Action)delegate
                     {
                         this.OrgItemsCollection.Refresh();
                     });

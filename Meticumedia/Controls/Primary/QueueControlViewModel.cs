@@ -391,7 +391,7 @@ namespace Meticumedia.Controls
             if (App.Current.Dispatcher.CheckAccess())
                 AddItemsToQueue(items);
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     AddItemsToQueue(items);
                 });
@@ -468,7 +468,7 @@ namespace Meticumedia.Controls
                 MoveUpSelectedItems();
             else
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     MoveUpSelectedItems();
                 });
@@ -503,7 +503,7 @@ namespace Meticumedia.Controls
                 MoveSelectedItemToTop();
             else
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     MoveSelectedItemToTop();
                 });
@@ -536,7 +536,7 @@ namespace Meticumedia.Controls
                 MoveDownSelectedItems();
             else
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     MoveDownSelectedItems();
                 });
@@ -571,7 +571,7 @@ namespace Meticumedia.Controls
                 MoveSelectedItemToBottom();
             else
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     MoveSelectedItemToBottom();
                 });
@@ -605,7 +605,7 @@ namespace Meticumedia.Controls
                 ClearQueue();
             else
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     ClearQueue();
                 });
@@ -737,7 +737,7 @@ namespace Meticumedia.Controls
                 RemoveQueueItem(item);
             else
             {
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                      RemoveQueueItem(item);
                 });

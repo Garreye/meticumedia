@@ -123,7 +123,7 @@ namespace Meticumedia.Controls
             if (App.Current.Dispatcher.CheckAccess())
                 UpdateResults();
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     UpdateResults();
                 });
@@ -156,11 +156,10 @@ namespace Meticumedia.Controls
             if (App.Current.Dispatcher.CheckAccess())
                 UpdateShows();
             else
-                lock (Organization.Shows.ContentLock)
-                    App.Current.Dispatcher.Invoke((Action)delegate
-                    {
-                        UpdateShows();
-                    });
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
+                {
+                    UpdateShows();
+                });
         }
 
         /// <summary>
@@ -172,13 +171,16 @@ namespace Meticumedia.Controls
             TvShow currSelection = this.SelectedShow;
 
             // Rebuilt combobox items
-            this.Shows.Clear();
-            this.Shows.Add(TvShow.AllShows);
-            for (int i = 0; i < Organization.Shows.Count; i++)
+            lock (Organization.Shows.ContentLock)
             {
-                // Add valid items
-                if (!string.IsNullOrEmpty(Organization.Shows[i].DatabaseName) && ((TvShow)Organization.Shows[i]).IncludeInSchedule && Organization.Shows[i].Id != 0)
-                    this.Shows.Add((TvShow)Organization.Shows[i]);
+                this.Shows.Clear();
+                this.Shows.Add(TvShow.AllShows);
+                for (int i = 0; i < Organization.Shows.Count; i++)
+                {
+                    // Add valid items
+                    if (!string.IsNullOrEmpty(Organization.Shows[i].DatabaseName) && ((TvShow)Organization.Shows[i]).IncludeInSchedule && Organization.Shows[i].Id != 0)
+                        this.Shows.Add((TvShow)Organization.Shows[i]);
+                }
             }
 
             // Reset selection

@@ -251,7 +251,7 @@ namespace Meticumedia.Controls
                         addItem.PropertyChanged += Format_PropertyChanged;
             }
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     if (e.NewItems != null)
                         foreach (FileNamePortion addItem in e.NewItems)
