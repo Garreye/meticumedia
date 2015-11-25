@@ -365,8 +365,8 @@ namespace Meticumedia.Classes
                         if (fileCat != Organization.DirScanLog[i].Category)
                             break;
 
-                        OrgItem newItem = UpdateItemFromPrevious(orgPath, Organization.DirScanLog[i], threaded, fast, skipMatching);
-                        if (newItem != null)
+                        OrgItem newItem = UpdateItemFromPrevious(orgPath, Organization.DirScanLog[i], threaded, false, false);
+                        if (newItem != null && newItem.Action != OrgAction.None)
                         {
                             if (newItem.CanEnable)
                                 newItem.Enable = true;
@@ -410,6 +410,8 @@ namespace Meticumedia.Classes
 
             List<string> possibleMatchPaths = new List<string>();
             possibleMatchPaths.Add(pathSplit.Last());
+
+            bool[] alreadyContained = new bool[pathSplit.Length - 1];
             for (int i = pathSplit.Length - 2; i > 0; i--)
             {
                 string build = string.Empty;
@@ -644,7 +646,6 @@ namespace Meticumedia.Classes
         {
             switch (reuseItem.Action)
             {
-                case OrgAction.None:
                 case OrgAction.Delete:
                     OrgItem copyItem = new OrgItem(reuseItem);
                     copyItem.SourcePath = orgPath.Path;
