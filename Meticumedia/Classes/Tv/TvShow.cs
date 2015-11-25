@@ -229,7 +229,7 @@ namespace Meticumedia.Classes
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
 
             // TODO: this is a hack
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {
                 this.Episodes.Clear();
                 foreach (TvEpisode episode in show.Episodes)

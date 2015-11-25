@@ -135,7 +135,7 @@ namespace MeticumediaTesting
 
         void Search_DebugNotification(object sender, DebugNotificationArgs e)
         {
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {
                 this.MatchProcessing.Add(e.Notification);
             });
@@ -167,7 +167,7 @@ namespace MeticumediaTesting
             else
                 path = this.SelectedScanDirPath;
 
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {
                 this.MatchProcessing.Clear();
             });
@@ -175,7 +175,7 @@ namespace MeticumediaTesting
             bool fromLog;
             OrgItem item = scan.ProcessPath(path, false, false, false, false, 0, false, out fromLog);
 
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {
                 this.MatchProcessing.Add("Final result: " + item.ToString());
             });

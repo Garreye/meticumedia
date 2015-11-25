@@ -1472,7 +1472,11 @@ namespace Meticumedia.Classes
                return;
 
            if (!root)
-               Directory.Delete(directory);
+               try
+               {
+                   Directory.Delete(directory);
+               }
+               catch { }
             return;
         }
 

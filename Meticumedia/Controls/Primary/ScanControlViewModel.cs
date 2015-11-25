@@ -548,7 +548,7 @@ namespace Meticumedia.Controls
                     this.OrgItems.Add(item);
             }
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     this.OrgItems.Clear();
                     foreach (OrgItem item in e.Items)
@@ -593,7 +593,7 @@ namespace Meticumedia.Controls
                     throw new Exception("Unknown scan type!");
             }
 
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {
                 foreach (OrgItem item in scanResults)
                     this.OrgItems.Add(item);
@@ -645,7 +645,7 @@ namespace Meticumedia.Controls
                 RefreshResultsSafe(false);
                 scanRunning = false;
 
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     this.RunButtonText = "Run";
                 });
@@ -761,7 +761,7 @@ namespace Meticumedia.Controls
             if (App.Current.Dispatcher.CheckAccess())
                 UpdateRunSelections();
             else
-                App.Current.Dispatcher.Invoke((Action)delegate
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
                 {
                     UpdateRunSelections();
                 });

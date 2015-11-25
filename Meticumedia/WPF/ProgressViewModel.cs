@@ -79,7 +79,7 @@ namespace Meticumedia.Controls
                 if (App.Current.Dispatcher.CheckAccess())
                     UpdateProgress(progress, msg, visible);
                 else
-                    App.Current.Dispatcher.Invoke((Action)delegate
+                    App.Current.Dispatcher.BeginInvoke((Action)delegate
                     {
                         UpdateProgress(progress, msg, visible);
                     });

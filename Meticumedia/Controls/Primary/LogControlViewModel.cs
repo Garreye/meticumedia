@@ -56,7 +56,7 @@ namespace Meticumedia.Controls
 
         private void ActionLog_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            App.Current.Dispatcher.Invoke((Action)delegate
+            App.Current.Dispatcher.BeginInvoke((Action)delegate
             {
                 if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
                     this.OrgItems.Clear();
