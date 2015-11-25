@@ -418,10 +418,17 @@ namespace Meticumedia.Classes
                 for (int j = i; j < pathSplit.Length; j++)
                     build += pathSplit[j] + " ";
 
-                possibleMatchPaths.Add(build);
+                // Looking to remove dummy video files by rip (e.g. "ERTG.mp4" inside "The Matrix 1999 hd ERGT rip/" folder)
+                foreach (string prevPossibleMatch in possibleMatchPaths)
+                    if (pathSplit[i].ToLower().Contains(Path.GetFileNameWithoutExtension(prevPossibleMatch.ToLower())))
+                        alreadyContained[i] = true;
+
+                if (!alreadyContained[i])
+                    possibleMatchPaths.Add(build);
             }
             for (int i = pathSplit.Length - 2; i > 0; i--)
-                possibleMatchPaths.Add(pathSplit[i] + Path.GetExtension(orgPath.Path));
+                if (!alreadyContained[i])
+                    possibleMatchPaths.Add(pathSplit[i] + Path.GetExtension(orgPath.Path));
 
             // Try to match to each string
             foreach (string matchString in possibleMatchPaths)
