@@ -402,7 +402,17 @@ namespace Meticumedia.Classes
                         {
                             OrgItem item = new OrgItem();
                             if (item.Load(logNodes[i]))
+                            {
+                                if (File.Exists(item.SourcePath))
+                                {
+                                    for (int j = 0; j < Settings.ScanDirectories.Count; j++)
+                                        if (item.sourcePath.ToLower().Contains(Settings.ScanDirectories[j].FolderPath.ToLower()))
+                                        {
                                             loadScanDirLog.Add(item);
+                                            break;
+                                        }
+                                }
+                            }
                         }
 
                         reader.Close();
