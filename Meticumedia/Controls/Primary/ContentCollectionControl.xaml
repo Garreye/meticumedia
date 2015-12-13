@@ -85,7 +85,9 @@
                     </StackPanel>
                 </Grid>
 
-                <wpfr:BindableMultiSelectListBox x:Name="lbContents" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" ItemTemplate="{StaticResource showItemTemplate}" ItemsSource="{Binding ContentsCollectionView}" SelectedItem="{Binding SelectedContent}" BindableSelectedItems="{Binding SelectedContents, Mode=OneWayToSource}"  SelectionMode="Extended" >
+                <wpfr:BindableMultiSelectListBox x:Name="lbContents" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" ItemTemplate="{StaticResource showItemTemplate}" ItemsSource="{Binding ContentsCollectionView}" SelectedItem="{Binding SelectedContent}" 
+                        BindableSelectedItems="{Binding SelectedContents, Mode=OneWayToSource}"  SelectionMode="Extended"
+                        wpfr:Commands.DataGridDoubleClickCommand="{Binding EditCommand}">
                     <ListBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Edit" Command="{Binding EditCommand}" Visibility="{Binding SingleItemSelectionVisibility}" />
