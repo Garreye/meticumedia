@@ -486,6 +486,9 @@ namespace Meticumedia.Controls
         /// </summary>
         private void Contents_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            if (App.Current == null)
+                return;
+
             if (contentLoaded)
                 UpdateGenresComboBoxSafe();
 
@@ -686,6 +689,9 @@ namespace Meticumedia.Controls
 
         private void UpdateGenresComboBoxSafe()
         {
+            if (App.Current == null)
+                return;
+
             if (App.Current.Dispatcher.CheckAccess())
                 UpdateGenresComboBox();
             else
@@ -728,18 +734,31 @@ namespace Meticumedia.Controls
                     throw new Exception("Unknown content type");
             }
 
-            // Add genres to combo box
-            this.GenreFilters.Clear();
-            this.GenreFilters.Add("All Genres");
-            lock (genres.AccessLock)
+            // Check if genres haves changes
+            bool changed = genres.Count != this.GenreFilters.Count;
+            if (!changed)
                 foreach (string genre in genres)
-                    this.GenreFilters.Add(genre);
+                    if (!this.GenreFilters.Contains(genre))
+                    {
+                        changed = true;
+                        break;
+                    }
 
-            // Set default selection if needed
-            if (!string.IsNullOrEmpty(selGenre) && this.GenreFilters.Contains(selGenre))
-                this.SelectedGenreFilter = selGenre;
-            else
-                this.SelectedGenreFilter = this.GenreFilters[0];
+            // Add genres to combo box
+            if (changed)
+            {
+                this.GenreFilters.Clear();
+                this.GenreFilters.Add("All Genres");
+                lock (genres.AccessLock)
+                    foreach (string genre in genres)
+                        this.GenreFilters.Add(genre);
+
+                // Set default selection if needed
+                if (!string.IsNullOrEmpty(selGenre) && this.GenreFilters.Contains(selGenre))
+                    this.SelectedGenreFilter = selGenre;
+                else
+                    this.SelectedGenreFilter = this.GenreFilters[0];
+            }
             
         }
 
