@@ -16,6 +16,50 @@
         </ObjectDataProvider>
 
         <wpfr:EnumDescriptionConverter x:Key="enumDescConv" />
+        <BooleanToVisibilityConverter x:Key="boolToVis" />
+
+        <ContextMenu x:Key="scanItemContext">
+            <MenuItem Header="Edit" Command="{Binding EditSelectedItemCommand}" Visibility="{Binding SingleDirScanSelectionVisibility}" />
+            <MenuItem Header="Set Destination Movie Folder" Visibility="{Binding AllMoviesSelectedResultsVisibility}" ItemsSource="{Binding MovieFolderItems}" />
+            <MenuItem Header="Set Action To Replace Existing" Command="{Binding SetReplaceExistingCommand}" Visibility="{Binding AllAlreadyExistSelectedResultsVisibility}" />
+            <MenuItem Header="Set to Delete" Command="{Binding SetSelectedItemToDeleteCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
+            <MenuItem Header="Ignore Item(s)" Command="{Binding IgnoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
+            <MenuItem Header="Unignore Items(s)" Command="{Binding UnignoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
+            <MenuItem Header="Locate Episode" Command="{Binding LocateEpisodeCommand}" Visibility="{Binding TvMissingScanSingleMissingSelectedResultsVisibility}" />
+            <MenuItem Header="Ignore" Visibility="{Binding TvMissingScanAnySelectedResultsVisibility}">
+                <MenuItem Header="Episode(s)" Command="{Binding IgnoreEpisodeCommand}" />
+                <MenuItem Header="Season(s)" Command="{Binding IgnoreSeasonCommand}" />
+                <MenuItem Header="Show ('Include in Scan' turned off)" Command="{Binding IgnoreShowCommand}" />
+            </MenuItem>
+        </ContextMenu>
+
+        <DataTemplate x:Key="DirScanTemplate">
+            <Border BorderThickness="1" BorderBrush="Black" Margin="2">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <CheckBox Grid.Row="0" Content="{Binding Action}" IsEnabled="{Binding CanEnable}" IsChecked="{Binding Enable}" FontWeight="Bold" Margin="3" Foreground="{Binding ActionColor}" />
+                    <TextBlock Grid.Row="1" Margin="3" Foreground="{Binding ActionColor}" >
+                        <Run Text="Source:" />
+                        <Run Text="{Binding SourcePathFileName, Mode=OneWay}" FontWeight="Bold"/>
+                        <Run Text=" (" />
+                        <Run Text="{Binding SourcePathDirectory, Mode=OneWay}" />
+                        <Run Text="):" />
+                    </TextBlock>
+                    <TextBlock Grid.Row="2" Margin="3" Foreground="{Binding ActionColor}">
+                        <Run Text="Destination:" />
+                        <Run Text="{Binding DestinationPathFileName, Mode=OneWay}" FontWeight="Bold" />
+                        <Run Text=" (" />
+                        <Run Text="{Binding DestinationPathDirectory, Mode=OneWay}" />
+                        <Run Text="):" />
+                    </TextBlock>
+                </Grid>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -83,9 +127,17 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <GroupBox Grid.Column="0" Header="Action Filter">
+                    <GroupBox Grid.Column="0" Header="View">
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <RadioButton Content="Grid" IsChecked="{Binding GridView}" Margin="3" />
+                            <RadioButton Content="List" IsChecked="{Binding ListView}" Margin="3" />
+                        </StackPanel>
+                    </GroupBox>
+
+                    <GroupBox Grid.Column="1" Header="Action Filter">
                         <StackPanel Orientation="Horizontal" Margin="2">
                             <CheckBox Content="None" Margin="3" IsChecked="{Binding NoneActionFilter}" />
                             <CheckBox Content="Move/Copy" Margin="3" IsChecked="{Binding MoveCopyActionFilter}" />
@@ -96,7 +148,7 @@
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Grid.Column="1" Header="Category Filter">
+                    <GroupBox Grid.Column="2" Header="Category Filter">
                         <StackPanel Orientation="Horizontal" Margin="2">
                             <CheckBox Content="TV" Margin="3" IsChecked="{Binding TvVideoCategoryFilter}" />
                             <CheckBox Content="Movie" Margin="3" IsChecked="{Binding MovieVideoCategoryFilter}"/>
@@ -110,32 +162,22 @@
                     </GroupBox>
                 </Grid>
 
-                <wpfr:BindableMultiSelectDataGrid Grid.Row="1" Margin="2" x:Name="dgResults" ItemsSource="{Binding OrgItemsCollection}" SelectedItems="{Binding Path=SelectedOrgItems, Mode=OneWayToSource}"
+                <wpfr:BindableMultiSelectDataGrid Grid.Row="1" Margin="2" Visibility="{Binding GridView, Converter={StaticResource boolToVis}}" ItemsSource="{Binding OrgItemsCollection}" SelectedItems="{Binding Path=SelectedOrgItems, Mode=OneWayToSource}"
                            AutoGenerateColumns="False" CanUserAddRows="False" EnableRowVirtualization="True" wpfr:Commands.DataGridDoubleClickCommand="{Binding EditSelectedItemCommand}"
-                            wpfr:DataGridColumnsBehavior.BindableColumns="{Binding GridColumns}">
+                            wpfr:DataGridColumnsBehavior.BindableColumns="{Binding GridColumns}" ContextMenu="{StaticResource scanItemContext}">
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
                             <Setter Property="Foreground" Value="{Binding ActionColor}"/>
                         </Style>
                     </DataGrid.RowStyle>
-
-                    <DataGrid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Edit" Command="{Binding EditSelectedItemCommand}" Visibility="{Binding SingleDirScanSelectionVisibility}" />
-                            <MenuItem Header="Set Destination Movie Folder" Visibility="{Binding AllMoviesSelectedResultsVisibility}" ItemsSource="{Binding MovieFolderItems}" />
-                            <MenuItem Header="Set Action To Replace Existing" Command="{Binding SetReplaceExistingCommand}" Visibility="{Binding AllAlreadyExistSelectedResultsVisibility}" />
-                            <MenuItem Header="Set to Delete" Command="{Binding SetSelectedItemToDeleteCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
-                            <MenuItem Header="Ignore Item(s)" Command="{Binding IgnoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
-                            <MenuItem Header="Unignore Items(s)" Command="{Binding UnignoreItemsCommand}" Visibility="{Binding DirectoryScanAnySelectedResultsVisibility}" />
-                            <MenuItem Header="Locate Episode" Command="{Binding LocateEpisodeCommand}" Visibility="{Binding TvMissingScanSingleMissingSelectedResultsVisibility}" />
-                            <MenuItem Header="Ignore" Visibility="{Binding TvMissingScanAnySelectedResultsVisibility}">
-                                <MenuItem Header="Episode(s)" Command="{Binding IgnoreEpisodeCommand}" />
-                                <MenuItem Header="Season(s)" Command="{Binding IgnoreSeasonCommand}" />
-                                <MenuItem Header="Show ('Include in Scan' turned off)" Command="{Binding IgnoreShowCommand}" />
-                            </MenuItem>
-                        </ContextMenu>
-                    </DataGrid.ContextMenu>
                 </wpfr:BindableMultiSelectDataGrid>
+
+                <wpfr:BindableMultiSelectListBox Grid.Row="1" Margin="2" Visibility="{Binding ListView, Converter={StaticResource boolToVis}}" 
+                        ItemsSource="{Binding OrgItemsCollection}" SelectionMode="Extended"
+                        BindableSelectedItems="{Binding Path=SelectedOrgItems, Mode=OneWayToSource}"
+                        wpfr:Commands.DataGridDoubleClickCommand="{Binding EditSelectedItemCommand}" ContextMenu="{StaticResource scanItemContext}" 
+                        ItemTemplate="{StaticResource DirScanTemplate}" HorizontalContentAlignment="Stretch" ScrollViewer.CanContentScroll="False">
+                </wpfr:BindableMultiSelectListBox>
 
                 <Grid Grid.Row="2" Margin="2">
                     <Grid.ColumnDefinitions>

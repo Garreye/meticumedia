@@ -387,6 +387,33 @@ namespace Meticumedia.Controls
 
         public ObservableCollection<DataGridColumn> GridColumns { get; set; }
 
+        public bool ListView
+        {
+            get
+            {
+                return _ListView;
+            }
+            set
+            {
+                _ListView = value;
+                OnPropertyChanged(this, "ListView");
+                OnPropertyChanged(this, "GridView");
+            }
+        }
+        private bool _ListView = false;
+
+        public bool GridView
+        {
+            get
+            {
+                return !ListView;
+            }
+            set
+            {
+                ListView = !value;
+            }
+        }
+
         #endregion
 
         #region Context Menu Related
