@@ -222,11 +222,15 @@ namespace Meticumedia.Classes
                 throw new Exception("Content must be TvShow");
             TvShow show = content as TvShow;
 
+            bool updateRequired = show.Id != this.Id;
             base.CloneAndHandlePath(show, replacePath, handleEmptyPath);
 
             this.IncludeInSchedule = show.IncludeInSchedule;
             this.DoMissingCheck = show.DoMissingCheck;
             this.DvdEpisodeOrder = show.DvdEpisodeOrder;
+
+            if (updateRequired)
+                this.UpdateInfoFromDatabase();
 
             // TODO: this is a hack
             App.Current.Dispatcher.BeginInvoke((Action)delegate
@@ -469,8 +473,8 @@ namespace Meticumedia.Classes
                         break;
                     case XmlElements.Episodes:
                         xw.WriteStartElement(element.ToString());
-                        foreach (TvEpisode episode in this.Episodes)
-                            episode.Save(xw);
+                        for(int i=0;i<this.Episodes.Count;i++)
+                            this.Episodes[i].Save(xw);
                         xw.WriteEndElement();
                         break;
                     case XmlElements.DoMissing:
