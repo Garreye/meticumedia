@@ -254,7 +254,7 @@ namespace Meticumedia.Classes
             LoadScanDirLogAsync();
         }
 
-        private static bool DoUpdating = true;
+        public static bool DoUpdating { get; private set; }
 
         /// <summary>
         /// Asynchronously load TV shows from XML

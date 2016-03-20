@@ -35,7 +35,7 @@ namespace Meticumedia
             
             // Load organization and settings from XML
             Settings.Load();
-            Organization.Load(true);
+            Organization.Load(true); // Pass in false to prevent updating (for debugging)
         }
 
         private void exit_Click(object sender, RoutedEventArgs e)

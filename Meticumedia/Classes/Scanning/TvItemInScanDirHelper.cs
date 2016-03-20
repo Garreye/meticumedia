@@ -69,7 +69,10 @@ namespace Meticumedia.Classes
         /// </summary>
         public static void DoUpdate(bool dirScanSearch)
         {
-            // Run scan to look for TV files
+            if (!Organization.DoUpdating)
+                return;
+
+                // Run scan to look for TV files
             if (dirScanSearch)
             {
                 scan.RunScan(Settings.ScanDirectories.ToList(), new List<OrgItem>(), true, true, true, true);
