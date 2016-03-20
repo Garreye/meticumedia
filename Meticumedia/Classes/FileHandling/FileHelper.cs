@@ -733,26 +733,17 @@ namespace Meticumedia.Classes
         /// <returns>string with word removed</returns>
         private static string RemoveWord(bool disableRemAfter, string input, Dictionary<FileWordType, List<string>> removeFileWords, RemoveFileWord remWord, out bool removed)
         {
-            // Store remove after state
-            bool remEverything = remWord.RemoveEverythingAfter;
-            bool remAfterWord = remWord.RemoveFollowingEndWord;
+            RemoveFileWord remWordClone = new RemoveFileWord(remWord);
 
             // Disable remove after if needed
             if (disableRemAfter)
             {
-                remWord.RemoveEverythingAfter = false;
-                remWord.RemoveFollowingEndWord = false;
+                remWordClone.RemoveEverythingAfter = false;
+                remWordClone.RemoveFollowingEndWord = false;
             }
 
             // Perform word remove
-            removed = remWord.RemoveWord(ref input, removeFileWords);
-
-            // Restore remove after state
-            if (disableRemAfter)
-            {
-                remWord.RemoveEverythingAfter = remEverything;
-                remWord.RemoveFollowingEndWord = remAfterWord;
-            }
+            removed = remWordClone.RemoveWord(ref input, removeFileWords);
 
             // Return results with removed word
             return input;

@@ -96,6 +96,16 @@ namespace Meticumedia.Classes
             this.RemoveEverythingAfter = removeEverythingAfter;
         }
 
+        public RemoveFileWord(RemoveFileWord other)
+        {
+            this.SeparatorBefore = other.SeparatorBefore;
+            this.SeparatorAfter = other.SeparatorAfter;
+            this.Word = other.Word;
+            this.Type = other.Type;
+            this.RemoveFollowingEndWord = other.RemoveFollowingEndWord;
+            this.RemoveEverythingAfter = other.RemoveEverythingAfter;
+        }
+
         #endregion
 
         #region Methods
@@ -215,6 +225,11 @@ namespace Meticumedia.Classes
 
             // Return regular expression string
             return re;
+        }
+
+        public override string ToString()
+        {
+            return this.Word;
         }
 
         #endregion
