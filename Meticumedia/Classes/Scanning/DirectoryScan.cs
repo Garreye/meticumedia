@@ -239,6 +239,7 @@ namespace Meticumedia.Classes
             if (this.background)
             {
                 bool cancel = false;
+                return;
                 processing.Run(paths, ref cancel, args, 1);
             }
             else
@@ -407,28 +408,47 @@ namespace Meticumedia.Classes
                 pathSplit = pathBase.Split('\\');
             else
                 pathSplit = orgPath.Path.Split('\\');
+            pathSplit[pathSplit.Length - 1] = Path.GetFileNameWithoutExtension(pathSplit[pathSplit.Length - 1]);
 
             List<string> possibleMatchPaths = new List<string>();
-            possibleMatchPaths.Add(pathSplit.Last());
 
-            bool[] alreadyContained = new bool[pathSplit.Length - 1];
-            for (int i = pathSplit.Length - 2; i > 0; i--)
+            // Looking to remove dummy video files by rip (e.g. "ERTG.mp4" inside "The Matrix 1999 hd ERGT rip/" folder)
+            List<string> validSplits = new List<string>();
+            for (int i = pathSplit.Length - 1; i > 0; i--)
+            {
+                if (string.IsNullOrWhiteSpace(pathSplit[i]))
+                    continue;
+
+                bool containedInOther = false;
+                for (int j = i - 1; j > 0; j--)
+                {
+                    if (pathSplit[j].Length > pathSplit[i].Length && pathSplit[j].ToLower().Contains(pathSplit[i].ToLower()))
+                    {
+                        containedInOther = true;
+                        break;
+                    }
+                }
+
+                if (!containedInOther)
+                {
+                    validSplits.Add(pathSplit[i]);
+                    possibleMatchPaths.Add(pathSplit[i] + Path.GetExtension(orgPath.Path));
+                }
+            }
+
+            for (int i = validSplits.Count - 1; i >= 0; i--)
             {
                 string build = string.Empty;
-                for (int j = i; j < pathSplit.Length; j++)
-                    build += pathSplit[j] + " ";
+                for (int j = validSplits.Count - 1; j >=i ; j--)
+                    build += validSplits[j] + " ";
 
-                // Looking to remove dummy video files by rip (e.g. "ERTG.mp4" inside "The Matrix 1999 hd ERGT rip/" folder)
-                foreach (string prevPossibleMatch in possibleMatchPaths)
-                    if (pathSplit[i].ToLower().Contains(Path.GetFileNameWithoutExtension(prevPossibleMatch.ToLower())))
-                        alreadyContained[i] = true;
+                build = build.Trim();
 
-                if (!alreadyContained[i])
+                build += Path.GetExtension(orgPath.Path);
+                if (!possibleMatchPaths.Contains(build))
                     possibleMatchPaths.Add(build);
             }
-            for (int i = pathSplit.Length - 2; i > 0; i--)
-                if (!alreadyContained[i])
-                    possibleMatchPaths.Add(pathSplit[i] + Path.GetExtension(orgPath.Path));
+            
 
             // Try to match to each string
             foreach (string matchString in possibleMatchPaths)
