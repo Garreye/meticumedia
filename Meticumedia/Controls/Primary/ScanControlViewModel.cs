@@ -391,26 +391,22 @@ namespace Meticumedia.Controls
         {
             get
             {
-                return _ListView;
+                return Settings.GuiControl.ScanListView;
             }
             set
             {
-                _ListView = value;
+                Settings.GuiControl.ScanListView = value;
+                Settings.Save(false);
                 OnPropertyChanged(this, "ListView");
                 OnPropertyChanged(this, "GridView");
             }
         }
-        private bool _ListView = false;
 
         public bool GridView
         {
             get
             {
-                return !ListView;
-            }
-            set
-            {
-                ListView = !value;
+                return !Settings.GuiControl.ScanListView;
             }
         }
 
@@ -562,6 +558,8 @@ namespace Meticumedia.Controls
 
         void Settings_SettingsModified(object sender, EventArgs e)
         {
+            OnPropertyChanged(this, "ListView");
+            OnPropertyChanged(this, "GridView");
             UpdateRunSelectionsSafe();
             UpdateMovieFolderItems();
         }

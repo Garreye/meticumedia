@@ -49,7 +49,7 @@
             <Button Grid.Column="5" Content="//\\" MinWidth="30" Padding="3" Margin="3" Command="{Binding MoveToTopSelectedCommand}" />
             <Button Grid.Column="6" Content="\\//" MinWidth="30" Padding="3" Margin="3" Command="{Binding MoveToBottomSelectedCommand}" />
 
-            <CheckBox Grid.Column="8" Content="Auto-Clear Completed" VerticalAlignment="Center" Margin="3" IsChecked="{Binding Path=AutoClearCompleted, Source={x:Static mm:Settings.GuiControl}}" />
+            <CheckBox Grid.Column="8" Content="Auto-Clear Completed" VerticalAlignment="Center" Margin="3" IsChecked="{Binding AutoClearCompleted}" />
             <Button Grid.Column="9" Content="Clear" MinWidth="80" Padding="3" Margin="3" Command="{Binding ClearCommand}"/>
         </Grid>
 

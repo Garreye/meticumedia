@@ -309,6 +309,19 @@ namespace Meticumedia.Controls
         }
         private PauseButtonStates pauseButtonState = PauseButtonStates.Pause;
 
+        public bool AutoClearCompleted
+        {
+            get
+            {
+                return Settings.GuiControl.AutoClearCompleted;
+            }
+            set
+            {
+                Settings.GuiControl.AutoClearCompleted = value;
+                Settings.Save(false);
+                OnPropertyChanged(this, "AutoClearCompleted");
+            }
+        }
 
         #endregion
 
@@ -337,7 +350,10 @@ namespace Meticumedia.Controls
 
             // Register to queuing event
             OrgItemQueueableViewModel.ItemsToQueue += HandleItemsToQueue;
-        }       
+
+            // Settings modified
+            Settings.SettingsModified += Settings_SettingsModified;
+        }
 
         #endregion
 
@@ -355,6 +371,13 @@ namespace Meticumedia.Controls
         {
             AddItemsToQueueSafe(e.QueueItems);
         }
+
+
+        private void Settings_SettingsModified(object sender, EventArgs e)
+        {
+            OnPropertyChanged(this, "AutoClearCompleted");
+        }
+
 
         #endregion
 

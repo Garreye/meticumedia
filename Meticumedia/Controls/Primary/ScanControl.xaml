@@ -48,14 +48,14 @@
                         <Run Text="{Binding SourcePathFileName, Mode=OneWay}" FontWeight="Bold"/>
                         <Run Text=" (" />
                         <Run Text="{Binding SourcePathDirectory, Mode=OneWay}" />
-                        <Run Text="):" />
+                        <Run Text=")" />
                     </TextBlock>
                     <TextBlock Grid.Row="2" Margin="3" Foreground="{Binding ActionColor}">
                         <Run Text="Destination:" />
                         <Run Text="{Binding DestinationPathFileName, Mode=OneWay}" FontWeight="Bold" />
                         <Run Text=" (" />
                         <Run Text="{Binding DestinationPathDirectory, Mode=OneWay}" />
-                        <Run Text="):" />
+                        <Run Text=")" />
                     </TextBlock>
                 </Grid>
             </Border>
@@ -132,7 +132,7 @@
 
                     <GroupBox Grid.Column="0" Header="View">
                         <StackPanel Orientation="Horizontal" Margin="2">
-                            <RadioButton Content="Grid" IsChecked="{Binding GridView}" Margin="3" />
+                            <RadioButton Content="Grid" IsChecked="{Binding GridView, Mode=OneWay}" Margin="3" />
                             <RadioButton Content="List" IsChecked="{Binding ListView}" Margin="3" />
                         </StackPanel>
                     </GroupBox>

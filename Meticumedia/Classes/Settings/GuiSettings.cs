@@ -44,15 +44,32 @@ namespace Meticumedia.Classes
         {
             get
             {
-                return autoClearCompleted;
+                return _AutoClearCompleted;
             }
             set
             {
-                autoClearCompleted = value;
+                _AutoClearCompleted = value;
                 OnPropertyChanged("AutoClearCompleted");
             }
         }
-        private bool autoClearCompleted;
+        private bool _AutoClearCompleted;
+
+        /// <summary>
+        /// Whether scan tab is set to list view
+        /// </summary>
+        public bool ScanListView
+        {
+            get
+            {
+                return _ScanListView;
+            }
+            set
+            {
+                _ScanListView = value;
+                OnPropertyChanged("ScanListView");
+            }
+        }
+        private bool _ScanListView;
 
         #endregion
 
@@ -73,7 +90,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Element names for properties that need to be saved to XML.
         /// </summary>
-        private enum XmlElements { AutoClearCompleted };
+        private enum XmlElements { AutoClearCompleted, ScanListView };
 
         /// <summary>
         /// Saves instance properties to XML file.
@@ -89,6 +106,9 @@ namespace Meticumedia.Classes
                 {
                     case XmlElements.AutoClearCompleted:
                         value = this.AutoClearCompleted.ToString();
+                        break;
+                    case XmlElements.ScanListView:
+                        value = this.ScanListView.ToString();
                         break;
                     default:
                         throw new Exception("Unkonw element!");
@@ -124,6 +144,11 @@ namespace Meticumedia.Classes
                         bool autoClear;
                         bool.TryParse(value, out autoClear);
                         this.AutoClearCompleted = autoClear;
+                        break;
+                    case XmlElements.ScanListView:
+                        bool scanListView;
+                        bool.TryParse(value, out scanListView);
+                        this.ScanListView = scanListView;
                         break;
                 }
             }
