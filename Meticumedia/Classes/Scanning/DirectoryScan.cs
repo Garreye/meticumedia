@@ -239,7 +239,6 @@ namespace Meticumedia.Classes
             if (this.background)
             {
                 bool cancel = false;
-                return;
                 processing.Run(paths, ref cancel, args, 1);
             }
             else
