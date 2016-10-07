@@ -13,73 +13,39 @@ namespace Meticumedia.Classes
 {
     public static class TvTorrentHelper
     {        
-        public static readonly string BASE_URL = "http://kat.cr";
-
         public static TvEpisodeTorrent GetEpisodeTorrent(TvEpisode episode)
         {            
             // Download show episodes page
-            string showPageUrl = BASE_URL + "/usearch/" + episode.BuildEpString().Replace(" ", "%20") + "/";
-            string showPage;
-            HttpWebRequest wr = WebRequest.CreateHttp(showPageUrl);
-            try
-            {
-                var response = wr.GetResponse();
-                using (var z = new GZipStream(response.GetResponseStream(), CompressionMode.Decompress))
-                {
-                    using (var reader = new StreamReader(z, Encoding.UTF8))
-                    {
-                        showPage = reader.ReadToEnd();
-                    }
-                }
-            }
-            catch
-            {
-                return null;
-            }
+            string showPageUrl = "http://rarbg.to/torrents.php?search=" + episode.BuildEpString().Replace(" ", "+");
+            WebClient client = new WebClient();
+            client.Headers.Add("User-Agent: Other");
+            string data = client.DownloadString(showPageUrl);
 
-            // Get regex for finding torrent download/magnet link
-            Regex torrentLinkRegex;
-            switch (Settings.General.TorrentDownload)
-            {
-                case TorrentDownload.Magnet:
-                    torrentLinkRegex = new Regex("<a\\W*data-nop\\W*title=\"Torrent magnet link\"\\W*href=\"([^\"]+)\"");
-                    break;
-                case TorrentDownload.DownloadTorrent:
-                case TorrentDownload.DownloadAndOpenTorrent:
-                    torrentLinkRegex = new Regex("<a\\W*data-download\\W*title=\"Download torrent file\"\\W*href=\"([^\"]+)\"");
-                    break;
-                default:
-                    throw new Exception("Unkown torrent download type");
-            }
-            
-            MatchCollection matches = torrentLinkRegex.Matches(showPage);
+            Regex baseRegex = new Regex(@"<tr\s+class=.lista2.>\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*</tr>");
 
+            Regex titleRegex = new Regex(@"title=""([^""]+)""");
+            Regex urlRegex = new Regex("href=\"(/torrent/[^\"]+)\"");
+
+            Regex sizeRegex = new Regex(@">(\S+)\s+MB<");
+
+            MatchCollection matches = baseRegex.Matches(data);
             Dictionary<TorrentQuality, TvEpisodeTorrent> matchingEpisodes = new Dictionary<TorrentQuality, TvEpisodeTorrent>();
+
             foreach (Match match in matches)
             {
-                string torrentLink = match.Groups[1].Value;
-
-                string name; Regex nameRegex;
-                switch (Settings.General.TorrentDownload)
-                {
-                    case TorrentDownload.Magnet:
-                        nameRegex = new Regex("dn=(?<name>[^&]+)");
-                        break;
-                    case TorrentDownload.DownloadTorrent:
-                    case TorrentDownload.DownloadAndOpenTorrent:
-                        nameRegex = new Regex("^(?<link>[^?]+)\\?title=(?<name>.*)");
-                        break;
-                    default:
-                        throw new Exception("Unkown torrent download type");
-                }
-
-                Match nameMatch = nameRegex.Match(torrentLink);
-                if (!nameMatch.Success)
+                string name;
+                Match titleMatch = titleRegex.Match(match.Groups[2].Value);
+                if (titleMatch.Success)
+                    name = titleMatch.Groups[1].Value;
+                else
                     continue;
 
-                name = nameMatch.Groups["name"].Value.Replace("+", " ");
-                if (!string.IsNullOrEmpty(nameMatch.Groups["link"].Value))
-                    torrentLink = nameMatch.Groups["link"].Value;
+                string pageUrl;
+                Match urlMatch = urlRegex.Match(match.Groups[2].Value);
+                if (urlMatch.Success)
+                    pageUrl = "http://rarbg.to" + urlMatch.Groups[1].Value;
+                else
+                    continue;
 
                 MatchCollection showMatches = episode.Show.MatchFileToContent(name);
                 bool matchShow = showMatches != null && showMatches.Count > 0;
@@ -90,7 +56,7 @@ namespace Meticumedia.Classes
                     // Don't want to get torrent with a bunch of episodes (double is okay)
                     if (ep2 > 0 && ep2 - ep1 > 1)
                         continue;
-                    
+
                     TorrentQuality quality = TorrentQuality.Sd480p;
                     if (name.ToLower().Contains("720p"))
                         quality = TorrentQuality.Hd720p;
@@ -104,25 +70,14 @@ namespace Meticumedia.Classes
                     torrentEp.Episode2 = ep2;
                     torrentEp.Quality = quality;
                     torrentEp.Title = name;
-
-                    switch (Settings.General.TorrentDownload)
-                    {
-                        case TorrentDownload.Magnet:
-                            torrentEp.Magnet = torrentLink;
-                            break;
-                        case TorrentDownload.DownloadTorrent:
-                        case TorrentDownload.DownloadAndOpenTorrent:
-                            torrentEp.File = torrentLink;
-                            break;
-                        default:
-                            throw new Exception("Unkown torrent download type");
-                    }
+                    torrentEp.PageUrl = pageUrl;                    
 
                     if (!matchingEpisodes.ContainsKey(quality))
                         matchingEpisodes.Add(quality, null);
 
                     if (matchingEpisodes[quality] == null)
                         matchingEpisodes[quality] = torrentEp;
+
                 }
             }
 
@@ -159,6 +114,22 @@ namespace Meticumedia.Classes
                         throw new Exception("Unknown torrent quality");
                 }
             }
+
+            // Link is for page, need to get actual torrent
+            WebClient pageClient = new WebClient();
+            pageClient.Headers.Add("User-Agent: Other");
+            string page = pageClient.DownloadString(matchingEpisodes[closestQuality].File);
+
+            Regex torrentRegex = new Regex(@">\s*Torrent:\s*</td>.*?href=""(/download.php?[^\""]+)""");
+            Regex magnetRegex = new Regex(@">\s*Torrent:\s*</td>.*?href=""(magnet:[^""]+)""");
+
+            Match torrentMatch = torrentRegex.Match(page);
+            if (torrentMatch.Success)
+                matchingEpisodes[closestQuality].File = "http://rarbg.to" + torrentMatch.Groups[1].Value;
+
+            Match magnetMatch = magnetRegex.Match(page);
+            if (magnetMatch.Success)
+                matchingEpisodes[closestQuality].Magnet = magnetMatch.Groups[1].Value;
 
             return matchingEpisodes[closestQuality];
         }

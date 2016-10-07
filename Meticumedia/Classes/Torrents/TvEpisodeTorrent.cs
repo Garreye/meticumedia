@@ -24,6 +24,8 @@ namespace Meticumedia.Classes
 
         public TorrentFlag Flag { get; set; }
 
+        public string PageUrl { get; set; }
+
         public string File { get; set; }
 
         public string Magnet { get; set; }
