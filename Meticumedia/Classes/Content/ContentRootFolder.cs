@@ -189,6 +189,19 @@ namespace Meticumedia.Classes
                 UpdateProgressChange(sender, new OrgProgressChangesEventArgs(newContent, percent, msg));
         }
 
+        /// <summary>
+        /// Static event that fires when folder updating complete
+        /// </summary>
+        public static event EventHandler UpdateProgressComplete;
+
+        /// <summary>
+        /// Triggers TvFolderUpdateProgressChange event
+        /// </summary>
+        public static void OnUpdateProgressComplete(ContentRootFolder sender)
+        {
+            UpdateProgressComplete?.Invoke(sender, new EventArgs());
+        }
+
         #endregion
 
         #region Constructors
@@ -615,6 +628,7 @@ namespace Meticumedia.Classes
             // Set progress to completed
             progressMsg = "Update of '" + this.FullPath + "' complete!";
             OnUpdateProgressChange(this, false, 100, progressMsg);
+            OnUpdateProgressComplete(this);
 
             // Return whether update was completed without cancelation
             return !cancel;

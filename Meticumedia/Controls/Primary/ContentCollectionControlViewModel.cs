@@ -388,6 +388,7 @@ namespace Meticumedia.Controls
 
             Settings.SettingsModified +=Settings_SettingsModified;
             ContentRootFolder.UpdateProgressChange += ContentRootFolder_UpdateProgressChange;
+            ContentRootFolder.UpdateProgressComplete += ContentRootFolder_UpdateProgressComplete;
 
             this.Folders = new ObservableCollection<ContentRootFolder>();
 
@@ -407,7 +408,7 @@ namespace Meticumedia.Controls
 
             liveCollection.IsLiveSorting = true;
             liveCollection.LiveSortingProperties.Add("DisplayName");
-        }        
+        }
 
         #endregion
 
@@ -489,20 +490,20 @@ namespace Meticumedia.Controls
             if (App.Current == null)
                 return;
 
-            if (contentLoaded)
+            if (contentLoaded && contentUpdated)
                 UpdateGenresComboBoxSafe();
 
             // Invoke can result in dead-lock if another app thread if waiting for collection.ContentLock
             ContentCollection collection = sender as ContentCollection;
 
             if (App.Current.Dispatcher.CheckAccess())
-                    UpdateContents(e, collection);
+                UpdateContents(e, collection);
             else
-                    App.Current.Dispatcher.BeginInvoke((Action)delegate
-                    {
-                        UpdateContents(e, collection);
-                    });
-            
+                App.Current.Dispatcher.BeginInvoke((Action)delegate
+                {
+                    UpdateContents(e, collection);
+                });
+
         }
 
         private void UpdateContents(System.Collections.Specialized.NotifyCollectionChangedEventArgs e, ContentCollection collection)
@@ -543,7 +544,20 @@ namespace Meticumedia.Controls
             ContentRootFolder folder = sender as ContentRootFolder;
             if (folder.ContentType == this.contentType)
             {
+                contentUpdated = false;
                 UpdateProgressSafe(e.ProgressPercentage, (string)e.UserState, e.ProgressPercentage < 100);
+            }
+        }
+
+        private bool contentUpdated = false;
+
+        private void ContentRootFolder_UpdateProgressComplete(object sender, EventArgs e)
+        {
+            ContentRootFolder folder = sender as ContentRootFolder;
+            if (folder.ContentType == this.contentType)
+            {
+                contentUpdated = true;
+                UpdateGenresComboBoxSafe();
             }
         }
 
