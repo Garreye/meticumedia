@@ -60,7 +60,7 @@ namespace Meticumedia.Classes
                 double progressPerEp = 1D / show.Episodes.Count * progressPerShow;
 
                 // Go through missing episodes
-                for(int j=0;j<show.Episodes.Count;j++)
+                for (int j = 0; j < show.Episodes.Count; j++)
                 {
                     // Get episode
                     TvEpisode ep = show.Episodes[j];
@@ -124,7 +124,6 @@ namespace Meticumedia.Classes
                         newItem.Number = number++;
                         missingCheckItem.Add(newItem);
                     }
-
                 }
             }
 

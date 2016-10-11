@@ -92,6 +92,8 @@
     <Compile Include="Classes\Settings\AutoMoveFileSetup.cs" />
     <Compile Include="Classes\Settings\CaseOptionType.cs" />
     <Compile Include="Classes\Settings\GeneralSettings.cs" />
+    <Compile Include="Classes\Torrents\SItes\RarbgTorrentSite.cs" />
+    <Compile Include="Classes\Torrents\SItes\TorrentAbstractSite.cs" />
     <Compile Include="Classes\Torrents\TorrentDownload.cs" />
     <Compile Include="Classes\Torrents\TvTorrentHelper.cs" />
     <Compile Include="Classes\Torrents\TvEpisodeTorrent.cs" />
