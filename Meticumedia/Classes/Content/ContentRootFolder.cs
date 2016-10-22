@@ -685,7 +685,7 @@ namespace Meticumedia.Classes
             if (contentExists && contentComplete)
             {
                 // Check if content needs updating
-                if ((DateTime.Now - newContent.LastUpdated).TotalDays > 7)
+                if ((DateTime.Now - newContent.LastUpdated).TotalDays > 7 && this.ContentType == ContentType.TvShow)
                     newContent.UpdateInfoFromDatabase();
 
                 // Update progress
