@@ -235,20 +235,6 @@ namespace Meticumedia.Classes
         }
         private TvEpisode tvEpisode;
 
-        public TvEpisodeTorrent TorrentTvEpisode
-        {
-            get
-            {
-                return torrentTvEpisode;
-            }
-            set
-            {
-                torrentTvEpisode = value;
-                OnPropertyChanged("TorrentTvEpisode");
-            }
-        }
-        private TvEpisodeTorrent torrentTvEpisode;
-
         void tvEpisode_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Show")
@@ -601,7 +587,7 @@ namespace Meticumedia.Classes
         /// <param name="episode">TV episode for file</param>
         /// <param name="episode2">2nd Tv epsidoe for file</param>
         /// <param name="category">file category</param>
-        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir, TvEpisodeTorrent torrentEp) : this()
+        public OrgItem(OrgStatus status, OrgAction action, TvEpisode episode, TvEpisode episode2, FileCategory category, OrgFolder scanDir) : this()
         {
             this.Status = status;
             this.Progress = 0;
@@ -614,7 +600,6 @@ namespace Meticumedia.Classes
             this.TvEpisode = new TvEpisode(episode);
             if (episode2 != null)
                 this.TvEpisode2 = new TvEpisode(episode2);
-            this.TorrentTvEpisode = torrentEp;
             this.Category = category;
             this.Enable = action == OrgAction.Torrent;
             this.ScanDirectory = scanDir;
@@ -746,7 +731,6 @@ namespace Meticumedia.Classes
             this.DestinationPath = item.DestinationPath;
             this.TvEpisode = item.TvEpisode;
             this.TvEpisode2 = item.TvEpisode2;
-            this.TorrentTvEpisode = item.TorrentTvEpisode;
             this.Category = item.Category;
             this.Enable = item.Enable;
             this.Movie = item.Movie;
@@ -1482,23 +1466,29 @@ namespace Meticumedia.Classes
 
         private bool DownloadTorrent()
         {
+            OnProgressChange(20);
+
+            TvEpisodeTorrent torrent = TvTorrentHelper.GetEpisodeTorrent(TvEpisode);
+
+            OnProgressChange(50);
+
             // Download the torrent file
-            if (this.TorrentTvEpisode != null)
+            if (torrent != null)
             {
                 WebClient webClient = new WebClient();
                 webClient.DownloadProgressChanged += webClient_DownloadProgressChanged;
 
                 if (Settings.General.TorrentDownload == TorrentDownload.Magnet)
                 {
-                    Process.Start(this.TorrentTvEpisode.Magnet);
+                    Process.Start(torrent.Magnet);
                     return true;
                 }
-                else
+                else if (!string.IsNullOrEmpty(torrent.File))
                 {
                     if (!Directory.Exists(Settings.General.TorrentDirectory))
                         Directory.CreateDirectory(Settings.General.TorrentDirectory);
 
-                    DownloadFile(this.TorrentTvEpisode.File, this.DestinationPath);
+                    DownloadFile(torrent.File, this.DestinationPath);
 
                     if (Settings.General.TorrentDownload == TorrentDownload.DownloadAndOpenTorrent)
                         Process.Start(this.DestinationPath);
@@ -1833,18 +1823,12 @@ namespace Meticumedia.Classes
         {
             if (this.Action == OrgAction.Torrent)
             {
-                this.SourcePath = TorrentTvEpisode.Url;
+                this.SourcePath = "Torrent Search for '" + TvEpisode.Show.BuildFileName(TvEpisode, null, "") + "'";
 
                 if (Settings.General.TorrentDownload == TorrentDownload.Magnet)
-                    this.DestinationPath = "Torrent Client Magnet Link/" + TorrentTvEpisode.Title;
+                    this.DestinationPath = "Torrent Magnet Link";
                 else
-                {
-                    TvEpisode ep1 = this.TvEpisode;
-                    TvEpisode ep2 = null;
-                    if (TorrentTvEpisode.Episode2 > 0)
-                        ep1.Show.FindEpisode(ep1.Season, TorrentTvEpisode.Episode2, false, out ep2);
-                    this.DestinationPath = Path.Combine(Settings.General.TorrentDirectory, TvEpisode.Show.BuildFileName(ep1, ep2, "") + ".torrent");
-                }
+                    this.DestinationPath = "Torrent File Download";
                 return;
             }
             

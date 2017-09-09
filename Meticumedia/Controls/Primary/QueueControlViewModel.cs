@@ -800,7 +800,7 @@ namespace Meticumedia.Controls
                     actionStr = "Processing";
                     break;
             }
-            string msg = actionStr + " file '" + System.IO.Path.GetFileName(item.SourcePath) + "'";
+            string msg = actionStr + " '" + System.IO.Path.GetFileName(item.SourcePath) + "'";
 
 
             if (e.ProgressPercentage == this.Progress && msg == this.ProgressMessage)

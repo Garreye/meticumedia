@@ -115,11 +115,11 @@ namespace Meticumedia.Classes
                         TvEpisodeTorrent ezTvEpisode = TvTorrentHelper.GetEpisodeTorrent(ep);
                         if (ezTvEpisode != null)
                         {
-                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null, ezTvEpisode);
+                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null);
                             newItem.BuildDestination();
                         }
                         else
-                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null, null);
+                            newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
 
                         newItem.Number = number++;
                         missingCheckItem.Add(newItem);

@@ -105,7 +105,7 @@ namespace Meticumedia.Classes
                     // Add empty item for missing
                     if (!found && ep.Aired && show.DoMissingCheck)
                     {
-                        OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null, null);
+                        OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.None, ep, null, FileCategory.TvVideo, null);
                         if (!show.DoRenaming)
                             newItem.Category = FileCategory.Ignored;
                         newItem.Number = number++;

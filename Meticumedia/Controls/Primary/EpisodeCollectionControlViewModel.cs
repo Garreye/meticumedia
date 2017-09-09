@@ -537,54 +537,22 @@ namespace Meticumedia.Controls
 
         private void GetTorrent()
         {
-            DoGetTorrent();
-        }
-
-        private async void DoGetTorrent()
-        {
             List<TvEpisode> selEpisodes = new List<TvEpisode>();
-            foreach(TvEpisode episode in this.SelectedEpisodes)
+            foreach (TvEpisode episode in this.SelectedEpisodes)
                 selEpisodes.Add(episode);
 
             List<string> unmatchedEps = new List<string>();
 
             List<OrgItem> items = new List<OrgItem>();
-            List<Task<TvEpisodeTorrent>> tasks = new List<Task<TvEpisodeTorrent>>();
             for (int i = 0; i < selEpisodes.Count; i++)
             {
-                // Start torrent get task
-                Task<TvEpisodeTorrent> task = TvTorrentHelper.GetEpisodeTorrentAsync(selEpisodes[i]);
-                tasks.Add(task);
+                OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, selEpisodes[i], null, FileCategory.TvVideo, null);
+                newItem.BuildDestination();
+                items.Add(newItem);
             }
-            await Task.WhenAll(tasks);
 
-            for (int i = 0; i < selEpisodes.Count; i++)
-            {
-                TvEpisodeTorrent ezEp = tasks[i].Result;
-                if (ezEp != null)
-                {
-                    OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, selEpisodes[i], null, FileCategory.TvVideo, null, ezEp);
-                    newItem.BuildDestination();
-                    items.Add(newItem);
-                }
-                else
-                    unmatchedEps.Add(selEpisodes[i].BuildEpString());
-            }
-            
             if (items.Count > 0)
                 OnItemsToQueue(items);
-
-            if(unmatchedEps.Count > 0)
-            {
-                string unmatchStr = "Unable to get torrents for the following files:" + Environment.NewLine;
-                for (int i = 0; i < unmatchedEps.Count; i++)
-                {
-                    unmatchStr += "\t" + unmatchedEps[i];
-                    if (i < unmatchedEps.Count - 1)
-                        unmatchStr += Environment.NewLine;
-                }
-                MessageBox.Show(unmatchStr, "Get Torrent Failure");
-            }
         }
 
         private void CopyEpisodeInfoToClipboard()
