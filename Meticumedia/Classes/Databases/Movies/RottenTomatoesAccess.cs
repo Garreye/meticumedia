@@ -41,12 +41,12 @@ namespace Meticumedia.Classes
         /// <summary>
         /// JSON rate limiter override
         /// </summary>
-        protected override JsonRateLimit JSON_RATE_LIMITER { get { return rateLimit; } }
+        protected override RateLimiter JSON_RATE_LIMITER { get { return rateLimit; } }
 
         /// <summary>
         /// JSON rate limiter instance
         /// </summary>
-        private JsonRateLimit rateLimit = new JsonRateLimit(true, 10, 900);
+        private RateLimiter rateLimit = new RateLimiter(true, 10, 900);
 
         #endregion
 

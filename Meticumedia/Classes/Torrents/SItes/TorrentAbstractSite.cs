@@ -60,7 +60,7 @@ namespace Meticumedia.Classes
             TvEpisodeTorrent closestTorrent = qualityTorrents[closestQuality];
             UpdateTorrentLinks(closestTorrent);
 
-            return closestTorrent;
+           return closestTorrent;
         }
 
         /// <summary>

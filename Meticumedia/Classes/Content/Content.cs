@@ -647,7 +647,7 @@ namespace Meticumedia.Classes
                 string re = BuildNameRegularExpresionString(true, name);
                 MatchCollection matches = null;
                 if (!string.IsNullOrEmpty(re))
-                    matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(fileName)), re, RegexOptions.IgnoreCase);
+                    matches = Regex.Matches(FileHelper.SimplifyFileName(System.IO.Path.GetFileNameWithoutExtension(FileHelper.GetSafeFileName(fileName))), re, RegexOptions.IgnoreCase);
 
                 // Return matches if found
                 if (matches != null && matches.Count > 0)

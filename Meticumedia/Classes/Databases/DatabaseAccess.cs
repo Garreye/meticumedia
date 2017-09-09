@@ -39,7 +39,7 @@ namespace Meticumedia.Classes
         /// <summary>
         /// Whether to limit rate of JSON requests or not
         /// </summary>
-        protected virtual JsonRateLimit JSON_RATE_LIMITER { get { throw new NotImplementedException(); } }
+        protected virtual RateLimiter JSON_RATE_LIMITER { get { throw new NotImplementedException(); } }
 
         /// <summary>
         /// API key request parameter string value
@@ -117,50 +117,6 @@ namespace Meticumedia.Classes
         #endregion
 
         #region Json Request
-
-        protected class JsonRateLimit
-        {
-            /// <summary>
-            /// Queue of times when database requests were made
-            /// </summary>
-            private Queue<DateTime> requestTimes = new Queue<DateTime>();
-            
-            public bool Enabled { get; set; }
-
-            public int MaxRequests { get; set; }
-
-            public int RequestLimitTime { get; set; }
-
-            public JsonRateLimit(bool en, int maxRequests, int limitTime)
-            {
-                this.Enabled = en;
-                this.MaxRequests = maxRequests;
-                this.RequestLimitTime = limitTime;
-            }
-
-            public void DoWait()
-            {
-                if (!this.Enabled)
-                    return;
-                
-                // Check rate of requests - maximum is 30 requests every 10 second
-                DateTime oldest;
-                lock (requestTimes)
-                {
-                    while (requestTimes.Count >= this.MaxRequests - 1)
-                    {
-                        oldest = requestTimes.Peek();
-                        double requestAge = (DateTime.Now - oldest).TotalMilliseconds;
-                        if (requestAge > this.RequestLimitTime)
-                            requestTimes.Dequeue();
-                        else
-                            Thread.Sleep((RequestLimitTime + 1 - (int)requestAge));
-
-                    }
-                    requestTimes.Enqueue(DateTime.Now);
-                }
-            }
-        }
 
         /// <summary>
         /// Performs HTTP JSON get from database.

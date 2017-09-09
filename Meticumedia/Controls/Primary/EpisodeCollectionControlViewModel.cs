@@ -476,8 +476,7 @@ namespace Meticumedia.Controls
 
             TvEpisode ep = this.SelectedEpisodes[0] as TvEpisode;
             if (ep.Missing == MissingStatus.Missing)
-                if(!GetTorrent())
-                    CopyEpisodeInfoToClipboard();
+                GetTorrent();
             else
                 PlayEpisode();
         }
@@ -536,7 +535,12 @@ namespace Meticumedia.Controls
                 ep.PlayEpisodeFile();
         }
 
-        private bool GetTorrent()
+        private void GetTorrent()
+        {
+            DoGetTorrent();
+        }
+
+        private async void DoGetTorrent()
         {
             List<TvEpisode> selEpisodes = new List<TvEpisode>();
             foreach(TvEpisode episode in this.SelectedEpisodes)
@@ -545,23 +549,27 @@ namespace Meticumedia.Controls
             List<string> unmatchedEps = new List<string>();
 
             List<OrgItem> items = new List<OrgItem>();
-            for(int i=0;i<selEpisodes.Count;i++)
+            List<Task<TvEpisodeTorrent>> tasks = new List<Task<TvEpisodeTorrent>>();
+            for (int i = 0; i < selEpisodes.Count; i++)
             {
-                TvEpisode ep = selEpisodes[i];
-                          
+                // Start torrent get task
+                Task<TvEpisodeTorrent> task = TvTorrentHelper.GetEpisodeTorrentAsync(selEpisodes[i]);
+                tasks.Add(task);
+            }
+            await Task.WhenAll(tasks);
 
-                // Check that show has EzTv setup
-                TvEpisodeTorrent ezEp = TvTorrentHelper.GetEpisodeTorrent(ep);
+            for (int i = 0; i < selEpisodes.Count; i++)
+            {
+                TvEpisodeTorrent ezEp = tasks[i].Result;
                 if (ezEp != null)
                 {
-                    OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, ep, null, FileCategory.TvVideo, null, ezEp);
+                    OrgItem newItem = new OrgItem(OrgStatus.Missing, OrgAction.Torrent, selEpisodes[i], null, FileCategory.TvVideo, null, ezEp);
                     newItem.BuildDestination();
                     items.Add(newItem);
                 }
                 else
-                    unmatchedEps.Add(ep.BuildEpString());
+                    unmatchedEps.Add(selEpisodes[i].BuildEpString());
             }
-            
             
             if (items.Count > 0)
                 OnItemsToQueue(items);
@@ -577,8 +585,6 @@ namespace Meticumedia.Controls
                 }
                 MessageBox.Show(unmatchStr, "Get Torrent Failure");
             }
-
-            return false;
         }
 
         private void CopyEpisodeInfoToClipboard()

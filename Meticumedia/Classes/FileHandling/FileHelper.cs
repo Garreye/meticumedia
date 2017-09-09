@@ -332,7 +332,7 @@ namespace Meticumedia.Classes
             episode2 = -1;
 
             // Get simpplified file name for easier matching
-            string simpleName = System.IO.Path.GetFileNameWithoutExtension(file);
+            string simpleName = System.IO.Path.GetFileNameWithoutExtension(FileHelper.GetSafeFileName(file));
             simpleName = BasicSimplify(simpleName, true);
 
             // Remove show name

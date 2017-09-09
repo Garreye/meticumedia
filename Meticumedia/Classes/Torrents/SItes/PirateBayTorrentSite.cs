@@ -9,50 +9,30 @@ using System.Threading.Tasks;
 
 namespace Meticumedia.Classes
 {
-    public class RarbgTorrentSite : TorrentAbstractSite
+    public class PirateBayTorrentSite : TorrentAbstractSite
     {
-        private static readonly string BASE_URL = "http://rarbg.to";
+        private static readonly string BASE_URL = "https://thepiratebay.org";
 
         private static RateLimiter Limiter = new RateLimiter(true, 1, 1000);
 
         public override List<TvEpisodeTorrent> GetAvailableTvTorrents(TvEpisode episode)
         {
             // Download show episodes page
-            string showPageUrl = BASE_URL + "/torrents.php?search=" + episode.BuildEpString().Replace(" ", "+");
-
-            Console.WriteLine("RARBG Pre  " + DateTime.Now.ToString());
+            string showPageUrl = BASE_URL + "/search/" + episode.BuildEpString().Replace(" ", "%20");
             Limiter.DoWait();
-            Console.WriteLine("RARBG Post  " + DateTime.Now.ToString());
 
             WebClient client = new WebClient();
             client.Headers.Add("User-Agent: Other");
             string data = client.DownloadString(showPageUrl);
 
-            Regex baseRegex = new Regex(@"<tr\s+class=.lista2.>\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*(<td.*?/td>)\s*</tr>");
-
-            Regex titleRegex = new Regex(@"title=""([^""]+)""");
-            Regex urlRegex = new Regex("href=\"(/torrent/[^\"]+)\"");
-
-            Regex sizeRegex = new Regex(@">(\S+)\s+MB<");
-
+            Regex baseRegex = new Regex("<div\\s+class=\\\"detName\\\">\\s+<a\\s+href=\\\"[^\\\"]+\\\"[^>]+>([^>]+)</a>\\s+</div>\\s+<a href=\\\"(magnet:[^\\\"]+)\\\"");
             MatchCollection matches = baseRegex.Matches(data);
 
             List<TvEpisodeTorrent> torrents = new List<TvEpisodeTorrent>();
             foreach (Match match in matches)
             {
-                string name;
-                Match titleMatch = titleRegex.Match(match.Groups[2].Value);
-                if (titleMatch.Success)
-                    name = titleMatch.Groups[1].Value;
-                else
-                    continue;
-
-                string pageUrl;
-                Match urlMatch = urlRegex.Match(match.Groups[2].Value);
-                if (urlMatch.Success)
-                    pageUrl = BASE_URL + urlMatch.Groups[1].Value;
-                else
-                    continue;
+                string name = match.Groups[1].Value;
+                string magnet = match.Groups[2].Value;
 
                 MatchCollection showMatches = episode.Show.MatchFileToContent(name);
                 bool matchShow = showMatches != null && showMatches.Count > 0;
@@ -77,7 +57,7 @@ namespace Meticumedia.Classes
                     torrentEp.Episode2 = ep2;
                     torrentEp.Quality = quality;
                     torrentEp.Title = name;
-                    torrentEp.PageUrl = pageUrl;
+                    torrentEp.Magnet = magnet;
 
                     torrents.Add(torrentEp);
                 }
@@ -88,25 +68,7 @@ namespace Meticumedia.Classes
 
         protected override void UpdateTorrentLinks(TvEpisodeTorrent torrent)
         {
-            // Link is for page, need to get actual torrent
-            WebClient pageClient = new WebClient();
-            pageClient.Headers.Add("User-Agent: Other");
-
-            Console.WriteLine("RARBG Pre  " + DateTime.Now.ToString());
-            Limiter.DoWait();
-            Console.WriteLine("RARBG Post  " + DateTime.Now.ToString());
-            string page = pageClient.DownloadString(torrent.PageUrl);
-
-            Regex torrentRegex = new Regex(@">\s*Torrent:\s*</td>.*?href=""(/download.php?[^\""]+)""");
-            Regex magnetRegex = new Regex(@">\s*Torrent:\s*</td>.*?href=""(magnet:[^""]+)""");
-
-            Match torrentMatch = torrentRegex.Match(page);
-            if (torrentMatch.Success)
-                torrent.File = BASE_URL + torrentMatch.Groups[1].Value;
-
-            Match magnetMatch = magnetRegex.Match(page);
-            if (magnetMatch.Success)
-                torrent.Magnet = magnetMatch.Groups[1].Value;
+           
         }
     }
 }
