@@ -22,6 +22,8 @@ namespace Meticumedia.Classes
         /// </summary>
         public static readonly string DELETE_DIRECTORY = "Never Never Land (Permanent Delete)";
 
+        public static readonly int SAMPLE_FILE_SIZE_THRESHOLD = 10485760; // 10 MB
+
         /// <summary>
         /// Categorize a file based on extension
         /// </summary>
@@ -40,7 +42,7 @@ namespace Meticumedia.Classes
                 if (FileTypeMatch(ext, file.Path))
                 {
                     // Check if sample!
-                    if (matchTo.ToLower().Contains("sample"))
+                    if (matchTo.ToLower().Contains("sample") || (new FileInfo(file.Path)).Length < SAMPLE_FILE_SIZE_THRESHOLD)
                         return FileCategory.Trash;
 
                     if (IsTvEpisode(matchTo))
